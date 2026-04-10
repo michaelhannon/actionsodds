@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Action's Odds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,400&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0b;
+    --dark: #111114;
+    --panel: #18181d;
+    --panel2: #1f1f26;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --gold: #e8b94a;
+    --gold2: #f5d07a;
+    --green: #2ecc71;
+    --green-dim: #1a7a43;
+    --amber: #f39c12;
+    --amber-dim: #7a4e09;
+    --red: #e74c3c;
+    --text: #f0eff5;
+    --text2: #9896a8;
+    --text3: #5c5a6e;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--black); color: var(--text); font-family: 'Barlow', sans-serif; font-size: 14px; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; opacity: 0.4; }
+
+  /* HEADER */
+  header { position: relative; z-index: 10; background: var(--dark); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), var(--gold2), var(--gold), transparent); }
+  .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .logo-icon { width: 42px; height: 42px; flex-shrink: 0; }
+  .logo-wordmark { display: flex; flex-direction: column; line-height: 1; }
+  .logo-action { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 0.06em; color: var(--gold); line-height: 1; }
+  .logo-odds { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.3em; color: var(--text2); text-transform: uppercase; }
+  .header-right { display: flex; align-items: center; gap: 14px; }
+  .sport-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.15em; color: var(--gold); background: rgba(232,185,74,0.1); border: 1px solid rgba(232,185,74,0.25); padding: 4px 12px; border-radius: 4px; text-transform: uppercase; }
+  .last-update { font-size: 11px; color: var(--text3); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.05em; }
+  .refresh-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--black); background: var(--gold); border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; transition: background 0.15s, transform 0.1s; display: flex; align-items: center; gap: 6px; }
+  .refresh-btn:hover { background: var(--gold2); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* LAYOUT */
+  .layout { display: grid; grid-template-columns: 1fr 340px; gap: 0; min-height: calc(100vh - 64px); position: relative; z-index: 1; }
+  .odds-panel { padding: 24px; border-right: 1px solid var(--border); overflow-y: auto; }
+  .tracker-panel { background: var(--dark); padding: 24px; overflow-y: auto; }
+
+  /* SUMMARY */
+  .summary-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+  .stat-box { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; position: relative; overflow: hidden; }
+  .stat-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gold); opacity: 0.4; }
+  .stat-box.green::before { background: var(--green); opacity: 0.5; }
+  .stat-box.amber::before { background: var(--amber); opacity: 0.5; }
+  .stat-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+  .stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.04em; color: var(--text); line-height: 1; }
+  .stat-val.gold { color: var(--gold); }
+  .stat-val.green { color: var(--green); }
+  .stat-val.amber { color: var(--amber); }
+
+  /* SECTION */
+  .section-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text2); }
+
+  /* BOOK TABS */
+  .book-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+  .book-tab { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 13px; border-radius: 5px; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .book-tab:hover { border-color: rgba(232,185,74,0.4); color: var(--gold); }
+  .book-tab.active { background: rgba(232,185,74,0.12); border-color: var(--gold); color: var(--gold); }
+
+  /* GAME CARD */
+  .game-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden; animation: slideIn 0.3s ease both; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .game-card.flagged { border-color: var(--green-dim); box-shadow: 0 0 0 1px rgba(46,204,113,0.15), inset 0 0 30px rgba(46,204,113,0.03); }
+  .game-card.paper-flag { border-color: var(--amber-dim); box-shadow: 0 0 0 1px rgba(243,156,18,0.15); }
+  .game-card-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px 8px; border-bottom: 1px solid var(--border); background: var(--panel2); }
+  .game-time { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); }
+  .trigger-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+  .tbadge { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
+  .tbadge-real { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
+  .tbadge-paper { background: rgba(243,156,18,0.12); color: var(--amber); border: 1px solid rgba(243,156,18,0.25); }
+
+  /* MATCHUP */
+  .matchup { padding: 10px 14px; }
+  .odds-cols-header { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+  .odds-col-lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3); width: 68px; text-align: center; }
+  .team-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; }
+  .team-info { display: flex; align-items: center; gap: 8px; flex: 1; }
+  .team-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; padding: 1px 5px; border-radius: 3px; text-transform: uppercase; }
+  .team-badge.home { background: rgba(232,185,74,0.1); color: rgba(232,185,74,0.6); border: 1px solid rgba(232,185,74,0.2); }
+  .team-badge.away { background: rgba(255,255,255,0.04); color: var(--text3); border: 1px solid var(--border); }
+  .team-name { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: 0.02em; }
+  .team-name.fav { color: var(--gold2); }
+  .odds-group { display: flex; }
+  .odds-cell { width: 68px; text-align: center; }
+  .odds-val { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: var(--text2); }
+  .odds-val.plus { color: var(--green); }
+  .odds-val.dog { color: #60a8ff; }
+  .matchup-divider { height: 1px; background: var(--border); margin: 2px 0; }
+
+  /* PLAY BOX */
+  .play-box { border-top: 1px solid var(--border); padding: 10px 14px; background: rgba(0,0,0,0.2); }
+  .play-section-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 6px; }
+  .play-section-label.real { color: var(--green); }
+  .play-section-label.paper { color: var(--amber); }
+  .play-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+  .play-desc { font-size: 13px; color: var(--text); flex: 1; padding-right: 8px; }
+  .play-note { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+  .play-amt { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: var(--green); white-space: nowrap; }
+  .play-amt.paper { color: var(--amber); }
+  .conf-pip { display: inline-flex; align-items: center; gap: 2px; margin-left: 6px; vertical-align: middle; }
+  .pip { width: 5px; height: 5px; border-radius: 50%; background: var(--border2); display: inline-block; }
+  .pip.on { background: var(--green); }
+  .pip.on.amber { background: var(--amber); }
+
+  /* LOADING / ERROR */
+  .status-box { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; text-align: center; margin-bottom: 16px; }
+  .status-box.error { border-color: rgba(231,76,60,0.4); }
+  .status-icon { font-size: 32px; margin-bottom: 12px; }
+  .status-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .status-sub { font-size: 13px; color: var(--text3); line-height: 1.6; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* RIGHT PANEL */
+  .panel-tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .panel-tab { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px 16px; background: transparent; border: none; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+  .panel-tab:hover { color: var(--text2); }
+  .panel-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* WL STRIP */
+  .wl-strip { display: flex; gap: 10px; margin-bottom: 16px; }
+  .wl-box { flex: 1; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; text-align: center; }
+  .wl-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+  .wl-val { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.04em; color: var(--text); }
+  .wl-val.w { color: var(--green); }
+  .wl-val.l { color: var(--red); }
+  .wl-val.pos { color: var(--green); font-size: 18px; }
+  .wl-val.neg { color: var(--red); font-size: 18px; }
+
+  /* LOG ROWS */
+  .log-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); gap: 8px; }
+  .log-row:last-child { border-bottom: none; }
+  .log-game { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.2; }
+  .log-detail { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .log-btns { display: flex; gap: 4px; flex-shrink: 0; }
+  .log-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border2); background: transparent; cursor: pointer; transition: all 0.12s; color: var(--text2); }
+  .log-btn.w { background: rgba(46,204,113,0.15); color: var(--green); border-color: rgba(46,204,113,0.3); }
+  .log-btn.l { background: rgba(231,76,60,0.15); color: var(--red); border-color: rgba(231,76,60,0.3); }
+
+  /* ADD FORM */
+  .add-form { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-top: 14px; }
+  .add-form-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
+  .form-grid.full { grid-template-columns: 1fr; }
+  .form-input { background: var(--panel2); border: 1px solid var(--border2); border-radius: 5px; color: var(--text); font-family: 'Barlow', sans-serif; font-size: 12px; padding: 7px 9px; outline: none; width: 100%; transition: border-color 0.15s; }
+  .form-input::placeholder { color: var(--text3); }
+  .form-input:focus { border-color: rgba(232,185,74,0.5); }
+  .add-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--black); background: var(--gold); border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 6px; transition: background 0.15s; }
+  .add-btn:hover { background: var(--gold2); }
+  .empty { text-align: center; padding: 24px 0; color: var(--text3); font-size: 13px; font-style: italic; }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .tracker-panel { border-top: 1px solid var(--border); }
+    .summary-strip { grid-template-columns: repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="21" cy="21" r="20" fill="#18181d" stroke="#e8b94a" stroke-width="1.5"/>
+      <path d="M21 8 L28 18 L35 18 L29 25 L31 34 L21 28 L11 34 L13 25 L7 18 L14 18 Z" fill="#e8b94a" opacity="0.9"/>
+      <circle cx="21" cy="21" r="5" fill="#0a0a0b"/>
+      <circle cx="21" cy="21" r="2.5" fill="#e8b94a"/>
+    </svg>
+    <div class="logo-wordmark">
+      <span class="logo-action">Action's</span>
+      <span class="logo-odds">Odds</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="sport-badge">MLB 2026</span>
+    <span class="last-update" id="last-update"></span>
+    <button class="refresh-btn" id="refresh-btn" onclick="fetchOdds()">
+      <span id="refresh-spinner" class="spinner" style="display:none;border-top-color:#000;"></span>
+      Refresh
+    </button>
+  </div>
+</header>
+
+<div class="layout">
+  <div class="odds-panel">
+    <div class="summary-strip">
+      <div class="stat-box green"><div class="stat-label">Real plays</div><div class="stat-val gold" id="s-real">—</div></div>
+      <div class="stat-box"><div class="stat-label">Daily stake</div><div class="stat-val" id="s-stake">—</div></div>
+      <div class="stat-box amber"><div class="stat-label">Paper plays</div><div class="stat-val amber" id="s-paper">—</div></div>
+      <div class="stat-box green"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bank">$2,250</div></div>
+    </div>
+    <div class="section-hdr">
+      <div class="section-title">Book</div>
+      <div style="font-size:11px;color:var(--text3);" id="game-count"></div>
+    </div>
+    <div class="book-tabs" id="book-tabs"></div>
+    <div id="card-output">
+      <div class="status-box">
+        <div class="spinner" style="width:24px;height:24px;margin:0 auto 16px;display:block;"></div>
+        <div class="status-title">Loading today's card...</div>
+        <div class="status-sub">Fetching live MLB odds</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tracker-panel">
+    <div class="panel-tabs">
+      <button class="panel-tab active" onclick="showPanelTab('paper')">Paper tracker</button>
+      <button class="panel-tab" onclick="showPanelTab('log')">Real plays</button>
+    </div>
+
+    <div id="ptab-paper">
+      <div class="wl-strip" id="paper-wl-strip">
+        <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">0</div></div>
+        <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">0</div></div>
+        <div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val">0</div></div>
+        <div class="wl-box"><div class="wl-label">Win%</div><div class="wl-val">—</div></div>
+      </div>
+      <div id="paper-list"><div class="empty">No paper trades yet.</div></div>
+      <div class="add-form">
+        <div class="add-form-title">Add paper trade</div>
+        <div class="form-grid full"><input class="form-input" id="p-game" placeholder="Game (e.g. NYY @ BOS)"></div>
+        <div class="form-grid">
+          <input class="form-input" id="p-bet" placeholder="Bet (O 8.5)">
+          <input class="form-input" id="p-odds" placeholder="Odds (+110)">
+        </div>
+        <div class="form-grid">
+          <input class="form-input" id="p-trigger" placeholder="Trigger (T4)">
+          <input class="form-input" id="p-note" placeholder="Note">
+        </div>
+        <button class="add-btn" onclick="addPaper()">Add Trade</button>
+      </div>
+    </div>
+
+    <div id="ptab-log" style="display:none;">
+      <div class="wl-strip" id="log-wl-strip">
+        <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">0</div></div>
+        <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">0</div></div>
+        <div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val">0</div></div>
+        <div class="wl-box"><div class="wl-label">P&L</div><div class="wl-val pos">$0</div></div>
+      </div>
+      <div id="log-list"><div class="empty">No plays logged yet.</div></div>
+      <div class="add-form">
+        <div class="add-form-title">Log real play</div>
+        <div class="form-grid full"><input class="form-input" id="l-game" placeholder="Game (e.g. NYY @ BOS)"></div>
+        <div class="form-grid">
+          <input class="form-input" id="l-bet" placeholder="Bet (NYY ML)">
+          <input class="form-input" id="l-odds" placeholder="Odds (-130)">
+        </div>
+        <div class="form-grid">
+          <input class="form-input" id="l-amt" placeholder="$ Amount">
+          <input class="form-input" id="l-trigger" placeholder="Trigger (T2)">
+        </div>
+        <button class="add-btn" onclick="addLog()">Log Play</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BOOK_LABELS = { caesars:'Caesars', hard_rock_bet:'Hard Rock', draftkings:'DraftKings', fanduel:'FanDuel', betmgm:'BetMGM', betrivers:'BetRivers', pointsbet_us:'PointsBet', unibet_us:'Unibet' };
+const BOOK_ORDER = ['caesars','hard_rock_bet','draftkings','fanduel','betmgm','betrivers'];
+
+let allGames = [], activeBook = 'caesars', availableBooks = [];
+let paperPlays = [], logPlays = [];
+try { paperPlays = JSON.parse(localStorage.getItem('ao_paper') || '[]'); } catch(e){}
+try { logPlays = JSON.parse(localStorage.getItem('ao_log') || '[]'); } catch(e){}
+function savePaper() { try { localStorage.setItem('ao_paper', JSON.stringify(paperPlays)); } catch(e){} }
+function saveLog() { try { localStorage.setItem('ao_log', JSON.stringify(logPlays)); } catch(e){} }
+
+function fmtOdds(n) { if(n==null) return '—'; return n>0?'+'+n:String(n); }
+function unitSize(conf, pct) { let b=conf>=9?800:conf>=8?600:conf>=7?400:200; return pct?Math.round(b*pct/100):b; }
+function pips(conf, isAmber) {
+  let h='<span class="conf-pip">';
+  for(let i=1;i<=10;i++) h+=`<span class="pip${i<=conf?' on'+(isAmber?' amber':''): ''}"></span>`;
+  return h+'</span>';
+}
+
+function checkTriggers(game, bk) {
+  const bm=game.bookmakers.find(b=>b.key===bk); if(!bm) return [];
+  const h2h=bm.markets.find(m=>m.key==='h2h');
+  const spreads=bm.markets.find(m=>m.key==='spreads');
+  const totals=bm.markets.find(m=>m.key==='totals');
+  const away=game.away_team, home=game.home_team;
+  const homeML=h2h?.outcomes?.find(o=>o.name===home)?.price;
+  const awayML=h2h?.outcomes?.find(o=>o.name===away)?.price;
+  const homeRL=spreads?.outcomes?.find(o=>o.name===home);
+  const awayRL=spreads?.outcomes?.find(o=>o.name===away);
+  const over=totals?.outcomes?.find(o=>o.name==='Over');
+  const under=totals?.outcomes?.find(o=>o.name==='Under');
+  const plays=[];
+  if(homeML!=null&&homeML>=115) plays.push({trigger:'T1A',desc:`${home} ML ${fmtOdds(homeML)}`,sub:'Home dog',conf:6,real:true,note:'Check park factor + SP. Confirm +1.5 RL price.'});
+  if(awayML!=null&&awayML>=200) plays.push({trigger:'T1B',desc:`${away} ML ${fmtOdds(awayML)}`,sub:'Big dog',conf:5,real:false,note:'Paper only until June 1. Need 3+ triggers to go real.'});
+  if(homeRL?.point<0&&homeRL?.price!=null){const p=homeRL.price;let pct=p>=150?100:p>=140?75:p>=135?50:p>=130?25:0;if(pct)plays.push({trigger:'T2',desc:`${home} -1.5 RL ${fmtOdds(p)}`,sub:'Fav RL',conf:6,pct,real:true,note:`Unit ${pct}% = $${unitSize(6,pct)}`});}
+  if(awayRL?.point<0&&awayRL?.price!=null){const p=awayRL.price;let pct=p>=150?100:p>=140?75:p>=135?50:p>=130?25:0;if(pct)plays.push({trigger:'T2',desc:`${away} -1.5 RL ${fmtOdds(p)}`,sub:'Fav RL',conf:6,pct,real:true,note:`Unit ${pct}% = $${unitSize(6,pct)}`});}
+  if(homeRL?.point>0&&homeRL?.price!=null){const p=homeRL.price;let pct=p>=130?100:p>=125?75:p>=122?50:p>=120?25:0;if(pct)plays.push({trigger:'T3',desc:`${home} +1.5 RL ${fmtOdds(p)}`,sub:'Dog RL',conf:6,pct,real:true,note:`Unit ${pct}% = $${unitSize(6,pct)}`});}
+  if(awayRL?.point>0&&awayRL?.price!=null){const p=awayRL.price;let pct=p>=130?100:p>=125?75:p>=122?50:p>=120?25:0;if(pct)plays.push({trigger:'T3',desc:`${away} +1.5 RL ${fmtOdds(p)}`,sub:'Dog RL',conf:6,pct,real:true,note:`Unit ${pct}% = $${unitSize(6,pct)}`});}
+  if(over?.point!=null) plays.push({trigger:'T4',desc:`O ${over.point} ${fmtOdds(over.price)}`,sub:'Over',conf:5,real:false,note:'PAPER ONLY — totals 3W-7L. Need 55%+ over 20 plays to unlock.'});
+  if(under?.point!=null) plays.push({trigger:'T4',desc:`U ${under.point} ${fmtOdds(under.price)}`,sub:'Under',conf:5,real:false,note:'PAPER ONLY — under lean on elite SP. Tracking vs over.'});
+  return plays;
+}
+
+function renderCard() {
+  const out=document.getElementById('card-output');
+  if(!allGames.length){out.innerHTML='<div class="status-box"><div class="status-title">No games today</div><div class="status-sub">Check back later or refresh.</div></div>';return;}
+  let realCount=0,stakeTotal=0,paperCount=0,html='';
+  const sorted=[...allGames].sort((a,b)=>{
+    const ap=checkTriggers(a,activeBook),bp=checkTriggers(b,activeBook);
+    const ar=ap.filter(p=>p.real).length,br=bp.filter(p=>p.real).length;
+    return br!==ar?br-ar:bp.length-ap.length;
+  });
+  for(const g of sorted) {
+    const plays=checkTriggers(g,activeBook);
+    const rp=plays.filter(p=>p.real),pp=plays.filter(p=>!p.real);
+    const bm=g.bookmakers.find(b=>b.key===activeBook);
+    const h2h=bm?.markets.find(m=>m.key==='h2h');
+    const spreads=bm?.markets.find(m=>m.key==='spreads');
+    const totals=bm?.markets.find(m=>m.key==='totals');
+    const away=g.away_team,home=g.home_team;
+    const homeML=h2h?.outcomes?.find(o=>o.name===home)?.price;
+    const awayML=h2h?.outcomes?.find(o=>o.name===away)?.price;
+    const homeRL=spreads?.outcomes?.find(o=>o.name===home);
+    const awayRL=spreads?.outcomes?.find(o=>o.name===away);
+    const over=totals?.outcomes?.find(o=>o.name==='Over');
+    const under=totals?.outcomes?.find(o=>o.name==='Under');
+    const cls=rp.length?'game-card flagged':pp.length?'game-card paper-flag':'game-card';
+    const timeStr=new Date(g.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});
+    const badges=plays.map(p=>`<span class="tbadge ${p.real?'tbadge-real':'tbadge-paper'}">${p.trigger}${p.real?'':' paper'}</span>`).join('');
+    const awayFav=awayML!=null&&homeML!=null&&awayML<homeML;
+    const homeFav=homeML!=null&&awayML!=null&&homeML<awayML;
+    html+=`<div class="${cls}">
+      <div class="game-card-header"><div class="game-time">${timeStr}</div><div class="trigger-badges">${badges}</div></div>
+      <div class="matchup">
+        <div class="odds-cols-header"><div class="odds-col-lbl">ML</div><div class="odds-col-lbl">RL</div><div class="odds-col-lbl">O/U</div></div>
+        <div class="team-row">
+          <div class="team-info"><span class="team-badge away">Away</span><span class="team-name${awayFav?' fav':''}">${away}</span></div>
+          <div class="odds-group">
+            <div class="odds-cell"><span class="odds-val${awayML>0?' dog':''}">${fmtOdds(awayML)}</span></div>
+            <div class="odds-cell"><span class="odds-val">${awayRL?(awayRL.point>0?'+':'')+awayRL.point+' '+fmtOdds(awayRL.price):'—'}</span></div>
+            <div class="odds-cell"><span class="odds-val">${over?'O '+over.point:'—'}</span></div>
+          </div>
+        </div>
+        <div class="matchup-divider"></div>
+        <div class="team-row">
+          <div class="team-info"><span class="team-badge home">Home</span><span class="team-name${homeFav?' fav':''}">${home}</span></div>
+          <div class="odds-group">
+            <div class="odds-cell"><span class="odds-val${homeML>0?' dog':''}">${fmtOdds(homeML)}</span></div>
+            <div class="odds-cell"><span class="odds-val">${homeRL?(homeRL.point>0?'+':'')+homeRL.point+' '+fmtOdds(homeRL.price):'—'}</span></div>
+            <div class="odds-cell"><span class="odds-val">${under?'U '+under.point:'—'}</span></div>
+          </div>
+        </div>
+      </div>`;
+    if(plays.length){
+      html+=`<div class="play-box">`;
+      if(rp.length){
+        html+=`<div class="play-section-label real">Real plays</div>`;
+        rp.forEach(p=>{const amt=unitSize(p.conf,p.pct||100);stakeTotal+=amt;realCount++;
+          html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,false)}</div><div class="play-amt">$${amt}</div></div><div class="play-note">${p.note}</div>`;});
+      }
+      if(pp.length){
+        html+=`<div class="play-section-label paper" style="margin-top:8px;">Paper only</div>`;
+        pp.forEach(p=>{paperCount++;
+          html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,true)}</div><div class="play-amt paper">paper</div></div><div class="play-note">${p.note}</div>`;});
+      }
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  }
+  out.innerHTML=html;
+  document.getElementById('s-real').textContent=realCount;
+  document.getElementById('s-stake').textContent='$'+stakeTotal.toLocaleString();
+  document.getElementById('s-paper').textContent=paperCount;
+  document.getElementById('game-count').textContent=allGames.length+' games today';
+}
+
+function renderBookTabs(){
+  document.getElementById('book-tabs').innerHTML=availableBooks.map(k=>`<button class="book-tab${k===activeBook?' active':''}" onclick="selectBook('${k}')">${BOOK_LABELS[k]||k}</button>`).join('');
+}
+function selectBook(k){activeBook=k;renderBookTabs();renderCard();}
+
+async function fetchOdds(){
+  const btn=document.getElementById('refresh-btn');
+  const spinner=document.getElementById('refresh-spinner');
+  btn.disabled=true; spinner.style.display='inline-block';
+  try {
+    const res=await fetch('/odds');
+    if(!res.ok) throw new Error('Server returned '+res.status);
+    allGames=await res.json();
+    if(allGames.error) throw new Error(allGames.error);
+    const bookSet=new Set();
+    allGames.forEach(g=>g.bookmakers.forEach(b=>bookSet.add(b.key)));
+    availableBooks=[...bookSet].sort((a,b)=>(BOOK_ORDER.indexOf(a)+1||99)-(BOOK_ORDER.indexOf(b)+1||99));
+    if(!availableBooks.includes(activeBook)) activeBook=availableBooks[0]||'caesars';
+    renderBookTabs(); renderCard();
+    document.getElementById('last-update').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  } catch(e){
+    document.getElementById('card-output').innerHTML=`<div class="status-box error"><div class="status-title" style="color:var(--red);">Connection error</div><div class="status-sub">${e.message}<br><br>Make sure server.js is running.<br>Open cmd and run: <strong style="color:var(--gold);">node server.js</strong></div></div>`;
+  }
+  btn.disabled=false; spinner.style.display='none';
+}
+
+// PANEL TABS
+function showPanelTab(t){
+  document.getElementById('ptab-paper').style.display=t==='paper'?'block':'none';
+  document.getElementById('ptab-log').style.display=t==='log'?'block':'none';
+  document.querySelectorAll('.panel-tab').forEach((b,i)=>b.classList.toggle('active',['paper','log'][i]===t));
+  if(t==='paper') renderPaper();
+  if(t==='log') renderLog();
+}
+
+// PAPER
+function renderPaper(){
+  const w=paperPlays.filter(p=>p.result==='W').length,l=paperPlays.filter(p=>p.result==='L').length,pend=paperPlays.filter(p=>!p.result).length;
+  document.getElementById('paper-wl-strip').innerHTML=`
+    <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">${w}</div></div>
+    <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">${l}</div></div>
+    <div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val">${pend}</div></div>
+    <div class="wl-box"><div class="wl-label">Win%</div><div class="wl-val">${w+l>0?Math.round(w/(w+l)*100)+'%':'—'}</div></div>`;
+  const list=document.getElementById('paper-list');
+  if(!paperPlays.length){list.innerHTML='<div class="empty">No paper trades yet.</div>';return;}
+  list.innerHTML=paperPlays.map((p,i)=>`<div class="log-row">
+    <div style="flex:1;min-width:0;"><div class="log-game">${p.game}</div><div class="log-detail">${p.bet} ${p.odds} · ${p.trigger} · ${p.date}</div></div>
+    <div class="log-btns">
+      <button class="log-btn${p.result==='W'?' w':''}" onclick="setPR(${i},'W')">W</button>
+      <button class="log-btn${p.result==='L'?' l':''}" onclick="setPR(${i},'L')">L</button>
+      <button class="log-btn" onclick="setPR(${i},null)" style="font-size:9px;">${p.result||'Pend'}</button>
+    </div></div>`).join('');
+}
+function addPaper(){
+  const g=document.getElementById('p-game').value.trim(),b=document.getElementById('p-bet').value.trim();
+  if(!g||!b)return;
+  paperPlays.push({game:g,bet:b,odds:document.getElementById('p-odds').value.trim(),trigger:document.getElementById('p-trigger').value.trim()||'T4',note:document.getElementById('p-note').value.trim(),date:new Date().toLocaleDateString(),result:null});
+  savePaper();renderPaper();
+  ['p-game','p-bet','p-odds','p-trigger','p-note'].forEach(id=>document.getElementById(id).value='');
+}
+function setPR(i,r){paperPlays[i].result=r;savePaper();renderPaper();}
+
+// LOG
+function renderLog(){
+  const w=logPlays.filter(p=>p.result==='W').length,l=logPlays.filter(p=>p.result==='L').length,pend=logPlays.filter(p=>!p.result).length;
+  const pnl=logPlays.filter(p=>p.result).reduce((acc,p)=>{
+    const amt=parseFloat(p.amt)||0,odds=parseInt(p.odds)||0;
+    if(p.result==='W')return acc+(odds>0?amt*(odds/100):amt*(100/Math.abs(odds)));
+    if(p.result==='L')return acc-amt; return acc;
+  },0);
+  document.getElementById('log-wl-strip').innerHTML=`
+    <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">${w}</div></div>
+    <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">${l}</div></div>
+    <div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val">${pend}</div></div>
+    <div class="wl-box"><div class="wl-label">P&L</div><div class="wl-val ${pnl>=0?'pos':'neg'}">${pnl>=0?'+':'-'}$${Math.abs(Math.round(pnl))}</div></div>`;
+  const list=document.getElementById('log-list');
+  if(!logPlays.length){list.innerHTML='<div class="empty">No plays logged yet.</div>';return;}
+  list.innerHTML=logPlays.map((p,i)=>`<div class="log-row">
+    <div style="flex:1;min-width:0;"><div class="log-game">${p.game}</div><div class="log-detail">${p.bet} ${p.odds} · $${p.amt} · ${p.trigger} · ${p.date}</div></div>
+    <div class="log-btns">
+      <button class="log-btn${p.result==='W'?' w':''}" onclick="setLR(${i},'W')">W</button>
+      <button class="log-btn${p.result==='L'?' l':''}" onclick="setLR(${i},'L')">L</button>
+      <button class="log-btn" onclick="setLR(${i},null)" style="font-size:9px;">${p.result||'Pend'}</button>
+    </div></div>`).join('');
+}
+function addLog(){
+  const g=document.getElementById('l-game').value.trim(),b=document.getElementById('l-bet').value.trim();
+  if(!g||!b)return;
+  logPlays.push({game:g,bet:b,odds:document.getElementById('l-odds').value.trim(),amt:document.getElementById('l-amt').value.trim(),trigger:document.getElementById('l-trigger').value.trim(),date:new Date().toLocaleDateString(),result:null});
+  saveLog();renderLog();
+  ['l-game','l-bet','l-odds','l-amt','l-trigger'].forEach(id=>document.getElementById(id).value='');
+}
+function setLR(i,r){logPlays[i].result=r;saveLog();renderLog();}
+
+// Boot
+fetchOdds();
+</script>
+</body>
+</html>

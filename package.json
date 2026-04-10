@@ -1,0 +1,12 @@
+{
+  "name": "actions-odds",
+  "version": "1.0.0",
+  "description": "Action's Odds - MLB trigger card",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
