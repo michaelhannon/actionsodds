@@ -45,20 +45,30 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .stat-val.amber{color:var(--amber);}
 .section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .section-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--text2);}
-.book-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.book-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
 .book-tab{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:5px 13px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all 0.15s;}
 .book-tab:hover{border-color:rgba(232,185,74,0.4);color:var(--gold);}
 .book-tab.active{background:rgba(232,185,74,0.12);border-color:var(--gold);color:var(--gold);}
+.market-intel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;}
+.intel-item{display:flex;flex-direction:column;}
+.intel-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:3px;}
+.intel-val{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:var(--text);}
+.intel-val.green{color:var(--green);}
+.intel-val.amber{color:var(--amber);}
+.intel-val.gold{color:var(--gold);}
 .game-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:12px;overflow:hidden;animation:slideIn 0.3s ease both;}
 @keyframes slideIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 .game-card.flagged{border-color:var(--green-dim);box-shadow:0 0 0 1px rgba(46,204,113,0.15);}
 .game-card.paper-flag{border-color:var(--amber-dim);box-shadow:0 0 0 1px rgba(243,156,18,0.15);}
+.game-card.sharp-flag{border-color:#60a8ff;box-shadow:0 0 0 1px rgba(96,168,255,0.15);}
 .game-card-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 8px;border-bottom:1px solid var(--border);background:var(--panel2);}
 .game-time{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);}
 .trigger-badges{display:flex;gap:5px;flex-wrap:wrap;}
 .tbadge{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.1em;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
 .tbadge-real{background:rgba(46,204,113,0.15);color:var(--green);border:1px solid rgba(46,204,113,0.3);}
 .tbadge-paper{background:rgba(243,156,18,0.12);color:var(--amber);border:1px solid rgba(243,156,18,0.25);}
+.tbadge-sharp{background:rgba(96,168,255,0.12);color:#60a8ff;border:1px solid rgba(96,168,255,0.25);}
+.tbadge-dynamic{background:rgba(232,185,74,0.12);color:var(--gold);border:1px solid rgba(232,185,74,0.25);}
 .matchup{padding:10px 14px;}
 .odds-cols-header{display:flex;justify-content:flex-end;margin-bottom:6px;}
 .odds-col-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);width:68px;text-align:center;}
@@ -73,27 +83,31 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .odds-cell{width:68px;text-align:center;}
 .odds-val{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--text2);}
 .odds-val.dog{color:#60a8ff;}
+.odds-val.best{color:var(--green);font-weight:700;}
 .matchup-divider{height:1px;background:var(--border);margin:2px 0;}
 .play-box{border-top:1px solid var(--border);padding:10px 14px;background:rgba(0,0,0,0.2);}
 .play-section-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:6px;}
 .play-section-label.real{color:var(--green);}
 .play-section-label.paper{color:var(--amber);}
+.play-section-label.sharp{color:#60a8ff;}
 .play-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
 .play-desc{font-size:13px;color:var(--text);flex:1;padding-right:8px;}
 .play-note{font-size:11px;color:var(--text3);margin-bottom:6px;}
 .play-amt{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--green);white-space:nowrap;}
 .play-amt.paper{color:var(--amber);}
+.play-amt.sharp{color:#60a8ff;}
 .conf-pip{display:inline-flex;align-items:center;gap:2px;margin-left:6px;vertical-align:middle;}
 .pip{width:5px;height:5px;border-radius:50%;background:var(--border2);display:inline-block;}
 .pip.on{background:var(--green);}
 .pip.on.amber{background:var(--amber);}
+.pip.on.blue{background:#60a8ff;}
 .status-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;text-align:center;margin-bottom:16px;}
 .status-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:0.05em;margin-bottom:8px;}
 .status-sub{font-size:13px;color:var(--text3);line-height:1.6;}
 .spinner{display:inline-block;width:13px;height:13px;border:2px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .panel-tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border);}
-.panel-tab{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:8px 14px;background:transparent;border:none;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s;}
+.panel-tab{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:8px 12px;background:transparent;border:none;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s;}
 .panel-tab:hover{color:var(--text2);}
 .panel-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
 .wl-strip{display:flex;gap:10px;margin-bottom:16px;}
@@ -131,6 +145,13 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .save-btn{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--black);background:var(--gold);border:none;padding:10px 24px;border-radius:6px;cursor:pointer;margin-top:8px;transition:background 0.15s;}
 .save-btn:hover{background:var(--gold2);}
 .saved-msg{font-size:12px;color:var(--green);margin-top:10px;display:none;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
+.toggle-lbl{font-size:13px;color:var(--text);}
+.toggle-sub{font-size:11px;color:var(--text3);}
+.toggle{width:36px;height:20px;background:var(--border2);border-radius:10px;position:relative;cursor:pointer;transition:background 0.2s;border:none;flex-shrink:0;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:'';position:absolute;width:14px;height:14px;background:white;border-radius:50%;top:3px;left:3px;transition:left 0.2s;}
+.toggle.on::after{left:19px;}
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
@@ -162,7 +183,6 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 </header>
 
 <div class="layout">
-  <!-- LEFT: ODDS CARD -->
   <div class="odds-panel">
     <div class="summary-strip">
       <div class="stat-box green"><div class="stat-label">Real plays</div><div class="stat-val gold" id="s-real">—</div></div>
@@ -175,6 +195,13 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
       <div style="font-size:11px;color:var(--text3);" id="game-count"></div>
     </div>
     <div class="book-tabs" id="book-tabs"></div>
+    <div class="market-intel" id="market-intel" style="display:none;">
+      <div class="intel-item"><div class="intel-lbl">Avg home dog ML</div><div class="intel-val gold" id="mi-avgdog">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">Best home dog</div><div class="intel-val green" id="mi-bestdog">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">RL market avg</div><div class="intel-val" id="mi-avgrl">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">Sharp divergence</div><div class="intel-val" id="mi-sharp">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">Dynamic threshold</div><div class="intel-val amber" id="mi-threshold">—</div></div>
+    </div>
     <div id="card-output">
       <div class="status-box">
         <div class="spinner" style="width:24px;height:24px;margin:0 auto 16px;display:block;"></div>
@@ -184,7 +211,6 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
     </div>
   </div>
 
-  <!-- RIGHT: TRACKER + SETTINGS -->
   <div class="tracker-panel">
     <div class="panel-tabs">
       <button class="panel-tab active" onclick="showTab('paper')">Paper</button>
@@ -192,7 +218,6 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
       <button class="panel-tab" onclick="showTab('settings')">Settings</button>
     </div>
 
-    <!-- PAPER TAB -->
     <div id="ptab-paper">
       <div class="wl-strip" id="paper-wl-strip">
         <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">0</div></div>
@@ -216,7 +241,6 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
       </div>
     </div>
 
-    <!-- LOG TAB -->
     <div id="ptab-log" style="display:none;">
       <div class="wl-strip" id="log-wl-strip">
         <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">0</div></div>
@@ -240,8 +264,27 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
       </div>
     </div>
 
-    <!-- SETTINGS TAB -->
     <div id="ptab-settings" style="display:none;">
+      <div class="cfg-section">
+        <div class="cfg-section-title">Dynamic trigger engine</div>
+        <div class="cfg-sub">When enabled, thresholds auto-adjust based on today's market</div>
+        <div class="toggle-row">
+          <div><div class="toggle-lbl">Dynamic thresholds</div><div class="toggle-sub">Auto-tune T1A/T2/T3 based on today's slate</div></div>
+          <button class="toggle" id="tog-dynamic" onclick="toggleSetting('dynamic')"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-lbl">Top % filter</div><div class="toggle-sub">T1A fires only on top 25% home dog prices</div></div>
+          <button class="toggle" id="tog-toppct" onclick="toggleSetting('toppct')"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-lbl">Sharp divergence alerts</div><div class="toggle-sub">Flag when books disagree by 10+ points</div></div>
+          <button class="toggle" id="tog-sharp" onclick="toggleSetting('sharp')"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-lbl">Market baseline filter</div><div class="toggle-sub">Only flag lines better than slate average</div></div>
+          <button class="toggle" id="tog-baseline" onclick="toggleSetting('baseline')"></button>
+        </div>
+      </div>
 
       <div class="cfg-section">
         <div class="cfg-section-title">Bankroll & units</div>
@@ -253,11 +296,11 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 
       <div class="cfg-section">
         <div class="cfg-section-title">T1A — Home dog ML</div>
-        <div><div class="cfg-lbl">Min ML threshold (e.g. 115 = +115)</div><input class="form-input" id="cfg-t1a-min" type="number" placeholder="115" style="max-width:160px;"></div>
+        <div><div class="cfg-lbl">Min ML threshold (used when dynamic is off)</div><input class="form-input" id="cfg-t1a-min" type="number" placeholder="115" style="max-width:160px;"></div>
       </div>
 
       <div class="cfg-section">
-        <div class="cfg-section-title">T1B — Big away dog ML</div>
+        <div class="cfg-section-title">T1B — Big away dog</div>
         <div class="cfg-sub">Paper only until go-live date</div>
         <div class="cfg-grid">
           <div><div class="cfg-lbl">Min ML threshold</div><input class="form-input" id="cfg-t1b-min" type="number" placeholder="200"></div>
@@ -266,7 +309,7 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
       </div>
 
       <div class="cfg-section">
-        <div class="cfg-section-title">T2 — Fav -1.5 RL unit sizing</div>
+        <div class="cfg-section-title">T2 — Fav -1.5 RL</div>
         <div class="cfg-grid-4">
           <div><div class="cfg-lbl">Tier 1 price</div><input class="form-input" id="cfg-t2-p1" type="number" placeholder="130"><div class="cfg-lbl" style="margin-top:6px;">Unit %</div><input class="form-input" id="cfg-t2-u1" type="number" placeholder="25"></div>
           <div><div class="cfg-lbl">Tier 2 price</div><input class="form-input" id="cfg-t2-p2" type="number" placeholder="135"><div class="cfg-lbl" style="margin-top:6px;">Unit %</div><input class="form-input" id="cfg-t2-u2" type="number" placeholder="50"></div>
@@ -276,7 +319,7 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
       </div>
 
       <div class="cfg-section">
-        <div class="cfg-section-title">T3 — Dog +1.5 RL unit sizing</div>
+        <div class="cfg-section-title">T3 — Dog +1.5 RL</div>
         <div class="cfg-grid-4">
           <div><div class="cfg-lbl">Tier 1 price</div><input class="form-input" id="cfg-t3-p1" type="number" placeholder="120"><div class="cfg-lbl" style="margin-top:6px;">Unit %</div><input class="form-input" id="cfg-t3-u1" type="number" placeholder="25"></div>
           <div><div class="cfg-lbl">Tier 2 price</div><input class="form-input" id="cfg-t3-p2" type="number" placeholder="122"><div class="cfg-lbl" style="margin-top:6px;">Unit %</div><input class="form-input" id="cfg-t3-u2" type="number" placeholder="50"></div>
@@ -289,39 +332,148 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
         <div class="cfg-section-title">T4 — Totals unlock</div>
         <div class="cfg-sub">Paper only until win% threshold is reached</div>
         <div class="cfg-grid">
-          <div><div class="cfg-lbl">Win% to unlock real money</div><input class="form-input" id="cfg-t4-pct" type="number" placeholder="55"></div>
-          <div><div class="cfg-lbl">Min sample size (plays)</div><input class="form-input" id="cfg-t4-sample" type="number" placeholder="20"></div>
+          <div><div class="cfg-lbl">Win% to unlock</div><input class="form-input" id="cfg-t4-pct" type="number" placeholder="55"></div>
+          <div><div class="cfg-lbl">Min sample size</div><input class="form-input" id="cfg-t4-sample" type="number" placeholder="20"></div>
         </div>
       </div>
 
       <button class="save-btn" onclick="saveSettings()">Save Settings</button>
-      <div class="saved-msg" id="saved-msg">Settings saved and applied to card.</div>
+      <div class="saved-msg" id="saved-msg">Settings saved and applied.</div>
     </div>
-
   </div>
 </div>
 
 <script>
-const BOOK_LABELS = {caesars:'Caesars',hard_rock_bet:'Hard Rock',draftkings:'DraftKings',fanduel:'FanDuel',betmgm:'BetMGM'};
-const BOOK_ORDER = ['caesars','hard_rock_bet','draftkings','fanduel','betmgm'];
+const BOOK_LABELS={caesars:'Caesars',hard_rock_bet:'Hard Rock',draftkings:'DraftKings',fanduel:'FanDuel',betmgm:'BetMGM'};
+const BOOK_ORDER=['caesars','hard_rock_bet','draftkings','fanduel','betmgm'];
 
-let allGames=[], activeBook='draftkings', availableBooks=[];
-let paperPlays=[], logPlays=[];
+let allGames=[],activeBook='draftkings',availableBooks=[];
+let paperPlays=[],logPlays=[];
 try{paperPlays=JSON.parse(localStorage.getItem('ao_paper')||'[]');}catch(e){}
 try{logPlays=JSON.parse(localStorage.getItem('ao_log')||'[]');}catch(e){}
 function savePaper(){try{localStorage.setItem('ao_paper',JSON.stringify(paperPlays));}catch(e){}}
 function saveLog(){try{localStorage.setItem('ao_log',JSON.stringify(logPlays));}catch(e){}}
 
-// CONFIG
-const DEFAULT_CFG={bankroll:2000,unit:200,t1aMin:115,t1bMin:200,t1bDate:'2026-06-01',t2Tiers:[{p:130,u:25},{p:135,u:50},{p:140,u:75},{p:150,u:100}],t3Tiers:[{p:120,u:25},{p:122,u:50},{p:125,u:75},{p:130,u:100}],t4Pct:55,t4Sample:20};
+const DEFAULT_CFG={
+  bankroll:2000,unit:200,
+  t1aMin:115,t1bMin:200,t1bDate:'2026-06-01',
+  t2Tiers:[{p:130,u:25},{p:135,u:50},{p:140,u:75},{p:150,u:100}],
+  t3Tiers:[{p:120,u:25},{p:122,u:50},{p:125,u:75},{p:130,u:100}],
+  t4Pct:55,t4Sample:20,
+  dynamic:true,toppct:true,sharp:true,baseline:true
+};
 let cfg=DEFAULT_CFG;
 try{const s=localStorage.getItem('ao_cfg');if(s)cfg={...DEFAULT_CFG,...JSON.parse(s)};}catch(e){}
 
+// Market intelligence state
+let marketState={avgDog:0,bestDog:0,avgRL:0,dynamicT1A:0,sharpGames:[],topDogs:[]};
+
 function fmtOdds(n){if(n==null)return'—';return n>0?'+'+n:String(n);}
 function unitAmt(pct){return Math.round(cfg.unit*pct/100);}
-function pips(conf,isAmber){let h='<span class="conf-pip">';for(let i=1;i<=10;i++)h+=`<span class="pip${i<=conf?' on'+(isAmber?' amber':''):''}"></span>`;return h+'</span>';}
+function pips(conf,type){
+  const cls=type==='blue'?'on blue':type==='amber'?'on amber':'on';
+  let h='<span class="conf-pip">';
+  for(let i=1;i<=10;i++)h+=`<span class="pip${i<=conf?' '+cls:''}"></span>`;
+  return h+'</span>';
+}
 
-function checkTriggers(game,bk){
+// =====================
+// MARKET INTELLIGENCE ENGINE
+// =====================
+function analyzeMarket(games, bk) {
+  const homeDogs=[], rlPrices=[], bookComparisons=[];
+
+  for(const g of games) {
+    const bm=g.bookmakers.find(b=>b.key===bk);
+    if(!bm) continue;
+    const h2h=bm.markets.find(m=>m.key==='h2h');
+    const spreads=bm.markets.find(m=>m.key==='spreads');
+    const homeML=h2h?.outcomes?.find(o=>o.name===g.home_team)?.price;
+    const awayML=h2h?.outcomes?.find(o=>o.name===g.away_team)?.price;
+    const homeRL=spreads?.outcomes?.find(o=>o.name===g.home_team);
+    const awayRL=spreads?.outcomes?.find(o=>o.name===g.away_team);
+
+    // Collect home dogs
+    if(homeML!=null && homeML>0) homeDogs.push({team:g.home_team,ml:homeML,game:g});
+    // Collect RL prices
+    if(homeRL?.price!=null) rlPrices.push(homeRL.price);
+    if(awayRL?.price!=null) rlPrices.push(awayRL.price);
+
+    // Sharp divergence — compare all books for this game
+    const allBMs = g.bookmakers;
+    if(allBMs.length >= 2) {
+      const mlPrices = [];
+      for(const bkm of allBMs) {
+        const bkh2h=bkm.markets.find(m=>m.key==='h2h');
+        const bkHome=bkh2h?.outcomes?.find(o=>o.name===g.home_team)?.price;
+        if(bkHome!=null) mlPrices.push({book:bkm.key,price:bkHome});
+      }
+      if(mlPrices.length>=2) {
+        const max=Math.max(...mlPrices.map(x=>x.price));
+        const min=Math.min(...mlPrices.map(x=>x.price));
+        const divergence=max-min;
+        if(divergence>=10) {
+          bookComparisons.push({
+            game:`${g.away_team} @ ${g.home_team}`,
+            home:g.home_team,away:g.away_team,
+            divergence,max,min,
+            bestBook:mlPrices.find(x=>x.price===max)?.book,
+            commenceTime:g.commence_time
+          });
+        }
+      }
+    }
+  }
+
+  // Sort home dogs best to worst
+  homeDogs.sort((a,b)=>b.ml-a.ml);
+
+  // Dynamic T1A threshold — top 25% of home dog prices
+  let dynamicT1A = cfg.t1aMin;
+  if(cfg.dynamic && homeDogs.length>0) {
+    const cutoff = Math.ceil(homeDogs.length*0.25);
+    dynamicT1A = homeDogs.length>=cutoff ? homeDogs[cutoff-1].ml : homeDogs[homeDogs.length-1].ml;
+    dynamicT1A = Math.max(dynamicT1A, cfg.t1aMin); // never go below manual threshold
+  }
+
+  // Average RL price
+  const avgRL = rlPrices.length>0 ? Math.round(rlPrices.reduce((a,b)=>a+b,0)/rlPrices.length) : 0;
+
+  // Average home dog ML
+  const avgDog = homeDogs.length>0 ? Math.round(homeDogs.reduce((a,b)=>a+b.ml,0)/homeDogs.length) : 0;
+
+  // Top dogs (top 25%)
+  const topCutoff = Math.max(1,Math.ceil(homeDogs.length*0.25));
+  const topDogs = homeDogs.slice(0,topCutoff).map(d=>d.team);
+
+  marketState={
+    avgDog,
+    bestDog:homeDogs.length>0?homeDogs[0].ml:0,
+    avgRL,
+    dynamicT1A,
+    sharpGames:bookComparisons.sort((a,b)=>b.divergence-a.divergence),
+    topDogs,
+    homeDogs
+  };
+
+  updateMarketIntel();
+}
+
+function updateMarketIntel() {
+  const el=document.getElementById('market-intel');
+  if(!el) return;
+  el.style.display='flex';
+  document.getElementById('mi-avgdog').textContent=marketState.avgDog>0?fmtOdds(marketState.avgDog):'—';
+  document.getElementById('mi-bestdog').textContent=marketState.bestDog>0?fmtOdds(marketState.bestDog):'—';
+  document.getElementById('mi-avgrl').textContent=marketState.avgRL?fmtOdds(marketState.avgRL):'—';
+  document.getElementById('mi-sharp').textContent=marketState.sharpGames.length>0?marketState.sharpGames.length+' games':'None';
+  document.getElementById('mi-threshold').textContent=cfg.dynamic?'T1A: '+fmtOdds(marketState.dynamicT1A)+' (auto)':'T1A: '+fmtOdds(cfg.t1aMin)+' (manual)';
+}
+
+// =====================
+// TRIGGER ENGINE
+// =====================
+function checkTriggers(game, bk) {
   const bm=game.bookmakers.find(b=>b.key===bk);if(!bm)return[];
   const h2h=bm.markets.find(m=>m.key==='h2h');
   const spreads=bm.markets.find(m=>m.key==='spreads');
@@ -337,19 +489,37 @@ function checkTriggers(game,bk){
   const today=new Date().toISOString().split('T')[0];
   const t1bLive=today>=cfg.t1bDate;
 
-  if(homeML!=null&&homeML>=cfg.t1aMin)
-    plays.push({trigger:'T1A',desc:`${home} ML ${fmtOdds(homeML)}`,sub:'Home dog',conf:6,real:true,note:'Check park factor + SP. Confirm +1.5 RL price.',amt:unitAmt(100)});
+  // Effective T1A threshold
+  const t1aThreshold = cfg.dynamic ? marketState.dynamicT1A : cfg.t1aMin;
 
-  if(awayML!=null&&awayML>=cfg.t1bMin)
-    plays.push({trigger:'T1B',desc:`${away} ML ${fmtOdds(awayML)}`,sub:'Big dog',conf:5,real:t1bLive,note:t1bLive?'T1B now live — confirm 3+ triggers.':'Paper only until '+cfg.t1bDate+'.',amt:unitAmt(100)});
+  // T1A — home dog
+  if(homeML!=null && homeML>0) {
+    const passesThreshold = homeML>=t1aThreshold;
+    const passesTopPct = !cfg.toppct || marketState.topDogs.includes(home);
+    const passesBaseline = !cfg.baseline || homeML>=(marketState.avgDog||0);
+    if(passesThreshold && passesTopPct && passesBaseline) {
+      const dynLabel = cfg.dynamic ? ' (top '+Math.round((marketState.topDogs.length/Math.max(marketState.homeDogs.length,1))*100)+'% slate)':'';
+      plays.push({trigger:'T1A',desc:`${home} ML ${fmtOdds(homeML)}`,sub:'Home dog'+dynLabel,conf:7,real:true,note:`Dynamic threshold: ${fmtOdds(t1aThreshold)} | Slate avg: ${fmtOdds(marketState.avgDog)}`,amt:unitAmt(100),type:'real'});
+    }
+  }
 
+  // T1B — big away dog
+  if(awayML!=null && awayML>=cfg.t1bMin) {
+    plays.push({trigger:'T1B',desc:`${away} ML ${fmtOdds(awayML)}`,sub:'Big dog',conf:5,real:t1bLive,note:t1bLive?'T1B now live.':'Paper only until '+cfg.t1bDate+'.',amt:unitAmt(100),type:t1bLive?'real':'paper'});
+  }
+
+  // T2/T3 RL triggers
   function rlTrigger(team,rl,trigger){
     const p=rl.price;
     const tiers=trigger==='T2'?cfg.t2Tiers:cfg.t3Tiers;
     const sorted=[...tiers].sort((a,b)=>b.p-a.p);
     let pct=0;
     for(const t of sorted){if(p>=t.p){pct=t.u;break;}}
-    if(pct)plays.push({trigger,desc:`${team} ${rl.point>0?'+':''}${rl.point} RL ${fmtOdds(p)}`,sub:trigger==='T2'?'Fav RL':'Dog RL',conf:6,pct,real:true,note:`Unit ${pct}% = $${unitAmt(pct)}`,amt:unitAmt(pct)});
+    // Baseline filter for RL — only fire if above avg RL
+    const passesBaseline = !cfg.baseline || p>=(marketState.avgRL||0);
+    if(pct && passesBaseline) {
+      plays.push({trigger,desc:`${team} ${rl.point>0?'+':''}${rl.point} RL ${fmtOdds(p)}`,sub:trigger==='T2'?'Fav RL':'Dog RL',conf:6,pct,real:true,note:`Unit ${pct}% = $${unitAmt(pct)} | Slate RL avg: ${fmtOdds(marketState.avgRL)}`,amt:unitAmt(pct),type:'real'});
+    }
   }
 
   if(homeRL?.point<0&&homeRL?.price!=null)rlTrigger(home,homeRL,'T2');
@@ -357,14 +527,25 @@ function checkTriggers(game,bk){
   if(homeRL?.point>0&&homeRL?.price!=null)rlTrigger(home,homeRL,'T3');
   if(awayRL?.point>0&&awayRL?.price!=null)rlTrigger(away,awayRL,'T3');
 
+  // Sharp divergence — flag if this game has book disagreement
+  if(cfg.sharp) {
+    const sharpGame=marketState.sharpGames.find(s=>s.home===home&&s.away===away);
+    if(sharpGame) {
+      const bestBkLabel=BOOK_LABELS[sharpGame.bestBook]||sharpGame.bestBook||'?';
+      plays.push({trigger:'SHARP',desc:`${sharpGame.divergence>0?'+':''}${sharpGame.divergence} pt book spread`,sub:'Line shop',conf:8,real:false,note:`Best price ${fmtOdds(sharpGame.max)} on ${bestBkLabel} vs ${fmtOdds(sharpGame.min)} elsewhere. Check all books.`,amt:0,type:'sharp'});
+    }
+  }
+
+  // T4 totals
   const t4done=paperPlays.filter(p=>p.trigger&&p.trigger.startsWith('T4')&&p.result);
   const t4w=t4done.filter(p=>p.result==='W').length;
   const t4pct=t4done.length>=cfg.t4Sample?Math.round(t4w/t4done.length*100):0;
   const t4real=t4done.length>=cfg.t4Sample&&t4pct>=cfg.t4Pct;
-  const t4note=t4real?'T4 UNLOCKED — totals real money now.':'PAPER ONLY — '+t4done.length+'/'+cfg.t4Sample+' plays. Need '+cfg.t4Pct+'%+ win rate.';
+  const t4note=t4real?'T4 UNLOCKED.':'PAPER — '+t4done.length+'/'+cfg.t4Sample+' plays, need '+cfg.t4Pct+'%+.';
 
-  if(over?.point!=null)plays.push({trigger:'T4',desc:`O ${over.point} ${fmtOdds(over.price)}`,sub:'Over',conf:5,real:t4real,note:t4note,amt:unitAmt(100)});
-  if(under?.point!=null)plays.push({trigger:'T4',desc:`U ${under.point} ${fmtOdds(under.price)}`,sub:'Under',conf:5,real:t4real,note:t4note,amt:unitAmt(100)});
+  if(over?.point!=null)plays.push({trigger:'T4',desc:`O ${over.point} ${fmtOdds(over.price)}`,sub:'Over',conf:5,real:t4real,note:t4note,amt:unitAmt(100),type:t4real?'real':'paper'});
+  if(under?.point!=null)plays.push({trigger:'T4',desc:`U ${under.point} ${fmtOdds(under.price)}`,sub:'Under',conf:5,real:t4real,note:t4note,amt:unitAmt(100),type:t4real?'real':'paper'});
+
   return plays;
 }
 
@@ -372,15 +553,22 @@ function renderCard(){
   const out=document.getElementById('card-output');
   if(!allGames.length){out.innerHTML='<div class="status-box"><div class="status-title">No games today</div></div>';return;}
   document.getElementById('s-bank').textContent='$'+cfg.bankroll.toLocaleString();
+
+  // Run market analysis first
+  analyzeMarket(allGames, activeBook);
+
   let realCount=0,stakeTotal=0,paperCount=0,html='';
   const sorted=[...allGames].sort((a,b)=>{
     const ap=checkTriggers(a,activeBook),bp=checkTriggers(b,activeBook);
     const ar=ap.filter(p=>p.real).length,br=bp.filter(p=>p.real).length;
     return br!==ar?br-ar:bp.length-ap.length;
   });
+
   for(const g of sorted){
     const plays=checkTriggers(g,activeBook);
-    const rp=plays.filter(p=>p.real),pp=plays.filter(p=>!p.real);
+    const rp=plays.filter(p=>p.type==='real');
+    const pp=plays.filter(p=>p.type==='paper');
+    const sp=plays.filter(p=>p.type==='sharp');
     const bm=g.bookmakers.find(b=>b.key===activeBook);
     const h2h=bm?.markets.find(m=>m.key==='h2h');
     const spreads=bm?.markets.find(m=>m.key==='spreads');
@@ -392,11 +580,15 @@ function renderCard(){
     const awayRL=spreads?.outcomes?.find(o=>o.name===away);
     const over=totals?.outcomes?.find(o=>o.name==='Over');
     const under=totals?.outcomes?.find(o=>o.name==='Under');
-    const cls=rp.length?'game-card flagged':pp.length?'game-card paper-flag':'game-card';
+    const cls=rp.length?'game-card flagged':sp.length&&!pp.length?'game-card sharp-flag':pp.length?'game-card paper-flag':'game-card';
     const timeStr=new Date(g.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});
-    const badges=plays.map(p=>`<span class="tbadge ${p.real?'tbadge-real':'tbadge-paper'}">${p.trigger}${p.real?'':' paper'}</span>`).join('');
+    const badges=plays.map(p=>{
+      const bc=p.type==='real'?'tbadge-real':p.type==='sharp'?'tbadge-sharp':p.trigger==='T1B'||p.trigger==='T4'?'tbadge-paper':'tbadge-dynamic';
+      return `<span class="tbadge ${bc}">${p.trigger}</span>`;
+    }).join('');
     const awayFav=awayML!=null&&homeML!=null&&awayML<homeML;
     const homeFav=homeML!=null&&awayML!=null&&homeML<awayML;
+
     html+=`<div class="${cls}">
       <div class="game-card-header"><div class="game-time">${timeStr}</div><div class="trigger-badges">${badges}</div></div>
       <div class="matchup">
@@ -419,22 +611,29 @@ function renderCard(){
           </div>
         </div>
       </div>`;
+
     if(plays.length){
       html+=`<div class="play-box">`;
       if(rp.length){
         html+=`<div class="play-section-label real">Real plays</div>`;
         rp.forEach(p=>{stakeTotal+=p.amt;realCount++;
-          html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,false)}</div><div class="play-amt">$${p.amt}</div></div><div class="play-note">${p.note}</div>`;});
+          html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,'green')}</div><div class="play-amt">$${p.amt}</div></div><div class="play-note">${p.note}</div>`;});
+      }
+      if(sp.length){
+        html+=`<div class="play-section-label sharp" style="margin-top:${rp.length?'8':'0'}px;">Line shop alert</div>`;
+        sp.forEach(p=>{
+          html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,'blue')}</div><div class="play-amt sharp">shop</div></div><div class="play-note">${p.note}</div>`;});
       }
       if(pp.length){
-        html+=`<div class="play-section-label paper" style="margin-top:8px;">Paper only</div>`;
+        html+=`<div class="play-section-label paper" style="margin-top:${rp.length||sp.length?'8':'0'}px;">Paper only</div>`;
         pp.forEach(p=>{paperCount++;
-          html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,true)}</div><div class="play-amt paper">paper</div></div><div class="play-note">${p.note}</div>`;});
+          html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,'amber')}</div><div class="play-amt paper">paper</div></div><div class="play-note">${p.note}</div>`;});
       }
       html+=`</div>`;
     }
     html+=`</div>`;
   }
+
   out.innerHTML=html;
   document.getElementById('s-real').textContent=realCount;
   document.getElementById('s-stake').textContent='$'+stakeTotal.toLocaleString();
@@ -468,19 +667,27 @@ async function fetchOdds(){
   btn.disabled=false;spinner.style.display='none';
 }
 
-// TAB SWITCHING
 function showTab(t){
-  ['paper','log','settings'].forEach(x=>{
-    document.getElementById('ptab-'+x).style.display=x===t?'block':'none';
-  });
+  ['paper','log','settings'].forEach(x=>document.getElementById('ptab-'+x).style.display=x===t?'block':'none');
   document.querySelectorAll('.panel-tab').forEach((b,i)=>b.classList.toggle('active',['paper','log','settings'][i]===t));
-  if(t==='settings')loadSettingsForm();
+  if(t==='settings'){loadSettingsForm();}
   if(t==='paper')renderPaper();
   if(t==='log')renderLog();
 }
 
-// SETTINGS
+function toggleSetting(key){
+  cfg[key]=!cfg[key];
+  const el=document.getElementById('tog-'+key);
+  if(el)el.classList.toggle('on',cfg[key]);
+  try{localStorage.setItem('ao_cfg',JSON.stringify(cfg));}catch(e){}
+  renderCard();
+}
+
 function loadSettingsForm(){
+  ['dynamic','toppct','sharp','baseline'].forEach(k=>{
+    const el=document.getElementById('tog-'+k);
+    if(el)el.classList.toggle('on',!!cfg[k]);
+  });
   document.getElementById('cfg-bankroll').value=cfg.bankroll;
   document.getElementById('cfg-unit').value=cfg.unit;
   document.getElementById('cfg-t1a-min').value=cfg.t1aMin;
@@ -494,6 +701,7 @@ function loadSettingsForm(){
 
 function saveSettings(){
   cfg={
+    ...cfg,
     bankroll:parseInt(document.getElementById('cfg-bankroll').value)||2000,
     unit:parseInt(document.getElementById('cfg-unit').value)||200,
     t1aMin:parseInt(document.getElementById('cfg-t1a-min').value)||115,
@@ -512,7 +720,6 @@ function saveSettings(){
   renderCard();
 }
 
-// PAPER
 function renderPaper(){
   const w=paperPlays.filter(p=>p.result==='W').length,l=paperPlays.filter(p=>p.result==='L').length,pend=paperPlays.filter(p=>!p.result).length;
   document.getElementById('paper-wl-strip').innerHTML=`
@@ -530,7 +737,6 @@ function renderPaper(){
       <button class="log-btn" onclick="setPR(${i},null)" style="font-size:9px;">${p.result||'Pend'}</button>
     </div></div>`).join('');
 }
-
 function addPaper(){
   const g=document.getElementById('p-game').value.trim(),b=document.getElementById('p-bet').value.trim();
   if(!g||!b)return;
@@ -540,7 +746,6 @@ function addPaper(){
 }
 function setPR(i,r){paperPlays[i].result=r;savePaper();renderPaper();}
 
-// LOG
 function renderLog(){
   const w=logPlays.filter(p=>p.result==='W').length,l=logPlays.filter(p=>p.result==='L').length,pend=logPlays.filter(p=>!p.result).length;
   const pnl=logPlays.filter(p=>p.result).reduce((acc,p)=>{
@@ -572,7 +777,7 @@ function addLog(){
 }
 function setLR(i,r){logPlays[i].result=r;saveLog();renderLog();}
 
-// AUTO REFRESH COUNTDOWN
+// AUTO REFRESH
 let countdown=300;
 function updateCountdown(){
   countdown--;
@@ -583,7 +788,6 @@ function updateCountdown(){
 }
 setInterval(updateCountdown,1000);
 
-// BOOT
 fetchOdds();
 </script>
 </body>
