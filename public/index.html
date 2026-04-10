@@ -209,7 +209,7 @@
       <div class="stat-box green"><div class="stat-label">Real plays</div><div class="stat-val gold" id="s-real">—</div></div>
       <div class="stat-box"><div class="stat-label">Daily stake</div><div class="stat-val" id="s-stake">—</div></div>
       <div class="stat-box amber"><div class="stat-label">Paper plays</div><div class="stat-val amber" id="s-paper">—</div></div>
-      <div class="stat-box green"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bank">$2,250</div></div>
+      <div class="stat-box green"><div class="stat-label">Season P&L</div><div class="stat-val green" id="s-bank">—</div></div>
     </div>
     <div class="section-hdr">
       <div class="section-title">Book</div>
@@ -280,8 +280,8 @@
 </div>
 
 <script>
-const BOOK_LABELS = { caesars:'Caesars', hard_rock_bet:'Hard Rock', draftkings:'DraftKings', fanduel:'FanDuel', betmgm:'BetMGM', betrivers:'BetRivers', pointsbet_us:'PointsBet', unibet_us:'Unibet' };
-const BOOK_ORDER = ['caesars','hard_rock_bet','draftkings','fanduel','betmgm','betrivers'];
+const BOOK_LABELS = { caesars:'Caesars', hard_rock_bet:'Hard Rock', draftkings:'DraftKings', fanduel:'FanDuel', betmgm:'BetMGM' };
+const BOOK_ORDER = ['caesars','hard_rock_bet','draftkings','fanduel','betmgm'];
 
 let allGames = [], activeBook = 'caesars', availableBooks = [];
 let paperPlays = [], logPlays = [];
@@ -393,6 +393,14 @@ function renderCard() {
   document.getElementById('s-stake').textContent='$'+stakeTotal.toLocaleString();
   document.getElementById('s-paper').textContent=paperCount;
   document.getElementById('game-count').textContent=allGames.length+' games today';
+  const pnl=logPlays.filter(p=>p.result).reduce((acc,p)=>{
+    const amt=parseFloat(p.amt)||0,odds=parseInt(p.odds)||0;
+    if(p.result==='W')return acc+(odds>0?amt*(odds/100):amt*(100/Math.abs(odds)));
+    if(p.result==='L')return acc-amt; return acc;
+  },0);
+  const pnlEl=document.getElementById('s-bank');
+  pnlEl.textContent=(pnl>=0?'+':'-')+'$'+Math.abs(Math.round(pnl));
+  pnlEl.style.color=pnl>=0?'var(--green)':'var(--red)';
 }
 
 function renderBookTabs(){
@@ -411,7 +419,8 @@ async function fetchOdds(){
     if(allGames.error) throw new Error(allGames.error);
     const bookSet=new Set();
     allGames.forEach(g=>g.bookmakers.forEach(b=>bookSet.add(b.key)));
-    availableBooks=[...bookSet].sort((a,b)=>(BOOK_ORDER.indexOf(a)+1||99)-(BOOK_ORDER.indexOf(b)+1||99));
+    const ALLOWED_BOOKS = ['caesars','hard_rock_bet','draftkings','fanduel','betmgm'];
+availableBooks=[...bookSet].filter(k=>ALLOWED_BOOKS.includes(k)).sort((a,b)=>(BOOK_ORDER.indexOf(a)+1||99)-(BOOK_ORDER.indexOf(b)+1||99));
     if(!availableBooks.includes(activeBook)) activeBook=availableBooks[0]||'caesars';
     renderBookTabs(); renderCard();
     document.getElementById('last-update').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
@@ -491,6 +500,24 @@ function setLR(i,r){logPlays[i].result=r;saveLog();renderLog();}
 
 // Boot
 fetchOdds();
+
+// Auto-refresh every 5 minutes with countdown
+let countdown = 300;
+const countdownEl = document.getElementById('last-update');
+
+function updateCountdown() {
+  countdown--;
+  if(countdown <= 0) {
+    countdown = 300;
+    fetchOdds();
+  }
+  const mins = Math.floor(countdown / 60);
+  const secs = countdown % 60;
+  const timeStr = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  countdownEl.textContent = 'Updated ' + timeStr + ' — next refresh in ' + mins + ':' + (secs<10?'0':'') + secs;
+}
+
+setInterval(updateCountdown, 1000);
 </script>
 </body>
 </html>
