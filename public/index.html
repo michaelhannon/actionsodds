@@ -546,12 +546,21 @@ Respond ONLY with valid JSON, no markdown, no explanation:
     const data=await res.json();
     let text=data.content?.find(b=>b.type==='text')?.text||'{}';
     text=text.replace(/```json|```/g,'').trim();
-    const brief=JSON.parse(text);
-    brief.mlbData=mlbData;brief.weather=weather;
+    const jStart=text.indexOf('{');const jEnd=text.lastIndexOf('}');
+    if(jStart===-1||jEnd===-1)throw new Error('No JSON');
+    const parsed=JSON.parse(text.slice(jStart,jEnd+1));
+    const brief={
+      lean:parsed.lean||parsed.Lean||'WATCH',
+      confidence:parseInt(parsed.confidence||parsed.Confidence||5)||5,
+      take:parsed.take||parsed.Take||parsed.analysis||parsed.recommendation||'Check pitchers and weather above.',
+      factors:parsed.factors||parsed.Factors||[],
+      warning:parsed.warning||parsed.Warning||parsed.risk||parsed.Risk||null,
+      mlbData,weather
+    };
     briefCache[cacheKey]=brief;
     return brief;
   }catch(e){
-    return{lean:'WATCH',confidence:5,take:'Unable to generate brief. Check game manually.',factors:[],warning:null,mlbData,weather};
+    return{lean:'WATCH',confidence:5,take:'AI brief unavailable — check pitchers and weather above.',factors:[],warning:null,mlbData,weather};
   }
 }
 
