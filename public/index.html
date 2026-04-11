@@ -855,13 +855,42 @@ let countdown=300;
 function updateCountdown(){countdown--;if(countdown<=0){countdown=300;// Theme
 let isDark = localStorage.getItem('ao_theme') !== 'light';
 function applyTheme(){
-  document.body.classList.toggle('light', !isDark);
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  document.body.style.background = isDark ? '#0a0a0b' : '#f0f2f5';
+  document.body.style.color = isDark ? '#f0eff5' : '#0d0d10';
   const icon = document.getElementById('theme-icon');
   const label = document.getElementById('theme-label');
-  const toggle = document.getElementById('theme-toggle');
   if(icon) icon.textContent = isDark ? '☀' : '☾';
   if(label) label.textContent = isDark ? 'Light' : 'Dark';
-  if(toggle) toggle.style.background = isDark ? 'transparent' : 'rgba(0,0,0,0.06)';
+  // Update all CSS variables dynamically
+  const r = document.documentElement.style;
+  if(!isDark){
+    r.setProperty('--black','#f0f2f5');
+    r.setProperty('--dark','#ffffff');
+    r.setProperty('--panel','#ffffff');
+    r.setProperty('--panel2','#f5f6f8');
+    r.setProperty('--border','rgba(0,0,0,0.09)');
+    r.setProperty('--border2','rgba(0,0,0,0.16)');
+    r.setProperty('--text','#0d0d10');
+    r.setProperty('--text2','#4a4a5a');
+    r.setProperty('--text3','#9090a0');
+    r.setProperty('--green','#1a8a45');
+    r.setProperty('--amber','#c47a00');
+    r.setProperty('--red','#c0392b');
+  } else {
+    r.setProperty('--black','#0a0a0b');
+    r.setProperty('--dark','#111114');
+    r.setProperty('--panel','#18181d');
+    r.setProperty('--panel2','#1f1f26');
+    r.setProperty('--border','rgba(255,255,255,0.07)');
+    r.setProperty('--border2','rgba(255,255,255,0.13)');
+    r.setProperty('--text','#f0eff5');
+    r.setProperty('--text2','#9896a8');
+    r.setProperty('--text3','#5c5a6e');
+    r.setProperty('--green','#2ecc71');
+    r.setProperty('--amber','#f39c12');
+    r.setProperty('--red','#e74c3c');
+  }
 }
 function toggleTheme(){
   isDark = !isDark;
