@@ -1084,10 +1084,10 @@ function renderCard(){
   }
   out.innerHTML=html;
   // Summary strip from actual logged plays, not trigger count
-  const pendingPlays=logPlays.filter(p=>!p.result);
-  const atRisk=pendingPlays.reduce((a,p)=>a+(parseFloat(p.amt)||0),0);
-  document.getElementById('s-real').textContent=pendingPlays.length;
-  document.getElementById('s-stake').textContent='$'+atRisk.toLocaleString();
+  const pendingPlays2=logPlays.filter(p=>!p.result);
+  const atRisk2=pendingPlays2.reduce((a,p)=>a+(parseFloat(p.amt)||0),0);
+  document.getElementById('s-real').textContent=pendingPlays2.length;
+  document.getElementById('s-stake').textContent='$'+atRisk2.toLocaleString();
   const sportLabels={mlb:'games',nhl:'games',nba:'games',nfl:'games',ncaaf:'games',ncaab:'games',ufc:'fights',pga:'golfers'};
   document.getElementById('game-count').textContent=allGames.length+' '+(sportLabels[activeSport]||'games')+' today';
   updateSeasonPnL();
