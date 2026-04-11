@@ -20,63 +20,106 @@ const SPORT_KEYS = {
 const GOLF_SPORTS = ['pga'];
 const ALLOWED_BOOKS = ['caesars', 'hard_rock_bet', 'draftkings', 'fanduel', 'betmgm'];
 
+// =====================
+// CACHE — 5 min per sport
+// =====================
+const cache = {};
+const CACHE_TTL = 5 * 60 * 1000;
+
+function getCached(sport) {
+  const entry = cache[sport];
+  if (entry && (Date.now() - entry.timestamp) < CACHE_TTL) {
+    console.log('[CACHE] HIT for ' + sport + ', age: ' + Math.round((Date.now() - entry.timestamp) / 1000) + 's');
+    return entry.data;
+  }
+  return null;
+}
+
+function setCache(sport, data) {
+  cache[sport] = { data: data, timestamp: Date.now() };
+  console.log('[CACHE] SET for ' + sport + ', ' + (Array.isArray(data) ? data.length + ' games' : 'error'));
+}
+
 function getOddsUrl(sport) {
   const key = SPORT_KEYS[sport] || SPORT_KEYS.mlb;
-  if(GOLF_SPORTS.includes(sport)){
-    return `https://api.the-odds-api.com/v4/sports/${key}/odds/?apiKey=${API_KEY}&regions=us&markets=outrights&oddsFormat=american&dateFormat=iso`;
+  if (GOLF_SPORTS.includes(sport)) {
+    return 'https://api.the-odds-api.com/v4/sports/' + key + '/odds/?apiKey=' + API_KEY + '&regions=us&markets=outrights&oddsFormat=american&dateFormat=iso';
   }
-  return `https://api.the-odds-api.com/v4/sports/${key}/odds/?apiKey=${API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american&dateFormat=iso`;
+  return 'https://api.the-odds-api.com/v4/sports/' + key + '/odds/?apiKey=' + API_KEY + '&regions=us&markets=h2h,spreads,totals&oddsFormat=american&dateFormat=iso';
+}
+
+function processGames(games, sport) {
+  if (!Array.isArray(games)) return games;
+  var now = Date.now();
+  var GRACE_MS = 30 * 60 * 1000;
+
+  if (GOLF_SPORTS.includes(sport)) {
+    return games.map(function(game) {
+      return Object.assign({}, game, {
+        bookmakers: game.bookmakers.filter(function(b) { return ALLOWED_BOOKS.includes(b.key); })
+      });
+    });
+  }
+
+  return games
+    .filter(function(game) { return (now - new Date(game.commence_time).getTime()) < GRACE_MS; })
+    .map(function(game) {
+      return Object.assign({}, game, {
+        bookmakers: game.bookmakers.filter(function(b) { return ALLOWED_BOOKS.includes(b.key); })
+      });
+    });
 }
 
 function fetchOdds(res, sport) {
-  https.get(getOddsUrl(sport||'mlb'), (apiRes) => {
-    let data = '';
-    apiRes.on('data', chunk => data += chunk);
-    apiRes.on('end', () => {
+  var cached = getCached(sport);
+  if (cached) {
+    var filtered = processGames(cached, sport);
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' });
+    res.end(JSON.stringify(filtered));
+    return;
+  }
+
+  console.log('[API] Fetching fresh odds for ' + sport);
+  https.get(getOddsUrl(sport || 'mlb'), function(apiRes) {
+    var data = '';
+    apiRes.on('data', function(chunk) { data += chunk; });
+    apiRes.on('end', function() {
       try {
-        const games = JSON.parse(data);
-        if(!Array.isArray(games)){res.writeHead(200,{'Content-Type':'application/json','Access-Control-Allow-Origin':'*'});res.end(JSON.stringify(games));return;}
-        const now = Date.now();
-        const GRACE_MS = 30 * 60 * 1000;
-        console.log('Current UTC time:', new Date().toISOString());
-        console.log('Total games from API:', games.length);
-        // Golf/outrights: don't filter by time, just pass through
-        let filtered;
-        if(GOLF_SPORTS.includes(sport)){
-          filtered = games.map(game => ({
-            ...game,
-            bookmakers: game.bookmakers.filter(b => ALLOWED_BOOKS.includes(b.key))
-          }));
-        } else {
-          games.forEach(g => {
-            const diff = (now - new Date(g.commence_time).getTime());
-            console.log(g.away_team, '@', g.home_team, g.commence_time, 'diff_mins:', Math.round(diff/60000));
-          });
-          filtered = games
-            .filter(game => (now - new Date(game.commence_time).getTime()) < GRACE_MS)
-            .map(game => ({
-              ...game,
-              bookmakers: game.bookmakers.filter(b => ALLOWED_BOOKS.includes(b.key))
-            }));
+        var games = JSON.parse(data);
+
+        if (!Array.isArray(games)) {
+          console.log('[API] Non-array response:', JSON.stringify(games).slice(0, 300));
+          res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+          res.end(JSON.stringify({ error: games.message || 'API error', detail: games.error_code || 'unknown' }));
+          return;
         }
+
+        console.log('[API] Got ' + games.length + ' games for ' + sport);
+        setCache(sport, games);
+
+        var filtered = processGames(games, sport);
+        console.log('[API] ' + filtered.length + ' games after filtering');
+
         res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' });
         res.end(JSON.stringify(filtered));
-      } catch(e) {
+      } catch (e) {
+        console.log('[API] Parse error:', e.message);
         res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
         res.end(data);
       }
     });
-  }).on('error', (err) => {
+  }).on('error', function(err) {
+    console.log('[API] Network error:', err.message);
     res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
     res.end(JSON.stringify({ error: err.message }));
   });
 }
 
 function proxyAnthropic(req, res) {
-  let body = '';
-  req.on('data', chunk => body += chunk);
-  req.on('end', () => {
-    const options = {
+  var body = '';
+  req.on('data', function(chunk) { body += chunk; });
+  req.on('end', function() {
+    var options = {
       hostname: 'api.anthropic.com',
       path: '/v1/messages',
       method: 'POST',
@@ -87,12 +130,12 @@ function proxyAnthropic(req, res) {
       }
     };
     console.log('[AI-BRIEF] Sending to Anthropic, key present:', !!ANTHROPIC_KEY, 'key length:', ANTHROPIC_KEY.length);
-    const apiReq = https.request(options, (apiRes) => {
-      let data = '';
-      apiRes.on('data', chunk => data += chunk);
-      apiRes.on('end', () => {
+    var apiReq = https.request(options, function(apiRes) {
+      var data = '';
+      apiRes.on('data', function(chunk) { data += chunk; });
+      apiRes.on('end', function() {
         console.log('[AI-BRIEF] Anthropic response status:', apiRes.statusCode);
-        if(apiRes.statusCode !== 200) console.log('[AI-BRIEF] Error body:', data.slice(0, 500));
+        if (apiRes.statusCode !== 200) console.log('[AI-BRIEF] Error body:', data.slice(0, 500));
         res.writeHead(apiRes.statusCode, {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
@@ -100,7 +143,7 @@ function proxyAnthropic(req, res) {
         res.end(data);
       });
     });
-    apiReq.on('error', (err) => {
+    apiReq.on('error', function(err) {
       res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
       res.end(JSON.stringify({ error: err.message }));
     });
@@ -109,27 +152,27 @@ function proxyAnthropic(req, res) {
   });
 }
 
-const server = http.createServer((req, res) => {
+var server = http.createServer(function(req, res) {
   if (req.method === 'OPTIONS') {
     res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST,GET', 'Access-Control-Allow-Headers': 'Content-Type' });
     res.end(); return;
   }
   if (req.url.startsWith('/odds')) {
-    const sport = new URL('http://x'+req.url).searchParams.get('sport') || 'mlb';
+    var sport = new URL('http://x' + req.url).searchParams.get('sport') || 'mlb';
     fetchOdds(res, sport); return;
   }
   if (req.url === '/ai-brief' && req.method === 'POST') { proxyAnthropic(req, res); return; }
   if (req.url === '/favicon.svg') {
-    const filePath = require('path').join(__dirname, 'public', 'favicon.svg');
-    require('fs').readFile(filePath, (err, content) => {
+    var filePath = path.join(__dirname, 'public', 'favicon.svg');
+    fs.readFile(filePath, function(err, content) {
       if (err) { res.writeHead(404); res.end(); return; }
       res.writeHead(200, { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'public, max-age=86400' });
       res.end(content);
     }); return;
   }
   if (req.url === '/' || req.url === '/index.html') {
-    const filePath = path.join(__dirname, 'public', 'index.html');
-    fs.readFile(filePath, (err, content) => {
+    var filePath2 = path.join(__dirname, 'public', 'index.html');
+    fs.readFile(filePath2, function(err, content) {
       if (err) { res.writeHead(500); res.end('Error'); return; }
       res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' });
       res.end(content);
@@ -138,4 +181,4 @@ const server = http.createServer((req, res) => {
   res.writeHead(404); res.end('Not found');
 });
 
-server.listen(PORT, () => console.log(`Action's Odds running on port ${PORT}`));
+server.listen(PORT, function() { console.log('Action\'s Odds running on port ' + PORT); });

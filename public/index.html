@@ -1048,7 +1048,11 @@ async function fetchOdds(){
   try{
     const res=await fetch('/odds?sport='+activeSport);if(!res.ok)throw new Error('Server '+res.status);
     const data=await res.json();
-    if(data.error)throw new Error(data.error);
+    if(data.error){
+      var errMsg=data.error;
+      if(data.detail==='OUT_OF_USAGE_CREDITS')errMsg='Odds API quota reached — data will refresh automatically when credits reset. Cached data may still load.';
+      throw new Error(errMsg);
+    }
     if(!Array.isArray(data))throw new Error('No games available for '+activeSport.toUpperCase());
     allGames=data;
     const bookSet=new Set();allGames.forEach(g=>g.bookmakers.forEach(b=>bookSet.add(b.key)));
