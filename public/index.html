@@ -1197,6 +1197,64 @@ setInterval(fetchLiveScores,30000); // every 30s
 setInterval(fetchMastersLeaderboard,60000); // every 60s
 setInterval(fetchLineMovements,120000); // every 2 min
 
+// =====================
+// GOLFER ANALYSIS
+// =====================
+var golferAnalysisCache={};
+
+function toggleGolfer(id){
+  var el=document.getElementById(id);
+  if(!el)return;
+  el.style.display=el.style.display==='none'?'block':'none';
+}
+
+async function analyzeGolfer(name,odds,targetId){
+  var el=document.getElementById(targetId);
+  if(!el)return;
+  if(golferAnalysisCache[name]){el.innerHTML=golferAnalysisCache[name];return;}
+  el.innerHTML='<div class="ai-loading"><div class="spinner"></div> Analyzing '+name+'...</div>';
+
+  // Build leaderboard context
+  var lbContext='';
+  if(mastersData&&mastersData.players){
+    var p=mastersData.players.find(function(pl){return pl.name.toLowerCase()===name.toLowerCase()||name.toLowerCase().includes(pl.name.toLowerCase().split(' ').pop());});
+    if(p)lbContext='Current position: '+p.position+', Score: '+p.score+', Today: '+p.today+', Thru: '+p.thru+(p.rounds&&p.rounds.length?', Rounds: '+p.rounds.join('-'):'');
+  }
+
+  var prompt='You are Action\'s Odds, a sharp golf betting analyst. Give a concise betting analysis for this golfer at the Masters Tournament.\n\nGolfer: '+name+'\nOutright odds: '+fmtOdds(odds)+'\n'+(lbContext?'Leaderboard: '+lbContext+'\n':'')+'Tournament: Masters Tournament at Augusta National\nStatus: '+(mastersData?mastersData.status:'In progress')+'\n\nRespond ONLY with valid JSON:\n{"verdict":"BET"|"PASS"|"WATCH","confidence":1-10,"analysis":"3-4 sentence analysis covering course fit, recent form, and betting value","strengths":["strength1","strength2"],"risks":["risk1","risk2"],"bestBet":"recommended bet type or null"}';
+
+  try{
+    var res2=await fetch('/ai-brief',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:prompt}]})});
+    if(res2.status===429){el.innerHTML='<div style="color:var(--amber);font-size:12px;">Rate limited — try again in a minute.</div>';return;}
+    var data=await res2.json();
+    var text=data.content?.find(function(b){return b.type==='text';})?.text||'{}';
+    text=text.replace(/```json|```/g,'').trim();
+    var jStart=text.indexOf('{');var jEnd=text.lastIndexOf('}');
+    if(jStart===-1)throw new Error('No JSON');
+    var parsed=JSON.parse(text.slice(jStart,jEnd+1));
+
+    var verdictCls=parsed.verdict==='BET'?'bet':parsed.verdict==='PASS'?'pass':'watch';
+    var verdictIcon=parsed.verdict==='BET'?'▲':parsed.verdict==='PASS'?'✕':'◆';
+    var resultHtml='<div class="ai-lean '+verdictCls+'" style="margin-bottom:8px;">'+verdictIcon+' '+parsed.verdict+'</div>';
+    resultHtml+='<div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:8px;">'+parsed.analysis+'</div>';
+    if(parsed.strengths&&parsed.strengths.length){
+      resultHtml+='<div style="margin-bottom:6px;">';
+      parsed.strengths.forEach(function(s){resultHtml+='<span style="font-size:10px;background:rgba(46,204,113,0.1);color:var(--green);border:1px solid rgba(46,204,113,0.2);padding:2px 6px;border-radius:3px;margin-right:4px;">✓ '+s+'</span>';});
+      resultHtml+='</div>';
+    }
+    if(parsed.risks&&parsed.risks.length){
+      resultHtml+='<div style="margin-bottom:6px;">';
+      parsed.risks.forEach(function(r){resultHtml+='<span style="font-size:10px;background:rgba(231,76,60,0.1);color:var(--red);border:1px solid rgba(231,76,60,0.2);padding:2px 6px;border-radius:3px;margin-right:4px;">⚠ '+r+'</span>';});
+      resultHtml+='</div>';
+    }
+    if(parsed.bestBet&&parsed.bestBet!=='null')resultHtml+='<div style="font-size:11px;color:var(--gold);font-family:Barlow Condensed,sans-serif;font-weight:600;letter-spacing:0.05em;margin-top:4px;">Best bet: '+parsed.bestBet+'</div>';
+    el.innerHTML=resultHtml;
+    golferAnalysisCache[name]=resultHtml;
+  }catch(e){
+    el.innerHTML='<div style="color:var(--red);font-size:12px;">Analysis unavailable. '+e.message+'</div>';
+  }
+}
+
 function renderCard(){
   const out=document.getElementById('card-output');
   if(!Array.isArray(allGames))allGames=[];
@@ -1221,21 +1279,44 @@ function renderCard(){
           <div class="trigger-badges"><span class="tbadge tbadge-real">${sorted.length} golfers</span></div>
         </div>
         <div style="padding:10px 14px;">
-          <div style="display:grid;grid-template-columns:1fr auto;gap:0;font-family:'Barlow Condensed',sans-serif;">
+          <div style="display:grid;grid-template-columns:1fr auto auto;gap:0;font-family:'Barlow Condensed',sans-serif;">
             <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding:6px 0;">Golfer</div>
-            <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding:6px 0;text-align:right;">Odds</div>`;
+            <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding:6px 0;text-align:center;width:60px;">Score</div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding:6px 0;text-align:right;width:70px;">Odds</div>`;
       sorted.forEach(function(o,i){
         var isFav=i<3;
         var isValue=o.price>=300&&o.price<=1500;
-        var isLongshot=o.price>1500&&o.price<=3000;
         var rowBg=i%2===0?'transparent':'rgba(255,255,255,0.02)';
         var nameColor=isFav?'var(--gold)':isValue?'var(--green)':'var(--text)';
         var oddsColor=o.price<=200?'var(--gold)':o.price<=1500?'var(--green)':'var(--text2)';
         var badge='';
         if(isFav)badge='<span style="font-size:9px;background:rgba(232,185,74,0.12);color:var(--gold);border:1px solid rgba(232,185,74,0.25);padding:1px 6px;border-radius:3px;margin-left:6px;letter-spacing:0.08em;">FAV</span>';
         else if(isValue)badge='<span style="font-size:9px;background:rgba(46,204,113,0.12);color:var(--green);border:1px solid rgba(46,204,113,0.25);padding:1px 6px;border-radius:3px;margin-left:6px;letter-spacing:0.08em;">VALUE</span>';
-        html+=`<div style="font-size:14px;font-weight:${isFav?'600':'400'};color:${nameColor};padding:7px 0;border-bottom:1px solid var(--border);background:${rowBg};">${o.name}${badge}</div>
-          <div style="font-size:14px;font-weight:600;color:${oddsColor};padding:7px 0;text-align:right;border-bottom:1px solid var(--border);background:${rowBg};">${fmtOdds(o.price)}</div>`;
+        // Find leaderboard data for this golfer
+        var lbPlayer=mastersData&&mastersData.players?mastersData.players.find(function(p){return p.name.toLowerCase()===o.name.toLowerCase()||o.name.toLowerCase().includes(p.name.toLowerCase().split(' ').pop());}):null;
+        var scoreText=lbPlayer?lbPlayer.score:'—';
+        var posText=lbPlayer?lbPlayer.position:'';
+        var rowId='golfer-'+i;
+        html+=`<div style="font-size:14px;font-weight:${isFav?'600':'400'};color:${nameColor};padding:7px 0;border-bottom:1px solid var(--border);background:${rowBg};cursor:pointer;display:flex;align-items:center;" onclick="toggleGolfer('${rowId}')">
+            <span style="flex:1;">${posText?posText+'. ':''}${o.name}${badge}</span>
+          </div>
+          <div style="font-size:14px;font-weight:600;color:${scoreText.includes('-')?'var(--green)':scoreText.includes('+')?'var(--red)':'var(--text2)'};padding:7px 0;text-align:center;border-bottom:1px solid var(--border);background:${rowBg};width:60px;">${scoreText}</div>
+          <div style="font-size:14px;font-weight:600;color:${oddsColor};padding:7px 0;text-align:right;border-bottom:1px solid var(--border);background:${rowBg};width:70px;">${fmtOdds(o.price)}</div>
+          <div id="${rowId}" style="display:none;grid-column:1/-1;padding:10px 0;border-bottom:1px solid var(--border);background:${rowBg};">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">`;
+        // Stats pills from leaderboard
+        if(lbPlayer){
+          if(lbPlayer.today&&lbPlayer.today!=='—')html+=`<div class="ai-stat"><div class="ai-stat-lbl">Today</div><div class="ai-stat-val">${lbPlayer.today}</div></div>`;
+          if(lbPlayer.thru&&lbPlayer.thru!=='—')html+=`<div class="ai-stat"><div class="ai-stat-lbl">Thru</div><div class="ai-stat-val">${lbPlayer.thru}</div></div>`;
+          if(lbPlayer.rounds&&lbPlayer.rounds.length)html+=`<div class="ai-stat"><div class="ai-stat-lbl">Rounds</div><div class="ai-stat-val">${lbPlayer.rounds.join('-')}</div></div>`;
+          html+=`<div class="ai-stat"><div class="ai-stat-lbl">Position</div><div class="ai-stat-val">${lbPlayer.position}</div></div>`;
+        }
+        html+=`<div class="ai-stat"><div class="ai-stat-lbl">Outright</div><div class="ai-stat-val">${fmtOdds(o.price)}</div></div>`;
+        html+=`</div>
+            <div id="${rowId}-ai" style="font-size:12px;color:var(--text2);line-height:1.6;">
+              <button onclick="event.stopPropagation();analyzeGolfer('${o.name}',${o.price},'${rowId}-ai')" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;background:transparent;border:1px solid var(--border2);color:var(--gold);padding:5px 12px;border-radius:5px;cursor:pointer;">Analyze ${o.name.split(' ').pop()}</button>
+            </div>
+          </div>`;
       });
       html+=`</div></div></div>`;
     }
