@@ -1180,11 +1180,12 @@ async function refreshBriefs(){
   for(const g of allGames.filter(g=>(now2-new Date(g.commence_time))<30*60*1000)){
     const plays=checkTriggers(g,activeBook);
     // Check if this game matches any logged live play
+    if(!g.home_team&&!g.away_team){continue;} // skip outrights (PGA etc)
     const hasLivePlay=pendingLive.some(lp=>{
       const searchStr=(lp.game+' '+lp.bet).toLowerCase();
-      const homeLastWord=g.home_team.toLowerCase().split(' ').pop();
-      const awayLastWord=g.away_team.toLowerCase().split(' ').pop();
-      return searchStr.includes(homeLastWord) || searchStr.includes(awayLastWord);
+      const homeLastWord=(g.home_team||'').toLowerCase().split(' ').pop();
+      const awayLastWord=(g.away_team||'').toLowerCase().split(' ').pop();
+      return (homeLastWord && searchStr.includes(homeLastWord)) || (awayLastWord && searchStr.includes(awayLastWord));
     });
     if(hasLivePlay && plays.length>0)flaggedGames.push({game:g,plays});
   }
