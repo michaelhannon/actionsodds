@@ -1002,9 +1002,9 @@ function renderCard(){
     const homeML=h2h?.outcomes?.find(o=>o.name===home)?.price;const awayML=h2h?.outcomes?.find(o=>o.name===away)?.price;
     const homeRL=spreads?.outcomes?.find(o=>o.name===home);const awayRL=spreads?.outcomes?.find(o=>o.name===away);
     const over=totals?.outcomes?.find(o=>o.name==='Over');const under=totals?.outcomes?.find(o=>o.name==='Under');
-    const cls=rp.length?'game-card flagged':sp.length&&!pp.length?'game-card sharp-flag':pp.length?'game-card paper-flag':'game-card';
+    const cls=rp.length?'game-card flagged':sp.length?'game-card sharp-flag':'game-card';
     const timeStr=new Date(g.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});
-    const badges=plays.map(p=>{const bc=p.type==='real'?'tbadge-real':p.type==='sharp'?'tbadge-sharp':'tbadge-paper';return`<span class="tbadge ${bc}">${p.trigger}</span>`;}).join('');
+    const badges=plays.filter(p=>p.type!=='paper').map(p=>{const bc=p.type==='real'?'tbadge-real':'tbadge-sharp';return`<span class="tbadge ${bc}">${p.trigger}</span>`;}).join('');
     const awayFav=awayML!=null&&homeML!=null&&awayML<homeML;const homeFav=homeML!=null&&awayML!=null&&homeML<awayML;
     html+=`<div class="${cls}">
       <div class="game-card-header"><div class="game-time">${timeStr}</div><div class="trigger-badges">${badges}</div></div>
@@ -1017,11 +1017,13 @@ function renderCard(){
           <div class="odds-group"><div class="odds-cell"><span class="odds-val${homeML>0?' dog':''}">${fmtOdds(homeML)}</span></div><div class="odds-cell"><span class="odds-val">${homeRL?(homeRL.point>0?'+':'')+homeRL.point+' '+fmtOdds(homeRL.price):'—'}</span></div><div class="odds-cell"><span class="odds-val">${under?'U '+under.point:'—'}</span></div></div></div>
       </div>`;
     if(plays.length){
+      const rp2=rp,sp2=sp;
+      if(rp2.length||sp2.length){
       html+=`<div class="play-box">`;
-      if(rp.length){html+=`<div class="play-section-label real">Real plays</div>`;rp.forEach(p=>{stakeTotal+=p.amt;realCount++;html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,'green')}</div><div class="play-amt">$${p.amt}</div></div><div class="play-note">${p.note}</div>`;});}
-      if(sp.length){html+=`<div class="play-section-label sharp" style="margin-top:${rp.length?'8':'0'}px;">Line shop</div>`;sp.forEach(p=>{html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,'blue')}</div><div class="play-amt sharp">shop</div></div><div class="play-note">${p.note}</div>`;});}
-      if(pp.length){html+=`<div class="play-section-label paper" style="margin-top:${rp.length||sp.length?'8':'0'}px;">Paper only</div>`;pp.forEach(p=>{paperCount++;html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,'amber')}</div><div class="play-amt paper">paper</div></div><div class="play-note">${p.note}</div>`;});}
+      if(rp2.length){html+=`<div class="play-section-label real">Real plays</div>`;rp2.forEach(p=>{stakeTotal+=p.amt;realCount++;html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,'green')}</div><div class="play-amt">$${p.amt}</div></div><div class="play-note">${p.note}</div>`;});}
+      if(sp2.length){html+=`<div class="play-section-label sharp" style="margin-top:${rp2.length?'8':'0'}px;">Line shop</div>`;sp2.forEach(p=>{html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,'blue')}</div><div class="play-amt sharp">shop</div></div><div class="play-note">${p.note}</div>`;});}
       html+=`</div>`;
+      }
     }
     html+=`</div>`;
   }
