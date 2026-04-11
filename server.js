@@ -164,21 +164,24 @@ function trackLines(sport, games) {
   if (!openingLines[key]) openingLines[key] = {};
   games.forEach(function(g) {
     var gameKey = g.away_team + '@' + g.home_team;
-    if (!openingLines[key][gameKey]) {
-      // Store opening lines
-      var bm = g.bookmakers && g.bookmakers[0];
-      if (!bm) return;
+    if (!openingLines[key][gameKey]) openingLines[key][gameKey] = {};
+    // Store opening line per book (only first time seen)
+    g.bookmakers.forEach(function(bm) {
+      if (openingLines[key][gameKey][bm.key]) return; // already stored
       var h2h = bm.markets && bm.markets.find(function(m) { return m.key === 'h2h'; });
-      if (h2h) {
-        openingLines[key][gameKey] = {
+      if (!h2h) return;
+      var ho = h2h.outcomes.find(function(o) { return o.name === g.home_team; });
+      var ao = h2h.outcomes.find(function(o) { return o.name === g.away_team; });
+      if (ho || ao) {
+        openingLines[key][gameKey][bm.key] = {
           time: Date.now(),
           home: g.home_team,
           away: g.away_team,
-          homeOpen: h2h.outcomes.find(function(o) { return o.name === g.home_team; }),
-          awayOpen: h2h.outcomes.find(function(o) { return o.name === g.away_team; })
+          homeOpen: ho ? ho.price : null,
+          awayOpen: ao ? ao.price : null
         };
       }
-    }
+    });
   });
 }
 
@@ -188,26 +191,50 @@ function getLineMovements(sport) {
   var cached = getCached(sport);
   if (!cached || !Array.isArray(cached)) return [];
   var movements = [];
+  var seen = {}; // dedupe by game
   cached.forEach(function(g) {
     var gameKey = g.away_team + '@' + g.home_team;
-    var opening = lines[gameKey];
-    if (!opening) return;
+    var gameLines = lines[gameKey];
+    if (!gameLines) return;
     g.bookmakers.forEach(function(bm) {
+      var opening = gameLines[bm.key];
+      if (!opening) return;
       var h2h = bm.markets && bm.markets.find(function(m) { return m.key === 'h2h'; });
       if (!h2h) return;
-      var homeCurrent = h2h.outcomes.find(function(o) { return o.name === g.home_team; });
-      var awayCurrent = h2h.outcomes.find(function(o) { return o.name === g.away_team; });
-      if (homeCurrent && opening.homeOpen) {
-        var diff = Math.abs((homeCurrent.price || 0) - (opening.homeOpen.price || 0));
-        if (diff >= 10) {
-          movements.push({
-            game: gameKey,
-            team: g.home_team,
-            book: bm.key,
-            open: opening.homeOpen.price,
-            current: homeCurrent.price,
-            diff: diff
-          });
+      // Check home team movement
+      if (opening.homeOpen != null) {
+        var homeCurrent = h2h.outcomes.find(function(o) { return o.name === g.home_team; });
+        if (homeCurrent) {
+          var diff = Math.abs(homeCurrent.price - opening.homeOpen);
+          if (diff >= 10 && !seen[gameKey + '_home']) {
+            seen[gameKey + '_home'] = true;
+            movements.push({
+              game: gameKey,
+              team: g.home_team,
+              book: bm.key,
+              open: opening.homeOpen,
+              current: homeCurrent.price,
+              diff: diff
+            });
+          }
+        }
+      }
+      // Check away team movement
+      if (opening.awayOpen != null) {
+        var awayCurrent = h2h.outcomes.find(function(o) { return o.name === g.away_team; });
+        if (awayCurrent) {
+          var diff2 = Math.abs(awayCurrent.price - opening.awayOpen);
+          if (diff2 >= 10 && !seen[gameKey + '_away']) {
+            seen[gameKey + '_away'] = true;
+            movements.push({
+              game: gameKey,
+              team: g.away_team,
+              book: bm.key,
+              open: opening.awayOpen,
+              current: awayCurrent.price,
+              diff: diff2
+            });
+          }
         }
       }
     });
@@ -286,32 +313,55 @@ function fetchMasters(res) {
     apiRes.on('end', function() {
       try {
         var parsed = JSON.parse(data);
+        console.log('[MASTERS] Response keys:', Object.keys(parsed));
         var event = parsed.events && parsed.events[0];
+        // Fallback: some ESPN endpoints use different structure
+        if (!event && parsed.leaderboard) {
+          // Direct leaderboard format
+          var result2 = { tournament: 'Masters Tournament', status: parsed.status || '', players: [] };
+          result2.players = parsed.leaderboard.map(function(p) {
+            return {
+              name: p.player ? (p.player.displayName || p.player.firstName + ' ' + p.player.lastName) : (p.displayName || 'Unknown'),
+              position: p.position || p.rank || '',
+              score: p.total || p.totalScore || p.score || '—',
+              today: p.today || p.currentRoundScore || '—',
+              thru: p.thru || '—',
+              rounds: p.rounds || [],
+              status: p.status || ''
+            };
+          });
+          mastersCache = { data: result2, timestamp: Date.now() };
+          res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+          res.end(JSON.stringify(result2));
+          return;
+        }
         var result = { tournament: '', status: '', players: [] };
         if (event) {
+          console.log('[MASTERS] Event:', event.name, 'competitions:', event.competitions ? event.competitions.length : 0);
           result.tournament = event.name || 'Masters Tournament';
           result.status = event.status && event.status.type ? event.status.type.detail : '';
           var competition = event.competitions && event.competitions[0];
           if (competition && competition.competitors) {
+            console.log('[MASTERS] Competitors:', competition.competitors.length);
             result.players = competition.competitors.map(function(c) {
               var athlete = c.athlete || {};
               var stats = {};
               if (c.statistics) {
                 c.statistics.forEach(function(s) { stats[s.name] = s.value; });
-              } else if (c.linescores) {
-                // Some ESPN formats use linescores
               }
               return {
-                name: athlete.displayName || athlete.shortName || 'Unknown',
-                position: c.status && c.status.position ? c.status.position.displayName : (c.sortOrder || ''),
-                score: c.score || c.totalScore || stats.totalScore || '—',
+                name: athlete.displayName || athlete.shortName || c.displayName || 'Unknown',
+                position: c.status && c.status.position ? c.status.position.displayName : (c.sortOrder || c.order || ''),
+                score: c.score || c.totalScore || stats.relativeScore || stats.totalScore || '—',
                 today: stats.currentRoundScore || c.currentRoundScore || stats.today || '—',
                 thru: stats.thru || c.thru || '—',
-                rounds: c.linescores ? c.linescores.map(function(r) { return r.value; }) : [],
-                status: c.status ? c.status.displayValue : ''
+                rounds: c.linescores ? c.linescores.map(function(r) { return r.value || r.displayValue; }) : [],
+                status: c.status ? (c.status.displayValue || '') : ''
               };
             }).sort(function(a, b) { return (parseInt(a.position) || 999) - (parseInt(b.position) || 999); });
           }
+        } else {
+          console.log('[MASTERS] No event found in response');
         }
         mastersCache = { data: result, timestamp: Date.now() };
         res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });

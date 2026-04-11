@@ -548,11 +548,12 @@ const BOOK_ORDER=['caesars','hard_rock_bet','draftkings','fanduel','betmgm'];
 let paperPlays=[],logPlays=[];
 try{paperPlays=JSON.parse(localStorage.getItem('ao_paper')||'[]');}catch(e){}
 try{logPlays=JSON.parse(localStorage.getItem('ao_log')||'[]');}catch(e){}
-// Seed opening day bets if log is empty
-if(!logPlays.length){
+// Seed opening day bets if log is empty or has old bad data
+var needReseed=!logPlays.length||logPlays.some(function(p){return p.game==='LAA @ CIN'&&p.bet==='STL Cardinals ML';});
+if(needReseed){
   logPlays=[
     {game:'NYY @ TB',bet:'TB Rays ML',odds:'+162',amt:'400',trigger:'T1+T2+T4+T5+T8',date:'4/11/2026',result:null},
-    {game:'LAA @ CIN',bet:'STL Cardinals ML',odds:'+118',amt:'400',trigger:'T12+T2+T3+T4+T6+T8',date:'4/11/2026',result:null},
+    {game:'BOS @ STL',bet:'STL Cardinals ML',odds:'+118',amt:'400',trigger:'T12+T2+T3+T4+T6+T8',date:'4/11/2026',result:null},
     {game:'Parlay: TB + STL + Rory McIlroy Masters',bet:'Parlay',odds:'+700',amt:'200',trigger:'T1+T12+PGA',date:'4/11/2026',result:null}
   ];
   try{localStorage.setItem('ao_log',JSON.stringify(logPlays));}catch(e){}
@@ -1026,7 +1027,10 @@ function updateTicker(){
       if(liveScores.length){
         var matched=liveScores.find(function(s){
           var lg=p.game.toLowerCase();
-          return lg.split(' ').some(function(w){return w.length>2&&(s.home.toLowerCase().includes(w)||s.away.toLowerCase().includes(w));});
+          // Match by team last name (e.g. "rays", "cardinals", "yankees")
+          var homeLastWord=s.home.toLowerCase().split(' ').pop();
+          var awayLastWord=s.away.toLowerCase().split(' ').pop();
+          return lg.includes(homeLastWord)||lg.includes(awayLastWord);
         });
         if(matched){
           var statusText=matched.status==='Final'?'FINAL':matched.status==='In Progress'?matched.inningHalf.substring(0,3)+' '+matched.inning:matched.status;
@@ -1163,21 +1167,24 @@ function autoGradeBets(){
   if(!liveScores.length)return;
   var changed=false;
   logPlays.forEach(function(p){
-    if(p.result)return; // already graded
+    if(p.result)return;
+    if((p.bet||'').toLowerCase().includes('parlay'))return; // skip parlays — manual grade
     var matched=liveScores.find(function(s){
       if(s.status!=='Final')return false;
       var lg=p.game.toLowerCase();
-      return lg.split(' ').some(function(w){return w.length>2&&(s.home.toLowerCase().includes(w)||s.away.toLowerCase().includes(w));});
+      var homeLastWord=s.home.toLowerCase().split(' ').pop();
+      var awayLastWord=s.away.toLowerCase().split(' ').pop();
+      return lg.includes(homeLastWord)||lg.includes(awayLastWord);
     });
     if(!matched)return;
-    // Try to determine W/L from bet description
     var betLower=(p.bet||'').toLowerCase();
-    var oddsNum=parseInt(p.odds)||0;
-    // ML bets
     var homeWon=matched.homeScore>matched.awayScore;
+    // ML bets — match team last name in bet description
     if(betLower.includes('ml')){
-      var betOnHome=matched.home.toLowerCase().split(' ').some(function(w){return w.length>2&&betLower.includes(w);});
-      var betOnAway=matched.away.toLowerCase().split(' ').some(function(w){return w.length>2&&betLower.includes(w);});
+      var homeTeamWord=matched.home.toLowerCase().split(' ').pop();
+      var awayTeamWord=matched.away.toLowerCase().split(' ').pop();
+      var betOnHome=betLower.includes(homeTeamWord);
+      var betOnAway=betLower.includes(awayTeamWord);
       if(betOnHome){p.result=homeWon?'W':'L';changed=true;}
       else if(betOnAway){p.result=homeWon?'L':'W';changed=true;}
     }
