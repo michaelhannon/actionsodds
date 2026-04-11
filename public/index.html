@@ -427,6 +427,55 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 </div>
 
 <script>
+// =====================
+// THEME ENGINE — global scope
+// =====================
+var isDark = localStorage.getItem('ao_theme') !== 'light';
+function applyTheme(){
+  const r = document.documentElement.style;
+  if(!isDark){
+    r.setProperty('--black','#f0f2f5');
+    r.setProperty('--dark','#ffffff');
+    r.setProperty('--panel','#ffffff');
+    r.setProperty('--panel2','#f5f6f8');
+    r.setProperty('--border','rgba(0,0,0,0.09)');
+    r.setProperty('--border2','rgba(0,0,0,0.16)');
+    r.setProperty('--text','#0d0d10');
+    r.setProperty('--text2','#4a4a5a');
+    r.setProperty('--text3','#9090a0');
+    r.setProperty('--green','#1a8a45');
+    r.setProperty('--amber','#c47a00');
+    r.setProperty('--red','#c0392b');
+    document.body.style.background='#f0f2f5';
+    document.body.style.color='#0d0d10';
+  } else {
+    r.setProperty('--black','#0a0a0b');
+    r.setProperty('--dark','#111114');
+    r.setProperty('--panel','#18181d');
+    r.setProperty('--panel2','#1f1f26');
+    r.setProperty('--border','rgba(255,255,255,0.07)');
+    r.setProperty('--border2','rgba(255,255,255,0.13)');
+    r.setProperty('--text','#f0eff5');
+    r.setProperty('--text2','#9896a8');
+    r.setProperty('--text3','#5c5a6e');
+    r.setProperty('--green','#2ecc71');
+    r.setProperty('--amber','#f39c12');
+    r.setProperty('--red','#e74c3c');
+    document.body.style.background='#0a0a0b';
+    document.body.style.color='#f0eff5';
+  }
+  const icon=document.getElementById('theme-icon');
+  const label=document.getElementById('theme-label');
+  if(icon)icon.textContent=isDark?'☀':'☾';
+  if(label)label.textContent=isDark?'Light':'Dark';
+}
+function toggleTheme(){
+  isDark=!isDark;
+  localStorage.setItem('ao_theme',isDark?'dark':'light');
+  applyTheme();
+}
+applyTheme();
+
 const BOOK_LABELS={caesars:'Caesars',hard_rock_bet:'Hard Rock',draftkings:'DraftKings',fanduel:'FanDuel',betmgm:'BetMGM'};
 const BOOK_ORDER=['caesars','hard_rock_bet','draftkings','fanduel','betmgm'];
 let allGames=[],activeBook='draftkings',availableBooks=[];
@@ -646,7 +695,9 @@ async function refreshBriefs(){
     </div>`;
   }).join('');
 
-  for(const{game,plays} of flaggedGames){
+  for(let bi=0;bi<flaggedGames.length;bi++){
+    const{game,plays}=flaggedGames[bi];
+    if(bi>0)await new Promise(r=>setTimeout(r,1500));
     const cardId=`brief-${game.home_team.replace(/\s/g,'-')}`;
     const card=document.getElementById(cardId);
     if(!card)continue;
@@ -852,55 +903,7 @@ function addLog(){const g=document.getElementById('l-game').value.trim(),b=docum
 function setLR(i,r){logPlays[i].result=r;saveLog();renderLog();updateSeasonPnL();}
 
 let countdown=300;
-function updateCountdown(){countdown--;if(countdown<=0){countdown=300;// Theme
-let isDark = localStorage.getItem('ao_theme') !== 'light';
-function applyTheme(){
-  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-  document.body.style.background = isDark ? '#0a0a0b' : '#f0f2f5';
-  document.body.style.color = isDark ? '#f0eff5' : '#0d0d10';
-  const icon = document.getElementById('theme-icon');
-  const label = document.getElementById('theme-label');
-  if(icon) icon.textContent = isDark ? '☀' : '☾';
-  if(label) label.textContent = isDark ? 'Light' : 'Dark';
-  // Update all CSS variables dynamically
-  const r = document.documentElement.style;
-  if(!isDark){
-    r.setProperty('--black','#f0f2f5');
-    r.setProperty('--dark','#ffffff');
-    r.setProperty('--panel','#ffffff');
-    r.setProperty('--panel2','#f5f6f8');
-    r.setProperty('--border','rgba(0,0,0,0.09)');
-    r.setProperty('--border2','rgba(0,0,0,0.16)');
-    r.setProperty('--text','#0d0d10');
-    r.setProperty('--text2','#4a4a5a');
-    r.setProperty('--text3','#9090a0');
-    r.setProperty('--green','#1a8a45');
-    r.setProperty('--amber','#c47a00');
-    r.setProperty('--red','#c0392b');
-  } else {
-    r.setProperty('--black','#0a0a0b');
-    r.setProperty('--dark','#111114');
-    r.setProperty('--panel','#18181d');
-    r.setProperty('--panel2','#1f1f26');
-    r.setProperty('--border','rgba(255,255,255,0.07)');
-    r.setProperty('--border2','rgba(255,255,255,0.13)');
-    r.setProperty('--text','#f0eff5');
-    r.setProperty('--text2','#9896a8');
-    r.setProperty('--text3','#5c5a6e');
-    r.setProperty('--green','#2ecc71');
-    r.setProperty('--amber','#f39c12');
-    r.setProperty('--red','#e74c3c');
-  }
-}
-function toggleTheme(){
-  isDark = !isDark;
-  localStorage.setItem('ao_theme', isDark ? 'dark' : 'light');
-  applyTheme();
-}
-applyTheme();
-
-fetchOdds();
-updateSeasonPnL();return;}const mins=Math.floor(countdown/60),secs=countdown%60;const timeStr=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});document.getElementById('last-update').textContent='Updated '+timeStr+' — next in '+mins+':'+(secs<10?'0':'')+secs;}
+function updateCountdown(){countdown--;if(countdown<=0){countdown=300;fetchOdds();return;}return;}const mins=Math.floor(countdown/60),secs=countdown%60;const timeStr=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});document.getElementById('last-update').textContent='Updated '+timeStr+' — next in '+mins+':'+(secs<10?'0':'')+secs;}
 setInterval(updateCountdown,1000);
 fetchOdds();
 </script>
