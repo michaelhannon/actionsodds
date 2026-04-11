@@ -1171,49 +1171,102 @@ async function refreshBriefs(){
   const container=document.getElementById('ai-cards');
   if(!Array.isArray(allGames)||!allGames.length){container.innerHTML='<div class="ai-empty">Load odds first.</div>';return;}
 
-  // Only brief games that have been logged as live plays
   const pendingLive=logPlays.filter(p=>!p.result);
-  if(!pendingLive.length){container.innerHTML='<div class="ai-empty"><span style="color:var(--gold);font-weight:600;">No live plays.</span> Log a bet in the Live Plays tab to unlock AI game briefs with pitcher analysis, weather, and betting recommendations.</div>';return;}
-
   const now2 = new Date();
   const flaggedGames=[];
+
+  // 1. Find games matching logged bets
   for(const g of allGames.filter(g=>(now2-new Date(g.commence_time))<30*60*1000)){
     const plays=checkTriggers(g,activeBook);
-    // Check if this game matches any logged live play
-    if(!g.home_team&&!g.away_team){continue;} // skip outrights (PGA etc)
+    if(!g.home_team&&!g.away_team){continue;}
     const hasLivePlay=pendingLive.some(lp=>{
       const searchStr=(lp.game+' '+lp.bet).toLowerCase();
       const homeLastWord=(g.home_team||'').toLowerCase().split(' ').pop();
       const awayLastWord=(g.away_team||'').toLowerCase().split(' ').pop();
       return (homeLastWord && searchStr.includes(homeLastWord)) || (awayLastWord && searchStr.includes(awayLastWord));
     });
-    if(hasLivePlay && plays.length>0)flaggedGames.push({game:g,plays});
+    if(hasLivePlay && plays.length>0)flaggedGames.push({game:g,plays,source:'bet'});
   }
 
-  if(!flaggedGames.length){container.innerHTML='<div class="ai-empty"><span style="color:var(--gold);font-weight:600;">No active briefs.</span> AI analysis appears here when your logged bets match upcoming games. Your plays will be briefed as game time approaches.</div>';return;}
+  // 2. Find hot games with 3+ real triggers (even without bets)
+  for(const g of allGames.filter(g=>(now2-new Date(g.commence_time))<30*60*1000)){
+    if(!g.home_team&&!g.away_team){continue;}
+    const alreadyFlagged=flaggedGames.some(fg=>fg.game===g);
+    if(alreadyFlagged)continue;
+    const plays=checkTriggers(g,activeBook);
+    const realPlays=plays.filter(p=>p.type==='real');
+    const sharpPlays=plays.filter(p=>p.type==='sharp');
+    if(realPlays.length>=3||(realPlays.length>=2&&sharpPlays.length>0))flaggedGames.push({game:g,plays,source:'hot'});
+  }
 
-  // Filter to only truly upcoming games at render time
-  const nowRender = new Date();
-  const currentFlagged = flaggedGames.filter(({game}) => (nowRender - new Date(game.commence_time)) < 30*60*1000);
+  // 3. Build cards HTML
+  var cardsHtml='';
 
-  if(!currentFlagged.length){container.innerHTML='<div class="ai-empty">No upcoming real-money plays right now.</div>';return;}
+  // Masters live update card
+  if(mastersData&&mastersData.players&&mastersData.players.length>=5){
+    var top3=mastersData.players.slice(0,3);
+    var rory=mastersData.players.find(function(p){return p.name.toLowerCase().includes('mcilroy');});
+    var hasRoryBet=pendingLive.some(function(lp){return (lp.game+' '+lp.bet).toLowerCase().includes('mcilroy')||(lp.game+' '+lp.bet).toLowerCase().includes('masters');});
+    cardsHtml+='<div class="ai-card" id="brief-masters" style="border-color:rgba(232,185,74,0.2);">';
+    cardsHtml+='<div class="ai-card-game">Masters Tournament · '+(mastersData.status||'Live')+'</div>';
+    cardsHtml+='<div class="ai-card-play" style="color:var(--gold);">'+(rory?rory.name+' '+rory.score+' ('+rory.position+')':'Masters Live')+'</div>';
+    if(hasRoryBet)cardsHtml+='<div class="ai-lean bet">▲ YOUR BET</div>';
+    cardsHtml+='<div class="ai-stats">';
+    top3.forEach(function(p){cardsHtml+='<div class="ai-stat"><div class="ai-stat-lbl">'+p.position+'</div><div class="ai-stat-val">'+p.name.split(' ').pop()+' '+p.score+'</div></div>';});
+    if(rory&&parseInt(rory.position)>3)cardsHtml+='<div class="ai-stat" style="border-color:rgba(232,185,74,0.2);"><div class="ai-stat-lbl">'+rory.position+'</div><div class="ai-stat-val" style="color:var(--gold);">McIlroy '+rory.score+'</div></div>';
+    if(rory&&rory.today)cardsHtml+='<div class="ai-stat"><div class="ai-stat-lbl">Today</div><div class="ai-stat-val">'+(rory.today||'—')+'</div></div>';
+    if(rory&&rory.thru)cardsHtml+='<div class="ai-stat"><div class="ai-stat-lbl">Thru</div><div class="ai-stat-val">'+(rory.thru||'—')+'</div></div>';
+    cardsHtml+='</div>';
+    cardsHtml+='<div class="ai-take">';
+    if(rory)cardsHtml+='<strong>'+rory.name+'</strong> is at <strong>'+rory.score+'</strong>'+(rory.thru&&rory.thru!=='F'&&rory.thru!=='—'?' through '+rory.thru+' holes':rory.thru==='F'?' after completing the round':'')+'. ';
+    if(rory&&parseInt(rory.position)<=1)cardsHtml+='Leading the field — your parlay leg is looking strong. ';
+    else if(rory&&parseInt(rory.position)<=3)cardsHtml+='Right in contention — weekend at Augusta is where it matters. ';
+    else if(rory&&parseInt(rory.position)<=5)cardsHtml+='Close to the lead — needs a push this round. ';
+    else if(rory)cardsHtml+='Needs to make a move to stay in contention. ';
+    cardsHtml+='Top: '+top3.map(function(p){return p.name.split(' ').pop()+' ('+p.score+')';}).join(', ')+'.';
+    cardsHtml+='</div>';
+    var rPos=rory?parseInt(rory.position)||99:99;
+    var confPct=rPos<=1?85:rPos<=3?65:rPos<=5?50:35;
+    cardsHtml+='<div class="confidence-bar"><div class="confidence-fill" style="width:'+confPct+'%;background:var(--gold)"></div></div>';
+    cardsHtml+='</div>';
+  }
 
-  container.innerHTML=currentFlagged.map(({game,plays})=>{
-    const rp=plays.filter(p=>p.type==='real');
-    return`<div class="ai-card loading" id="brief-${game.home_team.replace(/\s/g,'-')}">
-      <div class="ai-card-game">${game.away_team} @ ${game.home_team}</div>
-      <div class="ai-card-play">${rp[0]?.desc||''}</div>
-      <div class="ai-loading"><div class="spinner"></div> Queued for analysis...</div>
-    </div>`;
-  }).join('');
+  // Bet game placeholders
+  var betFlagged=flaggedGames.filter(function(fg){return fg.source==='bet';});
+  var hotFlagged=flaggedGames.filter(function(fg){return fg.source==='hot';}).slice(0,3);
 
-  for(let bi=0;bi<flaggedGames.length;bi++){
-    const{game,plays}=flaggedGames[bi];
+  betFlagged.forEach(function(fg){
+    var rp=fg.plays.filter(function(p){return p.type==='real';});
+    cardsHtml+='<div class="ai-card loading" id="brief-'+(fg.game.home_team||'game').replace(/\s/g,'-')+'">';
+    cardsHtml+='<div class="ai-card-game">'+(fg.game.away_team||'')+' @ '+(fg.game.home_team||'')+'</div>';
+    cardsHtml+='<div class="ai-card-play">'+(rp[0]?rp[0].desc:'')+'</div>';
+    cardsHtml+='<div class="ai-loading"><div class="spinner"></div> Queued for analysis...</div>';
+    cardsHtml+='</div>';
+  });
+
+  // Hot game placeholders
+  hotFlagged.forEach(function(fg){
+    var rp=fg.plays.filter(function(p){return p.type==='real';});
+    cardsHtml+='<div class="ai-card loading" id="brief-'+(fg.game.home_team||'hot').replace(/\s/g,'-')+'" style="border-color:rgba(251,191,36,0.15);">';
+    cardsHtml+='<div class="ai-card-game" style="color:var(--amber);">🔥 HOT · '+(fg.game.away_team||'')+' @ '+(fg.game.home_team||'')+'</div>';
+    cardsHtml+='<div class="ai-card-play amber">'+(rp[0]?rp[0].desc:rp.length+' triggers')+'</div>';
+    cardsHtml+='<div class="ai-loading"><div class="spinner"></div> Auto-analyzing...</div>';
+    cardsHtml+='</div>';
+  });
+
+  if(!cardsHtml){container.innerHTML='<div class="ai-empty"><span style="color:var(--gold);font-weight:600;">No active briefs.</span> Briefs appear when your bets match upcoming games or when 3+ triggers fire.</div>';return;}
+
+  container.innerHTML=cardsHtml;
+
+  // Generate AI briefs for all flagged games
+  var allToProcess=betFlagged.concat(hotFlagged);
+  for(let bi=0;bi<allToProcess.length;bi++){
+    const{game,plays}=allToProcess[bi];
     if(bi>0)await new Promise(r=>setTimeout(r,13000));
-    const cardId=`brief-${game.home_team.replace(/\s/g,'-')}`;
+    const cardId='brief-'+(game.home_team||'game').replace(/\s/g,'-');
     const card=document.getElementById(cardId);
     if(!card)continue;
-    card.querySelector('.ai-loading').innerHTML='<div class="spinner"></div> Analyzing game '+(bi+1)+' of '+flaggedGames.length+'...';
+    card.querySelector('.ai-loading').innerHTML='<div class="spinner"></div> Analyzing game '+(bi+1)+' of '+allToProcess.length+'...';
     try{
       const brief=await generateBrief(game,plays);
       const rp=plays.filter(p=>p.type==='real');
