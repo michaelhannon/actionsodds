@@ -1342,17 +1342,16 @@ function updateTicker(){
       // Find start time from live scores OR odds data
       var startTimeStr='';
       var timeMatch=null;
-      // Helper: check if logged game matches a team (handles abbreviations and full names)
-      function gameMatchesTeam(logGame, teamFull){
-        var lg=logGame.toLowerCase();
+      // Helper: check if logged play matches a team
+      function playMatchesTeam(play, teamFull){
+        var searchStr=(play.game+' '+play.bet).toLowerCase();
         var words=teamFull.toLowerCase().split(' ');
         var lastWord=words[words.length-1];
-        // Check if any word from the team name appears in the logged game
-        return lg.includes(lastWord) || words.some(function(w){return w.length>2 && lg.includes(w);});
+        return searchStr.includes(lastWord);
       }
       if(liveScores.length){
         timeMatch=liveScores.find(function(s){
-          return gameMatchesTeam(p.game, s.home) || gameMatchesTeam(p.game, s.away);
+          return playMatchesTeam(p, s.home) || playMatchesTeam(p, s.away);
         });
       }
       if(timeMatch){
@@ -1365,7 +1364,7 @@ function updateTicker(){
       // Fallback: check odds data for commence_time
       if(!startTimeStr&&Array.isArray(allGames)&&allGames.length){
         var oddsMatch=allGames.find(function(g){
-          return gameMatchesTeam(p.game, g.home_team) || gameMatchesTeam(p.game, g.away_team);
+          return playMatchesTeam(p, g.home_team) || playMatchesTeam(p, g.away_team);
         });
         if(oddsMatch&&oddsMatch.commence_time){
           startTimeStr=' · '+new Date(oddsMatch.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
