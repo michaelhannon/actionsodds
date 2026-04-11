@@ -323,6 +323,7 @@ body.light .ticker-card.gold-border{border-color:#b8860b;background:rgba(232,185
     <div class="panel-tabs">
       <button class="panel-tab active" id="tab-btn-paper" onclick="showTab('paper')">Paper</button>
       <button class="panel-tab" id="tab-btn-log" onclick="showTab('log')">Live plays</button>
+      <button class="panel-tab" id="tab-btn-calc" onclick="showTab('calc')">Calc</button>
       <button class="panel-tab" id="tab-btn-settings" onclick="showTab('settings')">Settings</button>
     </div>
 
@@ -460,6 +461,65 @@ body.light .ticker-card.gold-border{border-color:#b8860b;background:rgba(232,185
       <button class="save-btn" onclick="saveSettings()">Save Settings</button>
       <div class="saved-msg" id="saved-msg">Saved and applied.</div>
     </div>
+
+    <!-- CALCULATOR PANEL -->
+    <div id="ptab-calc" style="display:none;">
+      <!-- Parlay Calculator -->
+      <div class="cfg-section">
+        <div class="cfg-section-title">Parlay Calculator</div>
+        <div id="parlay-legs">
+          <div class="form-grid">
+            <input class="form-input parlay-odds" placeholder="Leg 1 odds (+150)" type="text">
+            <input class="form-input parlay-odds" placeholder="Leg 2 odds (-110)" type="text">
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <button onclick="addParlayLeg()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:5px 10px;border-radius:4px;cursor:pointer;">+ Leg</button>
+          <button onclick="removeParlayLeg()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:5px 10px;border-radius:4px;cursor:pointer;">- Leg</button>
+        </div>
+        <div class="form-grid" style="margin-top:8px;">
+          <div><div class="cfg-lbl">Wager ($)</div><input class="form-input" id="parlay-wager" type="number" value="200" oninput="calcParlay()"></div>
+        </div>
+        <button class="add-btn" onclick="calcParlay()" style="margin-top:8px;">Calculate</button>
+        <div id="parlay-result" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- Single Bet Calculator -->
+      <div class="cfg-section">
+        <div class="cfg-section-title">Single Bet / Implied Probability</div>
+        <div class="form-grid">
+          <div><div class="cfg-lbl">American Odds</div><input class="form-input" id="single-odds" type="text" placeholder="+162" oninput="calcSingle()"></div>
+          <div><div class="cfg-lbl">Wager ($)</div><input class="form-input" id="single-wager" type="number" value="400" oninput="calcSingle()"></div>
+        </div>
+        <div id="single-result" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- Hedge Calculator -->
+      <div class="cfg-section">
+        <div class="cfg-section-title">Hedge Calculator</div>
+        <div class="cfg-sub">Lock in profit regardless of outcome</div>
+        <div class="form-grid">
+          <div><div class="cfg-lbl">Original odds</div><input class="form-input" id="hedge-odds1" type="text" placeholder="+162" oninput="calcHedge()"></div>
+          <div><div class="cfg-lbl">Original wager ($)</div><input class="form-input" id="hedge-wager1" type="number" placeholder="400" oninput="calcHedge()"></div>
+        </div>
+        <div class="form-grid" style="margin-top:6px;">
+          <div><div class="cfg-lbl">Hedge odds</div><input class="form-input" id="hedge-odds2" type="text" placeholder="-180" oninput="calcHedge()"></div>
+        </div>
+        <div id="hedge-result" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- Kelly Criterion -->
+      <div class="cfg-section">
+        <div class="cfg-section-title">Kelly Criterion Sizing</div>
+        <div class="cfg-sub">Optimal bet size based on edge</div>
+        <div class="form-grid">
+          <div><div class="cfg-lbl">Odds</div><input class="form-input" id="kelly-odds" type="text" placeholder="+162" oninput="calcKelly()"></div>
+          <div><div class="cfg-lbl">Win probability (%)</div><input class="form-input" id="kelly-prob" type="number" placeholder="45" oninput="calcKelly()"></div>
+        </div>
+        <div id="kelly-result" style="margin-top:10px;"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1414,7 +1474,7 @@ async function fetchOdds(){
 }
 
 function showTab(t){
-  ['paper','log','settings'].forEach(x=>{
+  ['paper','log','calc','settings'].forEach(x=>{
     document.getElementById('ptab-'+x).style.display=x===t?'block':'none';
     const btn=document.getElementById('tab-btn-'+x);
     if(btn)btn.classList.toggle('active',x===t);
@@ -1502,6 +1562,136 @@ function renderLog(){
 }
 function addLog(){const g=document.getElementById('l-game').value.trim(),b=document.getElementById('l-bet').value.trim();if(!g||!b)return;const dateInput=document.getElementById('l-date').value.trim();const date=dateInput||new Date().toLocaleDateString();logPlays.push({game:g,bet:b,odds:document.getElementById('l-odds').value.trim(),amt:document.getElementById('l-amt').value.trim(),trigger:document.getElementById('l-trigger').value.trim(),date,result:null});saveLog();renderLog();['l-game','l-bet','l-odds','l-amt','l-trigger','l-date'].forEach(id=>document.getElementById(id).value='');updateSeasonPnL();}
 function setLR(i,r){logPlays[i].result=r;saveLog();renderLog();updateSeasonPnL();}
+
+// =====================
+// CALCULATOR FUNCTIONS
+// =====================
+function parseOdds(str){
+  var n=parseInt((str||'').replace(/[^0-9\-\+]/g,''));
+  if(isNaN(n))return null;
+  return n;
+}
+function oddsToDecimal(american){
+  if(american>0)return 1+(american/100);
+  if(american<0)return 1+(100/Math.abs(american));
+  return 1;
+}
+function impliedProb(american){
+  if(american>0)return 100/(american+100);
+  if(american<0)return Math.abs(american)/(Math.abs(american)+100);
+  return 0.5;
+}
+function resultBox(label,value,color){
+  return '<div class="wl-box" style="padding:8px;"><div class="wl-label">'+label+'</div><div class="wl-val" style="font-size:18px;color:'+(color||'var(--text)')+';">'+value+'</div></div>';
+}
+
+function addParlayLeg(){
+  var container=document.getElementById('parlay-legs');
+  var count=container.querySelectorAll('.parlay-odds').length;
+  var grid=container.querySelector('.form-grid')||container;
+  var input=document.createElement('input');
+  input.className='form-input parlay-odds';
+  input.placeholder='Leg '+(count+1)+' odds';
+  input.type='text';
+  grid.appendChild(input);
+}
+function removeParlayLeg(){
+  var inputs=document.querySelectorAll('.parlay-odds');
+  if(inputs.length>2)inputs[inputs.length-1].remove();
+}
+
+function calcParlay(){
+  var inputs=document.querySelectorAll('.parlay-odds');
+  var wager=parseFloat(document.getElementById('parlay-wager').value)||0;
+  var decimalOdds=1;
+  var legs=[];
+  var valid=true;
+  inputs.forEach(function(inp){
+    var odds=parseOdds(inp.value);
+    if(odds===null){valid=false;return;}
+    var dec=oddsToDecimal(odds);
+    decimalOdds*=dec;
+    legs.push({odds:odds,decimal:dec,prob:impliedProb(odds)});
+  });
+  var el=document.getElementById('parlay-result');
+  if(!valid||legs.length<2){el.innerHTML='<div style="color:var(--text3);font-size:12px;">Enter valid odds for all legs.</div>';return;}
+  var payout=wager*decimalOdds;
+  var profit=payout-wager;
+  var parlayAmerican=decimalOdds>=2?'+'+Math.round((decimalOdds-1)*100):'-'+Math.round(100/(decimalOdds-1));
+  var combinedProb=legs.reduce(function(a,l){return a*l.prob;},1);
+  el.innerHTML='<div class="wl-strip" style="margin-bottom:0;">'+
+    resultBox('Parlay Odds',parlayAmerican,'var(--gold)')+
+    resultBox('Payout','$'+Math.round(payout).toLocaleString(),'var(--green)')+
+    resultBox('Profit','$'+Math.round(profit).toLocaleString(),'var(--green)')+
+    resultBox('Implied Prob',Math.round(combinedProb*100)+'%','var(--amber)')+
+  '</div>';
+}
+
+function calcSingle(){
+  var odds=parseOdds(document.getElementById('single-odds').value);
+  var wager=parseFloat(document.getElementById('single-wager').value)||0;
+  var el=document.getElementById('single-result');
+  if(odds===null){el.innerHTML='';return;}
+  var dec=oddsToDecimal(odds);
+  var payout=wager*dec;
+  var profit=payout-wager;
+  var prob=impliedProb(odds);
+  var breakeven=Math.round(prob*100);
+  el.innerHTML='<div class="wl-strip" style="margin-bottom:0;">'+
+    resultBox('Payout','$'+Math.round(payout).toLocaleString(),'var(--green)')+
+    resultBox('Profit','$'+Math.round(profit).toLocaleString(),'var(--green)')+
+    resultBox('Implied Prob',Math.round(prob*1000)/10+'%','var(--amber)')+
+    resultBox('Break Even',breakeven+'%','var(--text2)')+
+  '</div>';
+}
+
+function calcHedge(){
+  var odds1=parseOdds(document.getElementById('hedge-odds1').value);
+  var wager1=parseFloat(document.getElementById('hedge-wager1').value)||0;
+  var odds2=parseOdds(document.getElementById('hedge-odds2').value);
+  var el=document.getElementById('hedge-result');
+  if(odds1===null||odds2===null||!wager1){el.innerHTML='';return;}
+  var dec1=oddsToDecimal(odds1);
+  var payout1=wager1*dec1;
+  // Hedge wager: payout1 / dec2
+  var dec2=oddsToDecimal(odds2);
+  var hedgeWager=payout1/dec2;
+  var profitIfOriginal=payout1-wager1-hedgeWager;
+  var profitIfHedge=(hedgeWager*dec2)-wager1-hedgeWager;
+  var guaranteed=Math.min(profitIfOriginal,profitIfHedge);
+  el.innerHTML='<div class="wl-strip" style="margin-bottom:8px;">'+
+    resultBox('Hedge Wager','$'+Math.round(hedgeWager).toLocaleString(),'var(--gold)')+
+    resultBox('If Original Wins','+$'+Math.round(profitIfOriginal).toLocaleString(),'var(--green)')+
+    resultBox('If Hedge Wins','+$'+Math.round(profitIfHedge).toLocaleString(),'var(--green)')+
+    resultBox('Guaranteed','+$'+Math.round(guaranteed).toLocaleString(),guaranteed>0?'var(--green)':'var(--red)')+
+  '</div>';
+}
+
+function calcKelly(){
+  var odds=parseOdds(document.getElementById('kelly-odds').value);
+  var prob=parseFloat(document.getElementById('kelly-prob').value)/100;
+  var el=document.getElementById('kelly-result');
+  if(odds===null||!prob||prob<=0||prob>=1){el.innerHTML='';return;}
+  var dec=oddsToDecimal(odds);
+  var b=dec-1;
+  var q=1-prob;
+  var kelly=(prob*b-q)/b;
+  var halfKelly=kelly/2;
+  var quarterKelly=kelly/4;
+  if(kelly<=0){
+    el.innerHTML='<div style="color:var(--red);font-size:12px;font-family:Barlow Condensed,sans-serif;">No edge — Kelly says don\'t bet. Implied prob ('+Math.round(impliedProb(odds)*100)+'%) is higher than your estimated '+Math.round(prob*100)+'%.</div>';
+    return;
+  }
+  var kellyUnit=Math.round(kelly*cfg.bankroll);
+  var halfUnit=Math.round(halfKelly*cfg.bankroll);
+  var quarterUnit=Math.round(quarterKelly*cfg.bankroll);
+  el.innerHTML='<div class="wl-strip" style="margin-bottom:0;">'+
+    resultBox('Full Kelly',Math.round(kelly*100)+'% · $'+kellyUnit.toLocaleString(),'var(--gold)')+
+    resultBox('Half Kelly',Math.round(halfKelly*100)+'% · $'+halfUnit.toLocaleString(),'var(--green)')+
+    resultBox('Quarter Kelly',Math.round(quarterKelly*100)+'% · $'+quarterUnit.toLocaleString(),'var(--text2)')+
+    resultBox('Edge','+'+Math.round((prob-impliedProb(odds))*100)+'%','var(--green)')+
+  '</div><div style="font-size:11px;color:var(--text3);margin-top:6px;">Based on $'+cfg.bankroll.toLocaleString()+' bankroll. Half Kelly recommended for most bettors.</div>';
+}
 
 let countdown=300;
 function updateCountdown(){countdown--;if(countdown<=0){countdown=300;fetchOdds();return;}const mins=Math.floor(countdown/60),secs=countdown%60;const timeStr=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});document.getElementById('last-update').textContent='Updated '+timeStr+' — next in '+mins+':'+(secs<10?'0':'')+secs;}
