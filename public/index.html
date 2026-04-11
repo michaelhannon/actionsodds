@@ -1046,7 +1046,10 @@ async function fetchOdds(){
   btn.disabled=true;spinner.style.display='inline-block';
   try{
     const res=await fetch('/odds?sport='+activeSport);if(!res.ok)throw new Error('Server '+res.status);
-    allGames=await res.json();if(allGames.error)throw new Error(allGames.error);
+    const data=await res.json();
+    if(data.error)throw new Error(data.error);
+    if(!Array.isArray(data))throw new Error('No games available for '+activeSport.toUpperCase());
+    allGames=data;
     const bookSet=new Set();allGames.forEach(g=>g.bookmakers.forEach(b=>bookSet.add(b.key)));
     availableBooks=[...bookSet].sort((a,b)=>(BOOK_ORDER.indexOf(a)+1||99)-(BOOK_ORDER.indexOf(b)+1||99));
     if(!availableBooks.includes(activeBook))activeBook=availableBooks[0]||'draftkings';
