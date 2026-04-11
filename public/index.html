@@ -1087,18 +1087,68 @@ function updateTicker(){
       if(liveScores.length){
         var matched=liveScores.find(function(s){
           var lg=p.game.toLowerCase();
-          // Match by team last name (e.g. "rays", "cardinals", "yankees")
           var homeLastWord=s.home.toLowerCase().split(' ').pop();
           var awayLastWord=s.away.toLowerCase().split(' ').pop();
           return lg.includes(homeLastWord)||lg.includes(awayLastWord);
         });
         if(matched){
-          var statusText=matched.status==='Final'?'FINAL':matched.status==='In Progress'?matched.inningHalf.substring(0,3)+' '+matched.inning:matched.status;
-          var scoreColor=matched.status==='Final'?'var(--gold)':'var(--green)';
-          scoreHtml='<div style="margin-top:5px;padding:4px 8px;background:rgba(46,204,113,0.08);border-radius:4px;font-family:Barlow Condensed,sans-serif;"><span style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:'+scoreColor+';">'+statusText+'</span><span style="font-size:13px;font-weight:600;color:var(--text);margin-left:8px;">'+matched.away+' '+matched.awayScore+' - '+matched.home+' '+matched.homeScore+'</span></div>';
+          var isLive=matched.status==='In Progress'||matched.abstractState==='Live';
+          var isFinal=matched.status==='Final'||matched.abstractState==='Final';
+          var statusText=isFinal?'FINAL':isLive?(matched.inningHalf==='Top'?'▲':'▼')+' '+matched.inning:matched.status;
+          var statusColor=isFinal?'var(--gold)':isLive?'var(--green)':'var(--text3)';
+          scoreHtml='<div style="margin-top:6px;padding:6px 8px;background:rgba(46,204,113,0.06);border:1px solid rgba(46,204,113,0.15);border-radius:6px;font-family:Barlow Condensed,sans-serif;">';
+          scoreHtml+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;"><span style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:'+statusColor+';">'+statusText+'</span>';
+          if(isLive)scoreHtml+='<span style="font-size:10px;color:var(--text3);">'+matched.outs+' out'+(matched.outs!==1?'s':'')+'</span>';
+          scoreHtml+='</div>';
+          scoreHtml+='<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text);padding:1px 0;"><span>'+(matched.awayAbbr||matched.away.split(" ").pop())+'</span><span>'+matched.awayScore+'</span></div>';
+          scoreHtml+='<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text);padding:1px 0;"><span>'+(matched.homeAbbr||matched.home.split(" ").pop())+'</span><span>'+matched.homeScore+'</span></div>';
+          if(isLive){
+            scoreHtml+='<div style="display:flex;align-items:center;gap:6px;margin-top:4px;border-top:1px solid var(--border);padding-top:4px;">';
+            scoreHtml+='<svg width="28" height="28" viewBox="0 0 32 32">';
+            var r1=matched.runners&&matched.runners.includes('1st');
+            var r2=matched.runners&&matched.runners.includes('2nd');
+            var r3=matched.runners&&matched.runners.includes('3rd');
+            scoreHtml+='<rect x="21" y="12" width="6" height="6" rx="1" transform="rotate(45,24,15)" fill="'+(r1?'var(--gold)':'var(--border2)')+'"/>';
+            scoreHtml+='<rect x="13" y="4" width="6" height="6" rx="1" transform="rotate(45,16,7)" fill="'+(r2?'var(--gold)':'var(--border2)')+'"/>';
+            scoreHtml+='<rect x="5" y="12" width="6" height="6" rx="1" transform="rotate(45,8,15)" fill="'+(r3?'var(--gold)':'var(--border2)')+'"/>';
+            scoreHtml+='</svg>';
+            scoreHtml+='<div style="display:flex;gap:3px;">';
+            for(var oi=0;oi<3;oi++)scoreHtml+='<div style="width:5px;height:5px;border-radius:50%;background:'+(oi<matched.outs?'var(--gold)':'var(--border2)')+';"></div>';
+            scoreHtml+='</div>';
+            var details=[];
+            if(matched.currentPitcher)details.push('P: '+matched.currentPitcher.split(' ').pop());
+            if(matched.currentBatter)details.push('AB: '+matched.currentBatter.split(' ').pop());
+            if(matched.balls!=null&&matched.strikes!=null)details.push(matched.balls+'-'+matched.strikes);
+            if(details.length)scoreHtml+='<div style="font-size:9px;color:var(--text3);">'+details.join(' · ')+'</div>';
+            scoreHtml+='</div>';
+          }
+          if(matched.innings&&matched.innings.length&&(isLive||isFinal)){
+            scoreHtml+='<div style="margin-top:4px;overflow-x:auto;">';
+            scoreHtml+='<div style="display:flex;gap:1px;font-size:8px;color:var(--text3);">';
+            scoreHtml+='<div style="min-width:24px;"> </div>';
+            matched.innings.forEach(function(inn){scoreHtml+='<div style="min-width:13px;text-align:center;font-weight:700;">'+inn.num+'</div>';});
+            scoreHtml+='<div style="min-width:16px;text-align:center;font-weight:700;">R</div><div style="min-width:16px;text-align:center;font-weight:700;">H</div></div>';
+            scoreHtml+='<div style="display:flex;gap:1px;font-size:8px;color:var(--text2);">';
+            scoreHtml+='<div style="min-width:24px;font-weight:600;">'+(matched.awayAbbr||'AWY')+'</div>';
+            matched.innings.forEach(function(inn){scoreHtml+='<div style="min-width:13px;text-align:center;">'+(inn.away!=null?inn.away:'')+'</div>';});
+            scoreHtml+='<div style="min-width:16px;text-align:center;font-weight:700;color:var(--text);">'+matched.awayScore+'</div><div style="min-width:16px;text-align:center;">'+matched.awayHits+'</div></div>';
+            scoreHtml+='<div style="display:flex;gap:1px;font-size:8px;color:var(--text2);">';
+            scoreHtml+='<div style="min-width:24px;font-weight:600;">'+(matched.homeAbbr||'HME')+'</div>';
+            matched.innings.forEach(function(inn){scoreHtml+='<div style="min-width:13px;text-align:center;">'+(inn.home!=null?inn.home:'')+'</div>';});
+            scoreHtml+='<div style="min-width:16px;text-align:center;font-weight:700;color:var(--text);">'+matched.homeScore+'</div><div style="min-width:16px;text-align:center;">'+matched.homeHits+'</div></div>';
+            scoreHtml+='</div>';
+          }
+          if(isFinal&&matched.decisions){
+            var dec=[];
+            if(matched.decisions.winner)dec.push('W: '+matched.decisions.winner.split(' ').pop());
+            if(matched.decisions.loser)dec.push('L: '+matched.decisions.loser.split(' ').pop());
+            if(matched.decisions.save)dec.push('S: '+matched.decisions.save.split(' ').pop());
+            if(dec.length)scoreHtml+='<div style="font-size:9px;color:var(--text3);margin-top:3px;">'+dec.join(' · ')+'</div>';
+          }
+          scoreHtml+='</div>';
         }
       }
-      cards.push('<div class="ticker-card active"><div class="ticker-label">Live Bet</div><div class="ticker-val">'+p.game+'</div><div class="ticker-sub">'+p.bet+' '+p.odds+' · $'+p.amt+'</div>'+scoreHtml+'</div>');
+      cards.push('<div class="ticker-card active" style="min-width:240px;"><div class="ticker-label">Live Bet</div><div class="ticker-val">'+p.game+'</div><div class="ticker-sub">'+p.bet+' '+p.odds+' · $'+p.amt+'</div>'+scoreHtml+'</div>');
     });
   }
 

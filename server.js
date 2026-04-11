@@ -255,7 +255,7 @@ function fetchScores(res) {
     return;
   }
   var today = new Date().toISOString().split('T')[0];
-  var url = 'https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=' + today + '&hydrate=linescore,team';
+  var url = 'https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=' + today + '&hydrate=linescore,probablePitcher,team,decisions';
   https.get(url, function(apiRes) {
     var data = '';
     apiRes.on('data', function(chunk) { data += chunk; });
@@ -266,17 +266,57 @@ function fetchScores(res) {
         if (parsed.dates && parsed.dates.length) {
           parsed.dates[0].games.forEach(function(g) {
             var ls = g.linescore || {};
+            var innings = [];
+            if (ls.innings) {
+              innings = ls.innings.map(function(inn) {
+                return { num: inn.num, away: inn.away ? inn.away.runs : null, home: inn.home ? inn.home.runs : null };
+              });
+            }
+            // Current play state
+            var offense = ls.offense || {};
+            var defense = ls.defense || {};
+            var runners = [];
+            if (offense.first) runners.push('1st');
+            if (offense.second) runners.push('2nd');
+            if (offense.third) runners.push('3rd');
+
+            var awayPitcher = g.teams.away.probablePitcher;
+            var homePitcher = g.teams.home.probablePitcher;
+
             games.push({
+              gameId: g.gamePk,
               status: g.status.detailedState,
+              abstractState: g.status.abstractGameState,
               inning: ls.currentInning || 0,
               inningHalf: ls.inningHalf || '',
+              outs: ls.outs || 0,
               away: g.teams.away.team.name,
               home: g.teams.home.team.name,
+              awayAbbr: g.teams.away.team.abbreviation || '',
+              homeAbbr: g.teams.home.team.abbreviation || '',
               awayScore: g.teams.away.score || 0,
               homeScore: g.teams.home.score || 0,
+              awayHits: ls.teams && ls.teams.away ? ls.teams.away.hits || 0 : 0,
+              homeHits: ls.teams && ls.teams.home ? ls.teams.home.hits || 0 : 0,
+              awayErrors: ls.teams && ls.teams.away ? ls.teams.away.errors || 0 : 0,
+              homeErrors: ls.teams && ls.teams.home ? ls.teams.home.errors || 0 : 0,
               awayRecord: (g.teams.away.leagueRecord || {}).wins + '-' + (g.teams.away.leagueRecord || {}).losses,
               homeRecord: (g.teams.home.leagueRecord || {}).wins + '-' + (g.teams.home.leagueRecord || {}).losses,
-              startTime: g.gameDate
+              startTime: g.gameDate,
+              innings: innings,
+              runners: runners,
+              currentPitcher: defense.pitcher ? defense.pitcher.fullName : null,
+              currentBatter: offense.batter ? offense.batter.fullName : null,
+              pitchCount: defense.pitcher && defense.pitcher.stats ? null : null,
+              balls: ls.balls || 0,
+              strikes: ls.strikes || 0,
+              awayProbable: awayPitcher ? awayPitcher.fullName : 'TBD',
+              homeProbable: homePitcher ? homePitcher.fullName : 'TBD',
+              decisions: g.decisions ? {
+                winner: g.decisions.winner ? g.decisions.winner.fullName : null,
+                loser: g.decisions.loser ? g.decisions.loser.fullName : null,
+                save: g.decisions.save ? g.decisions.save.fullName : null
+              } : null
             });
           });
         }
