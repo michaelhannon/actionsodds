@@ -11,16 +11,20 @@ const SPORT_KEYS = {
   mlb: 'baseball_mlb',
   nhl: 'icehockey_nhl',
   nba: 'basketball_nba',
-  pga: 'golf_pga_championship',
+  pga: 'golf_masters_tournament_winner',
   nfl: 'americanfootball_nfl',
   ncaaf: 'americanfootball_ncaaf',
   ncaab: 'basketball_ncaab',
   ufc: 'mma_mixed_martial_arts'
 };
+const GOLF_SPORTS = ['pga'];
 const ALLOWED_BOOKS = ['caesars', 'hard_rock_bet', 'draftkings', 'fanduel', 'betmgm'];
 
 function getOddsUrl(sport) {
   const key = SPORT_KEYS[sport] || SPORT_KEYS.mlb;
+  if(GOLF_SPORTS.includes(sport)){
+    return `https://api.the-odds-api.com/v4/sports/${key}/odds/?apiKey=${API_KEY}&regions=us&markets=outrights&oddsFormat=american&dateFormat=iso`;
+  }
   return `https://api.the-odds-api.com/v4/sports/${key}/odds/?apiKey=${API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american&dateFormat=iso`;
 }
 
@@ -31,20 +35,30 @@ function fetchOdds(res, sport) {
     apiRes.on('end', () => {
       try {
         const games = JSON.parse(data);
+        if(!Array.isArray(games)){res.writeHead(200,{'Content-Type':'application/json','Access-Control-Allow-Origin':'*'});res.end(JSON.stringify(games));return;}
         const now = Date.now();
-        const GRACE_MS = 30 * 60 * 1000; // 30 min grace after first pitch
+        const GRACE_MS = 30 * 60 * 1000;
         console.log('Current UTC time:', new Date().toISOString());
         console.log('Total games from API:', games.length);
-        games.forEach(g => {
-          const diff = (now - new Date(g.commence_time).getTime());
-          console.log(g.away_team, '@', g.home_team, g.commence_time, 'diff_mins:', Math.round(diff/60000));
-        });
-        const filtered = games
-          .filter(game => (now - new Date(game.commence_time).getTime()) < GRACE_MS)
-          .map(game => ({
+        // Golf/outrights: don't filter by time, just pass through
+        let filtered;
+        if(GOLF_SPORTS.includes(sport)){
+          filtered = games.map(game => ({
             ...game,
             bookmakers: game.bookmakers.filter(b => ALLOWED_BOOKS.includes(b.key))
           }));
+        } else {
+          games.forEach(g => {
+            const diff = (now - new Date(g.commence_time).getTime());
+            console.log(g.away_team, '@', g.home_team, g.commence_time, 'diff_mins:', Math.round(diff/60000));
+          });
+          filtered = games
+            .filter(game => (now - new Date(game.commence_time).getTime()) < GRACE_MS)
+            .map(game => ({
+              ...game,
+              bookmakers: game.bookmakers.filter(b => ALLOWED_BOOKS.includes(b.key))
+            }));
+        }
         res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' });
         res.end(JSON.stringify(filtered));
       } catch(e) {
