@@ -1016,18 +1016,82 @@ function updateTicker(){
   var pending=logPlays.filter(function(p){return !p.result;});
   var wins=logPlays.filter(function(p){return p.result==='W';});
   var losses=logPlays.filter(function(p){return p.result==='L';});
+  var settled=logPlays.filter(function(p){return p.result==='W'||p.result==='L';});
+  var pnl=settled.reduce(function(acc,p){var amt=parseFloat(p.amt)||0;var odds=parseInt(p.odds)||0;if(p.result==='W')return acc+(odds>0?amt*(odds/100):amt*(100/Math.abs(odds)));if(p.result==='L')return acc-amt;return acc;},0);
 
-  // Live bets card
+  // Live bets with scores
   if(pending.length){
     pending.forEach(function(p){
-      cards.push('<div class="ticker-card active"><div class="ticker-label">Live Bet</div><div class="ticker-val">'+p.game+'</div><div class="ticker-sub">'+p.bet+' '+p.odds+' · $'+p.amt+'</div></div>');
+      var scoreHtml='';
+      if(liveScores.length){
+        var matched=liveScores.find(function(s){
+          var lg=p.game.toLowerCase();
+          return lg.split(' ').some(function(w){return w.length>2&&(s.home.toLowerCase().includes(w)||s.away.toLowerCase().includes(w));});
+        });
+        if(matched){
+          var statusText=matched.status==='Final'?'FINAL':matched.status==='In Progress'?matched.inningHalf.substring(0,3)+' '+matched.inning:matched.status;
+          var scoreColor=matched.status==='Final'?'var(--gold)':'var(--green)';
+          scoreHtml='<div style="margin-top:5px;padding:4px 8px;background:rgba(46,204,113,0.08);border-radius:4px;font-family:Barlow Condensed,sans-serif;"><span style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:'+scoreColor+';">'+statusText+'</span><span style="font-size:13px;font-weight:600;color:var(--text);margin-left:8px;">'+matched.away+' '+matched.awayScore+' - '+matched.home+' '+matched.homeScore+'</span></div>';
+        }
+      }
+      cards.push('<div class="ticker-card active"><div class="ticker-label">Live Bet</div><div class="ticker-val">'+p.game+'</div><div class="ticker-sub">'+p.bet+' '+p.odds+' · $'+p.amt+'</div>'+scoreHtml+'</div>');
     });
   }
 
-  // Bankroll status
-  var settled=logPlays.filter(function(p){return p.result==='W'||p.result==='L';});
-  var pnl=settled.reduce(function(acc,p){var amt=parseFloat(p.amt)||0;var odds=parseInt(p.odds)||0;if(p.result==='W')return acc+(odds>0?amt*(odds/100):amt*(100/Math.abs(odds)));if(p.result==='L')return acc-amt;return acc;},0);
-  cards.push('<div class="ticker-card gold-border"><div class="ticker-label">Bankroll</div><div class="ticker-val" style="color:var(--gold);">$'+(cfg.bankroll+Math.round(pnl)).toLocaleString()+'</div><div class="ticker-sub">'+pending.length+' play'+(pending.length!==1?'s':'')+' at risk · $'+pending.reduce(function(a,p){return a+(parseFloat(p.amt)||0);},0).toLocaleString()+'</div></div>');
+  // Masters leaderboard card
+  if(mastersData&&mastersData.players&&mastersData.players.length){
+    var top5=mastersData.players.slice(0,5);
+    var rory=mastersData.players.find(function(p){return p.name.toLowerCase().includes('mcilroy');});
+    var lbHtml='<div class="ticker-card gold-border" style="min-width:260px;"><div class="ticker-label">'+mastersData.tournament+' Leaderboard</div>';
+    top5.forEach(function(p,i){
+      var isRory=p.name.toLowerCase().includes('mcilroy');
+      var rowStyle=isRory?'color:var(--gold);font-weight:700;':'color:var(--text);';
+      lbHtml+='<div style="display:flex;justify-content:space-between;font-family:Barlow Condensed,sans-serif;font-size:13px;'+rowStyle+'padding:2px 0;"><span>'+p.position+'. '+p.name+'</span><span>'+p.score+'</span></div>';
+    });
+    if(rory&&parseInt(rory.position)>5){
+      lbHtml+='<div style="border-top:1px solid var(--border);margin-top:3px;padding-top:3px;display:flex;justify-content:space-between;font-family:Barlow Condensed,sans-serif;font-size:13px;color:var(--gold);font-weight:700;"><span>'+rory.position+'. '+rory.name+'</span><span>'+rory.score+'</span></div>';
+    }
+    lbHtml+='<div class="ticker-sub">'+mastersData.status+'</div></div>';
+    cards.push(lbHtml);
+  }
+
+  // Bankroll + sparkline
+  var sparkHtml='';
+  if(settled.length>=2){
+    var cumPnl=[];var runPnl=0;
+    logPlays.forEach(function(p){
+      if(p.result==='W'||p.result==='L'){
+        var amt=parseFloat(p.amt)||0;var odds=parseInt(p.odds)||0;
+        if(p.result==='W')runPnl+=(odds>0?amt*(odds/100):amt*(100/Math.abs(odds)));
+        else runPnl-=amt;
+        cumPnl.push(runPnl);
+      }
+    });
+    if(cumPnl.length>=2){
+      var maxVal=Math.max.apply(null,cumPnl.map(function(v){return Math.abs(v);}));
+      if(maxVal===0)maxVal=1;
+      var svgW=120,svgH=30,pad=2;
+      var pts=cumPnl.map(function(v,i){
+        var x=pad+i*(svgW-2*pad)/(cumPnl.length-1);
+        var y=svgH/2-v/maxVal*(svgH/2-pad);
+        return x+','+y;
+      }).join(' ');
+      var lastColor=cumPnl[cumPnl.length-1]>=0?'var(--green)':'var(--red)';
+      sparkHtml='<div style="margin-top:6px;"><svg width="'+svgW+'" height="'+svgH+'" viewBox="0 0 '+svgW+' '+svgH+'"><line x1="'+pad+'" y1="'+svgH/2+'" x2="'+(svgW-pad)+'" y2="'+svgH/2+'" stroke="var(--border2)" stroke-width="0.5"/><polyline points="'+pts+'" fill="none" stroke="'+lastColor+'" stroke-width="1.5"/></svg></div>';
+    }
+  }
+  cards.push('<div class="ticker-card gold-border"><div class="ticker-label">Bankroll</div><div class="ticker-val" style="color:var(--gold);">$'+(cfg.bankroll+Math.round(pnl)).toLocaleString()+'</div><div class="ticker-sub">'+pending.length+' play'+(pending.length!==1?'s':'')+' at risk · $'+pending.reduce(function(a,p){return a+(parseFloat(p.amt)||0);},0).toLocaleString()+'</div>'+sparkHtml+'</div>');
+
+  // Line movements
+  if(lineMovements.length){
+    var moveHtml='<div class="ticker-card" style="border-color:var(--amber);"><div class="ticker-label" style="color:var(--amber);">Line Movements</div>';
+    lineMovements.slice(0,3).forEach(function(m){
+      var dir=m.current>m.open?'▲':'▼';
+      moveHtml+='<div style="font-family:Barlow Condensed,sans-serif;font-size:12px;color:var(--text);padding:2px 0;">'+dir+' '+m.team+' '+fmtOdds(m.open)+' → '+fmtOdds(m.current)+' <span style="color:var(--amber);">('+m.diff+'pts)</span></div>';
+    });
+    moveHtml+='</div>';
+    cards.push(moveHtml);
+  }
 
   // Sport-specific headlines
   if(activeSport==='pga'&&Array.isArray(allGames)&&allGames.length){
@@ -1037,20 +1101,16 @@ function updateTicker(){
     if(outrights&&outrights.outcomes.length){
       var sorted=[].concat(outrights.outcomes).sort(function(a,b){return a.price-b.price;});
       var fav=sorted[0];
-      cards.push('<div class="ticker-card gold-border"><div class="ticker-label">'+(g.sport_title||'Tournament')+' Favorite</div><div class="ticker-val" style="color:var(--gold);">'+fav.name+' '+fmtOdds(fav.price)+'</div><div class="ticker-sub">'+sorted.length+' golfers in field</div></div>');
-      if(sorted.length>1)cards.push('<div class="ticker-card"><div class="ticker-label">2nd Favorite</div><div class="ticker-val">'+sorted[1].name+' '+fmtOdds(sorted[1].price)+'</div></div>');
-      if(sorted.length>2)cards.push('<div class="ticker-card"><div class="ticker-label">3rd Favorite</div><div class="ticker-val">'+sorted[2].name+' '+fmtOdds(sorted[2].price)+'</div></div>');
+      cards.push('<div class="ticker-card gold-border"><div class="ticker-label">Betting Favorite</div><div class="ticker-val" style="color:var(--gold);">'+fav.name+' '+fmtOdds(fav.price)+'</div><div class="ticker-sub">'+sorted.length+' golfers in field</div></div>');
     }
   } else if(Array.isArray(allGames)&&allGames.length){
-    cards.push('<div class="ticker-card"><div class="ticker-label">'+activeSport.toUpperCase()+' Slate</div><div class="ticker-val">'+allGames.length+' games today</div><div class="ticker-sub">Odds via '+activeBook+'</div></div>');
-    // Best home dog
+    cards.push('<div class="ticker-card"><div class="ticker-label">'+activeSport.toUpperCase()+' Slate</div><div class="ticker-val">'+allGames.length+' games today</div><div class="ticker-sub">Odds via '+(BOOK_LABELS[activeBook]||activeBook)+'</div></div>');
     if(marketState.bestDog>0){
       var bestTeam=marketState.homeDogs&&marketState.homeDogs.length?marketState.homeDogs[0].team:'—';
       cards.push('<div class="ticker-card"><div class="ticker-label">Best Home Dog</div><div class="ticker-val" style="color:var(--green);">'+bestTeam+' '+fmtOdds(marketState.bestDog)+'</div></div>');
     }
-    // Sharp alerts
     if(marketState.sharpGames&&marketState.sharpGames.length){
-      cards.push('<div class="ticker-card"><div class="ticker-label">Sharp Alert</div><div class="ticker-val">'+marketState.sharpGames.length+' game'+(marketState.sharpGames.length>1?'s':'')+' with book divergence</div><div class="ticker-sub">'+marketState.sharpGames[0].game+' · '+marketState.sharpGames[0].divergence+'pt spread</div></div>');
+      cards.push('<div class="ticker-card"><div class="ticker-label">Sharp Alert</div><div class="ticker-val">'+marketState.sharpGames.length+' game'+(marketState.sharpGames.length>1?'s':'')+' divergence</div><div class="ticker-sub">'+marketState.sharpGames[0].game+' · '+marketState.sharpGames[0].divergence+'pt</div></div>');
     }
   }
 
@@ -1062,6 +1122,73 @@ function updateTicker(){
 
   container.innerHTML=cards.join('');
 }
+
+// =====================
+// LIVE DATA FETCHERS
+// =====================
+var liveScores=[];
+var mastersData=null;
+var lineMovements=[];
+
+async function fetchLiveScores(){
+  try{
+    var res=await fetch('/scores');
+    var data=await res.json();
+    if(Array.isArray(data))liveScores=data;
+    // Auto-grade bets
+    autoGradeBets();
+    updateTicker();
+  }catch(e){}
+}
+
+async function fetchMastersLeaderboard(){
+  try{
+    var res=await fetch('/masters');
+    var data=await res.json();
+    if(data&&data.players)mastersData=data;
+    updateTicker();
+  }catch(e){}
+}
+
+async function fetchLineMovements(){
+  try{
+    var res=await fetch('/line-moves?sport='+activeSport);
+    var data=await res.json();
+    if(Array.isArray(data))lineMovements=data;
+    updateTicker();
+  }catch(e){}
+}
+
+function autoGradeBets(){
+  if(!liveScores.length)return;
+  var changed=false;
+  logPlays.forEach(function(p){
+    if(p.result)return; // already graded
+    var matched=liveScores.find(function(s){
+      if(s.status!=='Final')return false;
+      var lg=p.game.toLowerCase();
+      return lg.split(' ').some(function(w){return w.length>2&&(s.home.toLowerCase().includes(w)||s.away.toLowerCase().includes(w));});
+    });
+    if(!matched)return;
+    // Try to determine W/L from bet description
+    var betLower=(p.bet||'').toLowerCase();
+    var oddsNum=parseInt(p.odds)||0;
+    // ML bets
+    var homeWon=matched.homeScore>matched.awayScore;
+    if(betLower.includes('ml')){
+      var betOnHome=matched.home.toLowerCase().split(' ').some(function(w){return w.length>2&&betLower.includes(w);});
+      var betOnAway=matched.away.toLowerCase().split(' ').some(function(w){return w.length>2&&betLower.includes(w);});
+      if(betOnHome){p.result=homeWon?'W':'L';changed=true;}
+      else if(betOnAway){p.result=homeWon?'L':'W';changed=true;}
+    }
+  });
+  if(changed){saveLog();renderLog();updateSeasonPnL();}
+}
+
+// Refresh live data on intervals
+setInterval(fetchLiveScores,30000); // every 30s
+setInterval(fetchMastersLeaderboard,60000); // every 60s
+setInterval(fetchLineMovements,120000); // every 2 min
 
 function renderCard(){
   const out=document.getElementById('card-output');
@@ -1293,6 +1420,9 @@ function updateCountdown(){countdown--;if(countdown<=0){countdown=300;fetchOdds(
 setInterval(updateCountdown,1000);
 updateTicker();
 fetchOdds();
+fetchLiveScores();
+fetchMastersLeaderboard();
+fetchLineMovements();
 </script>
 </body>
 </html>
