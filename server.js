@@ -17,11 +17,15 @@ function fetchOdds(res) {
     apiRes.on('end', () => {
       try {
         const games = JSON.parse(data);
-        const filtered = games.map(game => ({
-          ...game,
-          bookmakers: game.bookmakers.filter(b => ALLOWED_BOOKS.includes(b.key))
-        }));
-        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+        const now = Date.now();
+        const GRACE_MS = 30 * 60 * 1000; // 30 min grace after first pitch
+        const filtered = games
+          .filter(game => (now - new Date(game.commence_time).getTime()) < GRACE_MS)
+          .map(game => ({
+            ...game,
+            bookmakers: game.bookmakers.filter(b => ALLOWED_BOOKS.includes(b.key))
+          }));
+        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' });
         res.end(JSON.stringify(filtered));
       } catch(e) {
         res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
