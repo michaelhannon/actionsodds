@@ -63,13 +63,14 @@ body.light .refresh-btn{color:#ffffff;box-shadow:0 2px 8px rgba(146,112,14,0.25)
 body.light #theme-toggle{border-color:rgba(0,0,0,0.12);background:#f5f6f8;}
 body.light .cfg-section-title{color:#92700e;}
 body.light .toggle{background:rgba(0,0,0,0.12);}
-body.light #action-ticker{background:rgba(255,255,255,0.97);border-bottom:1px solid rgba(0,0,0,0.08);box-shadow:0 1px 6px rgba(0,0,0,0.03);}
 body.light .ticker-card{background:#ffffff;border:1px solid rgba(0,0,0,0.1);box-shadow:0 1px 4px rgba(0,0,0,0.04);backdrop-filter:none;}
 body.light .ticker-card:hover{border-color:rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(0,0,0,0.06);}
 body.light .ticker-card.active{border-color:#10b981;background:rgba(16,185,129,0.04);box-shadow:0 1px 6px rgba(16,185,129,0.08);}
 body.light .ticker-card.gold-border{border-color:#b8912e;background:rgba(232,185,74,0.05);box-shadow:0 1px 6px rgba(146,112,14,0.06);}
 body.light .confidence-bar{background:rgba(0,0,0,0.08);}
 body.light .last-update{color:#6b6b7a;}
+.action-ticker{background:rgba(14,15,22,0.5);}
+body.light .action-ticker{background:rgba(255,255,255,0.97);box-shadow:0 1px 6px rgba(0,0,0,0.03);}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--black);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;position:relative;}
 /* Animated background gradient */
@@ -341,7 +342,7 @@ a,button,input,select{transition:all 0.15s ease;}
 </header>
 
 <!-- TODAY'S ACTION TICKER -->
-<div id="action-ticker" style="background:rgba(14,15,22,0.5);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:12px 24px;overflow:hidden;position:relative;z-index:1;">
+<div id="action-ticker" class="action-ticker" style="backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:12px 24px;overflow:hidden;position:relative;z-index:1;">
   <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
     <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:0.08em;color:var(--gold);white-space:nowrap;">Today's Action</div>
     <div style="height:1px;flex:1;background:linear-gradient(90deg,var(--gold),transparent);"></div>
