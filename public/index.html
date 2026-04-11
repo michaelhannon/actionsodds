@@ -213,6 +213,15 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .toggle.on{background:var(--green);}
 .toggle::after{content:'';position:absolute;width:14px;height:14px;background:white;border-radius:50%;top:3px;left:3px;transition:left 0.2s;}
 .toggle.on::after{left:19px;}
+.ticker-card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;min-width:220px;max-width:280px;flex-shrink:0;}
+.ticker-card.active{border-color:var(--green);background:rgba(46,204,113,0.05);}
+.ticker-card.gold-border{border-color:var(--gold);background:rgba(232,185,74,0.05);}
+.ticker-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;}
+.ticker-val{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--text);line-height:1.4;}
+.ticker-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+body.light .ticker-card{background:var(--panel2);border-color:rgba(0,0,0,0.09);}
+body.light .ticker-card.active{border-color:var(--green);background:rgba(26,138,69,0.05);}
+body.light .ticker-card.gold-border{border-color:#b8860b;background:rgba(232,185,74,0.05);}
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
@@ -255,6 +264,18 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
     </button>
   </div>
 </header>
+
+<!-- TODAY'S ACTION TICKER -->
+<div id="action-ticker" style="background:var(--panel);border-bottom:1px solid var(--border);padding:12px 24px;overflow:hidden;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:0.08em;color:var(--gold);white-space:nowrap;">Today's Action</div>
+    <div style="height:1px;flex:1;background:linear-gradient(90deg,var(--gold),transparent);"></div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--text3);letter-spacing:0.05em;" id="ticker-date"></div>
+  </div>
+  <div id="ticker-content" style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;">
+    <div style="font-size:12px;color:var(--text3);font-style:italic;">Loading...</div>
+  </div>
+</div>
 
 <!-- AI BRIEFING STRIP -->
 <div class="ai-section">
@@ -985,6 +1006,63 @@ function updateSeasonPnL(){
   if(bankEl)bankEl.textContent='$'+(cfg.bankroll+Math.round(pnl)).toLocaleString();
 }
 
+function updateTicker(){
+  var container=document.getElementById('ticker-content');
+  var dateEl=document.getElementById('ticker-date');
+  if(!container)return;
+  dateEl.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+
+  var cards=[];
+  var pending=logPlays.filter(function(p){return !p.result;});
+  var wins=logPlays.filter(function(p){return p.result==='W';});
+  var losses=logPlays.filter(function(p){return p.result==='L';});
+
+  // Live bets card
+  if(pending.length){
+    pending.forEach(function(p){
+      cards.push('<div class="ticker-card active"><div class="ticker-label">Live Bet</div><div class="ticker-val">'+p.game+'</div><div class="ticker-sub">'+p.bet+' '+p.odds+' · $'+p.amt+'</div></div>');
+    });
+  }
+
+  // Bankroll status
+  var settled=logPlays.filter(function(p){return p.result==='W'||p.result==='L';});
+  var pnl=settled.reduce(function(acc,p){var amt=parseFloat(p.amt)||0;var odds=parseInt(p.odds)||0;if(p.result==='W')return acc+(odds>0?amt*(odds/100):amt*(100/Math.abs(odds)));if(p.result==='L')return acc-amt;return acc;},0);
+  cards.push('<div class="ticker-card gold-border"><div class="ticker-label">Bankroll</div><div class="ticker-val" style="color:var(--gold);">$'+(cfg.bankroll+Math.round(pnl)).toLocaleString()+'</div><div class="ticker-sub">'+pending.length+' play'+(pending.length!==1?'s':'')+' at risk · $'+pending.reduce(function(a,p){return a+(parseFloat(p.amt)||0);},0).toLocaleString()+'</div></div>');
+
+  // Sport-specific headlines
+  if(activeSport==='pga'&&Array.isArray(allGames)&&allGames.length){
+    var g=allGames[0];
+    var bm=g.bookmakers.find(function(b){return b.key===activeBook;});
+    var outrights=bm&&bm.markets?bm.markets.find(function(m){return m.key==='outrights';}):null;
+    if(outrights&&outrights.outcomes.length){
+      var sorted=[].concat(outrights.outcomes).sort(function(a,b){return a.price-b.price;});
+      var fav=sorted[0];
+      cards.push('<div class="ticker-card gold-border"><div class="ticker-label">'+(g.sport_title||'Tournament')+' Favorite</div><div class="ticker-val" style="color:var(--gold);">'+fav.name+' '+fmtOdds(fav.price)+'</div><div class="ticker-sub">'+sorted.length+' golfers in field</div></div>');
+      if(sorted.length>1)cards.push('<div class="ticker-card"><div class="ticker-label">2nd Favorite</div><div class="ticker-val">'+sorted[1].name+' '+fmtOdds(sorted[1].price)+'</div></div>');
+      if(sorted.length>2)cards.push('<div class="ticker-card"><div class="ticker-label">3rd Favorite</div><div class="ticker-val">'+sorted[2].name+' '+fmtOdds(sorted[2].price)+'</div></div>');
+    }
+  } else if(Array.isArray(allGames)&&allGames.length){
+    cards.push('<div class="ticker-card"><div class="ticker-label">'+activeSport.toUpperCase()+' Slate</div><div class="ticker-val">'+allGames.length+' games today</div><div class="ticker-sub">Odds via '+activeBook+'</div></div>');
+    // Best home dog
+    if(marketState.bestDog>0){
+      var bestTeam=marketState.homeDogs&&marketState.homeDogs.length?marketState.homeDogs[0].team:'—';
+      cards.push('<div class="ticker-card"><div class="ticker-label">Best Home Dog</div><div class="ticker-val" style="color:var(--green);">'+bestTeam+' '+fmtOdds(marketState.bestDog)+'</div></div>');
+    }
+    // Sharp alerts
+    if(marketState.sharpGames&&marketState.sharpGames.length){
+      cards.push('<div class="ticker-card"><div class="ticker-label">Sharp Alert</div><div class="ticker-val">'+marketState.sharpGames.length+' game'+(marketState.sharpGames.length>1?'s':'')+' with book divergence</div><div class="ticker-sub">'+marketState.sharpGames[0].game+' · '+marketState.sharpGames[0].divergence+'pt spread</div></div>');
+    }
+  }
+
+  // Season record
+  if(wins.length||losses.length){
+    var winPct=wins.length+losses.length>0?Math.round(wins.length/(wins.length+losses.length)*100):0;
+    cards.push('<div class="ticker-card"><div class="ticker-label">Season Record</div><div class="ticker-val">'+wins.length+'W - '+losses.length+'L ('+winPct+'%)</div><div class="ticker-sub">P&L: '+(pnl>=0?'+':'-')+'$'+Math.abs(Math.round(pnl)).toLocaleString()+'</div></div>');
+  }
+
+  container.innerHTML=cards.join('');
+}
+
 function renderCard(){
   const out=document.getElementById('card-output');
   if(!Array.isArray(allGames))allGames=[];
@@ -1036,6 +1114,7 @@ function renderCard(){
     document.getElementById('s-stake').textContent='$'+atRisk.toLocaleString();
     document.getElementById('game-count').textContent=(allGames.length||1)+' tournament(s)';
     updateSeasonPnL();
+    updateTicker();
     return;
   }
 
@@ -1091,6 +1170,7 @@ function renderCard(){
   const sportLabels={mlb:'games',nhl:'games',nba:'games',nfl:'games',ncaaf:'games',ncaab:'games',ufc:'fights',pga:'golfers'};
   document.getElementById('game-count').textContent=allGames.length+' '+(sportLabels[activeSport]||'games')+' today';
   updateSeasonPnL();
+  updateTicker();
 }
 
 function renderBookTabs(){document.getElementById('book-tabs').innerHTML=availableBooks.map(k=>`<button class="book-tab${k===activeBook?' active':''}" onclick="selectBook('${k}')">${BOOK_LABELS[k]||k}</button>`).join('');}
@@ -1211,6 +1291,7 @@ function setLR(i,r){logPlays[i].result=r;saveLog();renderLog();updateSeasonPnL()
 let countdown=300;
 function updateCountdown(){countdown--;if(countdown<=0){countdown=300;fetchOdds();return;}const mins=Math.floor(countdown/60),secs=countdown%60;const timeStr=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});document.getElementById('last-update').textContent='Updated '+timeStr+' — next in '+mins+':'+(secs<10?'0':'')+secs;}
 setInterval(updateCountdown,1000);
+updateTicker();
 fetchOdds();
 </script>
 </body>
