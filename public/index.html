@@ -71,6 +71,34 @@ body.light .confidence-bar{background:rgba(0,0,0,0.08);}
 body.light .last-update{color:#6b6b7a;}
 .action-ticker{background:rgba(14,15,22,0.5);}
 body.light .action-ticker{background:rgba(255,255,255,0.97);box-shadow:0 1px 6px rgba(0,0,0,0.03);}
+/* Right rail widgets */
+.rail-widget{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;}
+body.light .rail-widget{background:#ffffff;border-color:rgba(0,0,0,0.1);box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.rail-widget-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);}
+.rail-widget-title{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);}
+.rail-widget-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);}
+.rail-lb-row{display:flex;justify-content:space-between;align-items:center;padding:5px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text);border-bottom:1px solid var(--border);}
+.rail-lb-row:last-child{border-bottom:none;}
+.rail-lb-row.highlight{color:var(--gold);font-weight:700;background:rgba(232,185,74,0.06);}
+body.light .rail-lb-row.highlight{background:rgba(184,145,46,0.06);}
+.rail-lb-pos{width:22px;font-weight:600;color:var(--text3);font-size:12px;}
+.rail-lb-name{flex:1;padding:0 6px;}
+.rail-lb-score{font-weight:600;width:36px;text-align:right;}
+.rail-lb-today{font-size:11px;width:36px;text-align:right;color:var(--text3);}
+.rail-score-row{display:flex;align-items:center;padding:7px 14px;border-bottom:1px solid var(--border);gap:6px;font-family:'Barlow Condensed',sans-serif;font-size:13px;transition:background 0.15s;}
+.rail-score-row:last-child{border-bottom:none;}
+.rail-score-row:hover{background:var(--glass);}
+.rail-score-row.has-bet{background:rgba(232,185,74,0.04);border-left:2px solid var(--gold);}
+body.light .rail-score-row.has-bet{background:rgba(184,145,46,0.04);}
+.rail-score-teams{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
+.rail-score-team{display:flex;justify-content:space-between;font-size:12px;}
+.rail-score-team .team-abbr{font-weight:600;color:var(--text);}
+.rail-score-team .team-runs{font-weight:700;color:var(--text);width:20px;text-align:right;}
+.rail-score-status{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;min-width:48px;text-align:center;}
+.rail-score-status.live{color:var(--green);}
+.rail-score-status.final{color:var(--gold);}
+.rail-score-status.pre{color:var(--text3);}
+.rail-scores-empty{padding:16px 14px;font-size:12px;color:var(--text3);text-align:center;font-style:italic;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--black);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;position:relative;}
 /* Animated background gradient */
@@ -396,6 +424,26 @@ a,button,input,select{transition:all 0.15s ease;}
   </div>
 
   <div class="tracker-panel">
+    <!-- MINI MASTERS LEADERBOARD -->
+    <div class="rail-widget" id="rail-masters" style="display:none;">
+      <div class="rail-widget-hdr">
+        <div class="rail-widget-title">Masters Leaderboard</div>
+        <div class="rail-widget-sub" id="rail-masters-status"></div>
+      </div>
+      <div id="rail-masters-body"></div>
+    </div>
+
+    <!-- LIVE MLB SCOREBOARD -->
+    <div class="rail-widget" id="rail-scores">
+      <div class="rail-widget-hdr">
+        <div class="rail-widget-title">MLB Scores</div>
+        <div class="rail-widget-sub" id="rail-scores-count"></div>
+      </div>
+      <div id="rail-scores-body" style="max-height:280px;overflow-y:auto;">
+        <div class="rail-scores-empty">Loading scores...</div>
+      </div>
+    </div>
+
     <div class="panel-tabs">
       <button class="panel-tab active" id="tab-btn-paper" onclick="showTab('paper')">Paper</button>
       <button class="panel-tab" id="tab-btn-log" onclick="showTab('log')">Live plays</button>
@@ -1335,9 +1383,9 @@ async function fetchLiveScores(){
     var res=await fetch('/scores');
     var data=await res.json();
     if(Array.isArray(data))liveScores=data;
-    // Auto-grade bets
     autoGradeBets();
     updateTicker();
+    renderRailScores();
   }catch(e){}
 }
 
@@ -1347,6 +1395,7 @@ async function fetchMastersLeaderboard(){
     var data=await res.json();
     if(data&&data.players)mastersData=data;
     updateTicker();
+    renderRailMasters();
   }catch(e){}
 }
 
@@ -1357,6 +1406,107 @@ async function fetchLineMovements(){
     if(Array.isArray(data))lineMovements=data;
     updateTicker();
   }catch(e){}
+}
+
+// =====================
+// RIGHT RAIL WIDGETS
+// =====================
+function renderRailMasters(){
+  var widget=document.getElementById('rail-masters');
+  var body=document.getElementById('rail-masters-body');
+  var statusEl=document.getElementById('rail-masters-status');
+  if(!widget||!body)return;
+  if(!mastersData||!mastersData.players||!mastersData.players.length){
+    widget.style.display='none';return;
+  }
+  widget.style.display='block';
+  if(statusEl)statusEl.textContent=mastersData.status||'';
+  var top10=mastersData.players.slice(0,10);
+  // Check if Rory is outside top 10
+  var rory=mastersData.players.find(function(p){return p.name.toLowerCase().includes('mcilroy');});
+  var roryInTop=top10.some(function(p){return p.name.toLowerCase().includes('mcilroy');});
+  var html='';
+  top10.forEach(function(p){
+    var isRory=p.name.toLowerCase().includes('mcilroy');
+    var cls=isRory?'rail-lb-row highlight':'rail-lb-row';
+    var scoreColor=p.score&&p.score.includes('-')?'color:var(--green)':p.score&&p.score.includes('+')?'color:var(--red)':'';
+    var todayColor=p.today&&p.today.includes('-')?'color:var(--green)':p.today&&p.today.includes('+')?'color:var(--red)':'';
+    html+='<div class="'+cls+'">';
+    html+='<span class="rail-lb-pos">'+p.position+'</span>';
+    html+='<span class="rail-lb-name">'+p.name+'</span>';
+    html+='<span class="rail-lb-today" style="'+todayColor+'">'+(p.today||'—')+'</span>';
+    html+='<span class="rail-lb-score" style="'+scoreColor+'">'+p.score+'</span>';
+    html+='</div>';
+  });
+  if(rory&&!roryInTop){
+    html+='<div class="rail-lb-row highlight" style="border-top:2px solid var(--border);">';
+    html+='<span class="rail-lb-pos">'+rory.position+'</span>';
+    html+='<span class="rail-lb-name">'+rory.name+'</span>';
+    var rTodayColor=rory.today&&rory.today.includes('-')?'color:var(--green)':rory.today&&rory.today.includes('+')?'color:var(--red)':'';
+    var rScoreColor=rory.score&&rory.score.includes('-')?'color:var(--green)':rory.score&&rory.score.includes('+')?'color:var(--red)':'';
+    html+='<span class="rail-lb-today" style="'+rTodayColor+'">'+(rory.today||'—')+'</span>';
+    html+='<span class="rail-lb-score" style="'+rScoreColor+'">'+rory.score+'</span>';
+    html+='</div>';
+  }
+  body.innerHTML=html;
+}
+
+function renderRailScores(){
+  var body=document.getElementById('rail-scores-body');
+  var countEl=document.getElementById('rail-scores-count');
+  if(!body)return;
+  if(!liveScores.length){
+    body.innerHTML='<div class="rail-scores-empty">No games yet today</div>';
+    if(countEl)countEl.textContent='';
+    return;
+  }
+  // Sort: live first, then pre-game, then final
+  var sorted=[].concat(liveScores).sort(function(a,b){
+    var order={Live:0,'In Progress':0,Preview:1,Scheduled:1,Pre:1,Final:2};
+    var ao=order[a.abstractState]!=null?order[a.abstractState]:(order[a.status]!=null?order[a.status]:1);
+    var bo=order[b.abstractState]!=null?order[b.abstractState]:(order[b.status]!=null?order[b.status]:1);
+    return ao-bo;
+  });
+  var liveCount=sorted.filter(function(s){return s.abstractState==='Live'||s.status==='In Progress';}).length;
+  var finalCount=sorted.filter(function(s){return s.abstractState==='Final'||s.status==='Final';}).length;
+  if(countEl){
+    var parts=[];
+    if(liveCount)parts.push(liveCount+' live');
+    if(finalCount)parts.push(finalCount+' final');
+    parts.push(sorted.length+' total');
+    countEl.textContent=parts.join(' · ');
+  }
+  // Check which games have active bets
+  var pendingBets=logPlays.filter(function(p){return !p.result;});
+  var html='';
+  sorted.forEach(function(s){
+    var isLive=s.abstractState==='Live'||s.status==='In Progress';
+    var isFinal=s.abstractState==='Final'||s.status==='Final';
+    var isPre=!isLive&&!isFinal;
+    // Check if user has a bet on this game
+    var hasBet=pendingBets.some(function(p){
+      var lg=p.game.toLowerCase();
+      var hw=s.home.toLowerCase().split(' ').pop();
+      var aw=s.away.toLowerCase().split(' ').pop();
+      return lg.includes(hw)||lg.includes(aw);
+    });
+    var statusText,statusCls;
+    if(isFinal){statusText='FINAL';statusCls='final';}
+    else if(isLive){statusText=(s.inningHalf==='Top'?'▲':'▼')+' '+s.inning;statusCls='live';}
+    else{
+      var gt=new Date(s.startTime);
+      statusText=gt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      statusCls='pre';
+    }
+    html+='<div class="rail-score-row'+(hasBet?' has-bet':'')+'">';
+    html+='<div class="rail-score-teams">';
+    html+='<div class="rail-score-team"><span class="team-abbr">'+(s.awayAbbr||s.away.split(' ').pop())+'</span><span class="team-runs">'+(isPre?'':s.awayScore)+'</span></div>';
+    html+='<div class="rail-score-team"><span class="team-abbr">'+(s.homeAbbr||s.home.split(' ').pop())+'</span><span class="team-runs">'+(isPre?'':s.homeScore)+'</span></div>';
+    html+='</div>';
+    html+='<div class="rail-score-status '+statusCls+'">'+(isLive?'<span class="live-dot"></span>':'')+statusText+'</div>';
+    html+='</div>';
+  });
+  body.innerHTML=html;
 }
 
 function autoGradeBets(){
