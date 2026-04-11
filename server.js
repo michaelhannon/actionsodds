@@ -75,6 +75,14 @@ const server = http.createServer((req, res) => {
   }
   if (req.url === '/odds') { fetchOdds(res); return; }
   if (req.url === '/ai-brief' && req.method === 'POST') { proxyAnthropic(req, res); return; }
+  if (req.url === '/favicon.svg') {
+    const filePath = require('path').join(__dirname, 'public', 'favicon.svg');
+    require('fs').readFile(filePath, (err, content) => {
+      if (err) { res.writeHead(404); res.end(); return; }
+      res.writeHead(200, { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'public, max-age=86400' });
+      res.end(content);
+    }); return;
+  }
   if (req.url === '/' || req.url === '/index.html') {
     const filePath = path.join(__dirname, 'public', 'index.html');
     fs.readFile(filePath, (err, content) => {
