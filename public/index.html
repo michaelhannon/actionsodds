@@ -26,6 +26,7 @@ body.light .wl-box{background:#ffffff;border-color:rgba(0,0,0,0.09);}
 body.light .log-row{border-color:rgba(0,0,0,0.07);}
 body.light .panel-tabs{border-color:rgba(0,0,0,0.09);}
 body.light .play-box{background:rgba(0,0,0,0.02);}
+body.light .golf-row-alt{background:rgba(0,0,0,0.02) !important;}
 body.light .matchup-divider{background:rgba(0,0,0,0.06);}
 body.light .ai-section{background:#f8f8fb;border-bottom:1px solid rgba(0,0,0,0.09);}
 body.light .ai-card{background:#ffffff;border-color:rgba(0,0,0,0.09);}
@@ -743,8 +744,9 @@ function checkTriggers(game,bk){
   // PGA TRIGGERS
   // =====================
   else if(activeSport==='pga'){
-    if(!h2h)return[];
-    h2h.outcomes.forEach(o=>{
+    const outrights=bm?.markets?.find(m=>m.key==='outrights');
+    if(!outrights)return[];
+    outrights.outcomes.forEach(o=>{
       // T1: Course history value — players with proven track record at this venue
       if(o.price>=300&&o.price<=1500)
         plays.push({trigger:'T1',desc:`${o.name} ${fmtOdds(o.price)}`,sub:'Course value',conf:6,real:true,note:`Check: 3+ top-10s at this course, current form (top-20 last 2 starts), driving distance vs course fit.`,amt:unitAmt(50),type:'real'});
@@ -988,6 +990,58 @@ function renderCard(){
   if(!Array.isArray(allGames))allGames=[];
   if(!allGames.length){out.innerHTML='<div class="status-box"><div class="status-title">No games today</div></div>';return;}
   document.getElementById('s-bank').textContent='$'+cfg.bankroll.toLocaleString();
+
+  // =====================
+  // GOLF / OUTRIGHTS VIEW
+  // =====================
+  if(activeSport==='pga'){
+    let html='';
+    for(const g of allGames){
+      const bm=g.bookmakers.find(b=>b.key===activeBook);
+      const outrights=bm?.markets?.find(m=>m.key==='outrights');
+      if(!outrights)continue;
+      const sorted=[...outrights.outcomes].sort((a,b)=>a.price-b.price);
+      const title=g.sport_title||'Tournament';
+      const timeStr=new Date(g.commence_time).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      html+=`<div class="game-card">
+        <div class="game-card-header">
+          <div class="game-time">${title} · ${timeStr}</div>
+          <div class="trigger-badges"><span class="tbadge tbadge-real">${sorted.length} golfers</span></div>
+        </div>
+        <div style="padding:10px 14px;">
+          <div style="display:grid;grid-template-columns:1fr auto;gap:0;font-family:'Barlow Condensed',sans-serif;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding:6px 0;">Golfer</div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding:6px 0;text-align:right;">Odds</div>`;
+      sorted.forEach(function(o,i){
+        var isFav=i<3;
+        var isValue=o.price>=300&&o.price<=1500;
+        var isLongshot=o.price>1500&&o.price<=3000;
+        var rowBg=i%2===0?'transparent':'rgba(255,255,255,0.02)';
+        var nameColor=isFav?'var(--gold)':isValue?'var(--green)':'var(--text)';
+        var oddsColor=o.price<=200?'var(--gold)':o.price<=1500?'var(--green)':'var(--text2)';
+        var badge='';
+        if(isFav)badge='<span style="font-size:9px;background:rgba(232,185,74,0.12);color:var(--gold);border:1px solid rgba(232,185,74,0.25);padding:1px 6px;border-radius:3px;margin-left:6px;letter-spacing:0.08em;">FAV</span>';
+        else if(isValue)badge='<span style="font-size:9px;background:rgba(46,204,113,0.12);color:var(--green);border:1px solid rgba(46,204,113,0.25);padding:1px 6px;border-radius:3px;margin-left:6px;letter-spacing:0.08em;">VALUE</span>';
+        html+=`<div style="font-size:14px;font-weight:${isFav?'600':'400'};color:${nameColor};padding:7px 0;border-bottom:1px solid var(--border);background:${rowBg};">${o.name}${badge}</div>
+          <div style="font-size:14px;font-weight:600;color:${oddsColor};padding:7px 0;text-align:right;border-bottom:1px solid var(--border);background:${rowBg};">${fmtOdds(o.price)}</div>`;
+      });
+      html+=`</div></div></div>`;
+    }
+    out.innerHTML=html||'<div class="status-box"><div class="status-title">No tournament data available</div></div>';
+    // Hide market intel for golf
+    var mi=document.getElementById('market-intel');if(mi)mi.style.display='none';
+    var pendingPlays=logPlays.filter(function(p){return !p.result;});
+    var atRisk=pendingPlays.reduce(function(a,p){return a+(parseFloat(p.amt)||0);},0);
+    document.getElementById('s-real').textContent=pendingPlays.length;
+    document.getElementById('s-stake').textContent='$'+atRisk.toLocaleString();
+    document.getElementById('game-count').textContent=(allGames.length||1)+' tournament(s)';
+    updateSeasonPnL();
+    return;
+  }
+
+  // =====================
+  // NORMAL SPORTS VIEW
+  // =====================
   analyzeMarket(allGames.filter(g=>(Date.now()-new Date(g.commence_time))<30*60*1000),activeBook);
   let realCount=0,stakeTotal=0,paperCount=0,html='';
   const now = new Date();
