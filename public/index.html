@@ -534,7 +534,7 @@ Respond ONLY with valid JSON, no markdown, no explanation:
 {"lean":"BET"|"PASS"|"WATCH","confidence":1-10,"take":"2-3 sentence sharp betting take mentioning specific factors","factors":["factor1","factor2","factor3"],"warning":"one key risk or null"}`;
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch('/ai-brief',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
