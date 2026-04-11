@@ -255,7 +255,7 @@ function fetchScores(res) {
     return;
   }
   var today = new Date().toISOString().split('T')[0];
-  var url = 'https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=' + today + '&hydrate=linescore,probablePitcher,team,decisions';
+  var url = 'https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=' + today + '&hydrate=linescore,probablePitcher(note),team,decisions,stats(type=[season],group=[pitching])';
   https.get(url, function(apiRes) {
     var data = '';
     apiRes.on('data', function(chunk) { data += chunk; });
@@ -282,6 +282,29 @@ function fetchScores(res) {
 
             var awayPitcher = g.teams.away.probablePitcher;
             var homePitcher = g.teams.home.probablePitcher;
+
+            // Extract pitcher season stats if available
+            function getPitcherStats(pitcher) {
+              if (!pitcher) return null;
+              var stats = { name: pitcher.fullName, era: 'N/A', whip: 'N/A', ip: 'N/A', k9: 'N/A', fip: 'N/A', w: 0, l: 0 };
+              if (pitcher.stats) {
+                pitcher.stats.forEach(function(s) {
+                  if (s.type && s.type.displayName === 'season' && s.stats) {
+                    stats.era = s.stats.era || 'N/A';
+                    stats.whip = s.stats.whip || 'N/A';
+                    stats.ip = s.stats.inningsPitched || 'N/A';
+                    stats.k9 = s.stats.strikeoutsPer9Inn || 'N/A';
+                    stats.w = s.stats.wins || 0;
+                    stats.l = s.stats.losses || 0;
+                  }
+                });
+              }
+              if (pitcher.note) stats.note = pitcher.note;
+              return stats;
+            }
+
+            var awayPitcherStats = getPitcherStats(awayPitcher);
+            var homePitcherStats = getPitcherStats(homePitcher);
 
             games.push({
               gameId: g.gamePk,
@@ -312,6 +335,12 @@ function fetchScores(res) {
               strikes: ls.strikes || 0,
               awayProbable: awayPitcher ? awayPitcher.fullName : 'TBD',
               homeProbable: homePitcher ? homePitcher.fullName : 'TBD',
+              awayPitcherStats: awayPitcherStats,
+              homePitcherStats: homePitcherStats,
+              awayWins: (g.teams.away.leagueRecord || {}).wins || 0,
+              awayLosses: (g.teams.away.leagueRecord || {}).losses || 0,
+              homeWins: (g.teams.home.leagueRecord || {}).wins || 0,
+              homeLosses: (g.teams.home.leagueRecord || {}).losses || 0,
               decisions: g.decisions ? {
                 winner: g.decisions.winner ? g.decisions.winner.fullName : null,
                 loser: g.decisions.loser ? g.decisions.loser.fullName : null,

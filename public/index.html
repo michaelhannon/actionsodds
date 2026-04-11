@@ -154,6 +154,18 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .odds-val.dog{color:#60a8ff;}
 .matchup-divider{height:1px;background:var(--border);margin:2px 0;}
 .play-box{border-top:1px solid var(--border);padding:10px 14px;background:rgba(0,0,0,0.15);}
+.game-stats-strip{border-top:1px solid var(--border);padding:8px 14px;background:rgba(0,0,0,0.08);display:flex;gap:6px;flex-wrap:wrap;}
+body.light .game-stats-strip{background:rgba(0,0,0,0.02);}
+.gs-pill{display:flex;flex-direction:column;background:var(--glass);border:1px solid var(--glass-border);border-radius:6px;padding:4px 8px;min-width:0;flex:1;}
+.gs-pill-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);white-space:nowrap;}
+.gs-pill-val{font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gs-pill-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);}
+.gs-pitcher{display:flex;align-items:center;gap:6px;flex:2;min-width:0;}
+.gs-pitcher-side{display:flex;flex-direction:column;flex:1;min-width:0;}
+.gs-pitcher-name{font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gs-pitcher-era{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;}
+.gs-pitcher-detail{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);}
+.gs-vs{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);font-weight:600;align-self:center;}
 .play-section-label{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:6px;}
 .play-section-label.real{color:var(--green);}
 .play-section-label.paper{color:var(--amber);}
@@ -1427,12 +1439,14 @@ function renderCard(){
       html+=`<div class="game-card">
         <div class="game-card-header">
           <div class="game-time">${title} · ${timeStr}</div>
-          <div class="trigger-badges"><span class="tbadge tbadge-real">${sorted.length} golfers</span></div>
+          <div class="trigger-badges"><span class="tbadge tbadge-real">${sorted.length} golfers</span>${mastersData&&mastersData.status?`<span class="tbadge tbadge-paper">${mastersData.status}</span>`:''}</div>
         </div>
         <div style="padding:10px 14px;">
-          <div style="display:grid;grid-template-columns:1fr auto auto;gap:0;font-family:'Barlow Condensed',sans-serif;">
+          <div style="display:grid;grid-template-columns:1fr auto auto auto auto;gap:0;font-family:'Barlow Condensed',sans-serif;">
             <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding:6px 0;">Golfer</div>
-            <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding:6px 0;text-align:center;width:60px;">Score</div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding:6px 0;text-align:center;width:48px;">Score</div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding:6px 0;text-align:center;width:48px;">Today</div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding:6px 0;text-align:center;width:38px;">Thru</div>
             <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding:6px 0;text-align:right;width:70px;">Odds</div>`;
       sorted.forEach(function(o,i){
         var isFav=i<3;
@@ -1447,11 +1461,15 @@ function renderCard(){
         var lbPlayer=mastersData&&mastersData.players?mastersData.players.find(function(p){return p.name.toLowerCase()===o.name.toLowerCase()||o.name.toLowerCase().includes(p.name.toLowerCase().split(' ').pop());}):null;
         var scoreText=lbPlayer?lbPlayer.score:'—';
         var posText=lbPlayer?lbPlayer.position:'';
+        var todayText=lbPlayer&&lbPlayer.today&&lbPlayer.today!=='—'?lbPlayer.today:'—';
+        var thruText=lbPlayer&&lbPlayer.thru&&lbPlayer.thru!=='—'?lbPlayer.thru:'—';
         var rowId='golfer-'+i;
         html+=`<div style="font-size:14px;font-weight:${isFav?'600':'400'};color:${nameColor};padding:7px 0;border-bottom:1px solid var(--border);background:${rowBg};cursor:pointer;display:flex;align-items:center;" onclick="toggleGolfer('${rowId}')">
             <span style="flex:1;">${posText?posText+'. ':''}${o.name}${badge}</span>
           </div>
-          <div style="font-size:14px;font-weight:600;color:${scoreText.includes('-')?'var(--green)':scoreText.includes('+')?'var(--red)':'var(--text2)'};padding:7px 0;text-align:center;border-bottom:1px solid var(--border);background:${rowBg};width:60px;">${scoreText}</div>
+          <div style="font-size:14px;font-weight:600;color:${scoreText.includes('-')?'var(--green)':scoreText.includes('+')?'var(--red)':'var(--text2)'};padding:7px 0;text-align:center;border-bottom:1px solid var(--border);background:${rowBg};width:48px;">${scoreText}</div>
+          <div style="font-size:13px;font-weight:600;color:${todayText.includes('-')?'var(--green)':todayText.includes('+')?'var(--red)':'var(--text3)'};padding:7px 0;text-align:center;border-bottom:1px solid var(--border);background:${rowBg};width:48px;">${todayText}</div>
+          <div style="font-size:12px;color:var(--text3);padding:7px 0;text-align:center;border-bottom:1px solid var(--border);background:${rowBg};width:38px;">${thruText}</div>
           <div style="font-size:14px;font-weight:600;color:${oddsColor};padding:7px 0;text-align:right;border-bottom:1px solid var(--border);background:${rowBg};width:70px;">${fmtOdds(o.price)}</div>
           <div id="${rowId}" style="display:none;grid-column:1/-1;padding:10px 0;border-bottom:1px solid var(--border);background:${rowBg};">
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">`;
@@ -1517,6 +1535,96 @@ function renderCard(){
         <div class="team-row"><div class="team-info"><span class="team-badge home">Home</span><span class="team-name${homeFav?' fav':''}">${home}</span></div>
           <div class="odds-group"><div class="odds-cell"><span class="odds-val${homeML>0?' dog':''}">${fmtOdds(homeML)}</span></div><div class="odds-cell"><span class="odds-val">${homeRL?(homeRL.point>0?'+':'')+homeRL.point+' '+fmtOdds(homeRL.price):'—'}</span></div><div class="odds-cell"><span class="odds-val">${under?'U '+under.point:'—'}</span></div></div></div>
       </div>`;
+    // =====================
+    // REAL-TIME STATS STRIP (MLB only for now, NHL/NBA/etc get records)
+    // =====================
+    if(activeSport==='mlb'){
+      var scoreMatch=liveScores.find(function(s){
+        return s.home===home||s.away===away||home.includes(s.home.split(' ').pop())||away.includes(s.away.split(' ').pop())||s.home.includes(home.split(' ').pop())||s.away.includes(away.split(' ').pop());
+      });
+      var awayPS=scoreMatch&&scoreMatch.awayPitcherStats;
+      var homePS=scoreMatch&&scoreMatch.homePitcherStats;
+      var awayRec=scoreMatch?(scoreMatch.awayWins+'-'+scoreMatch.awayLosses):'';
+      var homeRec=scoreMatch?(scoreMatch.homeWins+'-'+scoreMatch.homeLosses):'';
+      var awayPName=scoreMatch&&scoreMatch.awayProbable?scoreMatch.awayProbable:'TBD';
+      var homePName=scoreMatch&&scoreMatch.homeProbable?scoreMatch.homeProbable:'TBD';
+      // ERA coloring helper
+      function eraColor(era){
+        if(!era||era==='N/A')return 'var(--text2)';
+        var n=parseFloat(era);
+        if(isNaN(n))return 'var(--text2)';
+        if(n<=3.00)return 'var(--green)';
+        if(n<=4.00)return 'var(--amber)';
+        return 'var(--red)';
+      }
+      html+=`<div class="game-stats-strip">`;
+      // Pitcher matchup pill
+      html+=`<div class="gs-pitcher" style="background:var(--glass);border:1px solid var(--glass-border);border-radius:6px;padding:6px 8px;">
+        <div class="gs-pitcher-side">
+          <div class="gs-pill-lbl">Away SP</div>
+          <div class="gs-pitcher-name">${awayPName==='TBD'?'TBD':awayPName.split(' ').pop()}</div>
+          ${awayPS&&awayPS.era!=='N/A'?`<div class="gs-pitcher-era" style="color:${eraColor(awayPS.era)};">${awayPS.era} ERA</div><div class="gs-pitcher-detail">${awayPS.w}-${awayPS.l} · ${awayPS.whip} WHIP</div>`:`<div class="gs-pitcher-detail">—</div>`}
+        </div>
+        <div class="gs-vs">vs</div>
+        <div class="gs-pitcher-side">
+          <div class="gs-pill-lbl">Home SP</div>
+          <div class="gs-pitcher-name">${homePName==='TBD'?'TBD':homePName.split(' ').pop()}</div>
+          ${homePS&&homePS.era!=='N/A'?`<div class="gs-pitcher-era" style="color:${eraColor(homePS.era)};">${homePS.era} ERA</div><div class="gs-pitcher-detail">${homePS.w}-${homePS.l} · ${homePS.whip} WHIP</div>`:`<div class="gs-pitcher-detail">—</div>`}
+        </div>
+      </div>`;
+      // Records pill
+      if(awayRec||homeRec){
+        html+=`<div class="gs-pill" style="flex:0 0 auto;min-width:55px;align-items:center;text-align:center;">
+          <div class="gs-pill-lbl">Records</div>
+          <div class="gs-pill-val" style="font-size:11px;">${awayRec||'—'}</div>
+          <div style="height:1px;background:var(--border);width:100%;margin:2px 0;"></div>
+          <div class="gs-pill-val" style="font-size:11px;">${homeRec||'—'}</div>
+        </div>`;
+      }
+      // Live score mini if game is in progress
+      if(scoreMatch&&(scoreMatch.status==='In Progress'||scoreMatch.abstractState==='Live')){
+        var innText=(scoreMatch.inningHalf==='Top'?'▲':'▼')+' '+scoreMatch.inning;
+        html+=`<div class="gs-pill" style="flex:0 0 auto;min-width:55px;align-items:center;text-align:center;border-color:rgba(52,211,153,0.2);">
+          <div class="gs-pill-lbl" style="color:var(--green);"><span class="live-dot"></span>LIVE</div>
+          <div class="gs-pill-val" style="font-size:11px;">${scoreMatch.awayScore}-${scoreMatch.homeScore}</div>
+          <div class="gs-pill-sub">${innText} · ${scoreMatch.outs}out</div>
+        </div>`;
+      } else if(scoreMatch&&(scoreMatch.status==='Final'||scoreMatch.abstractState==='Final')){
+        html+=`<div class="gs-pill" style="flex:0 0 auto;min-width:55px;align-items:center;text-align:center;">
+          <div class="gs-pill-lbl" style="color:var(--gold);">FINAL</div>
+          <div class="gs-pill-val" style="font-size:11px;">${scoreMatch.awayScore}-${scoreMatch.homeScore}</div>
+        </div>`;
+      }
+      html+=`</div>`;
+    }
+    // Non-MLB sports — show records from live scores if available
+    else if(activeSport==='nhl'||activeSport==='nba'){
+      var scoreMatch2=liveScores.find(function(s){
+        return home.includes(s.home.split(' ').pop())||away.includes(s.away.split(' ').pop())||s.home.includes(home.split(' ').pop())||s.away.includes(away.split(' ').pop());
+      });
+      if(scoreMatch2){
+        var awayRec2=scoreMatch2.awayRecord||'';
+        var homeRec2=scoreMatch2.homeRecord||'';
+        if(awayRec2||homeRec2){
+          html+=`<div class="game-stats-strip">
+            <div class="gs-pill" style="flex:0 0 auto;">
+              <div class="gs-pill-lbl">${away.split(' ').pop()}</div>
+              <div class="gs-pill-val">${awayRec2||'—'}</div>
+            </div>
+            <div class="gs-pill" style="flex:0 0 auto;">
+              <div class="gs-pill-lbl">${home.split(' ').pop()}</div>
+              <div class="gs-pill-val">${homeRec2||'—'}</div>
+            </div>`;
+          if(scoreMatch2.status==='In Progress'||scoreMatch2.abstractState==='Live'){
+            html+=`<div class="gs-pill" style="flex:0 0 auto;border-color:rgba(52,211,153,0.2);">
+              <div class="gs-pill-lbl" style="color:var(--green);"><span class="live-dot"></span>LIVE</div>
+              <div class="gs-pill-val">${scoreMatch2.awayScore}-${scoreMatch2.homeScore}</div>
+            </div>`;
+          }
+          html+=`</div>`;
+        }
+      }
+    }
     if(plays.length){
       const rp2=rp,sp2=sp;
       if(rp2.length||sp2.length){
@@ -1528,11 +1636,11 @@ function renderCard(){
     }
     // Bet links bar
     html+=`<div style="display:flex;gap:6px;padding:8px 14px;border-top:1px solid var(--border);flex-wrap:wrap;">
-      <button onclick="openBook('mlb','${encodeURIComponent(away+' '+home)}')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--gold);border:none;color:var(--black);padding:4px 10px;border-radius:4px;cursor:pointer;">Place Bet ↗</button>
-      <button onclick="openBookDirect('draftkings','mlb')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.05em;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 8px;border-radius:4px;cursor:pointer;">DK</button>
-      <button onclick="openBookDirect('fanduel','mlb')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.05em;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 8px;border-radius:4px;cursor:pointer;">FD</button>
-      <button onclick="openBookDirect('betmgm','mlb')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.05em;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 8px;border-radius:4px;cursor:pointer;">MGM</button>
-      <button onclick="openBookDirect('caesars','mlb')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.05em;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 8px;border-radius:4px;cursor:pointer;">CZR</button>
+      <button onclick="openBook('${activeSport}','${encodeURIComponent(away+' '+home)}')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--gold);border:none;color:var(--black);padding:4px 10px;border-radius:4px;cursor:pointer;">Place Bet ↗</button>
+      <button onclick="openBookDirect('draftkings','${activeSport}')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.05em;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 8px;border-radius:4px;cursor:pointer;">DK</button>
+      <button onclick="openBookDirect('fanduel','${activeSport}')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.05em;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 8px;border-radius:4px;cursor:pointer;">FD</button>
+      <button onclick="openBookDirect('betmgm','${activeSport}')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.05em;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 8px;border-radius:4px;cursor:pointer;">MGM</button>
+      <button onclick="openBookDirect('caesars','${activeSport}')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.05em;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 8px;border-radius:4px;cursor:pointer;">CZR</button>
     </div>`;
     html+=`</div>`;
   }
