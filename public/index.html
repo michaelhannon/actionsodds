@@ -526,10 +526,19 @@ const BOOK_ORDER=['caesars','hard_rock_bet','draftkings','fanduel','betmgm'];
 let paperPlays=[],logPlays=[];
 try{paperPlays=JSON.parse(localStorage.getItem('ao_paper')||'[]');}catch(e){}
 try{logPlays=JSON.parse(localStorage.getItem('ao_log')||'[]');}catch(e){}
+// Seed opening day bets if log is empty
+if(!logPlays.length){
+  logPlays=[
+    {game:'NYY @ TB',bet:'TB Rays ML',odds:'+162',amt:'400',trigger:'T1+T2+T4+T5+T8',date:'4/11/2026',result:null},
+    {game:'LAA @ CIN',bet:'STL Cardinals ML',odds:'+118',amt:'400',trigger:'T12+T2+T3+T4+T6+T8',date:'4/11/2026',result:null},
+    {game:'Parlay: TB + STL + Rory McIlroy Masters',bet:'Parlay',odds:'+700',amt:'200',trigger:'T1+T12+PGA',date:'4/11/2026',result:null}
+  ];
+  try{localStorage.setItem('ao_log',JSON.stringify(logPlays));}catch(e){}
+}
 function savePaper(){try{localStorage.setItem('ao_paper',JSON.stringify(paperPlays));}catch(e){}}
 function saveLog(){try{localStorage.setItem('ao_log',JSON.stringify(logPlays));}catch(e){}}
 
-const DEFAULT_CFG={bankroll:2000,unit:200,t1aMin:115,t1bMin:200,t1bDate:'2026-06-01',t2Tiers:[{p:130,u:25},{p:135,u:50},{p:140,u:75},{p:150,u:100}],t3Tiers:[{p:120,u:25},{p:122,u:50},{p:125,u:75},{p:130,u:100}],t4Pct:55,t4Sample:20,dynamic:true,toppct:true,sharp:true,baseline:true};
+const DEFAULT_CFG={bankroll:1000,unit:200,t1aMin:115,t1bMin:200,t1bDate:'2026-06-01',t2Tiers:[{p:130,u:25},{p:135,u:50},{p:140,u:75},{p:150,u:100}],t3Tiers:[{p:120,u:25},{p:122,u:50},{p:125,u:75},{p:130,u:100}],t4Pct:55,t4Sample:20,dynamic:true,toppct:true,sharp:true,baseline:true};
 let cfg=DEFAULT_CFG;
 try{const s=localStorage.getItem('ao_cfg');if(s)cfg={...DEFAULT_CFG,...JSON.parse(s)};}catch(e){}
 let marketState={avgDog:0,bestDog:0,avgRL:0,dynamicT1A:0,sharpGames:[],topDogs:[],homeDogs:[]};
@@ -887,15 +896,25 @@ async function refreshBriefs(){
   const container=document.getElementById('ai-cards');
   if(!allGames.length){container.innerHTML='<div class="ai-empty">Load odds first.</div>';return;}
 
+  // Only brief games that have been logged as live plays
+  const pendingLive=logPlays.filter(p=>!p.result);
+  if(!pendingLive.length){container.innerHTML='<div class="ai-empty">No live plays logged. Log a play to get AI briefs.</div>';return;}
+
   const now2 = new Date();
   const flaggedGames=[];
   for(const g of allGames.filter(g=>(now2-new Date(g.commence_time))<30*60*1000)){
     const plays=checkTriggers(g,activeBook);
-    const realPlays=plays.filter(p=>p.type==='real');
-    if(realPlays.length>0)flaggedGames.push({game:g,plays});
+    // Check if this game matches any logged live play
+    const gameStr=(g.away_team+' '+g.home_team).toLowerCase();
+    const hasLivePlay=pendingLive.some(lp=>{
+      const lg=lp.game.toLowerCase();
+      // Match team names from log against API game data
+      return gameStr.split(' ').some(w=>w.length>2&&lg.includes(w)) || lg.split(' ').some(w=>w.length>2&&gameStr.includes(w));
+    });
+    if(hasLivePlay && plays.length>0)flaggedGames.push({game:g,plays});
   }
 
-  if(!flaggedGames.length){container.innerHTML='<div class="ai-empty">No real-money plays flagged today.</div>';return;}
+  if(!flaggedGames.length){container.innerHTML='<div class="ai-empty">No upcoming games match your live plays.</div>';return;}
 
   // Filter to only truly upcoming games at render time
   const nowRender = new Date();
@@ -1007,8 +1026,11 @@ function renderCard(){
     html+=`</div>`;
   }
   out.innerHTML=html;
-  document.getElementById('s-real').textContent=realCount;
-  document.getElementById('s-stake').textContent='$'+stakeTotal.toLocaleString();
+  // Summary strip from actual logged plays, not trigger count
+  const pendingPlays=logPlays.filter(p=>!p.result);
+  const atRisk=pendingPlays.reduce((a,p)=>a+(parseFloat(p.amt)||0),0);
+  document.getElementById('s-real').textContent=pendingPlays.length;
+  document.getElementById('s-stake').textContent='$'+atRisk.toLocaleString();
   const sportLabels={mlb:'games',nhl:'games',nba:'games',nfl:'games',ncaaf:'games',ncaab:'games',ufc:'fights',pga:'golfers'};
   document.getElementById('game-count').textContent=allGames.length+' '+(sportLabels[activeSport]||'games')+' today';
   updateSeasonPnL();
