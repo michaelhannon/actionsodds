@@ -9,6 +9,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,400&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--black:#0a0a0b;--dark:#111114;--panel:#18181d;--panel2:#1f1f26;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--gold:#e8b94a;--gold2:#f5d07a;--green:#2ecc71;--green-dim:#1a7a43;--amber:#f39c12;--amber-dim:#7a4e09;--red:#e74c3c;--text:#f0eff5;--text2:#9896a8;--text3:#5c5a6e;--radius:10px;--radius-lg:16px;}
+body.light{--black:#f5f5f7;--dark:#ffffff;--panel:#ffffff;--panel2:#f0f0f4;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);--text:#111114;--text2:#555560;--text3:#999aaa;--green:#1a8a45;--green-dim:#d4f0e0;--amber:#c47a00;--amber-dim:#fef3d0;--red:#c0392b;}
+body.light header::after{background:linear-gradient(90deg,transparent,var(--gold),var(--gold2),var(--gold),transparent);}
+body.light .game-card.flagged{border-color:#1a8a45;box-shadow:0 0 0 1px rgba(26,138,69,0.2);}
+body.light .odds-val.dog{color:#1a6abf;}
+body.light .play-amt.sharp{color:#1a6abf;}
+body.light .tbadge-sharp{background:rgba(26,106,191,0.1);color:#1a6abf;border-color:rgba(26,106,191,0.3);}
+body.light .ai-section{background:#fafafa;border-bottom:1px solid var(--border);}
+body.light .ai-card{background:#ffffff;border-color:var(--border);}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--black);color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;}
 header{position:relative;z-index:10;background:var(--dark);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;}
@@ -195,6 +203,10 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
   <div class="header-right">
     <span class="sport-badge">MLB 2026</span>
     <span class="last-update" id="last-update"></span>
+    <button id="theme-toggle" onclick="toggleTheme()" style="background:transparent;border:1px solid var(--border2);border-radius:20px;padding:5px 12px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all 0.2s;">
+      <span id="theme-icon" style="font-size:14px;">☀</span>
+      <span id="theme-label" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);">Light</span>
+    </button>
     <button class="refresh-btn" id="refresh-btn" onclick="fetchOdds()">
       <span id="refresh-spinner" class="spinner" style="display:none;border-top-color:#000;"></span>
       Refresh
@@ -814,7 +826,25 @@ function addLog(){const g=document.getElementById('l-game').value.trim(),b=docum
 function setLR(i,r){logPlays[i].result=r;saveLog();renderLog();updateSeasonPnL();}
 
 let countdown=300;
-function updateCountdown(){countdown--;if(countdown<=0){countdown=300;fetchOdds();
+function updateCountdown(){countdown--;if(countdown<=0){countdown=300;// Theme
+let isDark = localStorage.getItem('ao_theme') !== 'light';
+function applyTheme(){
+  document.body.classList.toggle('light', !isDark);
+  const icon = document.getElementById('theme-icon');
+  const label = document.getElementById('theme-label');
+  const toggle = document.getElementById('theme-toggle');
+  if(icon) icon.textContent = isDark ? '☀' : '☾';
+  if(label) label.textContent = isDark ? 'Light' : 'Dark';
+  if(toggle) toggle.style.background = isDark ? 'transparent' : 'rgba(0,0,0,0.06)';
+}
+function toggleTheme(){
+  isDark = !isDark;
+  localStorage.setItem('ao_theme', isDark ? 'dark' : 'light');
+  applyTheme();
+}
+applyTheme();
+
+fetchOdds();
 updateSeasonPnL();return;}const mins=Math.floor(countdown/60),secs=countdown%60;const timeStr=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});document.getElementById('last-update').textContent='Updated '+timeStr+' — next in '+mins+':'+(secs<10?'0':'')+secs;}
 setInterval(updateCountdown,1000);
 fetchOdds();
