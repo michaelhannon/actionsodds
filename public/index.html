@@ -1180,11 +1180,11 @@ async function refreshBriefs(){
   for(const g of allGames.filter(g=>(now2-new Date(g.commence_time))<30*60*1000)){
     const plays=checkTriggers(g,activeBook);
     // Check if this game matches any logged live play
-    const gameStr=(g.away_team+' '+g.home_team).toLowerCase();
     const hasLivePlay=pendingLive.some(lp=>{
-      const lg=lp.game.toLowerCase();
-      // Match team names from log against API game data
-      return gameStr.split(' ').some(w=>w.length>2&&lg.includes(w)) || lg.split(' ').some(w=>w.length>2&&gameStr.includes(w));
+      const searchStr=(lp.game+' '+lp.bet).toLowerCase();
+      const homeLastWord=g.home_team.toLowerCase().split(' ').pop();
+      const awayLastWord=g.away_team.toLowerCase().split(' ').pop();
+      return searchStr.includes(homeLastWord) || searchStr.includes(awayLastWord);
     });
     if(hasLivePlay && plays.length>0)flaggedGames.push({game:g,plays});
   }
