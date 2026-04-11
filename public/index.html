@@ -108,6 +108,9 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .sport-btn{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;color:var(--text3);background:transparent;border:1px solid var(--border2);padding:4px 10px;border-radius:4px;text-transform:uppercase;cursor:pointer;transition:all 0.15s;}
 .sport-btn:hover{border-color:rgba(232,185,74,0.4);color:var(--gold);}
 .sport-btn.active{color:var(--gold);background:rgba(232,185,74,0.15);border-color:var(--gold);}
+.sport-btn{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;color:var(--text3);background:transparent;border:1px solid var(--border2);padding:4px 10px;border-radius:4px;text-transform:uppercase;cursor:pointer;transition:all 0.15s;}
+.sport-btn:hover{border-color:rgba(232,185,74,0.4);color:var(--gold);}
+.sport-btn.active{color:var(--gold);background:rgba(232,185,74,0.15);border-color:var(--gold);}
 .market-intel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;}
 .intel-item{display:flex;flex-direction:column;}
 .intel-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:3px;}
@@ -231,8 +234,14 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
   </div>
   <div class="header-right">
     <div style="display:flex;gap:6px;">
-      <button id="sport-mlb" onclick="setSport('mlb')" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.15em;color:var(--gold);background:rgba(232,185,74,0.15);border:1px solid var(--gold);padding:4px 12px;border-radius:4px;text-transform:uppercase;cursor:pointer;">MLB</button>
-      <button id="sport-nhl" onclick="setSport('nhl')" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.15em;color:var(--text3);background:transparent;border:1px solid var(--border2);padding:4px 12px;border-radius:4px;text-transform:uppercase;cursor:pointer;">NHL</button>
+      <button id="sport-mlb" onclick="setSport('mlb')" class="sport-btn">MLB</button>
+      <button id="sport-nhl" onclick="setSport('nhl')" class="sport-btn">NHL</button>
+      <button id="sport-nba" onclick="setSport('nba')" class="sport-btn">NBA</button>
+      <button id="sport-nfl" onclick="setSport('nfl')" class="sport-btn">NFL</button>
+      <button id="sport-ncaaf" onclick="setSport('ncaaf')" class="sport-btn">NCAAF</button>
+      <button id="sport-ncaab" onclick="setSport('ncaab')" class="sport-btn">NCAAB</button>
+      <button id="sport-ufc" onclick="setSport('ufc')" class="sport-btn">UFC</button>
+      <button id="sport-pga" onclick="setSport('pga')" class="sport-btn">PGA</button>
     </div>
     <span class="last-update" id="last-update"></span>
     <button id="theme-toggle" onclick="toggleTheme()" style="background:transparent;border:1px solid var(--border2);border-radius:20px;padding:5px 12px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all 0.2s;">
