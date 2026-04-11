@@ -246,9 +246,9 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 
   <div class="tracker-panel">
     <div class="panel-tabs">
-      <button class="panel-tab active" onclick="showTab('paper')">Paper</button>
-      <button class="panel-tab" onclick="showTab('log')">Real plays</button>
-      <button class="panel-tab" onclick="showTab('settings')">Settings</button>
+      <button class="panel-tab active" id="tab-btn-paper" onclick="showTab('paper')">Paper</button>
+      <button class="panel-tab" id="tab-btn-log" onclick="showTab('log')">Real plays</button>
+      <button class="panel-tab" id="tab-btn-settings" onclick="showTab('settings')">Settings</button>
     </div>
 
     <div id="ptab-paper">
@@ -685,9 +685,14 @@ async function fetchOdds(){
 }
 
 function showTab(t){
-  ['paper','log','settings'].forEach(x=>document.getElementById('ptab-'+x).style.display=x===t?'block':'none');
-  document.querySelectorAll('.panel-tab').forEach((b,i)=>b.classList.toggle('active',['paper','log','settings'][i]===t));
-  if(t==='settings')loadSettingsForm();if(t==='paper')renderPaper();if(t==='log')renderLog();
+  ['paper','log','settings'].forEach(x=>{
+    document.getElementById('ptab-'+x).style.display=x===t?'block':'none';
+    const btn=document.getElementById('tab-btn-'+x);
+    if(btn)btn.classList.toggle('active',x===t);
+  });
+  if(t==='settings')loadSettingsForm();
+  if(t==='paper')renderPaper();
+  if(t==='log')renderLog();
 }
 function toggleSetting(key){cfg[key]=!cfg[key];const el=document.getElementById('tog-'+key);if(el)el.classList.toggle('on',cfg[key]);try{localStorage.setItem('ao_cfg',JSON.stringify(cfg));}catch(e){}briefCache={};renderCard();refreshBriefs();}
 function loadSettingsForm(){
