@@ -74,7 +74,8 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .ai-cards{display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;scroll-behavior:smooth;}
 .ai-cards::-webkit-scrollbar{height:3px;}
 .ai-cards::-webkit-scrollbar-thumb{background:var(--gold);border-radius:99px;}
-.ai-card{background:var(--panel);backdrop-filter:blur(var(--blur));border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:14px 16px;min-width:300px;max-width:340px;flex-shrink:0;position:relative;transition:all 0.3s;animation:cardIn 0.4s ease both;}
+.ai-card{background:rgba(14,15,22,0.65);backdrop-filter:blur(16px);border:1px solid rgba(232,185,74,0.08);border-radius:var(--radius-lg);padding:16px 20px;min-width:300px;flex:1;max-width:600px;flex-shrink:0;position:relative;transition:all 0.3s;animation:cardIn 0.4s ease both;}
+.ai-cards:has(.ai-card:only-child) .ai-card{max-width:100%;min-width:100%;}
 .ai-card:hover{border-color:rgba(232,185,74,0.2);transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,0.3);}
 .ai-card.loading{opacity:0.7;}
 @keyframes cardIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
@@ -92,7 +93,7 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .ai-lean.pass{background:rgba(248,113,113,0.1);color:var(--red);border:1px solid rgba(248,113,113,0.2);}
 .ai-lean.watch{background:rgba(251,191,36,0.1);color:var(--amber);border:1px solid rgba(251,191,36,0.2);}
 .ai-loading{display:flex;align-items:center;gap:8px;color:var(--text3);font-size:12px;padding:8px 0;}
-.ai-empty{font-size:13px;color:var(--text3);font-style:italic;padding:8px 0;}
+.ai-empty{font-size:13px;color:var(--text3);padding:16px 20px;background:rgba(14,15,22,0.5);backdrop-filter:blur(12px);border:1px solid rgba(232,185,74,0.06);border-radius:var(--radius-lg);line-height:1.6;}
 .confidence-bar{height:3px;background:var(--border2);border-radius:99px;margin-top:8px;overflow:hidden;}
 .confidence-fill{height:100%;border-radius:99px;background:var(--green);transition:width 0.8s cubic-bezier(0.22,1,0.36,1);}
 
@@ -242,7 +243,7 @@ a,button,input,select{transition:all 0.15s ease;}
   .layout{grid-template-columns:1fr;}
   .summary-strip{grid-template-columns:repeat(2,1fr);}
   .ai-cards{flex-direction:row;}
-  .ai-card{min-width:280px;max-width:300px;}
+  .ai-card{min-width:280px;max-width:100%;}
   .tracker-panel{border-left:none;border-top:1px solid var(--border);}
   header{padding:0 16px;height:60px;}
   .odds-panel,.tracker-panel{padding:16px;}
@@ -1022,7 +1023,7 @@ async function refreshBriefs(){
 
   // Only brief games that have been logged as live plays
   const pendingLive=logPlays.filter(p=>!p.result);
-  if(!pendingLive.length){container.innerHTML='<div class="ai-empty">No live plays logged. Log a play to get AI briefs.</div>';return;}
+  if(!pendingLive.length){container.innerHTML='<div class="ai-empty"><span style="color:var(--gold);font-weight:600;">No live plays.</span> Log a bet in the Live Plays tab to unlock AI game briefs with pitcher analysis, weather, and betting recommendations.</div>';return;}
 
   const now2 = new Date();
   const flaggedGames=[];
@@ -1038,7 +1039,7 @@ async function refreshBriefs(){
     if(hasLivePlay && plays.length>0)flaggedGames.push({game:g,plays});
   }
 
-  if(!flaggedGames.length){container.innerHTML='<div class="ai-empty">No upcoming games match your live plays.</div>';return;}
+  if(!flaggedGames.length){container.innerHTML='<div class="ai-empty"><span style="color:var(--gold);font-weight:600;">No active briefs.</span> AI analysis appears here when your logged bets match upcoming games. Your plays will be briefed as game time approaches.</div>';return;}
 
   // Filter to only truly upcoming games at render time
   const nowRender = new Date();
