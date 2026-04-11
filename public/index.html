@@ -219,9 +219,9 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 <div class="layout">
   <div class="odds-panel">
     <div class="summary-strip">
-      <div class="stat-box green"><div class="stat-label">Real plays</div><div class="stat-val gold" id="s-real">—</div></div>
-      <div class="stat-box"><div class="stat-label">Daily stake</div><div class="stat-val" id="s-stake">—</div></div>
-      <div class="stat-box amber"><div class="stat-label">Paper plays</div><div class="stat-val amber" id="s-paper">—</div></div>
+      <div class="stat-box green"><div class="stat-label">Live plays</div><div class="stat-val gold" id="s-real">—</div></div>
+      <div class="stat-box"><div class="stat-label">At risk</div><div class="stat-val" id="s-stake">—</div></div>
+      <div class="stat-box green"><div class="stat-label">Season P&L</div><div class="stat-val green" id="s-pnl">+$0</div></div>
       <div class="stat-box green"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bank">—</div></div>
     </div>
     <div class="section-hdr">
@@ -247,7 +247,7 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
   <div class="tracker-panel">
     <div class="panel-tabs">
       <button class="panel-tab active" id="tab-btn-paper" onclick="showTab('paper')">Paper</button>
-      <button class="panel-tab" id="tab-btn-log" onclick="showTab('log')">Real plays</button>
+      <button class="panel-tab" id="tab-btn-log" onclick="showTab('log')">Live plays</button>
       <button class="panel-tab" id="tab-btn-settings" onclick="showTab('settings')">Settings</button>
     </div>
 
@@ -276,14 +276,34 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 
     <div id="ptab-log" style="display:none;">
       <div class="wl-strip" id="log-wl-strip">
-        <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">0</div></div>
-        <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">0</div></div>
-        <div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val">0</div></div>
-        <div class="wl-box"><div class="wl-label">P&L</div><div class="wl-val pos">$0</div></div>
+        <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w" id="lw-w">0</div></div>
+        <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l" id="lw-l">0</div></div>
+        <div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val" id="lw-pend">0</div></div>
+        <div class="wl-box"><div class="wl-label">ROI</div><div class="wl-val" id="lw-roi">—</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div class="stat-box green" style="padding:10px 12px;">
+          <div class="stat-label">Season P&L</div>
+          <div class="stat-val green" style="font-size:22px;" id="lw-pnl">+$0</div>
+        </div>
+        <div class="stat-box" style="padding:10px 12px;">
+          <div class="stat-label">Total wagered</div>
+          <div class="stat-val" style="font-size:22px;" id="lw-wagered">$0</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div class="section-title" style="font-size:11px;">Play history</div>
+        <select id="log-filter" onchange="renderLog()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;background:var(--panel2);border:1px solid var(--border2);color:var(--text2);padding:3px 8px;border-radius:4px;cursor:pointer;">
+          <option value="all">All plays</option>
+          <option value="pending">Pending</option>
+          <option value="settled">Settled</option>
+          <option value="W">Wins</option>
+          <option value="L">Losses</option>
+        </select>
       </div>
       <div id="log-list"><div class="empty">No plays logged yet.</div></div>
       <div class="add-form">
-        <div class="add-form-title">Log real play</div>
+        <div class="add-form-title">Log live play</div>
         <div class="form-grid full"><input class="form-input" id="l-game" placeholder="Game (e.g. NYY @ BOS)"></div>
         <div class="form-grid">
           <input class="form-input" id="l-bet" placeholder="Bet (NYY ML)">
@@ -293,6 +313,7 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
           <input class="form-input" id="l-amt" placeholder="$ Amount">
           <input class="form-input" id="l-trigger" placeholder="Trigger (T2)">
         </div>
+        <div class="form-grid full"><input class="form-input" id="l-date" placeholder="Date (leave blank = today)"></div>
         <button class="add-btn" onclick="addLog()">Log Play</button>
       </div>
     </div>
@@ -618,6 +639,24 @@ async function refreshBriefs(){
   }
 }
 
+function updateSeasonPnL(){
+  const settled=logPlays.filter(p=>p.result==='W'||p.result==='L');
+  const pnl=settled.reduce((acc,p)=>{
+    const amt=parseFloat(p.amt)||0,odds=parseInt(p.odds)||0;
+    if(p.result==='W')return acc+(odds>0?amt*(odds/100):amt*(100/Math.abs(odds)));
+    if(p.result==='L')return acc-amt;
+    return acc;
+  },0);
+  const el=document.getElementById('s-pnl');
+  if(!el)return;
+  el.textContent=(pnl>=0?'+':'-')+'$'+Math.abs(Math.round(pnl)).toLocaleString();
+  el.className='stat-val '+(pnl>=0?'green':'');
+  el.style.color=pnl<0?'var(--red)':'';
+  // Update bankroll
+  const bankEl=document.getElementById('s-bank');
+  if(bankEl)bankEl.textContent='$'+(cfg.bankroll+Math.round(pnl)).toLocaleString();
+}
+
 function renderCard(){
   const out=document.getElementById('card-output');
   if(!allGames.length){out.innerHTML='<div class="status-box"><div class="status-title">No games today</div></div>';return;}
@@ -662,8 +701,8 @@ function renderCard(){
   out.innerHTML=html;
   document.getElementById('s-real').textContent=realCount;
   document.getElementById('s-stake').textContent='$'+stakeTotal.toLocaleString();
-  document.getElementById('s-paper').textContent=paperCount;
   document.getElementById('game-count').textContent=allGames.length+' games today';
+  updateSeasonPnL();
 }
 
 function renderBookTabs(){document.getElementById('book-tabs').innerHTML=availableBooks.map(k=>`<button class="book-tab${k===activeBook?' active':''}" onclick="selectBook('${k}')">${BOOK_LABELS[k]||k}</button>`).join('');}
@@ -720,18 +759,63 @@ function renderPaper(){
 function addPaper(){const g=document.getElementById('p-game').value.trim(),b=document.getElementById('p-bet').value.trim();if(!g||!b)return;paperPlays.push({game:g,bet:b,odds:document.getElementById('p-odds').value.trim(),trigger:document.getElementById('p-trigger').value.trim()||'T4',note:document.getElementById('p-note').value.trim(),date:new Date().toLocaleDateString(),result:null});savePaper();renderPaper();['p-game','p-bet','p-odds','p-trigger','p-note'].forEach(id=>document.getElementById(id).value='');}
 function setPR(i,r){paperPlays[i].result=r;savePaper();renderPaper();}
 function renderLog(){
-  const w=logPlays.filter(p=>p.result==='W').length,l=logPlays.filter(p=>p.result==='L').length,pend=logPlays.filter(p=>!p.result).length;
-  const pnl=logPlays.filter(p=>p.result).reduce((acc,p)=>{const amt=parseFloat(p.amt)||0,odds=parseInt(p.odds)||0;if(p.result==='W')return acc+(odds>0?amt*(odds/100):amt*(100/Math.abs(odds)));if(p.result==='L')return acc-amt;return acc;},0);
-  document.getElementById('log-wl-strip').innerHTML=`<div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">${w}</div></div><div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">${l}</div></div><div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val">${pend}</div></div><div class="wl-box"><div class="wl-label">P&L</div><div class="wl-val ${pnl>=0?'pos':'neg'}">${pnl>=0?'+':'-'}$${Math.abs(Math.round(pnl))}</div></div>`;
+  const w=logPlays.filter(p=>p.result==='W').length;
+  const l=logPlays.filter(p=>p.result==='L').length;
+  const pend=logPlays.filter(p=>!p.result).length;
+  const settled=logPlays.filter(p=>p.result==='W'||p.result==='L');
+  const pnl=settled.reduce((acc,p)=>{const amt=parseFloat(p.amt)||0,odds=parseInt(p.odds)||0;if(p.result==='W')return acc+(odds>0?amt*(odds/100):amt*(100/Math.abs(odds)));if(p.result==='L')return acc-amt;return acc;},0);
+  const totalWagered=logPlays.reduce((acc,p)=>acc+(parseFloat(p.amt)||0),0);
+  const roi=totalWagered>0?Math.round(pnl/totalWagered*100):0;
+
+  // Update strip
+  const wEl=document.getElementById('lw-w');if(wEl)wEl.textContent=w;
+  const lEl=document.getElementById('lw-l');if(lEl)lEl.textContent=l;
+  const pEl=document.getElementById('lw-pend');if(pEl)pEl.textContent=pend;
+  const rEl=document.getElementById('lw-roi');if(rEl){rEl.textContent=(roi>=0?'+':'')+roi+'%';rEl.style.color=roi>=0?'var(--green)':'var(--red)';}
+  const pnlEl=document.getElementById('lw-pnl');if(pnlEl){pnlEl.textContent=(pnl>=0?'+':'-')+'$'+Math.abs(Math.round(pnl)).toLocaleString();pnlEl.style.color=pnl<0?'var(--red)':'';}
+  const wgEl=document.getElementById('lw-wagered');if(wgEl)wgEl.textContent='$'+Math.round(totalWagered).toLocaleString();
+
+  // Update top-level P&L
+  updateSeasonPnL();
+
   const list=document.getElementById('log-list');
-  if(!logPlays.length){list.innerHTML='<div class="empty">No plays logged yet.</div>';return;}
-  list.innerHTML=logPlays.map((p,i)=>`<div class="log-row"><div style="flex:1;min-width:0;"><div class="log-game">${p.game}</div><div class="log-detail">${p.bet} ${p.odds} · $${p.amt} · ${p.trigger} · ${p.date}</div></div><div class="log-btns"><button class="log-btn${p.result==='W'?' w':''}" onclick="setLR(${i},'W')">W</button><button class="log-btn${p.result==='L'?' l':''}" onclick="setLR(${i},'L')">L</button><button class="log-btn" onclick="setLR(${i},null)" style="font-size:9px;">${p.result||'Pend'}</button></div></div>`).join('');
+  if(!logPlays.length){list.innerHTML='<div class="empty">No live plays logged yet.</div>';return;}
+
+  // Filter
+  const filterEl=document.getElementById('log-filter');
+  const filter=filterEl?filterEl.value:'all';
+  let filtered=[...logPlays].reverse(); // newest first
+  if(filter==='pending')filtered=filtered.filter(p=>!p.result);
+  else if(filter==='settled')filtered=filtered.filter(p=>p.result==='W'||p.result==='L');
+  else if(filter==='W')filtered=filtered.filter(p=>p.result==='W');
+  else if(filter==='L')filtered=filtered.filter(p=>p.result==='L');
+
+  if(!filtered.length){list.innerHTML='<div class="empty">No plays match this filter.</div>';return;}
+
+  list.innerHTML=filtered.map(p=>{
+    const i=logPlays.indexOf(p);
+    let pnlStr='';
+    if(p.result==='W'){const amt=parseFloat(p.amt)||0,odds=parseInt(p.odds)||0;const win=odds>0?amt*(odds/100):amt*(100/Math.abs(odds));pnlStr=`<span style="color:var(--green);font-weight:500;">+$${Math.round(win)}</span>`;}
+    else if(p.result==='L'){pnlStr=`<span style="color:var(--red);font-weight:500;">-$${parseFloat(p.amt)||0}</span>`;}
+    return`<div class="log-row">
+      <div style="flex:1;min-width:0;">
+        <div class="log-game">${p.game} ${pnlStr}</div>
+        <div class="log-detail">${p.bet} ${p.odds} · $${p.amt} · ${p.trigger||''} · ${p.date}</div>
+      </div>
+      <div class="log-btns">
+        <button class="log-btn${p.result==='W'?' w':''}" onclick="setLR(${i},'W')">W</button>
+        <button class="log-btn${p.result==='L'?' l':''}" onclick="setLR(${i},'L')">L</button>
+        <button class="log-btn" onclick="setLR(${i},null)" style="font-size:9px;">${p.result||'Pend'}</button>
+      </div>
+    </div>`;
+  }).join('');
 }
-function addLog(){const g=document.getElementById('l-game').value.trim(),b=document.getElementById('l-bet').value.trim();if(!g||!b)return;logPlays.push({game:g,bet:b,odds:document.getElementById('l-odds').value.trim(),amt:document.getElementById('l-amt').value.trim(),trigger:document.getElementById('l-trigger').value.trim(),date:new Date().toLocaleDateString(),result:null});saveLog();renderLog();['l-game','l-bet','l-odds','l-amt','l-trigger'].forEach(id=>document.getElementById(id).value='');}
-function setLR(i,r){logPlays[i].result=r;saveLog();renderLog();}
+function addLog(){const g=document.getElementById('l-game').value.trim(),b=document.getElementById('l-bet').value.trim();if(!g||!b)return;const dateInput=document.getElementById('l-date').value.trim();const date=dateInput||new Date().toLocaleDateString();logPlays.push({game:g,bet:b,odds:document.getElementById('l-odds').value.trim(),amt:document.getElementById('l-amt').value.trim(),trigger:document.getElementById('l-trigger').value.trim(),date,result:null});saveLog();renderLog();['l-game','l-bet','l-odds','l-amt','l-trigger','l-date'].forEach(id=>document.getElementById(id).value='');updateSeasonPnL();}
+function setLR(i,r){logPlays[i].result=r;saveLog();renderLog();updateSeasonPnL();}
 
 let countdown=300;
-function updateCountdown(){countdown--;if(countdown<=0){countdown=300;fetchOdds();return;}const mins=Math.floor(countdown/60),secs=countdown%60;const timeStr=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});document.getElementById('last-update').textContent='Updated '+timeStr+' — next in '+mins+':'+(secs<10?'0':'')+secs;}
+function updateCountdown(){countdown--;if(countdown<=0){countdown=300;fetchOdds();
+updateSeasonPnL();return;}const mins=Math.floor(countdown/60),secs=countdown%60;const timeStr=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});document.getElementById('last-update').textContent='Updated '+timeStr+' — next in '+mins+':'+(secs<10?'0':'')+secs;}
 setInterval(updateCountdown,1000);
 fetchOdds();
 </script>
