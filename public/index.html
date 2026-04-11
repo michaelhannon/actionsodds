@@ -903,7 +903,7 @@ function addLog(){const g=document.getElementById('l-game').value.trim(),b=docum
 function setLR(i,r){logPlays[i].result=r;saveLog();renderLog();updateSeasonPnL();}
 
 let countdown=300;
-function updateCountdown(){countdown--;if(countdown<=0){countdown=300;fetchOdds();return;}return;}const mins=Math.floor(countdown/60),secs=countdown%60;const timeStr=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});document.getElementById('last-update').textContent='Updated '+timeStr+' — next in '+mins+':'+(secs<10?'0':'')+secs;}
+function updateCountdown(){countdown--;if(countdown<=0){countdown=300;fetchOdds();return;}const mins=Math.floor(countdown/60),secs=countdown%60;const timeStr=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});document.getElementById('last-update').textContent='Updated '+timeStr+' — next in '+mins+':'+(secs<10?'0':'')+secs;}
 setInterval(updateCountdown,1000);
 fetchOdds();
 </script>
