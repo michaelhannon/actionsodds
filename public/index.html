@@ -1345,6 +1345,7 @@ function updateTicker(){
       var timeMatch=null;
       // Helper: check if logged play matches a team
       function playMatchesTeam(play, teamFull){
+        if(!teamFull)return false;
         var searchStr=(play.game+' '+play.bet).toLowerCase();
         var words=teamFull.toLowerCase().split(' ');
         var lastWord=words[words.length-1];
