@@ -499,13 +499,12 @@ a,button,input,select{transition:all 0.15s ease;}
     </div>
 
     <div class="panel-tabs">
-      <button class="panel-tab active" id="tab-btn-paper" onclick="showTab('paper')">Paper</button>
-      <button class="panel-tab" id="tab-btn-log" onclick="showTab('log')">Live plays</button>
+      <button class="panel-tab active" id="tab-btn-log" onclick="showTab('log')">Live plays</button>
       <button class="panel-tab" id="tab-btn-calc" onclick="showTab('calc')">Calc</button>
       <button class="panel-tab" id="tab-btn-settings" onclick="showTab('settings')">Settings</button>
     </div>
 
-    <div id="ptab-paper">
+    <div id="ptab-paper" style="display:none;">
       <div class="wl-strip" id="paper-wl-strip">
         <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">0</div></div>
         <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">0</div></div>
@@ -528,7 +527,7 @@ a,button,input,select{transition:all 0.15s ease;}
       </div>
     </div>
 
-    <div id="ptab-log" style="display:none;">
+    <div id="ptab-log">
       <div class="wl-strip" id="log-wl-strip">
         <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w" id="lw-w">0</div></div>
         <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l" id="lw-l">0</div></div>
@@ -1929,7 +1928,6 @@ function showTab(t){
     if(btn)btn.classList.toggle('active',x===t);
   });
   if(t==='settings')loadSettingsForm();
-  if(t==='paper')renderPaper();
   if(t==='log')renderLog();
 }
 function toggleSetting(key){cfg[key]=!cfg[key];const el=document.getElementById('tog-'+key);if(el)el.classList.toggle('on',cfg[key]);try{localStorage.setItem('ao_cfg',JSON.stringify(cfg));}catch(e){}briefCache={};renderCard();refreshBriefs();}
