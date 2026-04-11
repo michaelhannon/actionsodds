@@ -11,14 +11,38 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,400&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--black:#0a0a0b;--dark:#111114;--panel:#18181d;--panel2:#1f1f26;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--gold:#e8b94a;--gold2:#f5d07a;--green:#2ecc71;--green-dim:#1a7a43;--amber:#f39c12;--amber-dim:#7a4e09;--red:#e74c3c;--text:#f0eff5;--text2:#9896a8;--text3:#5c5a6e;--radius:10px;--radius-lg:16px;}
-body.light{--black:#f5f5f7;--dark:#ffffff;--panel:#ffffff;--panel2:#f0f0f4;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);--text:#111114;--text2:#555560;--text3:#999aaa;--green:#1a8a45;--green-dim:#d4f0e0;--amber:#c47a00;--amber-dim:#fef3d0;--red:#c0392b;}
-body.light header::after{background:linear-gradient(90deg,transparent,var(--gold),var(--gold2),var(--gold),transparent);}
-body.light .game-card.flagged{border-color:#1a8a45;box-shadow:0 0 0 1px rgba(26,138,69,0.2);}
+body.light{--black:#f0f2f5;--dark:#ffffff;--panel:#ffffff;--panel2:#f5f6f8;--border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);--text:#0d0d10;--text2:#4a4a5a;--text3:#9090a0;--green:#1a8a45;--green-dim:#d4f0e0;--amber:#c47a00;--amber-dim:#fef3d0;--red:#c0392b;}
+body.light{background:#f0f2f5;color:#0d0d10;}
+body.light header{background:#ffffff;border-bottom:1px solid rgba(0,0,0,0.09);}
+body.light .odds-panel{background:#f0f2f5;}
+body.light .tracker-panel{background:#ffffff;border-left:1px solid rgba(0,0,0,0.09);}
+body.light .game-card{background:#ffffff;border-color:rgba(0,0,0,0.09);}
+body.light .game-card-header{background:#f8f8fb;}
+body.light .stat-box{background:#ffffff;border-color:rgba(0,0,0,0.09);}
+body.light .market-intel{background:#ffffff;border-color:rgba(0,0,0,0.09);}
+body.light .add-form{background:#ffffff;border-color:rgba(0,0,0,0.09);}
+body.light .form-input{background:#f5f6f8;border-color:rgba(0,0,0,0.14);color:#0d0d10;}
+body.light .wl-box{background:#ffffff;border-color:rgba(0,0,0,0.09);}
+body.light .log-row{border-color:rgba(0,0,0,0.07);}
+body.light .panel-tabs{border-color:rgba(0,0,0,0.09);}
+body.light .play-box{background:rgba(0,0,0,0.02);}
+body.light .matchup-divider{background:rgba(0,0,0,0.06);}
+body.light .ai-section{background:#f8f8fb;border-bottom:1px solid rgba(0,0,0,0.09);}
+body.light .ai-card{background:#ffffff;border-color:rgba(0,0,0,0.09);}
+body.light .ai-stat{background:#f5f6f8;}
+body.light .ai-take{color:#4a4a5a;}
 body.light .odds-val.dog{color:#1a6abf;}
-body.light .play-amt.sharp{color:#1a6abf;}
-body.light .tbadge-sharp{background:rgba(26,106,191,0.1);color:#1a6abf;border-color:rgba(26,106,191,0.3);}
-body.light .ai-section{background:#fafafa;border-bottom:1px solid var(--border);}
-body.light .ai-card{background:#ffffff;border-color:var(--border);}
+body.light .game-card.flagged{border-color:#1a8a45;box-shadow:0 0 0 1px rgba(26,138,69,0.15);}
+body.light .game-card.paper-flag{border-color:#c47a00;}
+body.light .tbadge-real{background:rgba(26,138,69,0.12);color:#1a8a45;border-color:rgba(26,138,69,0.3);}
+body.light .tbadge-paper{background:rgba(196,122,0,0.1);color:#c47a00;border-color:rgba(196,122,0,0.25);}
+body.light .book-tab{border-color:rgba(0,0,0,0.14);color:#4a4a5a;}
+body.light .book-tab.active{background:rgba(232,185,74,0.15);border-color:var(--gold);color:#b8860b;}
+body.light .sport-badge{color:#b8860b;background:rgba(232,185,74,0.15);border-color:rgba(232,185,74,0.3);}
+body.light .refresh-btn{color:#ffffff;}
+body.light #theme-toggle{border-color:rgba(0,0,0,0.16);}
+body.light .cfg-section-title{color:#b8860b;}
+body.light .toggle{background:rgba(0,0,0,0.15);}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--black);color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;}
 header{position:relative;z-index:10;background:var(--dark);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;}
