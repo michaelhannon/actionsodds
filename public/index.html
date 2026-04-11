@@ -1327,7 +1327,7 @@ function updateTicker(){
           scoreHtml+='</div>';
         }
       }
-      cards.push('<div class="ticker-card active" style="min-width:240px;"><div class="ticker-label">Live Bet</div><div class="ticker-val">'+p.game+'</div><div class="ticker-sub">'+p.bet+' '+p.odds+' · $'+p.amt+'</div>'+scoreHtml+'</div>');
+      cards.push('<div class="ticker-card active" style="min-width:240px;"><div class="ticker-label"><span class="live-dot"></span>Live Bet</div><div class="ticker-val">'+p.game+'</div><div class="ticker-sub">'+p.bet+' '+p.odds+' · $'+p.amt+'</div>'+scoreHtml+'</div>');
     });
   }
 
