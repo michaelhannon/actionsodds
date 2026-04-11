@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="shortcut icon" href="/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Action's Odds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,400&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0a0a0b;--dark:#111114;--panel:#18181d;--panel2:#1f1f26;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--gold:#e8b94a;--gold2:#f5d07a;--green:#2ecc71;--green-dim:#1a7a43;--amber:#f39c12;--amber-dim:#7a4e09;--red:#e74c3c;--text:#f0eff5;--text2:#9896a8;--text3:#5c5a6e;--radius:10px;--radius-lg:16px;}
+body.light{--black:#f0f2f5;--dark:#ffffff;--panel:#ffffff;--panel2:#f5f6f8;--border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);--text:#0d0d10;--text2:#4a4a5a;--text3:#9090a0;--green:#1a8a45;--green-dim:#d4f0e0;--amber:#c47a00;--amber-dim:#fef3d0;--red:#c0392b;}
+body.light{background:#f0f2f5;color:#0d0d10;}
+body.light header{background:#ffffff;border-bottom:1px solid rgba(0,0,0,0.09);}
+body.light .odds-panel{background:#f0f2f5;}
+body.light .tracker-panel{background:#ffffff;border-left:1px solid rgba(0,0,0,0.09);}
+body.light .game-card{background:#ffffff;border-color:rgba(0,0,0,0.09);}
+body.light .game-card-header{background:#f8f8fb;}
+body.light .stat-box{background:#ffffff;border-color:rgba(0,0,0,0.09);}
+body.light .market-intel{background:#ffffff;border-color:rgba(0,0,0,0.09);}
+body.light .add-form{background:#ffffff;border-color:rgba(0,0,0,0.09);}
+body.light .form-input{background:#f5f6f8;border-color:rgba(0,0,0,0.14);color:#0d0d10;}
+body.light .wl-box{background:#ffffff;border-color:rgba(0,0,0,0.09);}
+body.light .log-row{border-color:rgba(0,0,0,0.07);}
+body.light .panel-tabs{border-color:rgba(0,0,0,0.09);}
+body.light .play-box{background:rgba(0,0,0,0.02);}
+body.light .matchup-divider{background:rgba(0,0,0,0.06);}
+body.light .ai-section{background:#f8f8fb;border-bottom:1px solid rgba(0,0,0,0.09);}
+body.light .ai-card{background:#ffffff;border-color:rgba(0,0,0,0.09);}
+body.light .ai-stat{background:#f5f6f8;}
+body.light .ai-take{color:#4a4a5a;}
+body.light .odds-val.dog{color:#1a6abf;}
+body.light .game-card.flagged{border-color:#1a8a45;box-shadow:0 0 0 1px rgba(26,138,69,0.15);}
+body.light .game-card.paper-flag{border-color:#c47a00;}
+body.light .tbadge-real{background:rgba(26,138,69,0.12);color:#1a8a45;border-color:rgba(26,138,69,0.3);}
+body.light .tbadge-paper{background:rgba(196,122,0,0.1);color:#c47a00;border-color:rgba(196,122,0,0.25);}
+body.light .book-tab{border-color:rgba(0,0,0,0.14);color:#4a4a5a;}
+body.light .book-tab.active{background:rgba(232,185,74,0.15);border-color:var(--gold);color:#b8860b;}
+body.light .sport-badge{color:#b8860b;background:rgba(232,185,74,0.15);border-color:rgba(232,185,74,0.3);}
+body.light .refresh-btn{color:#ffffff;}
+body.light #theme-toggle{border-color:rgba(0,0,0,0.16);}
+body.light .cfg-section-title{color:#b8860b;}
+body.light .toggle{background:rgba(0,0,0,0.15);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--black);color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;}
+header{position:relative;z-index:10;background:var(--dark);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;}
+header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold2),var(--gold),transparent);}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:42px;height:42px;flex-shrink:0;}
+.logo-action{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:0.06em;color:var(--gold);line-height:1;}
+.logo-odds{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.3em;color:var(--text2);text-transform:uppercase;}
+.header-right{display:flex;align-items:center;gap:14px;}
+.sport-badge{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.15em;color:var(--gold);background:rgba(232,185,74,0.1);border:1px solid rgba(232,185,74,0.25);padding:4px 12px;border-radius:4px;text-transform:uppercase;}
+.last-update{font-size:11px;color:var(--text3);font-family:'Barlow Condensed',sans-serif;}
+.refresh-btn{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--black);background:var(--gold);border:none;padding:8px 18px;border-radius:6px;cursor:pointer;transition:background 0.15s;display:flex;align-items:center;gap:6px;}
+.refresh-btn:hover{background:var(--gold2);}
+.refresh-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+/* AI BRIEFING SECTION */
+.ai-section{background:var(--dark);border-bottom:1px solid var(--border);padding:16px 24px;}
+.ai-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.ai-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.08em;color:var(--gold);}
+.ai-subtitle{font-size:11px;color:var(--text3);font-family:'Barlow Condensed',sans-serif;letter-spacing:0.05em;}
+.ai-cards{display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;}
+.ai-cards::-webkit-scrollbar{height:3px;}
+.ai-cards::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
+.ai-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;min-width:300px;max-width:340px;flex-shrink:0;position:relative;}
+.ai-card.loading{opacity:0.7;}
+.ai-card-game{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+.ai-card-play{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--green);margin-bottom:10px;}
+.ai-card-play.amber{color:var(--amber);}
+.ai-stats{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.ai-stat{background:var(--panel2);border-radius:6px;padding:5px 8px;}
+.ai-stat-lbl{font-size:9px;color:var(--text3);font-family:'Barlow Condensed',sans-serif;letter-spacing:0.1em;text-transform:uppercase;}
+.ai-stat-val{font-size:12px;font-weight:500;color:var(--text);}
+.ai-take{font-size:12px;color:var(--text2);line-height:1.6;border-top:1px solid var(--border);padding-top:10px;margin-top:4px;}
+.ai-take strong{color:var(--gold);font-weight:500;}
+.ai-lean{display:inline-flex;align-items:center;gap:5px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:3px 8px;border-radius:4px;margin-bottom:8px;}
+.ai-lean.bet{background:rgba(46,204,113,0.15);color:var(--green);border:1px solid rgba(46,204,113,0.3);}
+.ai-lean.pass{background:rgba(231,76,60,0.12);color:var(--red);border:1px solid rgba(231,76,60,0.2);}
+.ai-lean.watch{background:rgba(243,156,18,0.12);color:var(--amber);border:1px solid rgba(243,156,18,0.25);}
+.ai-loading{display:flex;align-items:center;gap:8px;color:var(--text3);font-size:12px;padding:8px 0;}
+.ai-empty{font-size:13px;color:var(--text3);font-style:italic;padding:8px 0;}
+.confidence-bar{height:3px;background:var(--border2);border-radius:99px;margin-top:8px;overflow:hidden;}
+.confidence-fill{height:100%;border-radius:99px;background:var(--green);transition:width 0.5s;}
+
+.layout{display:grid;grid-template-columns:1fr 360px;min-height:calc(100vh - 64px);}
+.odds-panel{padding:24px;border-right:1px solid var(--border);overflow-y:auto;}
+.tracker-panel{background:var(--dark);padding:24px;overflow-y:auto;}
+.summary-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
+.stat-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;position:relative;overflow:hidden;}
+.stat-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:0.4;}
+.stat-box.green::before{background:var(--green);opacity:0.5;}
+.stat-box.amber::before{background:var(--amber);opacity:0.5;}
+.stat-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0.04em;color:var(--text);line-height:1;}
+.stat-val.gold{color:var(--gold);}
+.stat-val.green{color:var(--green);}
+.stat-val.amber{color:var(--amber);}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--text2);}
+.book-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.book-tab{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:5px 13px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all 0.15s;}
+.book-tab:hover{border-color:rgba(232,185,74,0.4);color:var(--gold);}
+.book-tab.active{background:rgba(232,185,74,0.12);border-color:var(--gold);color:var(--gold);}
+.sport-btn{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;color:var(--text3);background:transparent;border:1px solid var(--border2);padding:4px 10px;border-radius:4px;text-transform:uppercase;cursor:pointer;transition:all 0.15s;}
+.sport-btn:hover{border-color:rgba(232,185,74,0.4);color:var(--gold);}
+.sport-btn.active{color:var(--gold);background:rgba(232,185,74,0.15);border-color:var(--gold);}
+.sport-btn{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;color:var(--text3);background:transparent;border:1px solid var(--border2);padding:4px 10px;border-radius:4px;text-transform:uppercase;cursor:pointer;transition:all 0.15s;}
+.sport-btn:hover{border-color:rgba(232,185,74,0.4);color:var(--gold);}
+.sport-btn.active{color:var(--gold);background:rgba(232,185,74,0.15);border-color:var(--gold);}
+.market-intel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;}
+.intel-item{display:flex;flex-direction:column;}
+.intel-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:3px;}
+.intel-val{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:var(--text);}
+.intel-val.green{color:var(--green);}
+.intel-val.amber{color:var(--amber);}
+.intel-val.gold{color:var(--gold);}
+.game-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:12px;overflow:hidden;animation:slideIn 0.3s ease both;}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.game-card.flagged{border-color:var(--green-dim);box-shadow:0 0 0 1px rgba(46,204,113,0.15);}
+.game-card.paper-flag{border-color:var(--amber-dim);}
+.game-card.sharp-flag{border-color:#60a8ff;}
+.game-card-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 8px;border-bottom:1px solid var(--border);background:var(--panel2);}
+.game-time{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);}
+.trigger-badges{display:flex;gap:5px;flex-wrap:wrap;}
+.tbadge{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.1em;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+.tbadge-real{background:rgba(46,204,113,0.15);color:var(--green);border:1px solid rgba(46,204,113,0.3);}
+.tbadge-paper{background:rgba(243,156,18,0.12);color:var(--amber);border:1px solid rgba(243,156,18,0.25);}
+.tbadge-sharp{background:rgba(96,168,255,0.12);color:#60a8ff;border:1px solid rgba(96,168,255,0.25);}
+.matchup{padding:10px 14px;}
+.odds-cols-header{display:flex;justify-content:flex-end;margin-bottom:6px;}
+.odds-col-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);width:68px;text-align:center;}
+.team-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;}
+.team-info{display:flex;align-items:center;gap:8px;flex:1;}
+.team-badge{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.1em;padding:1px 5px;border-radius:3px;text-transform:uppercase;}
+.team-badge.home{background:rgba(232,185,74,0.1);color:rgba(232,185,74,0.6);border:1px solid rgba(232,185,74,0.2);}
+.team-badge.away{background:rgba(255,255,255,0.04);color:var(--text3);border:1px solid var(--border);}
+.team-name{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;color:var(--text);}
+.team-name.fav{color:var(--gold2);}
+.odds-group{display:flex;}
+.odds-cell{width:68px;text-align:center;}
+.odds-val{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--text2);}
+.odds-val.dog{color:#60a8ff;}
+.matchup-divider{height:1px;background:var(--border);margin:2px 0;}
+.play-box{border-top:1px solid var(--border);padding:10px 14px;background:rgba(0,0,0,0.2);}
+.play-section-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:6px;}
+.play-section-label.real{color:var(--green);}
+.play-section-label.paper{color:var(--amber);}
+.play-section-label.sharp{color:#60a8ff;}
+.play-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.play-desc{font-size:13px;color:var(--text);flex:1;padding-right:8px;}
+.play-note{font-size:11px;color:var(--text3);margin-bottom:6px;}
+.play-amt{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--green);white-space:nowrap;}
+.play-amt.paper{color:var(--amber);}
+.play-amt.sharp{color:#60a8ff;}
+.conf-pip{display:inline-flex;align-items:center;gap:2px;margin-left:6px;vertical-align:middle;}
+.pip{width:5px;height:5px;border-radius:50%;background:var(--border2);display:inline-block;}
+.pip.on{background:var(--green);}
+.pip.on.amber{background:var(--amber);}
+.pip.on.blue{background:#60a8ff;}
+.status-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;text-align:center;margin-bottom:16px;}
+.status-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px;}
+.status-sub{font-size:13px;color:var(--text3);line-height:1.6;}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.panel-tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border);}
+.panel-tab{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:8px 12px;background:transparent;border:none;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s;}
+.panel-tab:hover{color:var(--text2);}
+.panel-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.wl-strip{display:flex;gap:10px;margin-bottom:16px;}
+.wl-box{flex:1;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center;}
+.wl-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;}
+.wl-val{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--text);}
+.wl-val.w{color:var(--green);}
+.wl-val.l{color:var(--red);}
+.wl-val.pos{color:var(--green);font-size:18px;}
+.wl-val.neg{color:var(--red);font-size:18px;}
+.log-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);gap:8px;}
+.log-row:last-child{border-bottom:none;}
+.log-game{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:var(--text);line-height:1.2;}
+.log-detail{font-size:11px;color:var(--text3);margin-top:2px;}
+.log-btns{display:flex;gap:4px;flex-shrink:0;}
+.log-btn{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;border:1px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);}
+.log-btn.w{background:rgba(46,204,113,0.15);color:var(--green);border-color:rgba(46,204,113,0.3);}
+.log-btn.l{background:rgba(231,76,60,0.15);color:var(--red);border-color:rgba(231,76,60,0.3);}
+.add-form{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-top:14px;}
+.add-form-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;}
+.form-grid.full{grid-template-columns:1fr;}
+.form-input{background:var(--panel2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;padding:7px 9px;outline:none;width:100%;transition:border-color 0.15s;}
+.form-input::placeholder{color:var(--text3);}
+.form-input:focus{border-color:rgba(232,185,74,0.5);}
+.add-btn{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--black);background:var(--gold);border:none;padding:8px 16px;border-radius:5px;cursor:pointer;width:100%;margin-top:6px;}
+.add-btn:hover{background:var(--gold2);}
+.empty{text-align:center;padding:24px 0;color:var(--text3);font-size:13px;font-style:italic;}
+.cfg-section{margin-bottom:22px;}
+.cfg-section-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.cfg-sub{font-size:11px;color:var(--text3);margin-bottom:10px;margin-top:-6px;}
+.cfg-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.cfg-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.cfg-lbl{font-size:10px;color:var(--text3);font-family:'Barlow Condensed',sans-serif;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;}
+.save-btn{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--black);background:var(--gold);border:none;padding:10px 24px;border-radius:6px;cursor:pointer;margin-top:8px;}
+.save-btn:hover{background:var(--gold2);}
+.saved-msg{font-size:12px;color:var(--green);margin-top:10px;display:none;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
+.toggle-lbl{font-size:13px;color:var(--text);}
+.toggle-sub{font-size:11px;color:var(--text3);}
+.toggle{width:36px;height:20px;background:var(--border2);border-radius:10px;position:relative;cursor:pointer;border:none;flex-shrink:0;transition:background 0.2s;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:'';position:absolute;width:14px;height:14px;background:white;border-radius:50%;top:3px;left:3px;transition:left 0.2s;}
+.toggle.on::after{left:19px;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.summary-strip{grid-template-columns:repeat(2,1fr);}.ai-cards{flex-direction:column;}.ai-card{min-width:unset;max-width:unset;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="21" cy="21" r="20" fill="#18181d" stroke="#e8b94a" stroke-width="1.5"/>
+      <path d="M21 8 L28 18 L35 18 L29 25 L31 34 L21 28 L11 34 L13 25 L7 18 L14 18 Z" fill="#e8b94a" opacity="0.9"/>
+      <circle cx="21" cy="21" r="5" fill="#0a0a0b"/>
+      <circle cx="21" cy="21" r="2.5" fill="#e8b94a"/>
+    </svg>
+    <div style="display:flex;flex-direction:column;line-height:1;">
+      <span class="logo-action">Action's</span>
+      <span class="logo-odds">Odds</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div style="display:flex;gap:6px;">
+      <button id="sport-mlb" onclick="setSport('mlb')" class="sport-btn">MLB</button>
+      <button id="sport-nhl" onclick="setSport('nhl')" class="sport-btn">NHL</button>
+      <button id="sport-nba" onclick="setSport('nba')" class="sport-btn">NBA</button>
+      <button id="sport-nfl" onclick="setSport('nfl')" class="sport-btn">NFL</button>
+      <button id="sport-ncaaf" onclick="setSport('ncaaf')" class="sport-btn">NCAAF</button>
+      <button id="sport-ncaab" onclick="setSport('ncaab')" class="sport-btn">NCAAB</button>
+      <button id="sport-ufc" onclick="setSport('ufc')" class="sport-btn">UFC</button>
+      <button id="sport-pga" onclick="setSport('pga')" class="sport-btn">PGA</button>
+    </div>
+    <span class="last-update" id="last-update"></span>
+    <button id="theme-toggle" onclick="toggleTheme()" style="background:transparent;border:1px solid var(--border2);border-radius:20px;padding:5px 12px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all 0.2s;">
+      <span id="theme-icon" style="font-size:14px;">☀</span>
+      <span id="theme-label" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);">Light</span>
+    </button>
+    <button class="refresh-btn" id="refresh-btn" onclick="fetchOdds()">
+      <span id="refresh-spinner" class="spinner" style="display:none;border-top-color:#000;"></span>
+      Refresh
+    </button>
+  </div>
+</header>
+
+<!-- AI BRIEFING STRIP -->
+<div class="ai-section">
+  <div class="ai-header">
+    <div>
+      <div class="ai-title">Action's Intel</div>
+      <div class="ai-subtitle">AI-powered game briefs for real-money plays only</div>
+    </div>
+    <button onclick="refreshBriefs()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:5px 12px;border-radius:5px;cursor:pointer;">Refresh Briefs</button>
+  </div>
+  <div class="ai-cards" id="ai-cards">
+    <div class="ai-empty">Load odds to generate AI game briefs.</div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="odds-panel">
+    <div class="summary-strip">
+      <div class="stat-box green"><div class="stat-label">Live plays</div><div class="stat-val gold" id="s-real">—</div></div>
+      <div class="stat-box"><div class="stat-label">At risk</div><div class="stat-val" id="s-stake">—</div></div>
+      <div class="stat-box green"><div class="stat-label">Season P&L</div><div class="stat-val green" id="s-pnl">+$0</div></div>
+      <div class="stat-box green"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bank">—</div></div>
+    </div>
+    <div class="section-hdr">
+      <div class="section-title">Book</div>
+      <div style="font-size:11px;color:var(--text3);" id="game-count"></div>
+    </div>
+    <div class="book-tabs" id="book-tabs"></div>
+    <div class="market-intel" id="market-intel" style="display:none;">
+      <div class="intel-item"><div class="intel-lbl">Avg home dog</div><div class="intel-val gold" id="mi-avgdog">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">Best dog</div><div class="intel-val green" id="mi-bestdog">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">Avg RL</div><div class="intel-val" id="mi-avgrl">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">Sharp alerts</div><div class="intel-val" id="mi-sharp">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">Dynamic T1A</div><div class="intel-val amber" id="mi-threshold">—</div></div>
+    </div>
+    <div id="card-output">
+      <div class="status-box">
+        <div class="spinner" style="width:24px;height:24px;margin:0 auto 16px;display:block;"></div>
+        <div class="status-title">Loading today's card...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tracker-panel">
+    <div class="panel-tabs">
+      <button class="panel-tab active" id="tab-btn-paper" onclick="showTab('paper')">Paper</button>
+      <button class="panel-tab" id="tab-btn-log" onclick="showTab('log')">Live plays</button>
+      <button class="panel-tab" id="tab-btn-settings" onclick="showTab('settings')">Settings</button>
+    </div>
+
+    <div id="ptab-paper">
+      <div class="wl-strip" id="paper-wl-strip">
+        <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">0</div></div>
+        <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">0</div></div>
+        <div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val">0</div></div>
+        <div class="wl-box"><div class="wl-label">Win%</div><div class="wl-val">—</div></div>
+      </div>
+      <div id="paper-list"><div class="empty">No paper trades yet.</div></div>
+      <div class="add-form">
+        <div class="add-form-title">Add paper trade</div>
+        <div class="form-grid full"><input class="form-input" id="p-game" placeholder="Game (e.g. NYY @ BOS)"></div>
+        <div class="form-grid">
+          <input class="form-input" id="p-bet" placeholder="Bet (O 8.5)">
+          <input class="form-input" id="p-odds" placeholder="Odds (+110)">
+        </div>
+        <div class="form-grid">
+          <input class="form-input" id="p-trigger" placeholder="Trigger (T4)">
+          <input class="form-input" id="p-note" placeholder="Note">
+        </div>
+        <button class="add-btn" onclick="addPaper()">Add Trade</button>
+      </div>
+    </div>
+
+    <div id="ptab-log" style="display:none;">
+      <div class="wl-strip" id="log-wl-strip">
+        <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w" id="lw-w">0</div></div>
+        <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l" id="lw-l">0</div></div>
+        <div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val" id="lw-pend">0</div></div>
+        <div class="wl-box"><div class="wl-label">ROI</div><div class="wl-val" id="lw-roi">—</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div class="stat-box green" style="padding:10px 12px;">
+          <div class="stat-label">Season P&L</div>
+          <div class="stat-val green" style="font-size:22px;" id="lw-pnl">+$0</div>
+        </div>
+        <div class="stat-box" style="padding:10px 12px;">
+          <div class="stat-label">Total wagered</div>
+          <div class="stat-val" style="font-size:22px;" id="lw-wagered">$0</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div class="section-title" style="font-size:11px;">Play history</div>
+        <select id="log-filter" onchange="renderLog()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;background:var(--panel2);border:1px solid var(--border2);color:var(--text2);padding:3px 8px;border-radius:4px;cursor:pointer;">
+          <option value="all">All plays</option>
+          <option value="pending">Pending</option>
+          <option value="settled">Settled</option>
+          <option value="W">Wins</option>
+          <option value="L">Losses</option>
+        </select>
+      </div>
+      <div id="log-list"><div class="empty">No plays logged yet.</div></div>
+      <div class="add-form">
+        <div class="add-form-title">Log live play</div>
+        <div class="form-grid full"><input class="form-input" id="l-game" placeholder="Game (e.g. NYY @ BOS)"></div>
+        <div class="form-grid">
+          <input class="form-input" id="l-bet" placeholder="Bet (NYY ML)">
+          <input class="form-input" id="l-odds" placeholder="Odds (-130)">
+        </div>
+        <div class="form-grid">
+          <input class="form-input" id="l-amt" placeholder="$ Amount">
+          <input class="form-input" id="l-trigger" placeholder="Trigger (T2)">
+        </div>
+        <div class="form-grid full"><input class="form-input" id="l-date" placeholder="Date (leave blank = today)"></div>
+        <button class="add-btn" onclick="addLog()">Log Play</button>
+      </div>
+    </div>
+
+    <div id="ptab-settings" style="display:none;">
+      <div class="cfg-section">
+        <div class="cfg-section-title">Dynamic trigger engine</div>
+        <div class="toggle-row">
+          <div><div class="toggle-lbl">Dynamic thresholds</div><div class="toggle-sub">Auto-tune T1A based on today's slate</div></div>
+          <button class="toggle" id="tog-dynamic" onclick="toggleSetting('dynamic')"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-lbl">Top % filter</div><div class="toggle-sub">T1A fires only on top 25% home dogs</div></div>
+          <button class="toggle" id="tog-toppct" onclick="toggleSetting('toppct')"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-lbl">Sharp divergence alerts</div><div class="toggle-sub">Flag when books disagree 10+ points</div></div>
+          <button class="toggle" id="tog-sharp" onclick="toggleSetting('sharp')"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-lbl">Market baseline filter</div><div class="toggle-sub">Only flag lines better than slate avg</div></div>
+          <button class="toggle" id="tog-baseline" onclick="toggleSetting('baseline')"></button>
+        </div>
+      </div>
+      <div class="cfg-section">
+        <div class="cfg-section-title">Bankroll & units</div>
+        <div class="cfg-grid">
+          <div><div class="cfg-lbl">Bankroll ($)</div><input class="form-input" id="cfg-bankroll" type="number" placeholder="2000"></div>
+          <div><div class="cfg-lbl">Base unit ($)</div><input class="form-input" id="cfg-unit" type="number" placeholder="200"></div>
+        </div>
+      </div>
+      <div class="cfg-section">
+        <div class="cfg-section-title">T1A — Home dog ML</div>
+        <div><div class="cfg-lbl">Min threshold (when dynamic off)</div><input class="form-input" id="cfg-t1a-min" type="number" placeholder="115" style="max-width:160px;"></div>
+      </div>
+      <div class="cfg-section">
+        <div class="cfg-section-title">T1B — Big away dog</div>
+        <div class="cfg-sub">Paper only until go-live date</div>
+        <div class="cfg-grid">
+          <div><div class="cfg-lbl">Min ML</div><input class="form-input" id="cfg-t1b-min" type="number" placeholder="200"></div>
+          <div><div class="cfg-lbl">Go-live date</div><input class="form-input" id="cfg-t1b-date" type="date"></div>
+        </div>
+      </div>
+      <div class="cfg-section">
+        <div class="cfg-section-title">T2 — Fav -1.5 RL</div>
+        <div class="cfg-grid-4">
+          <div><div class="cfg-lbl">P1</div><input class="form-input" id="cfg-t2-p1" type="number" placeholder="130"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t2-u1" type="number" placeholder="25"></div>
+          <div><div class="cfg-lbl">P2</div><input class="form-input" id="cfg-t2-p2" type="number" placeholder="135"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t2-u2" type="number" placeholder="50"></div>
+          <div><div class="cfg-lbl">P3</div><input class="form-input" id="cfg-t2-p3" type="number" placeholder="140"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t2-u3" type="number" placeholder="75"></div>
+          <div><div class="cfg-lbl">P4</div><input class="form-input" id="cfg-t2-p4" type="number" placeholder="150"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t2-u4" type="number" placeholder="100"></div>
+        </div>
+      </div>
+      <div class="cfg-section">
+        <div class="cfg-section-title">T3 — Dog +1.5 RL</div>
+        <div class="cfg-grid-4">
+          <div><div class="cfg-lbl">P1</div><input class="form-input" id="cfg-t3-p1" type="number" placeholder="120"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t3-u1" type="number" placeholder="25"></div>
+          <div><div class="cfg-lbl">P2</div><input class="form-input" id="cfg-t3-p2" type="number" placeholder="122"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t3-u2" type="number" placeholder="50"></div>
+          <div><div class="cfg-lbl">P3</div><input class="form-input" id="cfg-t3-p3" type="number" placeholder="125"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t3-u3" type="number" placeholder="75"></div>
+          <div><div class="cfg-lbl">P4</div><input class="form-input" id="cfg-t3-p4" type="number" placeholder="130"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t3-u4" type="number" placeholder="100"></div>
+        </div>
+      </div>
+      <div class="cfg-section">
+        <div class="cfg-section-title">T4 — Totals unlock</div>
+        <div class="cfg-grid">
+          <div><div class="cfg-lbl">Win% to unlock</div><input class="form-input" id="cfg-t4-pct" type="number" placeholder="55"></div>
+          <div><div class="cfg-lbl">Min sample</div><input class="form-input" id="cfg-t4-sample" type="number" placeholder="20"></div>
+        </div>
+      </div>
+      <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+      <div class="saved-msg" id="saved-msg">Saved and applied.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================
+// THEME ENGINE — global scope
+// =====================
+var activeSport = localStorage.getItem('ao_sport') || 'mlb';
+var briefCache = {};
+
+function setSport(sport) {
+  activeSport = sport;
+  localStorage.setItem('ao_sport', sport);
+  // Update button styles
+  const mlbBtn = document.getElementById('sport-mlb');
+  const nhlBtn = document.getElementById('sport-nhl');
+  if(mlbBtn) {
+    mlbBtn.style.color = sport==='mlb' ? 'var(--gold)' : 'var(--text3)';
+    mlbBtn.style.background = sport==='mlb' ? 'rgba(232,185,74,0.15)' : 'transparent';
+    mlbBtn.style.borderColor = sport==='mlb' ? 'var(--gold)' : 'var(--border2)';
+  }
+  if(nhlBtn) {
+    nhlBtn.style.color = sport==='nhl' ? 'var(--gold)' : 'var(--text3)';
+    nhlBtn.style.background = sport==='nhl' ? 'rgba(232,185,74,0.15)' : 'transparent';
+    nhlBtn.style.borderColor = sport==='nhl' ? 'var(--gold)' : 'var(--border2)';
+  }
+  // Update game count label
+  const gc = document.getElementById('game-count');
+  if(gc) gc.textContent = '';
+  // Update AI section subtitle
+  const sub = document.querySelector('.ai-subtitle');
+  if(sub) sub.textContent = `AI-powered game briefs for ${sport.toUpperCase()} real-money plays only`;
+  briefCache = {};
+  allGames = [];
+  fetchOdds();
+}
+
+var isDark = localStorage.getItem('ao_theme') !== 'light';
+function applyTheme(){
+  const r = document.documentElement.style;
+  if(!isDark){
+    r.setProperty('--black','#f0f2f5');
+    r.setProperty('--dark','#ffffff');
+    r.setProperty('--panel','#ffffff');
+    r.setProperty('--panel2','#f5f6f8');
+    r.setProperty('--border','rgba(0,0,0,0.09)');
+    r.setProperty('--border2','rgba(0,0,0,0.16)');
+    r.setProperty('--text','#0d0d10');
+    r.setProperty('--text2','#4a4a5a');
+    r.setProperty('--text3','#9090a0');
+    r.setProperty('--green','#1a8a45');
+    r.setProperty('--amber','#c47a00');
+    r.setProperty('--red','#c0392b');
+    document.body.style.background='#f0f2f5';
+    document.body.style.color='#0d0d10';
+  } else {
+    r.setProperty('--black','#0a0a0b');
+    r.setProperty('--dark','#111114');
+    r.setProperty('--panel','#18181d');
+    r.setProperty('--panel2','#1f1f26');
+    r.setProperty('--border','rgba(255,255,255,0.07)');
+    r.setProperty('--border2','rgba(255,255,255,0.13)');
+    r.setProperty('--text','#f0eff5');
+    r.setProperty('--text2','#9896a8');
+    r.setProperty('--text3','#5c5a6e');
+    r.setProperty('--green','#2ecc71');
+    r.setProperty('--amber','#f39c12');
+    r.setProperty('--red','#e74c3c');
+    document.body.style.background='#0a0a0b';
+    document.body.style.color='#f0eff5';
+  }
+  const icon=document.getElementById('theme-icon');
+  const label=document.getElementById('theme-label');
+  if(icon)icon.textContent=isDark?'☀':'☾';
+  if(label)label.textContent=isDark?'Light':'Dark';
+}
+function toggleTheme(){
+  isDark=!isDark;
+  localStorage.setItem('ao_theme',isDark?'dark':'light');
+  applyTheme();
+}
+applyTheme();
+setSport(activeSport);
+
+const BOOK_LABELS={caesars:'Caesars',hard_rock_bet:'Hard Rock',draftkings:'DraftKings',fanduel:'FanDuel',betmgm:'BetMGM'};
+const BOOK_ORDER=['caesars','hard_rock_bet','draftkings','fanduel','betmgm'];
+let allGames=[],activeBook='draftkings',availableBooks=[];
+let paperPlays=[],logPlays=[];
+try{paperPlays=JSON.parse(localStorage.getItem('ao_paper')||'[]');}catch(e){}
+try{logPlays=JSON.parse(localStorage.getItem('ao_log')||'[]');}catch(e){}
+function savePaper(){try{localStorage.setItem('ao_paper',JSON.stringify(paperPlays));}catch(e){}}
+function saveLog(){try{localStorage.setItem('ao_log',JSON.stringify(logPlays));}catch(e){}}
+
+const DEFAULT_CFG={bankroll:2000,unit:200,t1aMin:115,t1bMin:200,t1bDate:'2026-06-01',t2Tiers:[{p:130,u:25},{p:135,u:50},{p:140,u:75},{p:150,u:100}],t3Tiers:[{p:120,u:25},{p:122,u:50},{p:125,u:75},{p:130,u:100}],t4Pct:55,t4Sample:20,dynamic:true,toppct:true,sharp:true,baseline:true};
+let cfg=DEFAULT_CFG;
+try{const s=localStorage.getItem('ao_cfg');if(s)cfg={...DEFAULT_CFG,...JSON.parse(s)};}catch(e){}
+let marketState={avgDog:0,bestDog:0,avgRL:0,dynamicT1A:0,sharpGames:[],topDogs:[],homeDogs:[]};
+
+function fmtOdds(n){if(n==null)return'—';return n>0?'+'+n:String(n);}
+function unitAmt(pct){return Math.round(cfg.unit*pct/100);}
+function pips(conf,type){const cls=type==='blue'?'on blue':type==='amber'?'on amber':'on';let h='<span class="conf-pip">';for(let i=1;i<=10;i++)h+=`<span class="pip${i<=conf?' '+cls:''}"></span>`;return h+'</span>';}
+
+function analyzeMarket(games,bk){
+  const homeDogs=[],rlPrices=[],bookComparisons=[];
+  for(const g of games){
+    const bm=g.bookmakers.find(b=>b.key===bk);if(!bm)continue;
+    const h2h=bm.markets.find(m=>m.key==='h2h');
+    const spreads=bm.markets.find(m=>m.key==='spreads');
+    const homeML=h2h?.outcomes?.find(o=>o.name===g.home_team)?.price;
+    const homeRL=spreads?.outcomes?.find(o=>o.name===g.home_team);
+    const awayRL=spreads?.outcomes?.find(o=>o.name===g.away_team);
+    if(homeML!=null&&homeML>0)homeDogs.push({team:g.home_team,ml:homeML,game:g});
+    if(homeRL?.price!=null)rlPrices.push(homeRL.price);
+    if(awayRL?.price!=null)rlPrices.push(awayRL.price);
+    const allBMs=g.bookmakers;
+    if(allBMs.length>=2){
+      const mlPrices=[];
+      for(const bkm of allBMs){const bkh2h=bkm.markets.find(m=>m.key==='h2h');const bkHome=bkh2h?.outcomes?.find(o=>o.name===g.home_team)?.price;if(bkHome!=null)mlPrices.push({book:bkm.key,price:bkHome});}
+      if(mlPrices.length>=2){const max=Math.max(...mlPrices.map(x=>x.price));const min=Math.min(...mlPrices.map(x=>x.price));const div=max-min;if(div>=10)bookComparisons.push({game:`${g.away_team} @ ${g.home_team}`,home:g.home_team,away:g.away_team,divergence:div,max,min,bestBook:mlPrices.find(x=>x.price===max)?.book,commenceTime:g.commence_time});}
+    }
+  }
+  homeDogs.sort((a,b)=>b.ml-a.ml);
+  let dynamicT1A=cfg.t1aMin;
+  if(cfg.dynamic&&homeDogs.length>0){const cutoff=Math.ceil(homeDogs.length*0.25);dynamicT1A=homeDogs.length>=cutoff?homeDogs[cutoff-1].ml:homeDogs[homeDogs.length-1].ml;dynamicT1A=Math.max(dynamicT1A,cfg.t1aMin);}
+  const avgRL=rlPrices.length>0?Math.round(rlPrices.reduce((a,b)=>a+b,0)/rlPrices.length):0;
+  const avgDog=homeDogs.length>0?Math.round(homeDogs.reduce((a,b)=>a+b.ml,0)/homeDogs.length):0;
+  const topCutoff=Math.max(1,Math.ceil(homeDogs.length*0.25));
+  const topDogs=homeDogs.slice(0,topCutoff).map(d=>d.team);
+  marketState={avgDog,bestDog:homeDogs.length>0?homeDogs[0].ml:0,avgRL,dynamicT1A,sharpGames:bookComparisons.sort((a,b)=>b.divergence-a.divergence),topDogs,homeDogs};
+  const el=document.getElementById('market-intel');
+  if(el){el.style.display='flex';document.getElementById('mi-avgdog').textContent=marketState.avgDog>0?fmtOdds(marketState.avgDog):'—';document.getElementById('mi-bestdog').textContent=marketState.bestDog>0?fmtOdds(marketState.bestDog):'—';document.getElementById('mi-avgrl').textContent=marketState.avgRL?fmtOdds(marketState.avgRL):'—';document.getElementById('mi-sharp').textContent=marketState.sharpGames.length>0?marketState.sharpGames.length+' games':'None';document.getElementById('mi-threshold').textContent=cfg.dynamic?fmtOdds(marketState.dynamicT1A)+' (auto)':fmtOdds(cfg.t1aMin)+' (manual)';}
+}
+
+function checkTriggers(game,bk){
+  const bm=game.bookmakers.find(b=>b.key===bk);if(!bm)return[];
+  const h2h=bm.markets.find(m=>m.key==='h2h');
+  const spreads=bm.markets.find(m=>m.key==='spreads');
+  const totals=bm.markets.find(m=>m.key==='totals');
+  const away=game.away_team,home=game.home_team;
+  const homeML=h2h?.outcomes?.find(o=>o.name===home)?.price;
+  const awayML=h2h?.outcomes?.find(o=>o.name===away)?.price;
+  const homeSpread=spreads?.outcomes?.find(o=>o.name===home);
+  const awaySpread=spreads?.outcomes?.find(o=>o.name===away);
+  const over=totals?.outcomes?.find(o=>o.name==='Over');
+  const under=totals?.outcomes?.find(o=>o.name==='Under');
+  const plays=[];
+  const today=new Date().toISOString().split('T')[0];
+
+  // T4 totals unlock check (shared across sports)
+  const t4done=paperPlays.filter(p=>p.trigger&&p.trigger.startsWith('T4')&&p.result);
+  const t4w=t4done.filter(p=>p.result==='W').length;
+  const t4pct=t4done.length>=cfg.t4Sample?Math.round(t4w/t4done.length*100):0;
+  const t4real=t4done.length>=cfg.t4Sample&&t4pct>=cfg.t4Pct;
+  const t4note=t4real?'T4 UNLOCKED.':'PAPER — '+t4done.length+'/'+cfg.t4Sample+' plays, need '+cfg.t4Pct+'%+.';
+
+  // =====================
+  // MLB TRIGGERS
+  // =====================
+  if(activeSport==='mlb'){
+    const t1aThreshold=cfg.dynamic?marketState.dynamicT1A:cfg.t1aMin;
+    if(homeML!=null&&homeML>0){
+      const passThresh=homeML>=t1aThreshold;
+      const passTop=!cfg.toppct||marketState.topDogs.includes(home);
+      const passBase=!cfg.baseline||homeML>=(marketState.avgDog||0);
+      if(passThresh&&passTop&&passBase)plays.push({trigger:'T1A',desc:`${home} ML ${fmtOdds(homeML)}`,sub:'Home dog',conf:7,real:true,note:`Threshold: ${fmtOdds(t1aThreshold)} | Avg: ${fmtOdds(marketState.avgDog)}`,amt:unitAmt(100),type:'real'});
+    }
+    if(awayML!=null&&awayML>=cfg.t1bMin)plays.push({trigger:'T1B',desc:`${away} ML ${fmtOdds(awayML)}`,sub:'Big dog',conf:5,real:today>=cfg.t1bDate,note:today>=cfg.t1bDate?'T1B live.':'Paper until '+cfg.t1bDate+'.',amt:unitAmt(100),type:today>=cfg.t1bDate?'real':'paper'});
+    function rlTrigger(team,rl,trigger){
+      const p=rl.price;const tiers=trigger==='T2'?cfg.t2Tiers:cfg.t3Tiers;
+      const sorted=[...tiers].sort((a,b)=>b.p-a.p);let pct=0;
+      for(const t of sorted){if(p>=t.p){pct=t.u;break;}}
+      const passBase=!cfg.baseline||p>=(marketState.avgRL||0);
+      if(pct&&passBase)plays.push({trigger,desc:`${team} ${rl.point>0?'+':''}${rl.point} RL ${fmtOdds(p)}`,sub:trigger==='T2'?'Fav RL':'Dog RL',conf:6,pct,real:true,note:`Unit ${pct}% = $${unitAmt(pct)}`,amt:unitAmt(pct),type:'real'});
+    }
+    if(homeSpread?.point<0&&homeSpread?.price!=null)rlTrigger(home,homeSpread,'T2');
+    if(awaySpread?.point<0&&awaySpread?.price!=null)rlTrigger(away,awaySpread,'T2');
+    if(homeSpread?.point>0&&homeSpread?.price!=null)rlTrigger(home,homeSpread,'T3');
+    if(awaySpread?.point>0&&awaySpread?.price!=null)rlTrigger(away,awaySpread,'T3');
+    if(cfg.sharp){const sg=marketState.sharpGames.find(s=>s.home===home&&s.away===away);if(sg)plays.push({trigger:'SHARP',desc:`+${sg.divergence}pt book spread`,sub:'Line shop',conf:8,real:false,note:`Best: ${fmtOdds(sg.max)} on ${BOOK_LABELS[sg.bestBook]||sg.bestBook}`,amt:0,type:'sharp'});}
+    if(over?.point!=null)plays.push({trigger:'T4',desc:`O ${over.point} ${fmtOdds(over.price)}`,sub:'Over',conf:5,real:t4real,note:t4note,amt:unitAmt(100),type:t4real?'real':'paper'});
+    if(under?.point!=null)plays.push({trigger:'T4',desc:`U ${under.point} ${fmtOdds(under.price)}`,sub:'Under',conf:5,real:t4real,note:t4note,amt:unitAmt(100),type:t4real?'real':'paper'});
+  }
+
+  // =====================
+  // NHL TRIGGERS
+  // =====================
+  else if(activeSport==='nhl'){
+    // T1: Home dog ML — home ice + goalie variance = value
+    if(homeML!=null&&homeML>=110)
+      plays.push({trigger:'T1',desc:`${home} ML ${fmtOdds(homeML)}`,sub:'Home dog',conf:7,real:true,note:'Home ice advantage. Check goalie matchup and B2B schedule.',amt:unitAmt(100),type:'real'});
+    // T2: Fade big road favorite — goalies make NHL a coin flip
+    if(awayML!=null&&awayML<=-160)
+      plays.push({trigger:'T2',desc:`Fade ${away} ${fmtOdds(awayML)} road fav`,sub:'Fade road chalk',conf:6,real:false,note:'PAPER — road favorites >-160 cover at low rate in NHL. Track before real money.',amt:unitAmt(100),type:'paper'});
+    // T3: Puck line dog — +1.5 value when ML dog is between +120 and +180
+    if(homeML!=null&&homeML>=120&&homeML<=200&&homeSpread?.point>0&&homeSpread?.price!=null&&homeSpread.price>=-130)
+      plays.push({trigger:'T3',desc:`${home} +1.5 PL ${fmtOdds(homeSpread.price)}`,sub:'PL value',conf:6,real:true,note:`ML ${fmtOdds(homeML)} — PL at ${fmtOdds(homeSpread.price)} offers better value. Home ice + puck line cushion.`,amt:unitAmt(75),type:'real'});
+    // T4: Under lean — B2B fatigue kills scoring
+    if(under?.point!=null)
+      plays.push({trigger:'T4',desc:`U ${under.point} ${fmtOdds(under.price)}`,sub:'Under',conf:5,real:t4real,note:t4real?'T4 UNLOCKED.':'PAPER — Check B2B schedule. Under hits more on tired teams.',amt:unitAmt(100),type:t4real?'real':'paper'});
+  }
+
+  // =====================
+  // NBA TRIGGERS
+  // =====================
+  else if(activeSport==='nba'){
+    // T1: Home dog — home court matters, especially late season
+    if(homeML!=null&&homeML>=115&&homeML<=250)
+      plays.push({trigger:'T1',desc:`${home} ML ${fmtOdds(homeML)}`,sub:'Home dog',conf:7,real:true,note:'Home court advantage. Check rest days and B2B. Avoid if home team on 2nd of B2B.',amt:unitAmt(100),type:'real'});
+    // T2: Spread fade — big NBA favorites (-10+) cover less than 50%
+    if(awaySpread?.point<-9.5&&awaySpread?.price!=null)
+      plays.push({trigger:'T2',desc:`${home} +${Math.abs(awaySpread.point)} ${fmtOdds(homeSpread?.price)}`,sub:'Fade big spread',conf:6,real:true,note:`Favorites -10 or more cover under 48% in NBA. Dog +${Math.abs(awaySpread.point)} has value.`,amt:unitAmt(75),type:'real'});
+    if(homeSpread?.point<-9.5&&homeSpread?.price!=null)
+      plays.push({trigger:'T2',desc:`${away} +${Math.abs(homeSpread.point)} ${fmtOdds(awaySpread?.price)}`,sub:'Fade big spread',conf:6,real:true,note:`Favorites -10 or more cover under 48% in NBA. Dog value.`,amt:unitAmt(75),type:'real'});
+    // T3: Road dog with rest advantage (opponent B2B)
+    if(awayML!=null&&awayML>=130)
+      plays.push({trigger:'T3',desc:`${away} ML ${fmtOdds(awayML)}`,sub:'Road dog watch',conf:5,real:false,note:'PAPER — Check if home team is on B2B. Road dogs with rest edge cover significantly more.',amt:unitAmt(50),type:'paper'});
+    // T4: Totals — pace and defense matchup dependent
+    if(over?.point!=null)
+      plays.push({trigger:'T4',desc:`O ${over.point} ${fmtOdds(over.price)}`,sub:'Over',conf:5,real:t4real,note:t4real?'T4 UNLOCKED.':'PAPER — Track pace ratings. High pace vs high pace = overs.',amt:unitAmt(100),type:t4real?'real':'paper'});
+  }
+
+  // =====================
+  // NFL TRIGGERS
+  // =====================
+  else if(activeSport==='nfl'){
+    // T1: Home dog +3 to +7 — home field worth 2.5-3 pts, sweet spot for value
+    if(homeSpread?.point>=3&&homeSpread?.point<=7&&homeSpread?.price!=null)
+      plays.push({trigger:'T1',desc:`${home} +${homeSpread.point} ${fmtOdds(homeSpread.price)}`,sub:'Home dog spread',conf:8,real:true,note:`Home dogs +3 to +7 cover 52%+ historically. Home field = 2.5-3 pt advantage. Strong value.`,amt:unitAmt(100),type:'real'});
+    // T2: Fade road chalk >-7 — road favorites -7 or more cover poorly
+    if(awaySpread?.point<-6.5&&awaySpread?.price!=null)
+      plays.push({trigger:'T2',desc:`${home} +${Math.abs(awaySpread.point)} ${fmtOdds(homeSpread?.price)}`,sub:'Fade road chalk',conf:7,real:true,note:`Road favorites laying 7+ cover less than 47%. Take the points at home.`,amt:unitAmt(75),type:'real'});
+    // T3: Division dog — division games are always closer
+    if(homeML!=null&&homeML>=130)
+      plays.push({trigger:'T3',desc:`${home} ML ${fmtOdds(homeML)}`,sub:'Dog ML watch',conf:5,real:false,note:'PAPER — If division game, home dog ML covers at elevated rate. Verify division matchup.',amt:unitAmt(50),type:'paper'});
+    // T4: Totals — weather and pace dependent
+    if(under?.point!=null)
+      plays.push({trigger:'T4',desc:`U ${under.point} ${fmtOdds(under.price)}`,sub:'Under',conf:5,real:t4real,note:t4real?'T4 UNLOCKED.':'PAPER — Check wind speed and temp. Cold weather + wind = unders.',amt:unitAmt(100),type:t4real?'real':'paper'});
+  }
+
+  // =====================
+  // NCAAF TRIGGERS
+  // =====================
+  else if(activeSport==='ncaaf'){
+    // T1: Home dog vs ranked opponent — college home field is massive (4-5 pts)
+    if(homeSpread?.point>=3&&homeSpread?.price!=null)
+      plays.push({trigger:'T1',desc:`${home} +${homeSpread.point} ${fmtOdds(homeSpread.price)}`,sub:'Home dog',conf:7,real:true,note:'College home field = 4-5 pt edge. Home dogs +3 or more cover well. Check if opponent ranked.',amt:unitAmt(100),type:'real'});
+    // T2: Fade large spread favorites (14+) — blowouts are rare, backdoor covers common
+    if(awaySpread?.point<-13.5&&awaySpread?.price!=null)
+      plays.push({trigger:'T2',desc:`${home} +${Math.abs(awaySpread.point)} ${fmtOdds(homeSpread?.price)}`,sub:'Fade big spread',conf:7,real:true,note:`Favorites -14 or more cover less than 45% in NCAAF. Backdoor covers are extremely common at big spreads.`,amt:unitAmt(75),type:'real'});
+    if(homeSpread?.point<-13.5&&homeSpread?.price!=null)
+      plays.push({trigger:'T2',desc:`${away} +${Math.abs(homeSpread.point)} ${fmtOdds(awaySpread?.price)}`,sub:'Fade big spread',conf:7,real:true,note:'Favorites -14+ cover under 45% in NCAAF.',amt:unitAmt(75),type:'real'});
+    // T4: Totals — high scoring college game environment
+    if(over?.point!=null)
+      plays.push({trigger:'T4',desc:`O ${over.point} ${fmtOdds(over.price)}`,sub:'Over',conf:5,real:t4real,note:t4real?'T4 UNLOCKED.':'PAPER — Check both teams pace and scoring averages.',amt:unitAmt(100),type:t4real?'real':'paper'});
+  }
+
+  // =====================
+  // NCAAB TRIGGERS
+  // =====================
+  else if(activeSport==='ncaab'){
+    // T1: Home dog in conference game — conference familiarity + home court
+    if(homeML!=null&&homeML>=120&&homeML<=300)
+      plays.push({trigger:'T1',desc:`${home} ML ${fmtOdds(homeML)}`,sub:'Home dog',conf:7,real:true,note:'Home court in NCAAB = 3-4 pt advantage. Conference games are tighter. Check NET rankings.',amt:unitAmt(100),type:'real'});
+    // T2: Fade big spread — parity in college basketball, especially mid-season
+    if(awaySpread?.point<-11.5)
+      plays.push({trigger:'T2',desc:`${home} +${Math.abs(awaySpread.point)} ${fmtOdds(homeSpread?.price)}`,sub:'Fade big spread',conf:6,real:true,note:'NCAAB favorites -12 or more cover less than 46%. College parity is real.',amt:unitAmt(75),type:'real'});
+    if(homeSpread?.point<-11.5)
+      plays.push({trigger:'T2',desc:`${away} +${Math.abs(homeSpread.point)} ${fmtOdds(awaySpread?.price)}`,sub:'Fade big spread',conf:6,real:true,note:'NCAAB favorites -12 or more cover less than 46%.',amt:unitAmt(75),type:'real'});
+    // T3: Road dog with strong KenPom — fade teams playing down to competition
+    if(awayML!=null&&awayML>=150&&awayML<=300)
+      plays.push({trigger:'T3',desc:`${away} ML ${fmtOdds(awayML)}`,sub:'Road value',conf:5,real:false,note:'PAPER — Check KenPom efficiency rating. Strong road teams at value ML cover well.',amt:unitAmt(50),type:'paper'});
+    // T4: Totals — tempo and defense dependent
+    if(under?.point!=null)
+      plays.push({trigger:'T4',desc:`U ${under.point} ${fmtOdds(under.price)}`,sub:'Under',conf:5,real:t4real,note:t4real?'T4 UNLOCKED.':'PAPER — Late season unders hit more as defenses peak.',amt:unitAmt(100),type:t4real?'real':'paper'});
+  }
+
+  // =====================
+  // UFC TRIGGERS
+  // =====================
+  else if(activeSport==='ufc'){
+    if(!h2h)return[];
+    h2h.outcomes.forEach(o=>{
+      // T1: Dog value — fade heavy chalk in UFC, anything can happen
+      if(o.price>=150&&o.price<=400)
+        plays.push({trigger:'T1',desc:`${o.name} ${fmtOdds(o.price)}`,sub:'Dog value',conf:6,real:true,note:`UFC dogs +150 to +400 offer strong value. One punch/submission ends any fight. Check reach, wrestling, recent form.`,amt:unitAmt(75),type:'real'});
+      // T2: Fade heavy chalk >-300 — variance too high at extreme prices
+      if(o.price<=-300)
+        plays.push({trigger:'T2',desc:`Fade ${o.name} ${fmtOdds(o.price)}`,sub:'Fade chalk',conf:7,real:false,note:`PAPER — Favorites -300 or more lose roughly 25% of the time in UFC. Extreme chalk rarely worth the juice.`,amt:unitAmt(50),type:'paper'});
+      // T3: Value range — strong plays between +400 and +700 for small unit
+      if(o.price>=400&&o.price<=700)
+        plays.push({trigger:'T3',desc:`${o.name} ${fmtOdds(o.price)}`,sub:'Big dog flier',conf:4,real:true,note:`Small unit flier. At ${fmtOdds(o.price)}, one upset pays for many misses. Check if stylistic edge exists.`,amt:unitAmt(25),type:'real'});
+    });
+  }
+
+  // =====================
+  // PGA TRIGGERS
+  // =====================
+  else if(activeSport==='pga'){
+    if(!h2h)return[];
+    h2h.outcomes.forEach(o=>{
+      // T1: Course history value — players with proven track record at this venue
+      if(o.price>=300&&o.price<=1500)
+        plays.push({trigger:'T1',desc:`${o.name} ${fmtOdds(o.price)}`,sub:'Course value',conf:6,real:true,note:`Check: 3+ top-10s at this course, current form (top-20 last 2 starts), driving distance vs course fit.`,amt:unitAmt(50),type:'real'});
+      // T2: Elite value — proven winners at longer odds
+      if(o.price>1500&&o.price<=3000)
+        plays.push({trigger:'T2',desc:`${o.name} ${fmtOdds(o.price)}`,sub:'Long shot value',conf:4,real:true,note:`Small unit. Check: course history, recent form, weather conditions, current world ranking trend.`,amt:unitAmt(25),type:'real'});
+    });
+  }
+
+  return plays;
+}
+
+// =====================
+// AI GAME BRIEFS
+// =====================
+
+async function fetchMLBData(homeTeam,awayTeam){
+  try{
+    const teamsRes=await fetch('https://statsapi.mlb.com/api/v1/teams?sportId=1');
+    const teamsData=await teamsRes.json();
+    const findTeam=(name)=>teamsData.teams.find(t=>t.name===name||t.teamName===name||name.includes(t.teamName)||t.name.includes(name));
+    const homeT=findTeam(homeTeam);const awayT=findTeam(awayTeam);
+    if(!homeT||!awayT)return null;
+    const today=new Date().toISOString().split('T')[0];
+    const schedRes=await fetch(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${today}&teamId=${homeT.id}&hydrate=probablePitcher`);
+    const schedData=await schedRes.json();
+    let homePitcher='TBD',awayPitcher='TBD',homeRecord='',awayRecord='';
+    if(schedData.dates&&schedData.dates.length>0){
+      const game=schedData.dates[0].games.find(g=>g.teams.home.team.id===homeT.id||g.teams.away.team.id===homeT.id);
+      if(game){
+        const hp=game.teams.home.probablePitcher;const ap=game.teams.away.probablePitcher;
+        if(hp)homePitcher=hp.fullName;if(ap)awayPitcher=ap.fullName;
+        homeRecord=`${game.teams.home.leagueRecord?.wins||0}-${game.teams.home.leagueRecord?.losses||0}`;
+        awayRecord=`${game.teams.away.leagueRecord?.wins||0}-${game.teams.away.leagueRecord?.losses||0}`;
+      }
+    }
+    return{homePitcher,awayPitcher,homeRecord,awayRecord,homeTeam,awayTeam};
+  }catch(e){return null;}
+}
+
+async function fetchWeather(homeTeam){
+  const STADIUMS={
+    'New York Yankees':{lat:40.8296,lon:-73.9262,name:'Yankee Stadium',dome:false},
+    'Boston Red Sox':{lat:42.3467,lon:-71.0972,name:'Fenway Park',dome:false},
+    'Los Angeles Dodgers':{lat:34.0739,lon:-118.2400,name:'Dodger Stadium',dome:false},
+    'Chicago Cubs':{lat:41.9484,lon:-87.6553,name:'Wrigley Field',dome:false},
+    'San Francisco Giants':{lat:37.7786,lon:-122.3893,name:'Oracle Park',dome:false},
+    'New York Mets':{lat:40.7571,lon:-73.8458,name:'Citi Field',dome:false},
+    'Philadelphia Phillies':{lat:39.9061,lon:-75.1665,name:'Citizens Bank Park',dome:false},
+    'Atlanta Braves':{lat:33.8908,lon:-84.4678,name:'Truist Park',dome:false},
+    'Houston Astros':{lat:29.7573,lon:-95.3555,name:'Minute Maid Park',dome:true},
+    'Tampa Bay Rays':{lat:27.7683,lon:-82.6534,name:'Tropicana Field',dome:true},
+    'Toronto Blue Jays':{lat:43.6414,lon:-79.3894,name:'Rogers Centre',dome:true},
+    'Milwaukee Brewers':{lat:43.0280,lon:-87.9712,name:'American Family Field',dome:true},
+    'Seattle Mariners':{lat:47.5914,lon:-122.3325,name:'T-Mobile Park',dome:true},
+    'Miami Marlins':{lat:25.7781,lon:-80.2196,name:'loanDepot park',dome:true},
+    'Arizona Diamondbacks':{lat:33.4453,lon:-112.0667,name:'Chase Field',dome:true},
+    'Minnesota Twins':{lat:44.9817,lon:-93.2776,name:'Target Field',dome:false},
+    'Detroit Tigers':{lat:42.3390,lon:-83.0485,name:'Comerica Park',dome:false},
+    'Cleveland Guardians':{lat:41.4962,lon:-81.6852,name:'Progressive Field',dome:false},
+    'Chicago White Sox':{lat:41.8300,lon:-87.6339,name:'Guaranteed Rate Field',dome:false},
+    'Kansas City Royals':{lat:39.0517,lon:-94.4803,name:'Kauffman Stadium',dome:false},
+    'Baltimore Orioles':{lat:39.2838,lon:-76.6217,name:'Camden Yards',dome:false},
+    'Washington Nationals':{lat:38.8730,lon:-77.0074,name:'Nationals Park',dome:false},
+    'Pittsburgh Pirates':{lat:40.4469,lon:-80.0057,name:'PNC Park',dome:false},
+    'Cincinnati Reds':{lat:39.0974,lon:-84.5079,name:'Great American Ball Park',dome:false},
+    'St. Louis Cardinals':{lat:38.6226,lon:-90.1928,name:'Busch Stadium',dome:false},
+    'Colorado Rockies':{lat:39.7559,lon:-104.9942,name:'Coors Field',dome:false},
+    'San Diego Padres':{lat:32.7073,lon:-117.1566,name:'Petco Park',dome:false},
+    'Oakland Athletics':{lat:37.7516,lon:-122.2005,name:'Oakland Coliseum',dome:false},
+    'Texas Rangers':{lat:32.7512,lon:-97.0832,name:'Globe Life Field',dome:true},
+    'Los Angeles Angels':{lat:33.8003,lon:-117.8827,name:'Angel Stadium',dome:false},
+  };
+  const s=Object.entries(STADIUMS).find(([k])=>homeTeam.includes(k.split(' ').pop())||k.includes(homeTeam.split(' ').pop()));
+  if(!s)return{dome:false,temp:'N/A',wind:'N/A',condition:'Unknown',stadium:'Unknown'};
+  const[,stad]=s;
+  if(stad.dome)return{dome:true,temp:'Indoor',wind:'Indoor',condition:'Dome — weather neutral',stadium:stad.name};
+  try{
+    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${stad.lat}&longitude=${stad.lon}&current=temperature_2m,wind_speed_10m,weather_code&temperature_unit=fahrenheit&wind_speed_unit=mph`);
+    const d=await r.json();
+    const wc=d.current.weather_code;
+    const cond=wc<=1?'Clear':wc<=3?'Partly cloudy':wc<=48?'Foggy':wc<=67?'Rain':wc<=77?'Snow':'Stormy';
+    return{dome:false,temp:Math.round(d.current.temperature_2m)+'°F',wind:Math.round(d.current.wind_speed_10m)+' mph',condition:cond,stadium:stad.name};
+  }catch(e){return{dome:false,temp:'N/A',wind:'N/A',condition:'N/A',stadium:stad.name};}
+}
+
+async function generateBrief(game,plays){
+  const cacheKey=`${game.home_team}-${game.away_team}`;
+  if(briefCache[cacheKey])return briefCache[cacheKey];
+
+  const [mlbData,weather]=await Promise.all([fetchMLBData(game.home_team,game.away_team),fetchWeather(game.home_team)]);
+  const realPlays=plays.filter(p=>p.type==='real');
+  const playDescs=realPlays.map(p=>`${p.trigger}: ${p.desc} ($${p.amt})`).join(', ');
+
+  const prompt=`You are Action's Odds, a sharp MLB betting assistant. Analyze this game and give a brief, direct betting take.
+
+Game: ${game.away_team} @ ${game.home_team}
+Date: ${new Date(game.commence_time).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} at ${new Date(game.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}
+Away record: ${mlbData?.awayRecord||'N/A'} | Home record: ${mlbData?.homeRecord||'N/A'}
+Probable pitchers: ${mlbData?.awayPitcher||'TBD'} (away) vs ${mlbData?.homePitcher||'TBD'} (home)
+Stadium: ${weather.stadium}
+Weather: ${weather.condition}, ${weather.temp}, Wind: ${weather.wind}
+Flagged plays: ${playDescs}
+
+Respond ONLY with valid JSON, no markdown, no explanation:
+{"lean":"BET"|"PASS"|"WATCH","confidence":1-10,"take":"2-3 sentence sharp betting take mentioning specific factors","factors":["factor1","factor2","factor3"],"warning":"one key risk or null"}`;
+
+  try{
+    const res=await fetch('/ai-brief',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await res.json();
+    let text=data.content?.find(b=>b.type==='text')?.text||'{}';
+    text=text.replace(/```json|```/g,'').trim();
+    const jStart=text.indexOf('{');const jEnd=text.lastIndexOf('}');
+    if(jStart===-1||jEnd===-1)throw new Error('No JSON');
+    const parsed=JSON.parse(text.slice(jStart,jEnd+1));
+    const brief={
+      lean:parsed.lean||parsed.Lean||'WATCH',
+      confidence:parseInt(parsed.confidence||parsed.Confidence||5)||5,
+      take:parsed.take||parsed.Take||parsed.analysis||parsed.recommendation||'Check pitchers and weather above.',
+      factors:parsed.factors||parsed.Factors||[],
+      warning:parsed.warning||parsed.Warning||parsed.risk||parsed.Risk||null,
+      mlbData,weather
+    };
+    briefCache[cacheKey]=brief;
+    return brief;
+  }catch(e){
+    return{lean:'WATCH',confidence:5,take:'AI brief unavailable — check pitchers and weather above.',factors:[],warning:null,mlbData,weather};
+  }
+}
+
+async function refreshBriefs(){
+  const container=document.getElementById('ai-cards');
+  if(!allGames.length){container.innerHTML='<div class="ai-empty">Load odds first.</div>';return;}
+
+  const now2 = new Date();
+  const flaggedGames=[];
+  for(const g of allGames.filter(g=>(now2-new Date(g.commence_time))<30*60*1000)){
+    const plays=checkTriggers(g,activeBook);
+    const realPlays=plays.filter(p=>p.type==='real');
+    if(realPlays.length>0)flaggedGames.push({game:g,plays});
+  }
+
+  if(!flaggedGames.length){container.innerHTML='<div class="ai-empty">No real-money plays flagged today.</div>';return;}
+
+  // Filter to only truly upcoming games at render time
+  const nowRender = new Date();
+  const currentFlagged = flaggedGames.filter(({game}) => (nowRender - new Date(game.commence_time)) < 30*60*1000);
+
+  if(!currentFlagged.length){container.innerHTML='<div class="ai-empty">No upcoming real-money plays right now.</div>';return;}
+
+  container.innerHTML=currentFlagged.map(({game,plays})=>{
+    const rp=plays.filter(p=>p.type==='real');
+    return`<div class="ai-card loading" id="brief-${game.home_team.replace(/\s/g,'-')}">
+      <div class="ai-card-game">${game.away_team} @ ${game.home_team}</div>
+      <div class="ai-card-play">${rp[0]?.desc||''}</div>
+      <div class="ai-loading"><div class="spinner"></div> Analyzing game...</div>
+    </div>`;
+  }).join('');
+
+  for(let bi=0;bi<flaggedGames.length;bi++){
+    const{game,plays}=flaggedGames[bi];
+    if(bi>0)await new Promise(r=>setTimeout(r,1500));
+    const cardId=`brief-${game.home_team.replace(/\s/g,'-')}`;
+    const card=document.getElementById(cardId);
+    if(!card)continue;
+    try{
+      const brief=await generateBrief(game,plays);
+      const rp=plays.filter(p=>p.type==='real');
+      const leanCls=brief.lean==='BET'?'bet':brief.lean==='PASS'?'pass':'watch';
+      const leanIcon=brief.lean==='BET'?'▲':brief.lean==='PASS'?'✕':'◆';
+      card.classList.remove('loading');
+      card.innerHTML=`
+        <div class="ai-card-game">${game.away_team} @ ${game.home_team} · ${new Date(game.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div>
+        <div class="ai-card-play ${brief.lean==='WATCH'?'amber':''}">${rp.map(p=>p.desc).join(' · ')}</div>
+        <div class="ai-lean ${leanCls}">${leanIcon} ${brief.lean}</div>
+        <div class="ai-stats">
+          ${brief.mlbData?.awayPitcher&&brief.mlbData.awayPitcher!=='TBD'?`<div class="ai-stat"><div class="ai-stat-lbl">Away SP</div><div class="ai-stat-val">${brief.mlbData.awayPitcher.split(' ').pop()}</div></div>`:''}
+          ${brief.mlbData?.homePitcher&&brief.mlbData.homePitcher!=='TBD'?`<div class="ai-stat"><div class="ai-stat-lbl">Home SP</div><div class="ai-stat-val">${brief.mlbData.homePitcher.split(' ').pop()}</div></div>`:''}
+          ${brief.mlbData?.awayRecord?`<div class="ai-stat"><div class="ai-stat-lbl">Away</div><div class="ai-stat-val">${brief.mlbData.awayRecord}</div></div>`:''}
+          ${brief.mlbData?.homeRecord?`<div class="ai-stat"><div class="ai-stat-lbl">Home</div><div class="ai-stat-val">${brief.mlbData.homeRecord}</div></div>`:''}
+          <div class="ai-stat"><div class="ai-stat-lbl">Weather</div><div class="ai-stat-val">${brief.weather?.dome?'Dome':brief.weather?.temp||'N/A'}</div></div>
+          ${!brief.weather?.dome&&brief.weather?.wind?`<div class="ai-stat"><div class="ai-stat-lbl">Wind</div><div class="ai-stat-val">${brief.weather.wind}</div></div>`:''}
+        </div>
+        <div class="ai-take">${brief.take}${brief.warning?`<br><br><strong>Risk:</strong> ${brief.warning}`:''}</div>
+        <div class="confidence-bar"><div class="confidence-fill" style="width:${brief.confidence*10}%;background:${brief.lean==='BET'?'var(--green)':brief.lean==='PASS'?'var(--red)':'var(--amber)'}"></div></div>`;
+    }catch(e){
+      card.classList.remove('loading');
+      card.innerHTML+='<div class="ai-take" style="color:var(--red);">Brief failed. Try refreshing.</div>';
+    }
+  }
+}
+
+function updateSeasonPnL(){
+  const settled=logPlays.filter(p=>p.result==='W'||p.result==='L');
+  const pnl=settled.reduce((acc,p)=>{
+    const amt=parseFloat(p.amt)||0,odds=parseInt(p.odds)||0;
+    if(p.result==='W')return acc+(odds>0?amt*(odds/100):amt*(100/Math.abs(odds)));
+    if(p.result==='L')return acc-amt;
+    return acc;
+  },0);
+  const el=document.getElementById('s-pnl');
+  if(!el)return;
+  el.textContent=(pnl>=0?'+':'-')+'$'+Math.abs(Math.round(pnl)).toLocaleString();
+  el.className='stat-val '+(pnl>=0?'green':'');
+  el.style.color=pnl<0?'var(--red)':'';
+  // Update bankroll
+  const bankEl=document.getElementById('s-bank');
+  if(bankEl)bankEl.textContent='$'+(cfg.bankroll+Math.round(pnl)).toLocaleString();
+}
+
+function renderCard(){
+  const out=document.getElementById('card-output');
+  if(!allGames.length){out.innerHTML='<div class="status-box"><div class="status-title">No games today</div></div>';return;}
+  document.getElementById('s-bank').textContent='$'+cfg.bankroll.toLocaleString();
+  analyzeMarket(allGames.filter(g=>(Date.now()-new Date(g.commence_time))<30*60*1000),activeBook);
+  let realCount=0,stakeTotal=0,paperCount=0,html='';
+  const now = new Date();
+  const cutoffMs = 30 * 60 * 1000; // 30 min grace period
+  const upcomingGames = allGames.filter(g => (now - new Date(g.commence_time)) < cutoffMs);
+  const sorted=[...upcomingGames].sort((a,b)=>{const ap=checkTriggers(a,activeBook),bp=checkTriggers(b,activeBook);const ar=ap.filter(p=>p.real).length,br=bp.filter(p=>p.real).length;return br!==ar?br-ar:bp.length-ap.length;});
+  for(const g of sorted){
+    const plays=checkTriggers(g,activeBook);
+    const rp=plays.filter(p=>p.type==='real'),pp=plays.filter(p=>p.type==='paper'),sp=plays.filter(p=>p.type==='sharp');
+    const bm=g.bookmakers.find(b=>b.key===activeBook);
+    const h2h=bm?.markets.find(m=>m.key==='h2h');const spreads=bm?.markets.find(m=>m.key==='spreads');const totals=bm?.markets.find(m=>m.key==='totals');
+    const away=g.away_team,home=g.home_team;
+    const homeML=h2h?.outcomes?.find(o=>o.name===home)?.price;const awayML=h2h?.outcomes?.find(o=>o.name===away)?.price;
+    const homeRL=spreads?.outcomes?.find(o=>o.name===home);const awayRL=spreads?.outcomes?.find(o=>o.name===away);
+    const over=totals?.outcomes?.find(o=>o.name==='Over');const under=totals?.outcomes?.find(o=>o.name==='Under');
+    const cls=rp.length?'game-card flagged':sp.length&&!pp.length?'game-card sharp-flag':pp.length?'game-card paper-flag':'game-card';
+    const timeStr=new Date(g.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});
+    const badges=plays.map(p=>{const bc=p.type==='real'?'tbadge-real':p.type==='sharp'?'tbadge-sharp':'tbadge-paper';return`<span class="tbadge ${bc}">${p.trigger}</span>`;}).join('');
+    const awayFav=awayML!=null&&homeML!=null&&awayML<homeML;const homeFav=homeML!=null&&awayML!=null&&homeML<awayML;
+    html+=`<div class="${cls}">
+      <div class="game-card-header"><div class="game-time">${timeStr}</div><div class="trigger-badges">${badges}</div></div>
+      <div class="matchup">
+        <div class="odds-cols-header"><div class="odds-col-lbl">ML</div><div class="odds-col-lbl">RL</div><div class="odds-col-lbl">O/U</div></div>
+        <div class="team-row"><div class="team-info"><span class="team-badge away">Away</span><span class="team-name${awayFav?' fav':''}">${away}</span></div>
+          <div class="odds-group"><div class="odds-cell"><span class="odds-val${awayML>0?' dog':''}">${fmtOdds(awayML)}</span></div><div class="odds-cell"><span class="odds-val">${awayRL?(awayRL.point>0?'+':'')+awayRL.point+' '+fmtOdds(awayRL.price):'—'}</span></div><div class="odds-cell"><span class="odds-val">${over?'O '+over.point:'—'}</span></div></div></div>
+        <div class="matchup-divider"></div>
+        <div class="team-row"><div class="team-info"><span class="team-badge home">Home</span><span class="team-name${homeFav?' fav':''}">${home}</span></div>
+          <div class="odds-group"><div class="odds-cell"><span class="odds-val${homeML>0?' dog':''}">${fmtOdds(homeML)}</span></div><div class="odds-cell"><span class="odds-val">${homeRL?(homeRL.point>0?'+':'')+homeRL.point+' '+fmtOdds(homeRL.price):'—'}</span></div><div class="odds-cell"><span class="odds-val">${under?'U '+under.point:'—'}</span></div></div></div>
+      </div>`;
+    if(plays.length){
+      html+=`<div class="play-box">`;
+      if(rp.length){html+=`<div class="play-section-label real">Real plays</div>`;rp.forEach(p=>{stakeTotal+=p.amt;realCount++;html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,'green')}</div><div class="play-amt">$${p.amt}</div></div><div class="play-note">${p.note}</div>`;});}
+      if(sp.length){html+=`<div class="play-section-label sharp" style="margin-top:${rp.length?'8':'0'}px;">Line shop</div>`;sp.forEach(p=>{html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,'blue')}</div><div class="play-amt sharp">shop</div></div><div class="play-note">${p.note}</div>`;});}
+      if(pp.length){html+=`<div class="play-section-label paper" style="margin-top:${rp.length||sp.length?'8':'0'}px;">Paper only</div>`;pp.forEach(p=>{paperCount++;html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,'amber')}</div><div class="play-amt paper">paper</div></div><div class="play-note">${p.note}</div>`;});}
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  }
+  out.innerHTML=html;
+  document.getElementById('s-real').textContent=realCount;
+  document.getElementById('s-stake').textContent='$'+stakeTotal.toLocaleString();
+  const sportLabels={mlb:'games',nhl:'games',nba:'games',nfl:'games',ncaaf:'games',ncaab:'games',ufc:'fights',pga:'golfers'};
+  document.getElementById('game-count').textContent=allGames.length+' '+(sportLabels[activeSport]||'games')+' today';
+  updateSeasonPnL();
+}
+
+function renderBookTabs(){document.getElementById('book-tabs').innerHTML=availableBooks.map(k=>`<button class="book-tab${k===activeBook?' active':''}" onclick="selectBook('${k}')">${BOOK_LABELS[k]||k}</button>`).join('');}
+function selectBook(k){activeBook=k;renderBookTabs();briefCache={};renderCard();refreshBriefs();}
+
+async function fetchOdds(){
+  const btn=document.getElementById('refresh-btn');const spinner=document.getElementById('refresh-spinner');
+  btn.disabled=true;spinner.style.display='inline-block';
+  try{
+    const res=await fetch('/odds?sport='+activeSport);if(!res.ok)throw new Error('Server '+res.status);
+    allGames=await res.json();if(allGames.error)throw new Error(allGames.error);
+    const bookSet=new Set();allGames.forEach(g=>g.bookmakers.forEach(b=>bookSet.add(b.key)));
+    availableBooks=[...bookSet].sort((a,b)=>(BOOK_ORDER.indexOf(a)+1||99)-(BOOK_ORDER.indexOf(b)+1||99));
+    if(!availableBooks.includes(activeBook))activeBook=availableBooks[0]||'draftkings';
+    briefCache={};
+    renderBookTabs();renderCard();refreshBriefs();countdown=300;
+  }catch(e){document.getElementById('card-output').innerHTML=`<div class="status-box"><div class="status-title" style="color:var(--red);">Error</div><div class="status-sub">${e.message}</div></div>`;}
+  btn.disabled=false;spinner.style.display='none';
+}
+
+function showTab(t){
+  ['paper','log','settings'].forEach(x=>{
+    document.getElementById('ptab-'+x).style.display=x===t?'block':'none';
+    const btn=document.getElementById('tab-btn-'+x);
+    if(btn)btn.classList.toggle('active',x===t);
+  });
+  if(t==='settings')loadSettingsForm();
+  if(t==='paper')renderPaper();
+  if(t==='log')renderLog();
+}
+function toggleSetting(key){cfg[key]=!cfg[key];const el=document.getElementById('tog-'+key);if(el)el.classList.toggle('on',cfg[key]);try{localStorage.setItem('ao_cfg',JSON.stringify(cfg));}catch(e){}briefCache={};renderCard();refreshBriefs();}
+function loadSettingsForm(){
+  ['dynamic','toppct','sharp','baseline'].forEach(k=>{const el=document.getElementById('tog-'+k);if(el)el.classList.toggle('on',!!cfg[k]);});
+  document.getElementById('cfg-bankroll').value=cfg.bankroll;document.getElementById('cfg-unit').value=cfg.unit;document.getElementById('cfg-t1a-min').value=cfg.t1aMin;document.getElementById('cfg-t1b-min').value=cfg.t1bMin;document.getElementById('cfg-t1b-date').value=cfg.t1bDate;
+  cfg.t2Tiers.forEach((t,i)=>{document.getElementById('cfg-t2-p'+(i+1)).value=t.p;document.getElementById('cfg-t2-u'+(i+1)).value=t.u;});
+  cfg.t3Tiers.forEach((t,i)=>{document.getElementById('cfg-t3-p'+(i+1)).value=t.p;document.getElementById('cfg-t3-u'+(i+1)).value=t.u;});
+  document.getElementById('cfg-t4-pct').value=cfg.t4Pct;document.getElementById('cfg-t4-sample').value=cfg.t4Sample;
+}
+function saveSettings(){
+  cfg={...cfg,bankroll:parseInt(document.getElementById('cfg-bankroll').value)||2000,unit:parseInt(document.getElementById('cfg-unit').value)||200,t1aMin:parseInt(document.getElementById('cfg-t1a-min').value)||115,t1bMin:parseInt(document.getElementById('cfg-t1b-min').value)||200,t1bDate:document.getElementById('cfg-t1b-date').value||'2026-06-01',t2Tiers:[1,2,3,4].map(i=>({p:parseInt(document.getElementById('cfg-t2-p'+i).value)||0,u:parseInt(document.getElementById('cfg-t2-u'+i).value)||0})),t3Tiers:[1,2,3,4].map(i=>({p:parseInt(document.getElementById('cfg-t3-p'+i).value)||0,u:parseInt(document.getElementById('cfg-t3-u'+i).value)||0})),t4Pct:parseInt(document.getElementById('cfg-t4-pct').value)||55,t4Sample:parseInt(document.getElementById('cfg-t4-sample').value)||20};
+  try{localStorage.setItem('ao_cfg',JSON.stringify(cfg));}catch(e){}
+  document.getElementById('s-bank').textContent='$'+cfg.bankroll.toLocaleString();
+  const msg=document.getElementById('saved-msg');msg.style.display='block';setTimeout(()=>msg.style.display='none',2500);
+  briefCache={};renderCard();refreshBriefs();
+}
+
+function renderPaper(){
+  const w=paperPlays.filter(p=>p.result==='W').length,l=paperPlays.filter(p=>p.result==='L').length,pend=paperPlays.filter(p=>!p.result).length;
+  document.getElementById('paper-wl-strip').innerHTML=`<div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">${w}</div></div><div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">${l}</div></div><div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val">${pend}</div></div><div class="wl-box"><div class="wl-label">Win%</div><div class="wl-val">${w+l>0?Math.round(w/(w+l)*100)+'%':'—'}</div></div>`;
+  const list=document.getElementById('paper-list');
+  if(!paperPlays.length){list.innerHTML='<div class="empty">No paper trades yet.</div>';return;}
+  list.innerHTML=paperPlays.map((p,i)=>`<div class="log-row"><div style="flex:1;min-width:0;"><div class="log-game">${p.game}</div><div class="log-detail">${p.bet} ${p.odds} · ${p.trigger} · ${p.date}</div></div><div class="log-btns"><button class="log-btn${p.result==='W'?' w':''}" onclick="setPR(${i},'W')">W</button><button class="log-btn${p.result==='L'?' l':''}" onclick="setPR(${i},'L')">L</button><button class="log-btn" onclick="setPR(${i},null)" style="font-size:9px;">${p.result||'Pend'}</button></div></div>`).join('');
+}
+function addPaper(){const g=document.getElementById('p-game').value.trim(),b=document.getElementById('p-bet').value.trim();if(!g||!b)return;paperPlays.push({game:g,bet:b,odds:document.getElementById('p-odds').value.trim(),trigger:document.getElementById('p-trigger').value.trim()||'T4',note:document.getElementById('p-note').value.trim(),date:new Date().toLocaleDateString(),result:null});savePaper();renderPaper();['p-game','p-bet','p-odds','p-trigger','p-note'].forEach(id=>document.getElementById(id).value='');}
+function setPR(i,r){paperPlays[i].result=r;savePaper();renderPaper();}
+function renderLog(){
+  const w=logPlays.filter(p=>p.result==='W').length;
+  const l=logPlays.filter(p=>p.result==='L').length;
+  const pend=logPlays.filter(p=>!p.result).length;
+  const settled=logPlays.filter(p=>p.result==='W'||p.result==='L');
+  const pnl=settled.reduce((acc,p)=>{const amt=parseFloat(p.amt)||0,odds=parseInt(p.odds)||0;if(p.result==='W')return acc+(odds>0?amt*(odds/100):amt*(100/Math.abs(odds)));if(p.result==='L')return acc-amt;return acc;},0);
+  const totalWagered=logPlays.reduce((acc,p)=>acc+(parseFloat(p.amt)||0),0);
+  const roi=totalWagered>0?Math.round(pnl/totalWagered*100):0;
+
+  // Update strip
+  const wEl=document.getElementById('lw-w');if(wEl)wEl.textContent=w;
+  const lEl=document.getElementById('lw-l');if(lEl)lEl.textContent=l;
+  const pEl=document.getElementById('lw-pend');if(pEl)pEl.textContent=pend;
+  const rEl=document.getElementById('lw-roi');if(rEl){rEl.textContent=(roi>=0?'+':'')+roi+'%';rEl.style.color=roi>=0?'var(--green)':'var(--red)';}
+  const pnlEl=document.getElementById('lw-pnl');if(pnlEl){pnlEl.textContent=(pnl>=0?'+':'-')+'$'+Math.abs(Math.round(pnl)).toLocaleString();pnlEl.style.color=pnl<0?'var(--red)':'';}
+  const wgEl=document.getElementById('lw-wagered');if(wgEl)wgEl.textContent='$'+Math.round(totalWagered).toLocaleString();
+
+  // Update top-level P&L
+  updateSeasonPnL();
+
+  const list=document.getElementById('log-list');
+  if(!logPlays.length){list.innerHTML='<div class="empty">No live plays logged yet.</div>';return;}
+
+  // Filter
+  const filterEl=document.getElementById('log-filter');
+  const filter=filterEl?filterEl.value:'all';
+  let filtered=[...logPlays].reverse(); // newest first
+  if(filter==='pending')filtered=filtered.filter(p=>!p.result);
+  else if(filter==='settled')filtered=filtered.filter(p=>p.result==='W'||p.result==='L');
+  else if(filter==='W')filtered=filtered.filter(p=>p.result==='W');
+  else if(filter==='L')filtered=filtered.filter(p=>p.result==='L');
+
+  if(!filtered.length){list.innerHTML='<div class="empty">No plays match this filter.</div>';return;}
+
+  list.innerHTML=filtered.map(p=>{
+    const i=logPlays.indexOf(p);
+    let pnlStr='';
+    if(p.result==='W'){const amt=parseFloat(p.amt)||0,odds=parseInt(p.odds)||0;const win=odds>0?amt*(odds/100):amt*(100/Math.abs(odds));pnlStr=`<span style="color:var(--green);font-weight:500;">+$${Math.round(win)}</span>`;}
+    else if(p.result==='L'){pnlStr=`<span style="color:var(--red);font-weight:500;">-$${parseFloat(p.amt)||0}</span>`;}
+    return`<div class="log-row">
+      <div style="flex:1;min-width:0;">
+        <div class="log-game">${p.game} ${pnlStr}</div>
+        <div class="log-detail">${p.bet} ${p.odds} · $${p.amt} · ${p.trigger||''} · ${p.date}</div>
+      </div>
+      <div class="log-btns">
+        <button class="log-btn${p.result==='W'?' w':''}" onclick="setLR(${i},'W')">W</button>
+        <button class="log-btn${p.result==='L'?' l':''}" onclick="setLR(${i},'L')">L</button>
+        <button class="log-btn" onclick="setLR(${i},null)" style="font-size:9px;">${p.result||'Pend'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function addLog(){const g=document.getElementById('l-game').value.trim(),b=document.getElementById('l-bet').value.trim();if(!g||!b)return;const dateInput=document.getElementById('l-date').value.trim();const date=dateInput||new Date().toLocaleDateString();logPlays.push({game:g,bet:b,odds:document.getElementById('l-odds').value.trim(),amt:document.getElementById('l-amt').value.trim(),trigger:document.getElementById('l-trigger').value.trim(),date,result:null});saveLog();renderLog();['l-game','l-bet','l-odds','l-amt','l-trigger','l-date'].forEach(id=>document.getElementById(id).value='');updateSeasonPnL();}
+function setLR(i,r){logPlays[i].result=r;saveLog();renderLog();updateSeasonPnL();}
+
+let countdown=300;
+function updateCountdown(){countdown--;if(countdown<=0){countdown=300;fetchOdds();return;}const mins=Math.floor(countdown/60),secs=countdown%60;const timeStr=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});document.getElementById('last-update').textContent='Updated '+timeStr+' — next in '+mins+':'+(secs<10?'0':'')+secs;}
+setInterval(updateCountdown,1000);
+fetchOdds();
+</script>
+</body>
+</html>
