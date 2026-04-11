@@ -446,29 +446,29 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 // THEME ENGINE — global scope
 // =====================
 var activeSport = localStorage.getItem('ao_sport') || 'mlb';
+var briefCache = {};
+var allGames = [];
+var activeBook = 'draftkings';
+var availableBooks = [];
 
 function setSport(sport) {
   activeSport = sport;
   localStorage.setItem('ao_sport', sport);
-  // Update button styles
-  const mlbBtn = document.getElementById('sport-mlb');
-  const nhlBtn = document.getElementById('sport-nhl');
-  if(mlbBtn) {
-    mlbBtn.style.color = sport==='mlb' ? 'var(--gold)' : 'var(--text3)';
-    mlbBtn.style.background = sport==='mlb' ? 'rgba(232,185,74,0.15)' : 'transparent';
-    mlbBtn.style.borderColor = sport==='mlb' ? 'var(--gold)' : 'var(--border2)';
-  }
-  if(nhlBtn) {
-    nhlBtn.style.color = sport==='nhl' ? 'var(--gold)' : 'var(--text3)';
-    nhlBtn.style.background = sport==='nhl' ? 'rgba(232,185,74,0.15)' : 'transparent';
-    nhlBtn.style.borderColor = sport==='nhl' ? 'var(--gold)' : 'var(--border2)';
-  }
+  // Update all sport button styles
+  ['mlb','nhl','nba','nfl','ncaaf','ncaab','ufc','pga'].forEach(function(s){
+    var btn = document.getElementById('sport-'+s);
+    if(btn){
+      btn.style.color = sport===s ? 'var(--gold)' : 'var(--text3)';
+      btn.style.background = sport===s ? 'rgba(232,185,74,0.15)' : 'transparent';
+      btn.style.borderColor = sport===s ? 'var(--gold)' : 'var(--border2)';
+    }
+  });
   // Update game count label
-  const gc = document.getElementById('game-count');
+  var gc = document.getElementById('game-count');
   if(gc) gc.textContent = '';
   // Update AI section subtitle
-  const sub = document.querySelector('.ai-subtitle');
-  if(sub) sub.textContent = `AI-powered game briefs for ${sport.toUpperCase()} real-money plays only`;
+  var sub = document.querySelector('.ai-subtitle');
+  if(sub) sub.textContent = 'AI-powered game briefs for '+sport.toUpperCase()+' real-money plays only';
   briefCache = {};
   allGames = [];
   fetchOdds();
@@ -523,7 +523,6 @@ setSport(activeSport);
 
 const BOOK_LABELS={caesars:'Caesars',hard_rock_bet:'Hard Rock',draftkings:'DraftKings',fanduel:'FanDuel',betmgm:'BetMGM'};
 const BOOK_ORDER=['caesars','hard_rock_bet','draftkings','fanduel','betmgm'];
-let allGames=[],activeBook='draftkings',availableBooks=[];
 let paperPlays=[],logPlays=[];
 try{paperPlays=JSON.parse(localStorage.getItem('ao_paper')||'[]');}catch(e){}
 try{logPlays=JSON.parse(localStorage.getItem('ao_log')||'[]');}catch(e){}
@@ -752,7 +751,6 @@ function checkTriggers(game,bk){
 // =====================
 // AI GAME BRIEFS
 // =====================
-let briefCache={};
 
 async function fetchMLBData(homeTeam,awayTeam){
   try{
