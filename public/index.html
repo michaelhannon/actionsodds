@@ -1375,6 +1375,7 @@ function renderCard(){
         html+=`</div>
             <div id="${rowId}-ai" style="font-size:12px;color:var(--text2);line-height:1.6;">
               <button onclick="event.stopPropagation();analyzeGolfer('${o.name}',${o.price},'${rowId}-ai')" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;background:transparent;border:1px solid var(--border2);color:var(--gold);padding:5px 12px;border-radius:5px;cursor:pointer;">Analyze ${o.name.split(' ').pop()}</button>
+              <button onclick="event.stopPropagation();openBook('pga')" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;background:var(--gold);border:none;color:var(--black);padding:5px 12px;border-radius:5px;cursor:pointer;margin-left:6px;">Place Bet ↗</button>
             </div>
           </div>`;
       });
@@ -1434,6 +1435,14 @@ function renderCard(){
       html+=`</div>`;
       }
     }
+    // Bet links bar
+    html+=`<div style="display:flex;gap:6px;padding:8px 14px;border-top:1px solid var(--border);flex-wrap:wrap;">
+      <button onclick="openBook('mlb','${encodeURIComponent(away+' '+home)}')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--gold);border:none;color:var(--black);padding:4px 10px;border-radius:4px;cursor:pointer;">Place Bet ↗</button>
+      <button onclick="openBookDirect('draftkings','mlb')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.05em;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 8px;border-radius:4px;cursor:pointer;">DK</button>
+      <button onclick="openBookDirect('fanduel','mlb')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.05em;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 8px;border-radius:4px;cursor:pointer;">FD</button>
+      <button onclick="openBookDirect('betmgm','mlb')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.05em;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 8px;border-radius:4px;cursor:pointer;">MGM</button>
+      <button onclick="openBookDirect('caesars','mlb')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.05em;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 8px;border-radius:4px;cursor:pointer;">CZR</button>
+    </div>`;
     html+=`</div>`;
   }
   out.innerHTML=html;
@@ -1562,6 +1571,72 @@ function renderLog(){
 }
 function addLog(){const g=document.getElementById('l-game').value.trim(),b=document.getElementById('l-bet').value.trim();if(!g||!b)return;const dateInput=document.getElementById('l-date').value.trim();const date=dateInput||new Date().toLocaleDateString();logPlays.push({game:g,bet:b,odds:document.getElementById('l-odds').value.trim(),amt:document.getElementById('l-amt').value.trim(),trigger:document.getElementById('l-trigger').value.trim(),date,result:null});saveLog();renderLog();['l-game','l-bet','l-odds','l-amt','l-trigger','l-date'].forEach(id=>document.getElementById(id).value='');updateSeasonPnL();}
 function setLR(i,r){logPlays[i].result=r;saveLog();renderLog();updateSeasonPnL();}
+
+// =====================
+// SPORTSBOOK DEEP LINKS
+// =====================
+var BOOK_URLS={
+  draftkings:{
+    mlb:'https://sportsbook.draftkings.com/leagues/baseball/mlb',
+    nhl:'https://sportsbook.draftkings.com/leagues/hockey/nhl',
+    nba:'https://sportsbook.draftkings.com/leagues/basketball/nba',
+    nfl:'https://sportsbook.draftkings.com/leagues/football/nfl',
+    pga:'https://sportsbook.draftkings.com/leagues/golf/us-masters',
+    ufc:'https://sportsbook.draftkings.com/leagues/mma/ufc',
+    ncaaf:'https://sportsbook.draftkings.com/leagues/football/cfb',
+    ncaab:'https://sportsbook.draftkings.com/leagues/basketball/cbb'
+  },
+  fanduel:{
+    mlb:'https://sportsbook.fanduel.com/baseball/mlb',
+    nhl:'https://sportsbook.fanduel.com/ice-hockey/nhl',
+    nba:'https://sportsbook.fanduel.com/basketball/nba',
+    nfl:'https://sportsbook.fanduel.com/football/nfl',
+    pga:'https://sportsbook.fanduel.com/golf',
+    ufc:'https://sportsbook.fanduel.com/mma/ufc',
+    ncaaf:'https://sportsbook.fanduel.com/football/college-football',
+    ncaab:'https://sportsbook.fanduel.com/basketball/college-basketball'
+  },
+  betmgm:{
+    mlb:'https://sports.betmgm.com/en/sports/baseball-23/betting/usa-9/mlb-75',
+    nhl:'https://sports.betmgm.com/en/sports/ice-hockey-12/betting/usa-9/nhl-34',
+    nba:'https://sports.betmgm.com/en/sports/basketball-7/betting/usa-9/nba-6',
+    nfl:'https://sports.betmgm.com/en/sports/football-11/betting/usa-9/nfl-35',
+    pga:'https://sports.betmgm.com/en/sports/golf-9',
+    ufc:'https://sports.betmgm.com/en/sports/mma-22',
+    ncaaf:'https://sports.betmgm.com/en/sports/football-11/betting/usa-9/college-football-211',
+    ncaab:'https://sports.betmgm.com/en/sports/basketball-7/betting/usa-9/college-basketball-264'
+  },
+  caesars:{
+    mlb:'https://www.caesars.com/sportsbook-and-casino/sport/baseball/competition/mlb',
+    nhl:'https://www.caesars.com/sportsbook-and-casino/sport/ice-hockey/competition/nhl',
+    nba:'https://www.caesars.com/sportsbook-and-casino/sport/basketball/competition/nba',
+    nfl:'https://www.caesars.com/sportsbook-and-casino/sport/football/competition/nfl',
+    pga:'https://www.caesars.com/sportsbook-and-casino/sport/golf',
+    ufc:'https://www.caesars.com/sportsbook-and-casino/sport/mma',
+    ncaaf:'https://www.caesars.com/sportsbook-and-casino/sport/football/competition/ncaaf',
+    ncaab:'https://www.caesars.com/sportsbook-and-casino/sport/basketball/competition/ncaab'
+  }
+};
+
+function openBook(sport,searchTerm){
+  // Opens the currently selected book for this sport
+  var book=activeBook;
+  var urls=BOOK_URLS[book];
+  if(urls&&urls[sport]){
+    window.open(urls[sport],'_blank');
+  } else {
+    // Fallback to DraftKings
+    var dk=BOOK_URLS.draftkings;
+    if(dk&&dk[sport])window.open(dk[sport],'_blank');
+  }
+}
+
+function openBookDirect(book,sport){
+  var urls=BOOK_URLS[book];
+  if(urls&&urls[sport]){
+    window.open(urls[sport],'_blank');
+  }
+}
 
 // =====================
 // CALCULATOR FUNCTIONS
