@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 3000;
-const API_KEY = process.env.ODDS_API_KEY || '8aa732b52276764387926d1c24f194c2';
+const API_KEY = process.env.ODDS_API_KEY || '';
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
 
 const SPORT_KEYS = {
