@@ -678,7 +678,7 @@ async function refreshBriefs(){
 
   const now2 = new Date();
   const flaggedGames=[];
-  for(const g of allGames.filter(g=>new Date(g.commence_time)>now2)){
+  for(const g of allGames.filter(g=>(now2-new Date(g.commence_time))<30*60*1000)){
     const plays=checkTriggers(g,activeBook);
     const realPlays=plays.filter(p=>p.type==='real');
     if(realPlays.length>0)flaggedGames.push({game:g,plays});
@@ -750,10 +750,11 @@ function renderCard(){
   const out=document.getElementById('card-output');
   if(!allGames.length){out.innerHTML='<div class="status-box"><div class="status-title">No games today</div></div>';return;}
   document.getElementById('s-bank').textContent='$'+cfg.bankroll.toLocaleString();
-  analyzeMarket(allGames.filter(g=>new Date(g.commence_time)>new Date()),activeBook);
+  analyzeMarket(allGames.filter(g=>(Date.now()-new Date(g.commence_time))<30*60*1000),activeBook);
   let realCount=0,stakeTotal=0,paperCount=0,html='';
   const now = new Date();
-  const upcomingGames = allGames.filter(g => new Date(g.commence_time) > now);
+  const cutoffMs = 30 * 60 * 1000; // 30 min grace period
+  const upcomingGames = allGames.filter(g => (now - new Date(g.commence_time)) < cutoffMs);
   const sorted=[...upcomingGames].sort((a,b)=>{const ap=checkTriggers(a,activeBook),bp=checkTriggers(b,activeBook);const ar=ap.filter(p=>p.real).length,br=bp.filter(p=>p.real).length;return br!==ar?br-ar:bp.length-ap.length;});
   for(const g of sorted){
     const plays=checkTriggers(g,activeBook);
