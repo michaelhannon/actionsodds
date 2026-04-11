@@ -844,16 +844,25 @@ Respond ONLY with valid JSON, no markdown, no explanation:
 {"lean":"BET"|"PASS"|"WATCH","confidence":1-10,"take":"2-3 sentence sharp betting take mentioning specific factors","factors":["factor1","factor2","factor3"],"warning":"one key risk or null"}`;
 
   try{
-    const res=await fetch('/ai-brief',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:400,
-        messages:[{role:'user',content:prompt}]
-      })
-    });
-    const data=await res.json();
+    let data;
+    for(let attempt=0;attempt<3;attempt++){
+      const res=await fetch('/ai-brief',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:400,
+          messages:[{role:'user',content:prompt}]
+        })
+      });
+      if(res.status===429){
+        await new Promise(r=>setTimeout(r,(attempt+1)*15000));
+        continue;
+      }
+      data=await res.json();
+      break;
+    }
+    if(!data)throw new Error('Rate limited');
     let text=data.content?.find(b=>b.type==='text')?.text||'{}';
     text=text.replace(/```json|```/g,'').trim();
     const jStart=text.indexOf('{');const jEnd=text.lastIndexOf('}');
@@ -899,16 +908,17 @@ async function refreshBriefs(){
     return`<div class="ai-card loading" id="brief-${game.home_team.replace(/\s/g,'-')}">
       <div class="ai-card-game">${game.away_team} @ ${game.home_team}</div>
       <div class="ai-card-play">${rp[0]?.desc||''}</div>
-      <div class="ai-loading"><div class="spinner"></div> Analyzing game...</div>
+      <div class="ai-loading"><div class="spinner"></div> Queued for analysis...</div>
     </div>`;
   }).join('');
 
   for(let bi=0;bi<flaggedGames.length;bi++){
     const{game,plays}=flaggedGames[bi];
-    if(bi>0)await new Promise(r=>setTimeout(r,1500));
+    if(bi>0)await new Promise(r=>setTimeout(r,13000));
     const cardId=`brief-${game.home_team.replace(/\s/g,'-')}`;
     const card=document.getElementById(cardId);
     if(!card)continue;
+    card.querySelector('.ai-loading').innerHTML='<div class="spinner"></div> Analyzing game '+(bi+1)+' of '+flaggedGames.length+'...';
     try{
       const brief=await generateBrief(game,plays);
       const rp=plays.filter(p=>p.type==='real');
