@@ -894,7 +894,7 @@ Respond ONLY with valid JSON, no markdown, no explanation:
 
 async function refreshBriefs(){
   const container=document.getElementById('ai-cards');
-  if(!allGames.length){container.innerHTML='<div class="ai-empty">Load odds first.</div>';return;}
+  if(!Array.isArray(allGames)||!allGames.length){container.innerHTML='<div class="ai-empty">Load odds first.</div>';return;}
 
   // Only brief games that have been logged as live plays
   const pendingLive=logPlays.filter(p=>!p.result);
@@ -985,6 +985,7 @@ function updateSeasonPnL(){
 
 function renderCard(){
   const out=document.getElementById('card-output');
+  if(!Array.isArray(allGames))allGames=[];
   if(!allGames.length){out.innerHTML='<div class="status-box"><div class="status-title">No games today</div></div>';return;}
   document.getElementById('s-bank').textContent='$'+cfg.bankroll.toLocaleString();
   analyzeMarket(allGames.filter(g=>(Date.now()-new Date(g.commence_time))<30*60*1000),activeBook);
@@ -1046,13 +1047,16 @@ async function fetchOdds(){
   btn.disabled=true;spinner.style.display='inline-block';
   try{
     const res=await fetch('/odds?sport='+activeSport);if(!res.ok)throw new Error('Server '+res.status);
-    allGames=await res.json();if(allGames.error)throw new Error(allGames.error);
+    const data=await res.json();
+    if(data.error)throw new Error(data.error);
+    if(!Array.isArray(data))throw new Error('No games available for '+activeSport.toUpperCase());
+    allGames=data;
     const bookSet=new Set();allGames.forEach(g=>g.bookmakers.forEach(b=>bookSet.add(b.key)));
     availableBooks=[...bookSet].sort((a,b)=>(BOOK_ORDER.indexOf(a)+1||99)-(BOOK_ORDER.indexOf(b)+1||99));
     if(!availableBooks.includes(activeBook))activeBook=availableBooks[0]||'draftkings';
     briefCache={};
     renderBookTabs();renderCard();refreshBriefs();countdown=300;
-  }catch(e){document.getElementById('card-output').innerHTML=`<div class="status-box"><div class="status-title" style="color:var(--red);">Error</div><div class="status-sub">${e.message}</div></div>`;}
+  }catch(e){allGames=[];document.getElementById('card-output').innerHTML=`<div class="status-box"><div class="status-title" style="color:var(--red);">Error</div><div class="status-sub">${e.message}</div></div>`;}
   btn.disabled=false;spinner.style.display='none';
 }
 
