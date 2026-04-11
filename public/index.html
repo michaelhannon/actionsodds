@@ -1339,21 +1339,34 @@ function updateTicker(){
           scoreHtml+='</div>';
         }
       }
-      // Find start time from live scores
+      // Find start time from live scores OR odds data
       var startTimeStr='';
+      var timeMatch=null;
       if(liveScores.length){
-        var timeMatch=liveScores.find(function(s){
+        timeMatch=liveScores.find(function(s){
           var lg=p.game.toLowerCase();
           var hw=s.home.toLowerCase().split(' ').pop();
           var aw=s.away.toLowerCase().split(' ').pop();
           return lg.includes(hw)||lg.includes(aw);
         });
-        if(timeMatch){
-          var isLive2=timeMatch.status==='In Progress'||timeMatch.abstractState==='Live';
-          var isFinal2=timeMatch.status==='Final'||timeMatch.abstractState==='Final';
-          if(isLive2)startTimeStr=' · <span style="color:var(--green);font-weight:600;">LIVE</span>';
-          else if(isFinal2)startTimeStr=' · <span style="color:var(--gold);font-weight:600;">FINAL</span>';
-          else if(timeMatch.startTime)startTimeStr=' · '+new Date(timeMatch.startTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      }
+      if(timeMatch){
+        var isLive2=timeMatch.status==='In Progress'||timeMatch.abstractState==='Live';
+        var isFinal2=timeMatch.status==='Final'||timeMatch.abstractState==='Final';
+        if(isLive2)startTimeStr=' · <span style="color:var(--green);font-weight:600;">LIVE</span>';
+        else if(isFinal2)startTimeStr=' · <span style="color:var(--gold);font-weight:600;">FINAL</span>';
+        else if(timeMatch.startTime)startTimeStr=' · '+new Date(timeMatch.startTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      }
+      // Fallback: check odds data for commence_time
+      if(!startTimeStr&&Array.isArray(allGames)&&allGames.length){
+        var oddsMatch=allGames.find(function(g){
+          var lg=p.game.toLowerCase();
+          var hw=g.home_team.toLowerCase().split(' ').pop();
+          var aw=g.away_team.toLowerCase().split(' ').pop();
+          return lg.includes(hw)||lg.includes(aw);
+        });
+        if(oddsMatch&&oddsMatch.commence_time){
+          startTimeStr=' · '+new Date(oddsMatch.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
         }
       }
       cards.push('<div class="ticker-card active" style="min-width:240px;"><div class="ticker-label"><span class="live-dot"></span>Live Bet'+startTimeStr+'</div><div class="ticker-val">'+p.game+'</div><div class="ticker-sub">'+p.bet+' '+p.odds+' · $'+p.amt+'</div>'+scoreHtml+'</div>');
