@@ -1202,8 +1202,9 @@ async function refreshBriefs(){
   // 3. Build cards HTML
   var cardsHtml='';
 
-  // Masters live update card (only on PGA or MLB where parlay is relevant)
-  if((activeSport==='pga'||activeSport==='mlb')&&mastersData&&mastersData.players&&mastersData.players.length>=5){
+  // Masters live update card (only on PGA or MLB, only when tournament is in progress)
+  var mastersFinished=mastersData&&mastersData.status&&(mastersData.status.toLowerCase().includes('final')||mastersData.status.toLowerCase().includes('complete')||(mastersData.status.toLowerCase().includes('round 4')&&mastersData.status.toLowerCase().includes('complete')));
+  if((activeSport==='pga'||activeSport==='mlb')&&mastersData&&mastersData.players&&mastersData.players.length>=5&&!mastersFinished){
     var top3=mastersData.players.slice(0,3);
     var rory=mastersData.players.find(function(p){return p.name.toLowerCase().includes('mcilroy');});
     var hasRoryBet=pendingLive.some(function(lp){return (lp.game+' '+lp.bet).toLowerCase().includes('mcilroy')||(lp.game+' '+lp.bet).toLowerCase().includes('masters');});
@@ -1560,6 +1561,11 @@ function renderRailMasters(){
   var statusEl=document.getElementById('rail-masters-status');
   if(!widget||!body)return;
   if(!mastersData||!mastersData.players||!mastersData.players.length){
+    widget.style.display='none';return;
+  }
+  // Hide if tournament is finished
+  var mStatus=(mastersData.status||'').toLowerCase();
+  if(mStatus.includes('final')||mStatus.includes('complete')){
     widget.style.display='none';return;
   }
   widget.style.display='block';
