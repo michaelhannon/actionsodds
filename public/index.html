@@ -1434,8 +1434,11 @@ function updateTicker(){
     });
   }
 
-  // Masters leaderboard card
-  if(mastersData&&mastersData.players&&mastersData.players.length){
+  // Masters leaderboard card (hide after tournament ends)
+  var tickerMastersDone=new Date()>=new Date('2026-04-13');
+  var tickerMastersStatus=(mastersData&&mastersData.status||'').toLowerCase();
+  if(tickerMastersStatus.includes('final')||tickerMastersStatus.includes('complete'))tickerMastersDone=true;
+  if(!tickerMastersDone&&mastersData&&mastersData.players&&mastersData.players.length){
     var top5=mastersData.players.slice(0,5);
     var rory=mastersData.players.find(function(p){return p.name.toLowerCase().includes('mcilroy');});
     var lbHtml='<div class="ticker-card gold-border" style="min-width:260px;"><div class="ticker-label">'+mastersData.tournament+' Leaderboard</div>';
