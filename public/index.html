@@ -237,11 +237,6 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
       <button id="sport-mlb" onclick="setSport('mlb')" class="sport-btn">MLB</button>
       <button id="sport-nhl" onclick="setSport('nhl')" class="sport-btn">NHL</button>
       <button id="sport-nba" onclick="setSport('nba')" class="sport-btn">NBA</button>
-      <button id="sport-nfl" onclick="setSport('nfl')" class="sport-btn">NFL</button>
-      <button id="sport-ncaaf" onclick="setSport('ncaaf')" class="sport-btn">NCAAF</button>
-      <button id="sport-ncaab" onclick="setSport('ncaab')" class="sport-btn">NCAAB</button>
-      <button id="sport-ufc" onclick="setSport('ufc')" class="sport-btn">UFC</button>
-      <button id="sport-pga" onclick="setSport('pga')" class="sport-btn">PGA</button>
     </div>
     <span class="last-update" id="last-update"></span>
     <button id="theme-toggle" onclick="toggleTheme()" style="background:transparent;border:1px solid var(--border2);border-radius:20px;padding:5px 12px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all 0.2s;">
@@ -472,23 +467,17 @@ var activeSport = localStorage.getItem('ao_sport') || 'mlb';
 function setSport(sport) {
   activeSport = sport;
   localStorage.setItem('ao_sport', sport);
-  // Update button styles
-  const mlbBtn = document.getElementById('sport-mlb');
-  const nhlBtn = document.getElementById('sport-nhl');
-  if(mlbBtn) {
-    mlbBtn.style.color = sport==='mlb' ? 'var(--gold)' : 'var(--text3)';
-    mlbBtn.style.background = sport==='mlb' ? 'rgba(232,185,74,0.15)' : 'transparent';
-    mlbBtn.style.borderColor = sport==='mlb' ? 'var(--gold)' : 'var(--border2)';
-  }
-  if(nhlBtn) {
-    nhlBtn.style.color = sport==='nhl' ? 'var(--gold)' : 'var(--text3)';
-    nhlBtn.style.background = sport==='nhl' ? 'rgba(232,185,74,0.15)' : 'transparent';
-    nhlBtn.style.borderColor = sport==='nhl' ? 'var(--gold)' : 'var(--border2)';
-  }
-  // Update game count label
+  // Update button styles — MLB, NHL, NBA only
+  ['mlb','nhl','nba'].forEach(s => {
+    const btn = document.getElementById('sport-'+s);
+    if(btn) {
+      btn.style.color = sport===s ? 'var(--gold)' : 'var(--text3)';
+      btn.style.background = sport===s ? 'rgba(232,185,74,0.15)' : 'transparent';
+      btn.style.borderColor = sport===s ? 'var(--gold)' : 'var(--border2)';
+    }
+  });
   const gc = document.getElementById('game-count');
   if(gc) gc.textContent = '';
-  // Update AI section subtitle
   const sub = document.querySelector('.ai-subtitle');
   if(sub) sub.textContent = `AI-powered game briefs for ${sport.toUpperCase()} real-money plays only`;
   briefCache = {};
