@@ -1351,7 +1351,7 @@ function updateSeasonPnL(){
 function renderCard(){
   const out=document.getElementById('card-output');
   if(!allGames.length){out.innerHTML='<div class="status-box"><div class="status-title">No games today</div></div>';return;}
-  document.getElementById('s-bank').textContent='$'+cfg.bankroll.toLocaleString();
+  const sbEl=document.getElementById('s-bank');if(sbEl)sbEl.textContent='$'+cfg.bankroll.toLocaleString();
   analyzeMarket(allGames.filter(g=>(Date.now()-new Date(g.commence_time))<30*60*1000),activeBook);
   let realCount=0,stakeTotal=0,paperCount=0,html='';
   const now = new Date();
@@ -1474,10 +1474,10 @@ function renderCard(){
     html+=`</div>`;
   }
   out.innerHTML=html;
-  document.getElementById('s-real').textContent=realCount;
-  document.getElementById('s-stake').textContent='$'+stakeTotal.toLocaleString();
+  const srEl=document.getElementById('s-real');if(srEl)srEl.textContent=realCount;
+  const ssEl=document.getElementById('s-stake');if(ssEl)ssEl.textContent='$'+stakeTotal.toLocaleString();
   const sportLabels={mlb:'games',nhl:'games',nba:'games',nfl:'games',ncaaf:'games',ncaab:'games',ufc:'fights',pga:'golfers'};
-  document.getElementById('game-count').textContent=allGames.length+' '+(sportLabels[activeSport]||'games')+' today';
+  const gcEl=document.getElementById('game-count');if(gcEl)gcEl.textContent=allGames.length+' '+(sportLabels[activeSport]||'games')+' today';
   updateSeasonPnL();
 }
 
