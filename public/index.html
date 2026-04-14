@@ -59,6 +59,19 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .refresh-btn:disabled{opacity:0.5;cursor:not-allowed;}
 
 /* AI BRIEFING SECTION */
+/* LIVE SCORES TICKER */
+.ticker-wrap{background:var(--dark);border-bottom:1px solid var(--border);overflow:hidden;height:32px;position:relative;}
+.ticker-wrap::before{content:'LIVE';position:absolute;left:0;top:0;height:100%;padding:0 12px;background:var(--gold);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.15em;display:flex;align-items:center;z-index:2;}
+.ticker-wrap::after{content:'';position:absolute;left:52px;top:0;width:20px;height:100%;background:linear-gradient(90deg,var(--dark),transparent);z-index:1;}
+.ticker-track{display:flex;gap:0;animation:tickerScroll 60s linear infinite;white-space:nowrap;padding-left:80px;}
+.ticker-track:hover{animation-play-state:paused;}
+@keyframes tickerScroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+.ticker-item{display:inline-flex;align-items:center;gap:8px;padding:0 20px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;color:var(--text2);border-right:1px solid var(--border);height:32px;}
+.ticker-teams{color:var(--text);font-weight:700;}
+.ticker-score{color:var(--gold);font-weight:700;font-size:13px;}
+.ticker-score.live{color:var(--green);}
+.ticker-status{font-size:10px;color:var(--text3);letter-spacing:0.05em;text-transform:uppercase;}
+.ticker-status.live{color:var(--green);}
 .ai-section{background:var(--dark);border-bottom:1px solid var(--border);padding:16px 24px;}
 .ai-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .ai-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.08em;color:var(--gold);}
@@ -249,6 +262,13 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
     </button>
   </div>
 </header>
+
+<!-- LIVE SCORES TICKER -->
+<div class="ticker-wrap" id="ticker-wrap">
+  <div class="ticker-track" id="ticker-track">
+    <span class="ticker-item"><span class="ticker-teams">Loading scores...</span></span>
+  </div>
+</div>
 
 <!-- AI BRIEFING STRIP -->
 <div class="ai-section">
@@ -1493,10 +1513,44 @@ function renderLog(){
 function addLog(){const g=document.getElementById('l-game').value.trim(),b=document.getElementById('l-bet').value.trim();if(!g||!b)return;const dateInput=document.getElementById('l-date').value.trim();const date=dateInput||new Date().toLocaleDateString();logPlays.push({game:g,bet:b,odds:document.getElementById('l-odds').value.trim(),amt:document.getElementById('l-amt').value.trim(),trigger:document.getElementById('l-trigger').value.trim(),date,result:null});saveLog();renderLog();['l-game','l-bet','l-odds','l-amt','l-trigger','l-date'].forEach(id=>document.getElementById(id).value='');updateSeasonPnL();}
 function setLR(i,r){logPlays[i].result=r;saveLog();renderLog();updateSeasonPnL();}
 
+
+// =====================
+// LIVE SCORES TICKER
+// =====================
+async function fetchTicker(){
+  try{
+    const r=await fetch('/scores');
+    const games=await r.json();
+    if(!Array.isArray(games)||!games.length){return;}
+    const track=document.getElementById('ticker-track');
+    if(!track)return;
+    const items=games.map(g=>{
+      const isLive=g.abstractState==='Live';
+      const isFinal=g.abstractState==='Final';
+      const isPre=g.abstractState==='Preview';
+      let statusStr='';
+      if(isLive)statusStr=(g.inningHalf==='Top'?'▲':'▼')+g.inning+' · '+g.outs+' out';
+      else if(isFinal)statusStr='Final';
+      else if(isPre){const t=new Date(g.startTime);statusStr=t.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
+      const scoreStr=(isLive||isFinal)?(g.awayScore+'-'+g.homeScore):'vs';
+      const statusCls=isLive?'live':'';
+      const scoreCls=isLive?'live':isFinal?'final':'';
+      const awayName=g.awayAbbr||g.away.split(' ').pop();
+      const homeName=g.homeAbbr||g.home.split(' ').pop();
+      return '<span class="ticker-item"><span class="ticker-teams">'+awayName+' @ '+homeName+'</span><span class="ticker-score '+scoreCls+'">'+scoreStr+'</span><span class="ticker-status '+statusCls+'">'+statusStr+'</span></span>';
+    }).join('');
+    track.innerHTML=items+items;
+    const duration=Math.max(30,games.length*4);
+    track.style.animationDuration=duration+'s';
+  }catch(e){console.log('[TICKER] Error:',e.message);}
+}
+
 let countdown=300;
 function updateCountdown(){countdown--;if(countdown<=0){countdown=300;fetchOdds();return;}const mins=Math.floor(countdown/60),secs=countdown%60;const timeStr=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});document.getElementById('last-update').textContent='Updated '+timeStr+' — next in '+mins+':'+(secs<10?'0':'')+secs;}
 setInterval(updateCountdown,1000);
 fetchOdds();
+fetchTicker();
+setInterval(fetchTicker, 30000);
 </script>
 </body>
 </html>
