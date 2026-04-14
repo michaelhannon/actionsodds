@@ -463,6 +463,10 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 // THEME ENGINE — global scope
 // =====================
 var activeSport = localStorage.getItem('ao_sport') || 'mlb';
+var briefCache={};
+var allGames=[];
+var activeBook='draftkings';
+var availableBooks=[];
 
 function setSport(sport) {
   activeSport = sport;
@@ -534,14 +538,13 @@ setSport(activeSport);
 
 const BOOK_LABELS={caesars:'Caesars',hard_rock_bet:'Hard Rock',draftkings:'DraftKings',fanduel:'FanDuel',betmgm:'BetMGM'};
 const BOOK_ORDER=['caesars','hard_rock_bet','draftkings','fanduel','betmgm'];
-let allGames=[],activeBook='draftkings',availableBooks=[];
+// allGames, activeBook, availableBooks declared at top
 let paperPlays=[],logPlays=[];
 try{paperPlays=JSON.parse(localStorage.getItem('ao_paper')||'[]');}catch(e){}
 try{logPlays=JSON.parse(localStorage.getItem('ao_log')||'[]');}catch(e){}
 function savePaper(){try{localStorage.setItem('ao_paper',JSON.stringify(paperPlays));}catch(e){}}
 function saveLog(){try{localStorage.setItem('ao_log',JSON.stringify(logPlays));}catch(e){}}
 
-let briefCache={};
 // T1-T14 System defaults — Action's Odds v3
 // T1: home dog +140-+199 | T11: home fav -115 to -135 | T12: home dog +110-+134 | T13: road dog +140-+165
 // Unit: $200 base | T1+0=$200 | T1+1=$400 | T1+2=$600 | T1+3=$800 | T1+4+=$1000 cap
@@ -1064,7 +1067,6 @@ function checkTriggers(game,bk){
 // =====================
 // AI GAME BRIEFS
 // =====================
-// briefCache declared at top of script
 
 async function fetchMLBData(homeTeam,awayTeam){
   try{
