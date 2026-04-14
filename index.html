@@ -272,10 +272,10 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 <div class="layout">
   <div class="odds-panel">
     <div class="summary-strip">
-      <div class="stat-box green"><div class="stat-label">Live plays</div><div class="stat-val gold" id="s-real">—</div></div>
-      <div class="stat-box"><div class="stat-label">At risk</div><div class="stat-val" id="s-stake">—</div></div>
-      <div class="stat-box green"><div class="stat-label">Season P&L</div><div class="stat-val green" id="s-pnl">+$0</div></div>
-      <div class="stat-box green"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bank">—</div></div>
+      <div class="stat-box green"><div class="stat-label">Season P&L</div><div class="stat-val green" id="s-pnl">+$784</div></div>
+      <div class="stat-box"><div class="stat-label">At Risk Today</div><div class="stat-val" id="s-stake">—</div></div>
+      <div class="stat-box green"><div class="stat-label">Active Bankroll</div><div class="stat-val green" id="s-bank">$3,400</div></div>
+      <div class="stat-box amber"><div class="stat-label">Live Plays</div><div class="stat-val gold" id="s-real">—</div></div>
     </div>
     <div class="section-hdr">
       <div class="section-title">Book</div>
@@ -283,11 +283,12 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
     </div>
     <div class="book-tabs" id="book-tabs"></div>
     <div class="market-intel" id="market-intel" style="display:none;">
-      <div class="intel-item"><div class="intel-lbl">Avg home dog</div><div class="intel-val gold" id="mi-avgdog">—</div></div>
-      <div class="intel-item"><div class="intel-lbl">Best dog</div><div class="intel-val green" id="mi-bestdog">—</div></div>
-      <div class="intel-item"><div class="intel-lbl">Avg RL</div><div class="intel-val" id="mi-avgrl">—</div></div>
-      <div class="intel-item"><div class="intel-lbl">Sharp alerts</div><div class="intel-val" id="mi-sharp">—</div></div>
-      <div class="intel-item"><div class="intel-lbl">Dynamic T1A</div><div class="intel-val amber" id="mi-threshold">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">T1 Gate</div><div class="intel-val gold" id="mi-t1">+140 to +199</div></div>
+      <div class="intel-item"><div class="intel-lbl">T11 Window</div><div class="intel-val amber" id="mi-t11">-115 to -135</div></div>
+      <div class="intel-item"><div class="intel-lbl">T12 Zone</div><div class="intel-val" id="mi-t12">+110 to +134</div></div>
+      <div class="intel-item"><div class="intel-lbl">Best Dog</div><div class="intel-val green" id="mi-bestdog">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">Sharp Alerts</div><div class="intel-val" id="mi-sharp">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">Avoid Zone</div><div class="intel-val" style="color:var(--red);" id="mi-avoid">+200+ / below +135</div></div>
     </div>
     <div id="card-output">
       <div class="status-box">
@@ -372,71 +373,92 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
     </div>
 
     <div id="ptab-settings" style="display:none;">
+
       <div class="cfg-section">
-        <div class="cfg-section-title">Dynamic trigger engine</div>
+        <div class="cfg-section-title">⚙ System Controls</div>
         <div class="toggle-row">
-          <div><div class="toggle-lbl">Dynamic thresholds</div><div class="toggle-sub">Auto-tune T1A based on today's slate</div></div>
-          <button class="toggle" id="tog-dynamic" onclick="toggleSetting('dynamic')"></button>
-        </div>
-        <div class="toggle-row">
-          <div><div class="toggle-lbl">Top % filter</div><div class="toggle-sub">T1A fires only on top 25% home dogs</div></div>
-          <button class="toggle" id="tog-toppct" onclick="toggleSetting('toppct')"></button>
-        </div>
-        <div class="toggle-row">
-          <div><div class="toggle-lbl">Sharp divergence alerts</div><div class="toggle-sub">Flag when books disagree 10+ points</div></div>
+          <div><div class="toggle-lbl">Sharp divergence alerts</div><div class="toggle-sub">Flag games where books disagree 10+ points</div></div>
           <button class="toggle" id="tog-sharp" onclick="toggleSetting('sharp')"></button>
         </div>
         <div class="toggle-row">
-          <div><div class="toggle-lbl">Market baseline filter</div><div class="toggle-sub">Only flag lines better than slate avg</div></div>
-          <button class="toggle" id="tog-baseline" onclick="toggleSetting('baseline')"></button>
+          <div><div class="toggle-lbl">Show avoid zones</div><div class="toggle-sub">Flag +200+ and below +135 games as warnings</div></div>
+          <button class="toggle" id="tog-avoid" onclick="toggleSetting('avoid')"></button>
         </div>
       </div>
+
       <div class="cfg-section">
-        <div class="cfg-section-title">Bankroll & units</div>
+        <div class="cfg-section-title">💰 Bankroll & Units</div>
+        <div class="cfg-sub">Active bankroll: Caesars $2,000 + BetMGM $1,400</div>
         <div class="cfg-grid">
-          <div><div class="cfg-lbl">Bankroll ($)</div><input class="form-input" id="cfg-bankroll" type="number" placeholder="2000"></div>
-          <div><div class="cfg-lbl">Base unit ($)</div><input class="form-input" id="cfg-unit" type="number" placeholder="200"></div>
+          <div><div class="cfg-lbl">Total Bankroll ($)</div><input class="form-input" id="cfg-bankroll" type="number" placeholder="3400"></div>
+          <div><div class="cfg-lbl">Base Unit ($)</div><input class="form-input" id="cfg-unit" type="number" placeholder="200"></div>
         </div>
+        <div class="cfg-sub" style="margin-top:8px;color:var(--text3);">Unit scaling: T1 alone=$200 · +1=$400 · +2=$600 · +3=$800 · +4+=$1,000 cap</div>
       </div>
+
       <div class="cfg-section">
-        <div class="cfg-section-title">T1A — Home dog ML</div>
-        <div><div class="cfg-lbl">Min threshold (when dynamic off)</div><input class="form-input" id="cfg-t1a-min" type="number" placeholder="115" style="max-width:160px;"></div>
-      </div>
-      <div class="cfg-section">
-        <div class="cfg-section-title">T1B — Big away dog</div>
-        <div class="cfg-sub">Paper only until go-live date</div>
+        <div class="cfg-section-title">🎯 T1 — Home Underdog Gate</div>
+        <div class="cfg-sub">Primary gate. Required for all home underdog plays.</div>
         <div class="cfg-grid">
-          <div><div class="cfg-lbl">Min ML</div><input class="form-input" id="cfg-t1b-min" type="number" placeholder="200"></div>
-          <div><div class="cfg-lbl">Go-live date</div><input class="form-input" id="cfg-t1b-date" type="date"></div>
+          <div><div class="cfg-lbl">Min ML (floor)</div><input class="form-input" id="cfg-t1-min" type="number" placeholder="140"></div>
+          <div><div class="cfg-lbl">Max ML (ceiling)</div><input class="form-input" id="cfg-t1-max" type="number" placeholder="199"></div>
+        </div>
+        <div class="cfg-sub" style="margin-top:6px;color:var(--amber);">Below +135 = insufficient value. +200+ = reassess (market signal).</div>
+      </div>
+
+      <div class="cfg-section">
+        <div class="cfg-section-title">🎯 T11 — Small Home Favorite</div>
+        <div class="cfg-sub">Requires 3+ additional triggers. Max bet $800.</div>
+        <div class="cfg-grid">
+          <div><div class="cfg-lbl">Min (e.g. -115)</div><input class="form-input" id="cfg-t11-min" type="number" placeholder="115"></div>
+          <div><div class="cfg-lbl">Max (e.g. -135)</div><input class="form-input" id="cfg-t11-max" type="number" placeholder="135"></div>
         </div>
       </div>
+
       <div class="cfg-section">
-        <div class="cfg-section-title">T2 — Fav -1.5 RL</div>
-        <div class="cfg-grid-4">
-          <div><div class="cfg-lbl">P1</div><input class="form-input" id="cfg-t2-p1" type="number" placeholder="130"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t2-u1" type="number" placeholder="25"></div>
-          <div><div class="cfg-lbl">P2</div><input class="form-input" id="cfg-t2-p2" type="number" placeholder="135"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t2-u2" type="number" placeholder="50"></div>
-          <div><div class="cfg-lbl">P3</div><input class="form-input" id="cfg-t2-p3" type="number" placeholder="140"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t2-u3" type="number" placeholder="75"></div>
-          <div><div class="cfg-lbl">P4</div><input class="form-input" id="cfg-t2-p4" type="number" placeholder="150"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t2-u4" type="number" placeholder="100"></div>
+        <div class="cfg-section-title">🎯 T12 — Home Dog +110 to +134</div>
+        <div class="cfg-sub">Requires 5+ triggers. Max bet $600.</div>
+        <div class="cfg-grid">
+          <div><div class="cfg-lbl">Min ML</div><input class="form-input" id="cfg-t12-min" type="number" placeholder="110"></div>
+          <div><div class="cfg-lbl">Max ML</div><input class="form-input" id="cfg-t12-max" type="number" placeholder="134"></div>
         </div>
       </div>
+
       <div class="cfg-section">
-        <div class="cfg-section-title">T3 — Dog +1.5 RL</div>
-        <div class="cfg-grid-4">
-          <div><div class="cfg-lbl">P1</div><input class="form-input" id="cfg-t3-p1" type="number" placeholder="120"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t3-u1" type="number" placeholder="25"></div>
-          <div><div class="cfg-lbl">P2</div><input class="form-input" id="cfg-t3-p2" type="number" placeholder="122"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t3-u2" type="number" placeholder="50"></div>
-          <div><div class="cfg-lbl">P3</div><input class="form-input" id="cfg-t3-p3" type="number" placeholder="125"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t3-u3" type="number" placeholder="75"></div>
-          <div><div class="cfg-lbl">P4</div><input class="form-input" id="cfg-t3-p4" type="number" placeholder="130"><div class="cfg-lbl" style="margin-top:5px;">U%</div><input class="form-input" id="cfg-t3-u4" type="number" placeholder="100"></div>
+        <div class="cfg-section-title">🎯 T13 — Road Underdog</div>
+        <div class="cfg-sub">Requires ALL 5: T2+T3+T6+T8+1 additional. Max bet $400. Killed by T14.</div>
+        <div class="cfg-grid">
+          <div><div class="cfg-lbl">Min ML</div><input class="form-input" id="cfg-t13-min" type="number" placeholder="140"></div>
+          <div><div class="cfg-lbl">Max ML</div><input class="form-input" id="cfg-t13-max" type="number" placeholder="165"></div>
         </div>
       </div>
+
       <div class="cfg-section">
-        <div class="cfg-section-title">T4 — Totals unlock</div>
+        <div class="cfg-section-title">⚖ T14 — Power Ratings Thresholds</div>
+        <div class="cfg-sub">Mandatory check on every qualifying game. Uses implied probability as proxy.</div>
+        <div class="cfg-grid">
+          <div><div class="cfg-lbl">Kill T13 if gap ≥ (pts)</div><input class="form-input" id="cfg-t14-kill" type="number" placeholder="15"></div>
+          <div><div class="cfg-lbl">T1 needs 4+ if gap ≥ (pts)</div><input class="form-input" id="cfg-t14-extra" type="number" placeholder="20"></div>
+        </div>
+      </div>
+
+      <div class="cfg-section">
+        <div class="cfg-section-title">📊 T4 — Totals Unlock</div>
+        <div class="cfg-sub">Paper-track totals until sample size and win% thresholds are met.</div>
         <div class="cfg-grid">
           <div><div class="cfg-lbl">Win% to unlock</div><input class="form-input" id="cfg-t4-pct" type="number" placeholder="55"></div>
           <div><div class="cfg-lbl">Min sample</div><input class="form-input" id="cfg-t4-sample" type="number" placeholder="20"></div>
         </div>
       </div>
+
+      <div class="cfg-section">
+        <div class="cfg-section-title">📅 Season Baseline</div>
+        <div class="cfg-sub">Pre-app P&L carried forward (Apr 11-13 results).</div>
+        <div><div class="cfg-lbl">Baseline P&L ($)</div><input class="form-input" id="cfg-baseline-pnl" type="number" placeholder="784" style="max-width:160px;"></div>
+      </div>
+
       <button class="save-btn" onclick="saveSettings()">Save Settings</button>
-      <div class="saved-msg" id="saved-msg">Saved and applied.</div>
+      <div class="saved-msg" id="saved-msg">✓ Settings saved and applied.</div>
     </div>
   </div>
 </div>
@@ -446,7 +468,6 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 // THEME ENGINE — global scope
 // =====================
 var activeSport = localStorage.getItem('ao_sport') || 'mlb';
-var briefCache = {};
 
 function setSport(sport) {
   activeSport = sport;
@@ -531,7 +552,35 @@ try{logPlays=JSON.parse(localStorage.getItem('ao_log')||'[]');}catch(e){}
 function savePaper(){try{localStorage.setItem('ao_paper',JSON.stringify(paperPlays));}catch(e){}}
 function saveLog(){try{localStorage.setItem('ao_log',JSON.stringify(logPlays));}catch(e){}}
 
-const DEFAULT_CFG={bankroll:2000,unit:200,t1aMin:115,t1bMin:200,t1bDate:'2026-06-01',t2Tiers:[{p:130,u:25},{p:135,u:50},{p:140,u:75},{p:150,u:100}],t3Tiers:[{p:120,u:25},{p:122,u:50},{p:125,u:75},{p:130,u:100}],t4Pct:55,t4Sample:20,dynamic:true,toppct:true,sharp:true,baseline:true};
+// T1-T14 System defaults — Action's Odds v3
+// T1: home dog +140-+199 | T11: home fav -115 to -135 | T12: home dog +110-+134 | T13: road dog +140-+165
+// Unit: $200 base | T1+0=$200 | T1+1=$400 | T1+2=$600 | T1+3=$800 | T1+4+=$1000 cap
+// T11 max $800 | T12 max $600 | T13 max $400
+// Season baseline: +$784 as of Apr 13 2026
+const SEASON_BASELINE=784; // P&L carried in from April 11-13 results
+const DEFAULT_CFG={
+  bankroll:3400,          // Caesars $2000 + BetMGM $1400
+  unit:200,               // Base unit
+  t1Min:140,              // T1 floor — home dog +140 to +199
+  t1Max:199,              // T1 ceiling
+  t11Min:115,             // T11 small home fav floor (e.g. -115)
+  t11Max:135,             // T11 small home fav ceiling (e.g. -135)
+  t12Min:110,             // T12 floor
+  t12Max:134,             // T12 ceiling
+  t13Min:140,             // T13 road dog floor
+  t13Max:165,             // T13 road dog ceiling
+  t14PowerKill:15,        // T14: kill T13 if home power gap >= this
+  t14ExtraReq:20,         // T14: T1 needs 4+ triggers if gap >= this
+  avoidBelow:135,         // Avoid zone — below this is insufficient value
+  avoidAbove:200,         // Avoid zone — reassess above this
+  t4Pct:55,               // T4 totals win% to unlock
+  t4Sample:20,            // T4 min sample
+  // Legacy fields kept for compatibility
+  t1aMin:140,t1bMin:200,t1bDate:'2026-06-01',
+  t2Tiers:[{p:130,u:25},{p:135,u:50},{p:140,u:75},{p:150,u:100}],
+  t3Tiers:[{p:120,u:25},{p:122,u:50},{p:125,u:75},{p:130,u:100}],
+  dynamic:false,toppct:false,sharp:true,baseline:false
+};
 let cfg=DEFAULT_CFG;
 try{const s=localStorage.getItem('ao_cfg');if(s)cfg={...DEFAULT_CFG,...JSON.parse(s)};}catch(e){}
 let marketState={avgDog:0,bestDog:0,avgRL:0,dynamicT1A:0,sharpGames:[],topDogs:[],homeDogs:[]};
@@ -568,7 +617,14 @@ function analyzeMarket(games,bk){
   const topDogs=homeDogs.slice(0,topCutoff).map(d=>d.team);
   marketState={avgDog,bestDog:homeDogs.length>0?homeDogs[0].ml:0,avgRL,dynamicT1A,sharpGames:bookComparisons.sort((a,b)=>b.divergence-a.divergence),topDogs,homeDogs};
   const el=document.getElementById('market-intel');
-  if(el){el.style.display='flex';document.getElementById('mi-avgdog').textContent=marketState.avgDog>0?fmtOdds(marketState.avgDog):'—';document.getElementById('mi-bestdog').textContent=marketState.bestDog>0?fmtOdds(marketState.bestDog):'—';document.getElementById('mi-avgrl').textContent=marketState.avgRL?fmtOdds(marketState.avgRL):'—';document.getElementById('mi-sharp').textContent=marketState.sharpGames.length>0?marketState.sharpGames.length+' games':'None';document.getElementById('mi-threshold').textContent=cfg.dynamic?fmtOdds(marketState.dynamicT1A)+' (auto)':fmtOdds(cfg.t1aMin)+' (manual)';}
+  if(el){
+    el.style.display='flex';
+    const bestDogEl=document.getElementById('mi-bestdog');
+    if(bestDogEl)bestDogEl.textContent=marketState.bestDog>0?fmtOdds(marketState.bestDog):'—';
+    const sharpEl=document.getElementById('mi-sharp');
+    if(sharpEl)sharpEl.textContent=marketState.sharpGames.length>0?marketState.sharpGames.length+' games':'None';
+    // T1/T11/T12 windows are static display — already set in HTML
+  }
 }
 
 function checkTriggers(game,bk){
@@ -594,31 +650,296 @@ function checkTriggers(game,bk){
   const t4note=t4real?'T4 UNLOCKED.':'PAPER — '+t4done.length+'/'+cfg.t4Sample+' plays, need '+cfg.t4Pct+'%+.';
 
   // =====================
-  // MLB TRIGGERS
+  // MLB TRIGGERS — Full T1-T14 System
+  // Base unit: $200 | T1 alone: $200 | +1: $400 | +2: $600 | +3: $800 | +4+: $1000 (hard cap)
+  // T11 max: $800 | T12 max: $600 | T13 max: $400
   // =====================
   if(activeSport==='mlb'){
-    const t1aThreshold=cfg.dynamic?marketState.dynamicT1A:cfg.t1aMin;
-    if(homeML!=null&&homeML>0){
-      const passThresh=homeML>=t1aThreshold;
-      const passTop=!cfg.toppct||marketState.topDogs.includes(home);
-      const passBase=!cfg.baseline||homeML>=(marketState.avgDog||0);
-      if(passThresh&&passTop&&passBase)plays.push({trigger:'T1A',desc:`${home} ML ${fmtOdds(homeML)}`,sub:'Home dog',conf:7,real:true,note:`Threshold: ${fmtOdds(t1aThreshold)} | Avg: ${fmtOdds(marketState.avgDog)}`,amt:unitAmt(100),type:'real'});
+    // Pull window values from cfg (with fallbacks to system defaults)
+    const T1_MIN=cfg.t1Min||140, T1_MAX=cfg.t1Max||199;
+    const T11_MIN=cfg.t11Min||115, T11_MAX=cfg.t11Max||135;
+    const T12_MIN=cfg.t12Min||110, T12_MAX=cfg.t12Max||134;
+    const T13_MIN=cfg.t13Min||140, T13_MAX=cfg.t13Max||165;
+    const T14_KILL=cfg.t14PowerKill||15, T14_EXTRA=cfg.t14ExtraReq||20;
+
+    const BASE=cfg.unit||200;
+
+    // ── UNIT SIZING HELPER ──
+    function mlbUnit(triggerCount, gate){
+      if(gate==='T11') return Math.min(BASE*4, 800); // T11 max $800
+      if(gate==='T12') return Math.min(BASE*3, 600); // T12 max $600
+      if(gate==='T13') return Math.min(BASE*2, 400); // T13 max $400
+      // T1 base scaling: 1 trigger=$200, +1=$400, +2=$600, +3=$800, +4=$1000 cap
+      const scale=[1,2,3,4,5];
+      const idx=Math.min(triggerCount-1,4);
+      return Math.min(scale[idx]*BASE, 1000);
     }
-    if(awayML!=null&&awayML>=cfg.t1bMin)plays.push({trigger:'T1B',desc:`${away} ML ${fmtOdds(awayML)}`,sub:'Big dog',conf:5,real:today>=cfg.t1bDate,note:today>=cfg.t1bDate?'T1B live.':'Paper until '+cfg.t1bDate+'.',amt:unitAmt(100),type:today>=cfg.t1bDate?'real':'paper'});
-    function rlTrigger(team,rl,trigger){
-      const p=rl.price;const tiers=trigger==='T2'?cfg.t2Tiers:cfg.t3Tiers;
-      const sorted=[...tiers].sort((a,b)=>b.p-a.p);let pct=0;
-      for(const t of sorted){if(p>=t.p){pct=t.u;break;}}
-      const passBase=!cfg.baseline||p>=(marketState.avgRL||0);
-      if(pct&&passBase)plays.push({trigger,desc:`${team} ${rl.point>0?'+':''}${rl.point} RL ${fmtOdds(p)}`,sub:trigger==='T2'?'Fav RL':'Dog RL',conf:6,pct,real:true,note:`Unit ${pct}% = $${unitAmt(pct)}`,amt:unitAmt(pct),type:'real'});
+
+    // ── SUPPORTING TRIGGER CHECKS (return true/false) ──
+    // T2 — Streak mismatch (approximated via win% differential if available)
+    const t2Fire = false; // Requires external streak data — flag as informational
+
+    // T5 — Ballpark factor
+    const HITTER_PARKS=['Colorado Rockies','Cincinnati Reds','Boston Red Sox','Houston Astros'];
+    const PITCHER_PARKS=['San Francisco Giants','Pittsburgh Pirates','San Diego Padres','Los Angeles Dodgers'];
+    const DOME_PARKS=['Tampa Bay Rays','Milwaukee Brewers','Seattle Mariners','Miami Marlins','Arizona Diamondbacks','Minnesota Twins','Texas Rangers','Toronto Blue Jays'];
+    const isDome=DOME_PARKS.some(t=>home.includes(t.split(' ').pop()));
+    const isHitterPark=HITTER_PARKS.some(t=>home.includes(t.split(' ').pop()));
+    const isPitcherPark=PITCHER_PARKS.some(t=>home.includes(t.split(' ').pop()));
+    const t5Fire=isHitterPark||isDome; // favorable run environment for home team
+
+    // T7 — Weather (remove for dome parks; irrelevant)
+    const t7Applicable=!isDome;
+
+    // T9 — Schedule/fatigue (placeholder — check game notes)
+    const t9Fire=false;
+
+    // T10 — Divisional familiarity (placeholder)
+    const t10Fire=false;
+
+    // ── T14 POWER RATINGS CHECK ──
+    // Approximated: if home win% vs away win% gap > threshold, kill certain plays
+    // Uses bookmaker implied probability as proxy for power rating
+    let homeImplied=0, awayImplied=0;
+    if(homeML!=null){homeImplied=homeML>0?(100/(homeML+100)):(Math.abs(homeML)/(Math.abs(homeML)+100));}
+    if(awayML!=null){awayImplied=awayML>0?(100/(awayML+100)):(Math.abs(awayML)/(Math.abs(awayML)+100));}
+    const powerGap=Math.round(Math.abs(homeImplied-awayImplied)*100); // 0-100 scale
+    // T14: if home team power rating exceeds road dog by 15+ pts → kills T13
+    // if gap > 20pts → T1 requires 4+ triggers
+    const t14KillsT13=homeImplied>awayImplied&&powerGap>=T14_KILL;
+    const t14RequiresExtra=homeImplied>awayImplied&&powerGap>=T14_EXTRA;
+
+    // ── T1 — HOME UNDERDOG +140 to +199 (Primary Gate) ──
+    if(homeML!=null&&homeML>=T1_MIN&&homeML<=T1_MAX){
+      // Count supporting triggers available from live data
+      let supportCount=0;
+      const supportNotes=[];
+      if(t5Fire){supportCount++;supportNotes.push('T5 park');}
+      if(t7Applicable){supportCount++;supportNotes.push('T7 weather check');}
+      // Sharp divergence acts as bonus trigger
+      const sg=cfg.sharp?marketState.sharpGames.find(s=>s.home===home&&s.away===away):null;
+      if(sg&&sg.divergence>=10){supportCount++;supportNotes.push(`T-SHARP +${sg.divergence}pt`);}
+      // Run line plus-money check
+      const homeRLPlusPrice=homeSpread?.point>0&&homeSpread?.price!=null&&homeSpread.price>=-115?homeSpread.price:null;
+
+      // T14 gate: if power gap >20, require 4+ supports
+      const minRequired=t14RequiresExtra?4:0;
+      const passT14=supportCount>=minRequired;
+
+      // Determine bet size based on trigger count
+      const totalTriggers=1+supportCount; // T1 = 1, each support adds 1
+      const betAmt=passT14?mlbUnit(totalTriggers,'T1'):0;
+      const conf=Math.min(5+supportCount,10);
+
+      if(passT14){
+        plays.push({
+          trigger:'T1',
+          desc:`${home} ML ${fmtOdds(homeML)}`,
+          sub:'Home dog +140 to +199',
+          conf,
+          real:true,
+          note:`${totalTriggers} trigger(s): T1 gate${supportNotes.length?' + '+supportNotes.join(', '):''}${t14RequiresExtra?' | T14: high power gap, need 4+':''}`,
+          amt:betAmt,
+          type:'real'
+        });
+        // Run line add-on: when 4+ triggers fire, auto-evaluate +1.5 at minus odds OR fav -1.5 at plus
+        if(totalTriggers>=4&&homeRLPlusPrice){
+          plays.push({
+            trigger:'T1-RL',
+            desc:`${home} +1.5 RL ${fmtOdds(homeRLPlusPrice)}`,
+            sub:'Run line add-on (4+ triggers)',
+            conf:conf-1,
+            real:true,
+            note:`50% of straight bet = $${Math.round(betAmt*0.5)}. Auto-add when 4+ triggers fire.`,
+            amt:Math.round(betAmt*0.5),
+            type:'real'
+          });
+        }
+        if(totalTriggers>=4&&awaySpread?.point<0&&awaySpread?.price!=null&&awaySpread.price>0){
+          plays.push({
+            trigger:'T1-RL',
+            desc:`${away} -1.5 RL ${fmtOdds(awaySpread.price)}`,
+            sub:'Fav RL plus money (4+ triggers)',
+            conf:conf-1,
+            real:true,
+            note:`Best value: fav -1.5 paying plus money. 50% of straight = $${Math.round(betAmt*0.5)}.`,
+            amt:Math.round(betAmt*0.5),
+            type:'real'
+          });
+        }
+      } else {
+        // Still show as paper/watch if T14 blocks
+        plays.push({
+          trigger:'T1',
+          desc:`${home} ML ${fmtOdds(homeML)}`,
+          sub:'Home dog — T14 blocks (need 4+ triggers)',
+          conf:3,
+          real:false,
+          note:`Power gap ${powerGap}pts requires 4+ supporting triggers. Have ${supportCount}. PASS.`,
+          amt:0,
+          type:'paper'
+        });
+      }
     }
-    if(homeSpread?.point<0&&homeSpread?.price!=null)rlTrigger(home,homeSpread,'T2');
-    if(awaySpread?.point<0&&awaySpread?.price!=null)rlTrigger(away,awaySpread,'T2');
-    if(homeSpread?.point>0&&homeSpread?.price!=null)rlTrigger(home,homeSpread,'T3');
-    if(awaySpread?.point>0&&awaySpread?.price!=null)rlTrigger(away,awaySpread,'T3');
-    if(cfg.sharp){const sg=marketState.sharpGames.find(s=>s.home===home&&s.away===away);if(sg)plays.push({trigger:'SHARP',desc:`+${sg.divergence}pt book spread`,sub:'Line shop',conf:8,real:false,note:`Best: ${fmtOdds(sg.max)} on ${BOOK_LABELS[sg.bestBook]||sg.bestBook}`,amt:0,type:'sharp'});}
-    if(over?.point!=null)plays.push({trigger:'T4',desc:`O ${over.point} ${fmtOdds(over.price)}`,sub:'Over',conf:5,real:t4real,note:t4note,amt:unitAmt(100),type:t4real?'real':'paper'});
-    if(under?.point!=null)plays.push({trigger:'T4',desc:`U ${under.point} ${fmtOdds(under.price)}`,sub:'Under',conf:5,real:t4real,note:t4note,amt:unitAmt(100),type:t4real?'real':'paper'});
+
+    // ── T11 — SMALL HOME FAVORITE -115 to -135 (requires 3+ additional triggers) ──
+    if(homeML!=null&&homeML<=-T11_MIN&&homeML>=-T11_MAX){
+      let t11Count=0;
+      const t11Notes=[];
+      if(t5Fire){t11Count++;t11Notes.push('T5');}
+      if(t7Applicable){t11Count++;t11Notes.push('T7');}
+      const sg11=cfg.sharp?marketState.sharpGames.find(s=>s.home===home&&s.away===away):null;
+      if(sg11&&sg11.divergence>=10){t11Count++;t11Notes.push(`SHARP +${sg11.divergence}pt`);}
+      // Home win rate advantage counts as trigger
+      if(homeImplied>awayImplied+0.08){t11Count++;t11Notes.push('T14 power edge');}
+
+      if(t11Count>=3){
+        const betAmt=mlbUnit(t11Count,'T11');
+        plays.push({
+          trigger:'T11',
+          desc:`${home} ML ${fmtOdds(homeML)}`,
+          sub:`Small home fav (${t11Count+1} triggers)`,
+          conf:Math.min(4+t11Count,9),
+          real:true,
+          note:`T11 gate + ${t11Notes.join(', ')} | Max $800 | Bet: $${betAmt}`,
+          amt:betAmt,
+          type:'real'
+        });
+        // Run line add-on at 4+ triggers
+        if(t11Count>=3&&awaySpread?.price!=null&&awaySpread.price>0){
+          plays.push({
+            trigger:'T11-RL',
+            desc:`${home} -1.5 RL ${fmtOdds(homeSpread?.price)}`,
+            sub:'T11 run line add-on',
+            conf:5,
+            real:true,
+            note:`50% of T11 bet = $${Math.round(betAmt*0.5)}`,
+            amt:Math.round(betAmt*0.5),
+            type:'real'
+          });
+        }
+      } else {
+        plays.push({
+          trigger:'T11',
+          desc:`${home} ML ${fmtOdds(homeML)}`,
+          sub:`Small fav — need 3+ triggers (have ${t11Count})`,
+          conf:2,
+          real:false,
+          note:`T11 requires 3+ additional triggers. Currently ${t11Count}/3. WATCH.`,
+          amt:0,
+          type:'paper'
+        });
+      }
+    }
+
+    // ── T12 — HOME UNDERDOG +110 to +134 (requires 5+ triggers) ──
+    if(homeML!=null&&homeML>=T12_MIN&&homeML<=T12_MAX){
+      let t12Count=0;
+      const t12Notes=[];
+      if(t5Fire){t12Count++;t12Notes.push('T5');}
+      if(t7Applicable){t12Count++;t12Notes.push('T7');}
+      const sg12=cfg.sharp?marketState.sharpGames.find(s=>s.home===home&&s.away===away):null;
+      if(sg12&&sg12.divergence>=10){t12Count++;t12Notes.push(`SHARP +${sg12.divergence}pt`);}
+      if(homeImplied>awayImplied+0.05){t12Count++;t12Notes.push('power edge');}
+
+      if(t12Count>=5){
+        plays.push({
+          trigger:'T12',
+          desc:`${home} ML ${fmtOdds(homeML)}`,
+          sub:`T12 — +110 to +134 zone (${t12Count} triggers)`,
+          conf:6,
+          real:true,
+          note:`T12: 5+ triggers required. Have ${t12Count}. Max $600.`,
+          amt:mlbUnit(t12Count,'T12'),
+          type:'real'
+        });
+      } else {
+        plays.push({
+          trigger:'T12',
+          desc:`${home} ML ${fmtOdds(homeML)}`,
+          sub:`T12 zone — need 5 triggers (have ${t12Count})`,
+          conf:2,
+          real:false,
+          note:`T12 +110 to +134 requires 5+ triggers. Only ${t12Count} available. PASS.`,
+          amt:0,
+          type:'paper'
+        });
+      }
+    }
+
+    // ── T13 — ROAD UNDERDOG +140 to +165 (all 5 required: T2+T3+T6+T8+1 more; must clear T14) ──
+    if(awayML!=null&&awayML>=T13_MIN&&awayML<=T13_MAX&&!t14KillsT13){
+      let t13Count=0;
+      const t13Notes=[];
+      if(t5Fire){t13Count++;t13Notes.push('T5');}
+      const sg13=cfg.sharp?marketState.sharpGames.find(s=>s.home===home&&s.away===away):null;
+      if(sg13&&sg13.divergence>=10){t13Count++;t13Notes.push(`SHARP +${sg13.divergence}`);}
+      // T13 requires all 5 specific triggers — with live data we can confirm some
+      const hasAll5=t13Count>=3; // approximate — external data needed for full T2/T6/T8
+      if(hasAll5){
+        plays.push({
+          trigger:'T13',
+          desc:`${away} ML ${fmtOdds(awayML)}`,
+          sub:'Road dog T13 — verify T2/T6/T8 manually',
+          conf:5,
+          real:false,
+          note:`T13 road dog. T14 cleared (power gap ${powerGap}pts <15). Confirm T2 streak, T6 pitcher FIP, T8 bullpen before betting. Max $400.`,
+          amt:0,
+          type:'paper'
+        });
+      }
+    } else if(awayML!=null&&awayML>=T13_MIN&&awayML<=T13_MAX&&t14KillsT13){
+      plays.push({
+        trigger:'T13',
+        desc:`${away} ML ${fmtOdds(awayML)}`,
+        sub:'T13 KILLED by T14',
+        conf:1,
+        real:false,
+        note:`T14 power rating gap ${powerGap}pts ≥15. Home team too strong. T13 road dog play killed. PASS.`,
+        amt:0,
+        type:'paper'
+      });
+    }
+
+    // ── AVOID ZONES — Flag for awareness ──
+    // Below +135: insufficient value
+    if(homeML!=null&&homeML>=110&&homeML<=134){
+      // Already handled in T12 above
+    }
+    // +200 or higher: reassess (market signal something wrong)
+    if(homeML!=null&&homeML>=200){
+      plays.push({
+        trigger:'AVOID',
+        desc:`${home} ML ${fmtOdds(homeML)} — +200 zone`,
+        sub:'Reassess — +200 signal',
+        conf:2,
+        real:false,
+        note:`+200 or higher signals something is wrong (injury, starter scratch?). Reassess before any bet. Do NOT bet without full investigation.`,
+        amt:0,
+        type:'paper'
+      });
+    }
+
+    // ── SHARP DIVERGENCE ALERT ──
+    if(cfg.sharp){
+      const sgFinal=marketState.sharpGames.find(s=>s.home===home&&s.away===away);
+      if(sgFinal&&sgFinal.divergence>=10){
+        plays.push({
+          trigger:'SHARP',
+          desc:`+${sgFinal.divergence}pt book spread`,
+          sub:'Sharp money signal',
+          conf:8,
+          real:false,
+          note:`Line divergence ≥10pts. Best: ${fmtOdds(sgFinal.max)} on ${BOOK_LABELS[sgFinal.bestBook]||sgFinal.bestBook}. Shop this line.`,
+          amt:0,
+          type:'sharp'
+        });
+      }
+    }
+
+    // ── TOTALS (T4 — track before real money) ──
+    if(over?.point!=null) plays.push({trigger:'T4',desc:`O ${over.point} ${fmtOdds(over.price)}`,sub:'Over',conf:5,real:t4real,note:t4note,amt:unitAmt(100),type:t4real?'real':'paper'});
+    if(under?.point!=null) plays.push({trigger:'T4',desc:`U ${under.point} ${fmtOdds(under.price)}`,sub:'Under',conf:5,real:t4real,note:t4note,amt:unitAmt(100),type:t4real?'real':'paper'});
   }
 
   // =====================
@@ -753,6 +1074,7 @@ function checkTriggers(game,bk){
 // =====================
 // AI GAME BRIEFS
 // =====================
+let briefCache={};
 
 async function fetchMLBData(homeTeam,awayTeam){
   try{
@@ -832,18 +1154,44 @@ async function generateBrief(game,plays){
   const realPlays=plays.filter(p=>p.type==='real');
   const playDescs=realPlays.map(p=>`${p.trigger}: ${p.desc} ($${p.amt})`).join(', ');
 
-  const prompt=`You are Action's Odds, a sharp MLB betting assistant. Analyze this game and give a brief, direct betting take.
+  // Park factor for prompt context
+  const HITTER_PARKS_B=['Colorado Rockies','Cincinnati Reds','Boston Red Sox','Houston Astros'];
+  const PITCHER_PARKS_B=['San Francisco Giants','Pittsburgh Pirates','San Diego Padres','Los Angeles Dodgers'];
+  const DOME_PARKS_B=['Tampa Bay Rays','Milwaukee Brewers','Seattle Mariners','Miami Marlins','Arizona Diamondbacks','Minnesota Twins','Texas Rangers','Toronto Blue Jays'];
+  const isDome=DOME_PARKS_B.some(t=>game.home_team.includes(t.split(' ').pop()));
+  const isHitterPark=HITTER_PARKS_B.some(t=>game.home_team.includes(t.split(' ').pop()));
+  const isPitcherPark=PITCHER_PARKS_B.some(t=>game.home_team.includes(t.split(' ').pop()));
+
+  const prompt=`You are Action's Odds, a sharp MLB betting system assistant with 40 years of combined gambling experience. You use a proprietary trigger system (T1-T14) to find +EV edges.
+
+SYSTEM RULES:
+- T1 = Home underdog +140 to +199 (primary gate). Sweet spot backed by 17.68% ROI over 3 seasons.
+- T11 = Small home favorite -115 to -135 (requires 3+ additional triggers, max $800)
+- T12 = Home dog +110 to +134 (requires 5+ triggers, max $600)  
+- T13 = Road dog +140 to +165 (requires ALL 5: T2+T3+T6+T8+1 more; killed if home power rating gap ≥15pts)
+- T14 = Power ratings check (mandatory): run differential, records, ERA, FIP. Kills T13 if gap ≥15pts. T1 needs 4+ triggers if gap ≥20pts.
+- Supporting triggers: T2=streak mismatch, T3=run differential, T5=ballpark factor, T6=pitcher FIP advantage, T7=weather (irrelevant in domes), T8=bullpen depletion (48hr usage), T9=schedule/fatigue
+- FIP is the most important pitcher stat. Run differential is the most important team stat.
+- Avoid +200 or higher (market signal). Avoid below +135 (insufficient value). Avoid favorites beyond -135 without 4+ triggers.
+- Unit sizing: T1 alone=$200, +1 trigger=$400, +2=$600, +3=$800, +4+=$1000 cap
+- Always check: pitcher FIP vs ERA (FIP more predictive), bullpen ERA last 7 days, park factor, weather (wind 15+mph blowing in suppresses offense)
+- MLB home underdogs win 45.9% vs road dogs 33.1%. 2023+ rule changes (pitch clock, shift ban, bigger bases) increased parity — market hasn't fully adjusted.
 
 Game: ${game.away_team} @ ${game.home_team}
 Date: ${new Date(game.commence_time).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} at ${new Date(game.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}
 Away record: ${mlbData?.awayRecord||'N/A'} | Home record: ${mlbData?.homeRecord||'N/A'}
 Probable pitchers: ${mlbData?.awayPitcher||'TBD'} (away) vs ${mlbData?.homePitcher||'TBD'} (home)
-Stadium: ${weather.stadium}
-Weather: ${weather.condition}, ${weather.temp}, Wind: ${weather.wind}
-Flagged plays: ${playDescs}
+Away pitcher stats: ERA ${mlbData?.awayERA||'N/A'} | FIP ${mlbData?.awayFIP||'N/A'} | WHIP ${mlbData?.awayWHIP||'N/A'}
+Home pitcher stats: ERA ${mlbData?.homeERA||'N/A'} | FIP ${mlbData?.homeFIP||'N/A'} | WHIP ${mlbData?.homeWHIP||'N/A'}
+Stadium: ${weather.stadium}${isDome?' (DOME — T7 irrelevant)':''}
+Weather: ${weather.condition}, ${weather.temp}, Wind: ${weather.wind}${!isDome&&parseInt(weather.wind)>=15?' ⚠️ 15+ mph wind — check direction':''}
+Park factor: ${isHitterPark?'HITTER PARK (105+)':isPitcherPark?'PITCHER PARK (<95)':'Neutral'}
+System triggers fired: ${playDescs}
+
+Analyze using the T1-T14 system above. Be direct and sharp. Mention FIP vs ERA if relevant, park factor, bullpen situation, and power rating gap.
 
 Respond ONLY with valid JSON, no markdown, no explanation:
-{"lean":"BET"|"PASS"|"WATCH","confidence":1-10,"take":"2-3 sentence sharp betting take mentioning specific factors","factors":["factor1","factor2","factor3"],"warning":"one key risk or null"}`;
+{"lean":"BET"|"PASS"|"WATCH","confidence":1-10,"take":"2-3 sentence sharp system-based take referencing specific triggers and stats","factors":["trigger or stat factor 1","factor 2","factor 3"],"warning":"one key risk, IL return pitcher, bullpen issue, or null","unitSize":"recommended bet size based on trigger count or null"}`;
 
   try{
     const res=await fetch('/ai-brief',{
@@ -867,6 +1215,7 @@ Respond ONLY with valid JSON, no markdown, no explanation:
       take:parsed.take||parsed.Take||parsed.analysis||parsed.recommendation||'Check pitchers and weather above.',
       factors:parsed.factors||parsed.Factors||[],
       warning:parsed.warning||parsed.Warning||parsed.risk||parsed.Risk||null,
+      unitSize:parsed.unitSize||parsed.unit_size||null,
       mlbData,weather
     };
     briefCache[cacheKey]=brief;
@@ -924,13 +1273,17 @@ async function refreshBriefs(){
         <div class="ai-stats">
           ${brief.mlbData?.awayPitcher&&brief.mlbData.awayPitcher!=='TBD'?`<div class="ai-stat"><div class="ai-stat-lbl">Away SP</div><div class="ai-stat-val">${brief.mlbData.awayPitcher.split(' ').pop()}</div></div>`:''}
           ${brief.mlbData?.homePitcher&&brief.mlbData.homePitcher!=='TBD'?`<div class="ai-stat"><div class="ai-stat-lbl">Home SP</div><div class="ai-stat-val">${brief.mlbData.homePitcher.split(' ').pop()}</div></div>`:''}
+          ${brief.mlbData?.awayFIP?`<div class="ai-stat"><div class="ai-stat-lbl">Away FIP</div><div class="ai-stat-val">${brief.mlbData.awayFIP}</div></div>`:''}
+          ${brief.mlbData?.homeFIP?`<div class="ai-stat"><div class="ai-stat-lbl">Home FIP</div><div class="ai-stat-val">${brief.mlbData.homeFIP}</div></div>`:''}
           ${brief.mlbData?.awayRecord?`<div class="ai-stat"><div class="ai-stat-lbl">Away</div><div class="ai-stat-val">${brief.mlbData.awayRecord}</div></div>`:''}
           ${brief.mlbData?.homeRecord?`<div class="ai-stat"><div class="ai-stat-lbl">Home</div><div class="ai-stat-val">${brief.mlbData.homeRecord}</div></div>`:''}
-          <div class="ai-stat"><div class="ai-stat-lbl">Weather</div><div class="ai-stat-val">${brief.weather?.dome?'Dome':brief.weather?.temp||'N/A'}</div></div>
-          ${!brief.weather?.dome&&brief.weather?.wind?`<div class="ai-stat"><div class="ai-stat-lbl">Wind</div><div class="ai-stat-val">${brief.weather.wind}</div></div>`:''}
+          <div class="ai-stat"><div class="ai-stat-lbl">Weather</div><div class="ai-stat-val">${brief.weather?.dome?'🏟 Dome':brief.weather?.temp||'N/A'}</div></div>
+          ${!brief.weather?.dome&&brief.weather?.wind?`<div class="ai-stat" style="${parseInt(brief.weather.wind)>=15?'background:rgba(243,156,18,0.15);':''}}"><div class="ai-stat-lbl">Wind</div><div class="ai-stat-val" style="${parseInt(brief.weather.wind)>=15?'color:var(--amber);':''}">${brief.weather.wind}${parseInt(brief.weather.wind)>=15?' ⚠️':''}</div></div>`:''}
+          ${brief.unitSize?`<div class="ai-stat" style="background:rgba(46,204,113,0.12);"><div class="ai-stat-lbl">Unit Size</div><div class="ai-stat-val" style="color:var(--green);">${brief.unitSize}</div></div>`:''}
         </div>
-        <div class="ai-take">${brief.take}${brief.warning?`<br><br><strong>Risk:</strong> ${brief.warning}`:''}</div>
-        <div class="confidence-bar"><div class="confidence-fill" style="width:${brief.confidence*10}%;background:${brief.lean==='BET'?'var(--green)':brief.lean==='PASS'?'var(--red)':'var(--amber)'}"></div></div>`;
+        <div class="ai-take">${brief.take}${brief.warning?`<br><br><strong>⚠ Risk:</strong> ${brief.warning}`:''}</div>
+        ${brief.factors?.length?`<div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap;">${brief.factors.map(f=>`<span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.08em;padding:2px 7px;border-radius:3px;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);">${f}</span>`).join('')}</div>`:''}
+        <div class="confidence-bar" style="margin-top:10px;"><div class="confidence-fill" style="width:${brief.confidence*10}%;background:${brief.lean==='BET'?'var(--green)':brief.lean==='PASS'?'var(--red)':'var(--amber)'}"></div></div>`;
     }catch(e){
       card.classList.remove('loading');
       card.innerHTML+='<div class="ai-take" style="color:var(--red);">Brief failed. Try refreshing.</div>';
@@ -940,20 +1293,22 @@ async function refreshBriefs(){
 
 function updateSeasonPnL(){
   const settled=logPlays.filter(p=>p.result==='W'||p.result==='L');
-  const pnl=settled.reduce((acc,p)=>{
+  const appPnl=settled.reduce((acc,p)=>{
     const amt=parseFloat(p.amt)||0,odds=parseInt(p.odds)||0;
     if(p.result==='W')return acc+(odds>0?amt*(odds/100):amt*(100/Math.abs(odds)));
     if(p.result==='L')return acc-amt;
     return acc;
   },0);
+  // Add season baseline (pre-app plays Apr 11-13)
+  const totalPnl=appPnl+SEASON_BASELINE;
   const el=document.getElementById('s-pnl');
   if(!el)return;
-  el.textContent=(pnl>=0?'+':'-')+'$'+Math.abs(Math.round(pnl)).toLocaleString();
-  el.className='stat-val '+(pnl>=0?'green':'');
-  el.style.color=pnl<0?'var(--red)':'';
-  // Update bankroll
+  el.textContent=(totalPnl>=0?'+':'-')+'$'+Math.abs(Math.round(totalPnl)).toLocaleString();
+  el.className='stat-val '+(totalPnl>=0?'green':'');
+  el.style.color=totalPnl<0?'var(--red)':'';
+  // Update bankroll display (starting bankroll + total pnl)
   const bankEl=document.getElementById('s-bank');
-  if(bankEl)bankEl.textContent='$'+(cfg.bankroll+Math.round(pnl)).toLocaleString();
+  if(bankEl)bankEl.textContent='$'+(cfg.bankroll+Math.round(appPnl)).toLocaleString();
 }
 
 function renderCard(){
@@ -1036,16 +1391,48 @@ function showTab(t){
 }
 function toggleSetting(key){cfg[key]=!cfg[key];const el=document.getElementById('tog-'+key);if(el)el.classList.toggle('on',cfg[key]);try{localStorage.setItem('ao_cfg',JSON.stringify(cfg));}catch(e){}briefCache={};renderCard();refreshBriefs();}
 function loadSettingsForm(){
-  ['dynamic','toppct','sharp','baseline'].forEach(k=>{const el=document.getElementById('tog-'+k);if(el)el.classList.toggle('on',!!cfg[k]);});
-  document.getElementById('cfg-bankroll').value=cfg.bankroll;document.getElementById('cfg-unit').value=cfg.unit;document.getElementById('cfg-t1a-min').value=cfg.t1aMin;document.getElementById('cfg-t1b-min').value=cfg.t1bMin;document.getElementById('cfg-t1b-date').value=cfg.t1bDate;
-  cfg.t2Tiers.forEach((t,i)=>{document.getElementById('cfg-t2-p'+(i+1)).value=t.p;document.getElementById('cfg-t2-u'+(i+1)).value=t.u;});
-  cfg.t3Tiers.forEach((t,i)=>{document.getElementById('cfg-t3-p'+(i+1)).value=t.p;document.getElementById('cfg-t3-u'+(i+1)).value=t.u;});
-  document.getElementById('cfg-t4-pct').value=cfg.t4Pct;document.getElementById('cfg-t4-sample').value=cfg.t4Sample;
+  ['sharp','avoid'].forEach(k=>{const el=document.getElementById('tog-'+k);if(el)el.classList.toggle('on',!!cfg[k]);});
+  const fields={
+    'cfg-bankroll':cfg.bankroll||3400,
+    'cfg-unit':cfg.unit||200,
+    'cfg-t1-min':cfg.t1Min||140,
+    'cfg-t1-max':cfg.t1Max||199,
+    'cfg-t11-min':cfg.t11Min||115,
+    'cfg-t11-max':cfg.t11Max||135,
+    'cfg-t12-min':cfg.t12Min||110,
+    'cfg-t12-max':cfg.t12Max||134,
+    'cfg-t13-min':cfg.t13Min||140,
+    'cfg-t13-max':cfg.t13Max||165,
+    'cfg-t14-kill':cfg.t14PowerKill||15,
+    'cfg-t14-extra':cfg.t14ExtraReq||20,
+    'cfg-t4-pct':cfg.t4Pct||55,
+    'cfg-t4-sample':cfg.t4Sample||20,
+    'cfg-baseline-pnl':typeof SEASON_BASELINE!=='undefined'?SEASON_BASELINE:784
+  };
+  Object.entries(fields).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.value=val;});
 }
 function saveSettings(){
-  cfg={...cfg,bankroll:parseInt(document.getElementById('cfg-bankroll').value)||2000,unit:parseInt(document.getElementById('cfg-unit').value)||200,t1aMin:parseInt(document.getElementById('cfg-t1a-min').value)||115,t1bMin:parseInt(document.getElementById('cfg-t1b-min').value)||200,t1bDate:document.getElementById('cfg-t1b-date').value||'2026-06-01',t2Tiers:[1,2,3,4].map(i=>({p:parseInt(document.getElementById('cfg-t2-p'+i).value)||0,u:parseInt(document.getElementById('cfg-t2-u'+i).value)||0})),t3Tiers:[1,2,3,4].map(i=>({p:parseInt(document.getElementById('cfg-t3-p'+i).value)||0,u:parseInt(document.getElementById('cfg-t3-u'+i).value)||0})),t4Pct:parseInt(document.getElementById('cfg-t4-pct').value)||55,t4Sample:parseInt(document.getElementById('cfg-t4-sample').value)||20};
+  const g=id=>parseInt(document.getElementById(id)?.value)||0;
+  cfg={...cfg,
+    bankroll:g('cfg-bankroll')||3400,
+    unit:g('cfg-unit')||200,
+    t1Min:g('cfg-t1-min')||140,
+    t1Max:g('cfg-t1-max')||199,
+    t11Min:g('cfg-t11-min')||115,
+    t11Max:g('cfg-t11-max')||135,
+    t12Min:g('cfg-t12-min')||110,
+    t12Max:g('cfg-t12-max')||134,
+    t13Min:g('cfg-t13-min')||140,
+    t13Max:g('cfg-t13-max')||165,
+    t14PowerKill:g('cfg-t14-kill')||15,
+    t14ExtraReq:g('cfg-t14-extra')||20,
+    t4Pct:g('cfg-t4-pct')||55,
+    t4Sample:g('cfg-t4-sample')||20,
+    // Legacy compat
+    t1aMin:g('cfg-t1-min')||140,
+  };
   try{localStorage.setItem('ao_cfg',JSON.stringify(cfg));}catch(e){}
-  document.getElementById('s-bank').textContent='$'+cfg.bankroll.toLocaleString();
+  updateSeasonPnL();
   const msg=document.getElementById('saved-msg');msg.style.display='block';setTimeout(()=>msg.style.display='none',2500);
   briefCache={};renderCard();refreshBriefs();
 }
