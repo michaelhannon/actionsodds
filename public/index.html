@@ -16,7 +16,7 @@ body.light{background:#f0f2f5;color:#0d0d10;}
 body.light header{background:#ffffff;border-bottom:1px solid rgba(0,0,0,0.09);}
 body.light .odds-panel{background:#f0f2f5;}
 body.light .tracker-panel{background:#ffffff;border-left:1px solid rgba(0,0,0,0.09);}
-body.light .game-card{background:#ffffff;border-color:rgba(0,0,0,0.09);}
+body.light .game-card{background:#ffffff;border-color:rgba(0,0,0,0.10);box-shadow:0 1px 4px rgba(0,0,0,0.06);}
 body.light .game-card-header{background:#f8f8fb;}
 body.light .stat-box{background:#ffffff;border-color:rgba(0,0,0,0.09);}
 body.light .market-intel{background:#ffffff;border-color:rgba(0,0,0,0.09);}
@@ -25,7 +25,7 @@ body.light .form-input{background:#f5f6f8;border-color:rgba(0,0,0,0.14);color:#0
 body.light .wl-box{background:#ffffff;border-color:rgba(0,0,0,0.09);}
 body.light .log-row{border-color:rgba(0,0,0,0.07);}
 body.light .panel-tabs{border-color:rgba(0,0,0,0.09);}
-body.light .play-box{background:rgba(0,0,0,0.02);}
+body.light .play-box{background:#f8f8fb;}
 body.light .matchup-divider{background:rgba(0,0,0,0.06);}
 body.light .ai-section{background:#f8f8fb;border-bottom:1px solid rgba(0,0,0,0.09);}
 body.light .ai-card{background:#ffffff;border-color:rgba(0,0,0,0.09);}
@@ -315,35 +315,11 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 
   <div class="tracker-panel">
     <div class="panel-tabs">
-      <button class="panel-tab active" id="tab-btn-paper" onclick="showTab('paper')">Paper</button>
-      <button class="panel-tab" id="tab-btn-log" onclick="showTab('log')">Live plays</button>
+      
+      <button class="panel-tab active" id="tab-btn-log" onclick="showTab('log')">Live plays</button>
       <button class="panel-tab" id="tab-btn-settings" onclick="showTab('settings')">Settings</button>
     </div>
-
-    <div id="ptab-paper">
-      <div class="wl-strip" id="paper-wl-strip">
-        <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">0</div></div>
-        <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">0</div></div>
-        <div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val">0</div></div>
-        <div class="wl-box"><div class="wl-label">Win%</div><div class="wl-val">—</div></div>
-      </div>
-      <div id="paper-list"><div class="empty">No paper trades yet.</div></div>
-      <div class="add-form">
-        <div class="add-form-title">Add paper trade</div>
-        <div class="form-grid full"><input class="form-input" id="p-game" placeholder="Game (e.g. NYY @ BOS)"></div>
-        <div class="form-grid">
-          <input class="form-input" id="p-bet" placeholder="Bet (O 8.5)">
-          <input class="form-input" id="p-odds" placeholder="Odds (+110)">
-        </div>
-        <div class="form-grid">
-          <input class="form-input" id="p-trigger" placeholder="Trigger (T4)">
-          <input class="form-input" id="p-note" placeholder="Note">
-        </div>
-        <button class="add-btn" onclick="addPaper()">Add Trade</button>
-      </div>
-    </div>
-
-    <div id="ptab-log" style="display:none;">
+    <div id="ptab-log">
       <div class="wl-strip" id="log-wl-strip">
         <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w" id="lw-w">0</div></div>
         <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l" id="lw-l">0</div></div>
@@ -560,9 +536,8 @@ const BOOK_LABELS={caesars:'Caesars',hard_rock_bet:'Hard Rock',draftkings:'Draft
 const BOOK_ORDER=['caesars','hard_rock_bet','draftkings','fanduel','betmgm'];
 // allGames, activeBook, availableBooks declared at top
 let paperPlays=[],logPlays=[];
-try{paperPlays=JSON.parse(localStorage.getItem('ao_paper')||'[]');}catch(e){}
 try{logPlays=JSON.parse(localStorage.getItem('ao_log')||'[]');}catch(e){}
-function savePaper(){try{localStorage.setItem('ao_paper',JSON.stringify(paperPlays));}catch(e){}}
+catch(e){}}
 function saveLog(){try{localStorage.setItem('ao_log',JSON.stringify(logPlays));}catch(e){}}
 
 // T1-T14 System defaults — Action's Odds v3
@@ -1392,13 +1367,13 @@ async function fetchOdds(){
 }
 
 function showTab(t){
-  ['paper','log','settings'].forEach(x=>{
+  ['log','settings'].forEach(x=>{
     document.getElementById('ptab-'+x).style.display=x===t?'block':'none';
     const btn=document.getElementById('tab-btn-'+x);
     if(btn)btn.classList.toggle('active',x===t);
   });
   if(t==='settings')loadSettingsForm();
-  if(t==='paper')renderPaper();
+  
   if(t==='log')renderLog();
 }
 function toggleSetting(key){cfg[key]=!cfg[key];const el=document.getElementById('tog-'+key);if(el)el.classList.toggle('on',cfg[key]);try{localStorage.setItem('ao_cfg',JSON.stringify(cfg));}catch(e){}briefCache={};renderCard();refreshBriefs();}
@@ -1449,15 +1424,7 @@ function saveSettings(){
   briefCache={};renderCard();refreshBriefs();
 }
 
-function renderPaper(){
-  const w=paperPlays.filter(p=>p.result==='W').length,l=paperPlays.filter(p=>p.result==='L').length,pend=paperPlays.filter(p=>!p.result).length;
-  document.getElementById('paper-wl-strip').innerHTML=`<div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">${w}</div></div><div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">${l}</div></div><div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val">${pend}</div></div><div class="wl-box"><div class="wl-label">Win%</div><div class="wl-val">${w+l>0?Math.round(w/(w+l)*100)+'%':'—'}</div></div>`;
-  const list=document.getElementById('paper-list');
-  if(!paperPlays.length){list.innerHTML='<div class="empty">No paper trades yet.</div>';return;}
-  list.innerHTML=paperPlays.map((p,i)=>`<div class="log-row"><div style="flex:1;min-width:0;"><div class="log-game">${p.game}</div><div class="log-detail">${p.bet} ${p.odds} · ${p.trigger} · ${p.date}</div></div><div class="log-btns"><button class="log-btn${p.result==='W'?' w':''}" onclick="setPR(${i},'W')">W</button><button class="log-btn${p.result==='L'?' l':''}" onclick="setPR(${i},'L')">L</button><button class="log-btn" onclick="setPR(${i},null)" style="font-size:9px;">${p.result||'Pend'}</button></div></div>`).join('');
-}
-function addPaper(){const g=document.getElementById('p-game').value.trim(),b=document.getElementById('p-bet').value.trim();if(!g||!b)return;paperPlays.push({game:g,bet:b,odds:document.getElementById('p-odds').value.trim(),trigger:document.getElementById('p-trigger').value.trim()||'T4',note:document.getElementById('p-note').value.trim(),date:new Date().toLocaleDateString(),result:null});savePaper();renderPaper();['p-game','p-bet','p-odds','p-trigger','p-note'].forEach(id=>document.getElementById(id).value='');}
-function setPR(i,r){paperPlays[i].result=r;savePaper();renderPaper();}
+
 function renderLog(){
   const w=logPlays.filter(p=>p.result==='W').length;
   const l=logPlays.filter(p=>p.result==='L').length;
