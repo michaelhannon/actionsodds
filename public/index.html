@@ -630,11 +630,8 @@ function checkTriggers(game,bk){
   const today=new Date().toISOString().split('T')[0];
 
   // T4 totals unlock check (shared across sports)
-  const t4done=paperPlays.filter(p=>p.trigger&&p.trigger.startsWith('T4')&&p.result);
-  const t4w=t4done.filter(p=>p.result==='W').length;
-  const t4pct=t4done.length>=cfg.t4Sample?Math.round(t4w/t4done.length*100):0;
-  const t4real=t4done.length>=cfg.t4Sample&&t4pct>=cfg.t4Pct;
-  const t4note=t4real?'T4 UNLOCKED.':'PAPER — '+t4done.length+'/'+cfg.t4Sample+' plays, need '+cfg.t4Pct+'%+.';
+  const t4real=false;
+  const t4note='PAPER — Totals tracking pending unlock.';
 
   // =====================
   // MLB TRIGGERS — Full T1-T14 System
