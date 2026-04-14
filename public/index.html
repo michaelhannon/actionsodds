@@ -229,6 +229,36 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
 @media(max-width:900px){.layout{grid-template-columns:1fr;}.summary-strip{grid-template-columns:repeat(2,1fr);}.ai-cards{flex-direction:column;}.ai-card{min-width:unset;max-width:unset;}}
+
+/* ── VEGASINSIDER-STYLE CARD LAYOUT ── */
+.vi-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:10px;overflow:hidden;animation:slideIn 0.3s ease both;}
+.vi-card.flagged{border-color:var(--green-dim);box-shadow:0 0 0 1px rgba(46,204,113,0.15);}
+.vi-card.sharp-flag{border-color:#60a8ff;}
+.vi-card.paper-flag{border-color:var(--amber-dim);}
+.vi-card-header{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:var(--panel2);border-bottom:1px solid var(--border);}
+.vi-time{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);}
+.vi-table{width:100%;border-collapse:collapse;}
+.vi-table th{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding:4px 8px;text-align:center;border-bottom:1px solid var(--border);}
+.vi-table th.team-col{text-align:left;width:180px;}
+.vi-table td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;}
+.vi-table td.team-col{text-align:left;}
+.vi-table tr:last-child td{border-bottom:none;}
+.vi-team{display:flex;align-items:center;gap:7px;}
+.vi-badge{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.08em;padding:1px 5px;border-radius:3px;text-transform:uppercase;}
+.vi-badge.away{background:rgba(255,255,255,0.04);color:var(--text3);border:1px solid var(--border);}
+.vi-badge.home{background:rgba(232,185,74,0.1);color:rgba(232,185,74,0.6);border:1px solid rgba(232,185,74,0.2);}
+.vi-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--text);}
+.vi-pitcher{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--text3);margin-top:1px;}
+.vi-odds{color:var(--text2);}
+.vi-odds.dog{color:#60a8ff;}
+.vi-odds.fav{color:var(--text);}
+.vi-odds.best{background:rgba(232,185,74,0.15);color:var(--gold);border-radius:4px;padding:2px 6px;}
+.vi-open{color:var(--text3);font-size:11px;}
+.vi-plays{border-top:1px solid var(--border);padding:8px 12px;background:rgba(0,0,0,0.15);}
+body.light .vi-card{background:#ffffff;border-color:rgba(0,0,0,0.09);}
+body.light .vi-card-header{background:#f8f8fb;}
+body.light .vi-plays{background:#f5f6f8;}
+body.light .vi-odds.best{background:rgba(184,134,11,0.12);}
 </style>
 </head>
 <body>
@@ -1317,16 +1347,84 @@ function renderCard(){
     const timeStr=new Date(g.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});
     const badges=plays.map(p=>{const bc=p.type==='real'?'tbadge-real':p.type==='sharp'?'tbadge-sharp':'tbadge-paper';return`<span class="tbadge ${bc}">${p.trigger}</span>`;}).join('');
     const awayFav=awayML!=null&&homeML!=null&&awayML<homeML;const homeFav=homeML!=null&&awayML!=null&&homeML<awayML;
-    html+=`<div class="${cls}">
-      <div class="game-card-header"><div class="game-time">${timeStr}</div><div class="trigger-badges">${badges}</div></div>
-      <div class="matchup">
-        <div class="odds-cols-header"><div class="odds-col-lbl">ML</div><div class="odds-col-lbl">RL</div><div class="odds-col-lbl">O/U</div></div>
-        <div class="team-row"><div class="team-info"><span class="team-badge away">Away</span><span class="team-name${awayFav?' fav':''}">${away}</span></div>
-          <div class="odds-group"><div class="odds-cell"><span class="odds-val${awayML>0?' dog':''}">${fmtOdds(awayML)}</span></div><div class="odds-cell"><span class="odds-val">${awayRL?(awayRL.point>0?'+':'')+awayRL.point+' '+fmtOdds(awayRL.price):'—'}</span></div><div class="odds-cell"><span class="odds-val">${over?'O '+over.point:'—'}</span></div></div></div>
-        <div class="matchup-divider"></div>
-        <div class="team-row"><div class="team-info"><span class="team-badge home">Home</span><span class="team-name${homeFav?' fav':''}">${home}</span></div>
-          <div class="odds-group"><div class="odds-cell"><span class="odds-val${homeML>0?' dog':''}">${fmtOdds(homeML)}</span></div><div class="odds-cell"><span class="odds-val">${homeRL?(homeRL.point>0?'+':'')+homeRL.point+' '+fmtOdds(homeRL.price):'—'}</span></div><div class="odds-cell"><span class="odds-val">${under?'U '+under.point:'—'}</span></div></div></div>
-      </div>`;
+    // Build multi-book odds row (VI style)
+    function bookOdds(game, teamName, mktKey, isHome) {
+      const books = game.bookmakers || [];
+      const allBooks = ['draftkings','fanduel','betmgm','caesars','hard_rock_bet'];
+      const prices = allBooks.map(bk => {
+        const bm = books.find(b => b.key === bk);
+        if (!bm) return null;
+        const mkt = bm.markets.find(m => m.key === mktKey);
+        if (!mkt) return null;
+        const out = mkt.outcomes.find(o => o.name === teamName);
+        if (!out) return null;
+        if (mktKey === 'spreads') return { book: bk, price: out.price, point: out.point };
+        if (mktKey === 'totals') return { book: bk, price: out.price, point: out.point };
+        return { book: bk, price: out.price };
+      });
+      // Find best price
+      const valid = prices.filter(p => p !== null);
+      const bestPrice = valid.length ? Math.max(...valid.map(p => p.price)) : null;
+      return { prices, bestPrice };
+    }
+
+    // Get open line from active book
+    const openML_away = awayML;
+    const openML_home = homeML;
+
+    // Build book columns for away ML
+    const awayMLData = bookOdds(g, away, 'h2h');
+    const homeMLData = bookOdds(g, home, 'h2h');
+    const awayRLData = bookOdds(g, away, 'spreads');
+    const homeRLData = bookOdds(g, home, 'spreads');
+    const overData = bookOdds(g, 'Over', 'totals');
+    const underData = bookOdds(g, 'Under', 'totals');
+
+    const bookLabels = {draftkings:'DK', fanduel:'FD', betmgm:'MGM', caesars:'CZR', hard_rock_bet:'HRK'};
+    const bookKeys = ['draftkings','fanduel','betmgm','caesars','hard_rock_bet'];
+    const availBks = bookKeys.filter(bk => g.bookmakers.some(b => b.key === bk));
+
+    function oddsCell(data, idx, isDog) {
+      if (!data || !data.prices[idx]) return '<td class="vi-odds">—</td>';
+      const p = data.prices[idx];
+      if (!p) return '<td class="vi-odds">—</td>';
+      const isBest = p.price === data.bestPrice && data.bestPrice !== null;
+      const cls = isBest ? 'vi-odds best' : isDog ? 'vi-odds dog' : 'vi-odds';
+      const val = p.point !== undefined ? (p.point > 0 ? '+' : '') + p.point + ' ' + fmtOdds(p.price) : fmtOdds(p.price);
+      return `<td><span class="${cls}">${val}</span></td>`;
+    }
+
+    html+=`<div class="${cls.replace('game-card','vi-card')}">
+      <div class="vi-card-header"><div class="vi-time">${timeStr}</div><div class="trigger-badges">${badges}</div></div>
+      <table class="vi-table">
+        <thead><tr>
+          <th class="team-col">Team</th>
+          <th>Open</th>
+          ${availBks.map(bk=>`<th>${bookLabels[bk]||bk}</th>`).join('')}
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td class="team-col"><div class="vi-team"><span class="vi-badge away">Away</span><div><div class="vi-name">${away.split(' ').pop()}</div></div></div></td>
+            <td><span class="vi-open">${fmtOdds(openML_away)}</span></td>
+            ${availBks.map((_,i)=>oddsCell(awayMLData,i,awayML>0)).join('')}
+          </tr>
+          <tr>
+            <td class="team-col"><div class="vi-team"><span class="vi-badge home">Home</span><div><div class="vi-name">${home.split(' ').pop()}</div></div></div></td>
+            <td><span class="vi-open">${fmtOdds(openML_home)}</span></td>
+            ${availBks.map((_,i)=>oddsCell(homeMLData,i,homeML>0)).join('')}
+          </tr>
+          <tr style="background:rgba(255,255,255,0.02);">
+            <td class="team-col" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--text3);letter-spacing:0.1em;">RUN LINE</td>
+            <td><span class="vi-open">${awayRL?(awayRL.point>0?'+':'')+awayRL.point:'—'}</span></td>
+            ${availBks.map((_,i)=>oddsCell(awayRLData,i,false)).join('')}
+          </tr>
+          <tr style="background:rgba(255,255,255,0.02);">
+            <td class="team-col" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--text3);letter-spacing:0.1em;">TOTAL</td>
+            <td><span class="vi-open">${over?'O '+over.point:'—'}</span></td>
+            ${availBks.map((_,i)=>oddsCell(overData,i,false)).join('')}
+          </tr>
+        </tbody>
+      </table>`;
     if(plays.length){
       html+=`<div class="play-box">`;
       if(rp.length){html+=`<div class="play-section-label real">Real plays</div>`;rp.forEach(p=>{stakeTotal+=p.amt;realCount++;html+=`<div class="play-row"><div class="play-desc">${p.desc} <em style="color:var(--text3);font-size:12px;">${p.sub}</em>${pips(p.conf,'green')}</div><div class="play-amt">$${p.amt}</div></div><div class="play-note">${p.note}</div>`;});}
