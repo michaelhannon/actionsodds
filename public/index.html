@@ -264,46 +264,54 @@ body.light .vi-tbl th{background:#f5f6f8;}
 body.light .vi-plays{background:#f8f8fb;}
 body.light .vi-cell-best{background:rgba(184,134,11,0.12);}
 
-/* ── VI-STYLE ODDS CARDS ── */
-.vi-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;}
-.vi-card.flagged{border-color:rgba(46,204,113,0.5);box-shadow:0 0 0 1px rgba(46,204,113,0.12);}
-.vi-card.sharp-flag{border-color:rgba(96,168,255,0.4);}
-.vi-card-hdr{display:flex;align-items:center;justify-content:space-between;padding:6px 12px 5px;background:var(--panel2);border-bottom:1px solid var(--border);}
+
+
+/* ══ VI-ACCURATE CARD LAYOUT ══ */
+.vi-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;}
+.vi-card.flagged{border-left:3px solid var(--green);box-shadow:0 0 0 1px rgba(46,204,113,0.1);}
+.vi-card.sharp-flag{border-left:3px solid #60a8ff;}
+.vi-card-hdr{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:var(--panel2);border-bottom:1px solid var(--border);}
 .vi-hdr-left{display:flex;align-items:center;gap:10px;}
 .vi-gametime{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);}
-.vi-table{width:100%;border-collapse:collapse;table-layout:fixed;}
-.vi-table .col-team{width:36%;}
-.vi-table .col-open{width:9%;text-align:center;}
-.vi-table .col-book{text-align:center;}
-.vi-table thead th{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);padding:5px 6px 4px;border-bottom:1px solid var(--border);background:var(--panel2);}
-.vi-table thead th.col-team{text-align:left;padding-left:12px;}
-.vi-table thead th.col-open{color:var(--text3);}
+.vi-table{width:100%;border-collapse:collapse;}
+.vi-table thead tr{border-bottom:1px solid var(--border);}
+.vi-table thead th{padding:6px 4px 5px;text-align:center;background:var(--panel2);}
+.vi-table thead th.th-team{text-align:left;padding-left:12px;width:220px;}
+.vi-table thead th.th-open{width:70px;}
+.vi-table thead th.th-book{width:80px;}
+.vi-book-logo{display:inline-flex;align-items:center;justify-content:center;border-radius:5px;padding:3px 8px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:0.05em;color:#fff;white-space:nowrap;}
+.vi-book-logo.dk{background:#1a4f8a;}
+.vi-book-logo.fd{background:#1493ff;}
+.vi-book-logo.mgm{background:#c8a84b;color:#000;}
+.vi-book-logo.czr{background:#002B5C;}
+.vi-book-logo.hrk{background:#000;}
 .vi-table tbody tr{border-bottom:1px solid var(--border);}
 .vi-table tbody tr:last-child{border-bottom:none;}
-.vi-table tbody tr.section-row td{background:rgba(255,255,255,0.025);border-top:1px solid var(--border);}
-.vi-table tbody td{padding:7px 6px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:var(--text2);text-align:center;white-space:nowrap;}
-.vi-table tbody td.col-team{text-align:left;padding-left:12px;}
-.vi-team-cell{display:flex;align-items:center;gap:8px;}
-.vi-ha{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.08em;padding:1px 5px;border-radius:3px;text-transform:uppercase;flex-shrink:0;}
-.vi-ha.away{background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);}
-.vi-ha.home{background:rgba(232,185,74,0.1);color:rgba(232,185,74,0.7);border:1px solid rgba(232,185,74,0.2);}
-.vi-tname{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--text);line-height:1.2;}
-.vi-pitcher{font-size:10px;color:var(--text3);letter-spacing:0.02em;}
-.vi-open-val{font-size:11px;color:var(--text3);}
-.vi-price{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;}
-.vi-price.dog{color:#60a8ff;}
-.vi-price.fav{color:var(--text);}
-.vi-price.best{background:rgba(232,185,74,0.18);color:var(--gold);border-radius:4px;padding:2px 7px;display:inline-block;}
-.vi-price.neutral{color:var(--text2);}
+.vi-table tbody tr.rl-row{background:rgba(255,255,255,0.015);}
+.vi-table tbody td{padding:8px 4px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--text2);}
+.vi-table tbody td.td-team{text-align:left;padding-left:12px;}
+.vi-team-row{display:flex;align-items:center;gap:8px;}
+.vi-ha{font-size:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:0.08em;padding:1px 5px;border-radius:3px;text-transform:uppercase;flex-shrink:0;}
+.vi-ha.away{background:rgba(255,255,255,0.06);color:var(--text3);border:1px solid var(--border);}
+.vi-ha.home{background:rgba(232,185,74,0.12);color:rgba(232,185,74,0.8);border:1px solid rgba(232,185,74,0.25);}
+.vi-tname{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--text);line-height:1.1;}
+.vi-pitcher{font-family:'Barlow',sans-serif;font-size:10px;color:var(--text3);margin-top:1px;}
+.vi-open-cell{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--text3);font-weight:600;}
+.vi-price-cell{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:5px;min-width:52px;text-align:center;}
+.vi-price-cell.dog{color:#60a8ff;}
+.vi-price-cell.fav{color:var(--text);}
+.vi-price-cell.neutral{color:var(--text2);}
+.vi-price-cell.best{background:rgba(232,185,74,0.22);color:var(--gold);}
 .vi-section-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);}
 .vi-plays{padding:9px 12px;border-top:1px solid var(--border);background:rgba(0,0,0,0.12);}
 /* Light mode */
-body.light .vi-card{background:#fff;border-color:rgba(0,0,0,0.09);}
-body.light .vi-card-hdr{background:#f8f9fb;}
-body.light .vi-table thead th{background:#f8f9fb;}
-body.light .vi-table tbody tr.section-row td{background:rgba(0,0,0,0.02);}
-body.light .vi-price.best{background:rgba(184,134,11,0.12);color:#b8860b;}
+body.light .vi-card{background:#fff;border-color:rgba(0,0,0,0.08);}
+body.light .vi-card-hdr{background:#f7f8fb;}
+body.light .vi-table thead th{background:#f7f8fb;}
+body.light .vi-table tbody tr.rl-row{background:rgba(0,0,0,0.015);}
+body.light .vi-price-cell.best{background:rgba(184,134,11,0.14);color:#b8860b;}
 body.light .vi-plays{background:#f5f6f8;}
+body.light .vi-price-cell.dog{color:#1a6abf;}
 </style>
 </head>
 <body>
@@ -1367,7 +1375,7 @@ function renderCard(){
     const homeML=h2h?.outcomes?.find(o=>o.name===home)?.price;const awayML=h2h?.outcomes?.find(o=>o.name===away)?.price;
     const homeRL=spreads?.outcomes?.find(o=>o.name===home);const awayRL=spreads?.outcomes?.find(o=>o.name===away);
     const over=totals?.outcomes?.find(o=>o.name==='Over');const under=totals?.outcomes?.find(o=>o.name==='Under');
-    const viCls=rp.length?'vi-card flagged':sp.length&&!pp.length?'vi-card sharp-flag':pp.length?'vi-card':'vi-card';
+    const viCls=rp.length?'vi-card flagged':sp.length&&!pp.length?'vi-card sharp-flag':'vi-card';
     const timeStr=new Date(g.commence_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});
     const badges=[...new Set(plays.map(p=>p.trigger))].map(t=>{
       const p=plays.find(x=>x.trigger===t);
@@ -1375,92 +1383,86 @@ function renderCard(){
       return`<span class="tbadge ${bc}">${t}</span>`;
     }).join('');
 
-    // Multi-book price lookup
-    const BOOK_KEYS=['draftkings','fanduel','betmgm','caesars'];
-    const BOOK_LBL={draftkings:'DraftKings',fanduel:'FanDuel',betmgm:'BetMGM',caesars:'Caesars'};
-    const availBks=BOOK_KEYS.filter(bk=>g.bookmakers.some(b=>b.key===bk));
+    // Book config
+    const BOOKS=[
+      {key:'draftkings', label:'DraftKings', cls:'dk'},
+      {key:'fanduel',    label:'FanDuel',    cls:'fd'},
+      {key:'betmgm',     label:'BetMGM',     cls:'mgm'},
+      {key:'caesars',    label:'Caesars',    cls:'czr'},
+    ];
+    const availBks=BOOKS.filter(b=>g.bookmakers.some(bm=>bm.key===b.key));
 
-    function getPrice(bkKey,teamName,mkt){
+    function getOut(bkKey,teamName,mkt){
       const bm=g.bookmakers.find(b=>b.key===bkKey);if(!bm)return null;
       const m=bm.markets.find(x=>x.key===mkt);if(!m)return null;
       return m.outcomes.find(o=>o.name===teamName)||null;
     }
-
-    function bestOf(arr){const v=arr.filter(x=>x!==null&&x!==undefined);return v.length?Math.max(...v):null;}
-
-    // Get all prices for best highlight
-    const awayMLPrices=availBks.map(bk=>{const p=getPrice(bk,away,'h2h');return p?p.price:null;});
-    const homeMLPrices=availBks.map(bk=>{const p=getPrice(bk,home,'h2h');return p?p.price:null;});
-    const awayRLPrices=availBks.map(bk=>{const p=getPrice(bk,away,'spreads');return p?p.price:null;});
-    const homeRLPrices=availBks.map(bk=>{const p=getPrice(bk,home,'spreads');return p?p.price:null;});
-    const overPrices=availBks.map(bk=>{const p=getPrice(bk,'Over','totals');return p?p.price:null;});
-    const underPrices=availBks.map(bk=>{const p=getPrice(bk,'Under','totals');return p?p.price:null;});
-
-    const bestAwayML=bestOf(awayMLPrices);
-    const bestHomeML=bestOf(homeMLPrices);
-    const bestAwayRL=bestOf(awayRLPrices);
-    const bestHomeRL=bestOf(homeRLPrices);
-    const bestOver=bestOf(overPrices);
-    const bestUnder=bestOf(underPrices);
-
-    function priceCell(price,best,isDog){
-      if(price===null)return`<td style="color:var(--text3);text-align:center;font-family:'Barlow Condensed',sans-serif;">—</td>`;
-      const isBest=price===best;
-      const cls=isBest?'vi-price best':isDog?'vi-price dog':'vi-price fav';
-      return`<td style="text-align:center;"><span class="${cls}">${fmtOdds(price)}</span></td>`;
+    function bestPrice(bks,teamName,mkt){
+      const prices=bks.map(b=>{const o=getOut(b.key,teamName,mkt);return o?o.price:null;}).filter(p=>p!==null);
+      return prices.length?Math.max(...prices):null;
     }
-    function rlCell(bkKey,teamName,best){
-      const p=getPrice(bkKey,teamName,'spreads');
-      if(!p)return`<td style="color:var(--text3);text-align:center;font-family:'Barlow Condensed',sans-serif;">—</td>`;
-      const isBest=p.price===best;
-      const cls=isBest?'vi-price best':'vi-price neutral';
-      const pt=(p.point>0?'+':'')+p.point;
-      return`<td style="text-align:center;"><span class="${cls}">${pt} ${fmtOdds(p.price)}</span></td>`;
+
+    const bestAwayML=bestPrice(availBks,away,'h2h');
+    const bestHomeML=bestPrice(availBks,home,'h2h');
+    const bestAwayRL=bestPrice(availBks,away,'spreads');
+    const bestHomeRL=bestPrice(availBks,home,'spreads');
+    const bestOver=bestPrice(availBks,'Over','totals');
+
+    function mlCell(bk,teamName,best,isDog){
+      const o=getOut(bk.key,teamName,'h2h');
+      if(!o)return'<td><span class="vi-price-cell neutral">—</span></td>';
+      const isBest=o.price===best;
+      const cls=isBest?'best':isDog?'dog':'fav';
+      return`<td><span class="vi-price-cell ${cls}">${fmtOdds(o.price)}</span></td>`;
     }
-    function totalCell(bkKey,teamName,best){
-      const p=getPrice(bkKey,teamName,'totals');
-      if(!p)return`<td style="color:var(--text3);text-align:center;font-family:'Barlow Condensed',sans-serif;">—</td>`;
-      const isBest=p.price===best;
-      const cls=isBest?'vi-price best':'vi-price neutral';
+    function rlCell(bk,teamName,best){
+      const o=getOut(bk.key,teamName,'spreads');
+      if(!o)return'<td><span class="vi-price-cell neutral">—</span></td>';
+      const isBest=o.price===best;
+      const pt=(o.point>0?'+':'')+o.point;
+      return`<td><span class="vi-price-cell ${isBest?'best':'neutral'}">${pt} ${fmtOdds(o.price)}</span></td>`;
+    }
+    function totCell(bk,teamName,best){
+      const o=getOut(bk.key,teamName,'totals');
+      if(!o)return'<td><span class="vi-price-cell neutral">—</span></td>';
+      const isBest=o.price===best;
       const lbl=teamName==='Over'?'O':'U';
-      return`<td style="text-align:center;"><span class="${cls}">${lbl}${p.point} ${fmtOdds(p.price)}</span></td>`;
+      return`<td><span class="vi-price-cell ${isBest?'best':'neutral'}">${lbl}${o.point} ${fmtOdds(o.price)}</span></td>`;
     }
 
     html+=`<div class="${viCls}">
       <div class="vi-card-hdr">
-        <div class="vi-hdr-left">
-          <span class="vi-gametime">${timeStr}</span>
-        </div>
+        <div class="vi-hdr-left"><span class="vi-gametime">${timeStr}</span></div>
         <div class="trigger-badges">${badges}</div>
       </div>
       <table class="vi-table">
         <thead>
           <tr>
-            <th class="col-team">Team</th>
-            <th class="col-open">Open</th>
-            ${availBks.map(bk=>`<th class="col-book">${BOOK_LBL[bk]}</th>`).join('')}
+            <th class="th-team"></th>
+            <th class="th-open" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--text3);">OPEN</th>
+            ${availBks.map(b=>`<th class="th-book"><span class="vi-book-logo ${b.cls}">${b.label}</span></th>`).join('')}
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td class="col-team"><div class="vi-team-cell"><span class="vi-ha away">Away</span><div><div class="vi-tname">${away}</div></div></div></td>
-            <td style="text-align:center;"><span class="vi-open-val">${fmtOdds(awayML)}</span></td>
-            ${availBks.map((bk,i)=>priceCell(awayMLPrices[i],bestAwayML,awayML>0)).join('')}
+            <td class="td-team"><div class="vi-team-row"><span class="vi-ha away">Away</span><div><div class="vi-tname">${away}</div></div></div></td>
+            <td><span class="vi-open-cell">${fmtOdds(awayML)}</span></td>
+            ${availBks.map(b=>mlCell(b,away,bestAwayML,awayML>0)).join('')}
           </tr>
           <tr>
-            <td class="col-team"><div class="vi-team-cell"><span class="vi-ha home">Home</span><div><div class="vi-tname">${home}</div></div></div></td>
-            <td style="text-align:center;"><span class="vi-open-val">${fmtOdds(homeML)}</span></td>
-            ${availBks.map((bk,i)=>priceCell(homeMLPrices[i],bestHomeML,homeML>0)).join('')}
+            <td class="td-team"><div class="vi-team-row"><span class="vi-ha home">Home</span><div><div class="vi-tname">${home}</div></div></div></td>
+            <td><span class="vi-open-cell">${fmtOdds(homeML)}</span></td>
+            ${availBks.map(b=>mlCell(b,home,bestHomeML,homeML>0)).join('')}
           </tr>
-          <tr class="section-row">
-            <td class="col-team"><span class="vi-section-lbl">Run Line</span></td>
-            <td style="text-align:center;"><span class="vi-open-val">${awayRL?(awayRL.point>0?'+':'')+awayRL.point:'—'}</span></td>
-            ${availBks.map(bk=>rlCell(bk,away,bestAwayRL)).join('')}
+          <tr class="rl-row">
+            <td class="td-team"><span class="vi-section-lbl">Run Line</span></td>
+            <td><span class="vi-open-cell">${awayRL?(awayRL.point>0?'+':'')+awayRL.point:'—'}</span></td>
+            ${availBks.map(b=>rlCell(b,away,bestAwayRL)).join('')}
           </tr>
-          <tr class="section-row">
-            <td class="col-team"><span class="vi-section-lbl">Total</span></td>
-            <td style="text-align:center;"><span class="vi-open-val">${over?'O '+over.point:'—'}</span></td>
-            ${availBks.map(bk=>totalCell(bk,'Over',bestOver)).join('')}
+          <tr class="rl-row">
+            <td class="td-team"><span class="vi-section-lbl">Total</span></td>
+            <td><span class="vi-open-cell">${over?'O'+over.point:'—'}</span></td>
+            ${availBks.map(b=>totCell(b,'Over',bestOver)).join('')}
           </tr>
         </tbody>
       </table>`;
