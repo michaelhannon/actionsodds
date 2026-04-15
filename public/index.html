@@ -304,6 +304,8 @@ body.light .vi-cell-best{background:rgba(184,134,11,0.12);}
 .vi-price-cell.best{background:rgba(232,185,74,0.22);color:var(--gold);}
 .vi-section-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);}
 .vi-plays{padding:9px 12px;border-top:1px solid var(--border);background:rgba(0,0,0,0.12);}
+.vi-price-link{text-decoration:none;display:block;transition:transform 0.1s;}
+.vi-price-link:hover{transform:scale(1.05);}
 /* Light mode */
 body.light .vi-card{background:#fff;border-color:rgba(0,0,0,0.08);}
 body.light .vi-card-hdr{background:#f7f8fb;}
@@ -1385,10 +1387,10 @@ function renderCard(){
 
     // Book config
     const BOOKS=[
-      {key:'draftkings', label:'DraftKings', cls:'dk'},
-      {key:'fanduel',    label:'FanDuel',    cls:'fd'},
-      {key:'betmgm',     label:'BetMGM',     cls:'mgm'},
-      {key:'caesars',    label:'Caesars',    cls:'czr'},
+      {key:'draftkings', label:'DraftKings', cls:'dk', url:'https://sportsbook.draftkings.com/'},
+      {key:'fanduel',    label:'FanDuel',    cls:'fd', url:'https://sportsbook.fanduel.com/'},
+      {key:'betmgm',     label:'BetMGM',     cls:'mgm', url:'https://sports.betmgm.com/en/sports/baseball-23'},
+      {key:'caesars',    label:'Caesars',    cls:'czr', url:'https://www.caesars.com/sportsbook-and-casino/'},
     ];
     const availBks=BOOKS.filter(b=>g.bookmakers.some(bm=>bm.key===b.key));
 
@@ -1413,21 +1415,21 @@ function renderCard(){
       if(!o)return'<td><span class="vi-price-cell neutral">—</span></td>';
       const isBest=o.price===best;
       const cls=isBest?'best':isDog?'dog':'fav';
-      return`<td><span class="vi-price-cell ${cls}">${fmtOdds(o.price)}</span></td>`;
+      return`<td><a href="${bk.url}" target="_blank" class="vi-price-link"><span class="vi-price-cell ${cls}">${fmtOdds(o.price)}</span></a></td>`;
     }
     function rlCell(bk,teamName,best){
       const o=getOut(bk.key,teamName,'spreads');
       if(!o)return'<td><span class="vi-price-cell neutral">—</span></td>';
       const isBest=o.price===best;
       const pt=(o.point>0?'+':'')+o.point;
-      return`<td><span class="vi-price-cell ${isBest?'best':'neutral'}">${pt} ${fmtOdds(o.price)}</span></td>`;
+      return`<td><a href="${bk.url}" target="_blank" class="vi-price-link"><span class="vi-price-cell ${isBest?'best':'neutral'}">${pt} ${fmtOdds(o.price)}</span></a></td>`;
     }
     function totCell(bk,teamName,best){
       const o=getOut(bk.key,teamName,'totals');
       if(!o)return'<td><span class="vi-price-cell neutral">—</span></td>';
       const isBest=o.price===best;
       const lbl=teamName==='Over'?'O':'U';
-      return`<td><span class="vi-price-cell ${isBest?'best':'neutral'}">${lbl}${o.point} ${fmtOdds(o.price)}</span></td>`;
+      return`<td><a href="${bk.url}" target="_blank" class="vi-price-link"><span class="vi-price-cell ${isBest?'best':'neutral'}">${lbl}${o.point} ${fmtOdds(o.price)}</span></a></td>`;
     }
 
     html+=`<div class="${viCls}">
