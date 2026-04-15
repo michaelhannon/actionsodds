@@ -1626,22 +1626,33 @@ async function fetchTicker(){
     const track=document.getElementById('ticker-track');
     if(!track)return;
     const items=games.map(g=>{
-      const isLive=g.abstractState==='Live';
-      const isFinal=g.abstractState==='Final';
-      const isPre=g.abstractState==='Preview';
+      // Handle all possible MLB Stats API state strings
+      const state=(g.abstractState||g.status||'').toLowerCase();
+      const isLive=state==='live'||state==='in progress'||state==='manager challenge';
+      const isFinal=state==='final'||state==='game over'||state==='completed early';
+      const isPre=!isLive&&!isFinal;
       let statusStr='';
-      if(isLive)statusStr=(g.inningHalf==='Top'?'▲':'▼')+g.inning+' · '+g.outs+' out';
-      else if(isFinal)statusStr='Final';
-      else if(isPre){const t=new Date(g.startTime);statusStr=t.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
+      if(isLive){
+        const half=g.inningHalf==='Top'?'▲':'▼';
+        statusStr=half+(g.inning||'?')+' '+(g.outs||0)+' out';
+      } else if(isFinal){
+        statusStr='Final';
+      } else {
+        const t=new Date(g.startTime);
+        statusStr=isNaN(t)?g.status||'':t.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      }
       const scoreStr=(isLive||isFinal)?(g.awayScore+'-'+g.homeScore):'vs';
       const statusCls=isLive?'live':'';
       const scoreCls=isLive?'live':isFinal?'final':'';
       const awayName=g.awayAbbr||g.away.split(' ').pop();
       const homeName=g.homeAbbr||g.home.split(' ').pop();
-      return '<span class="ticker-item"><span class="ticker-teams">'+awayName+' @ '+homeName+'</span><span class="ticker-score '+scoreCls+'">'+scoreStr+'</span><span class="ticker-status '+statusCls+'">'+statusStr+'</span></span>';
+      return '<span class="ticker-item"><span class="ticker-teams">'+awayName+' @ '+homeName+'</span>'
+        +'<span class="ticker-score '+scoreCls+'">'+scoreStr+'</span>'
+        +'<span class="ticker-status '+statusCls+'">'+statusStr+'</span></span>';
     }).join('');
+    if(!items){return;}
     track.innerHTML=items+items;
-    const duration=Math.max(30,games.length*4);
+    const duration=Math.max(40,games.length*5);
     track.style.animationDuration=duration+'s';
   }catch(e){console.log('[TICKER] Error:',e.message);}
 }
