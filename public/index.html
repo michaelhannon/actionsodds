@@ -140,6 +140,27 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .section-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text2);}
 
+/* ── MULTI-BOOK GRID ─────────────────────────────────── */
+.book-grid{width:100%;border-collapse:collapse;margin-bottom:10px;font-family:var(--mono);}
+.book-grid th{padding:6px 8px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;text-align:center;border-bottom:2px solid;}
+.book-grid td{padding:5px 8px;font-size:13px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
+.book-grid tr:hover td{background:rgba(255,255,255,0.02);}
+.book-grid .game-col{text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;padding-right:12px;}
+.book-grid .game-time-col{font-size:10px;color:var(--text3);white-space:nowrap;}
+.book-grid .best-val{font-weight:700;}
+.bg-fd{color:#1bcd8f;border-color:#1bcd8f;}
+.bg-mgm{color:#c8973a;border-color:#c8973a;}
+.bg-czr{color:#7ab3f0;border-color:#7ab3f0;}
+.bg-hr{color:#ff6b8a;border-color:#ff6b8a;}
+.book-logo{display:inline-block;padding:2px 8px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;}
+.bl-fd{background:rgba(27,205,143,0.12);color:#1bcd8f;border:1px solid rgba(27,205,143,0.3);}
+.bl-mgm{background:rgba(200,151,58,0.12);color:#c8973a;border:1px solid rgba(200,151,58,0.3);}
+.bl-czr{background:rgba(122,179,240,0.12);color:#7ab3f0;border:1px solid rgba(122,179,240,0.3);}
+.bl-hr{background:rgba(255,107,138,0.12);color:#ff6b8a;border:1px solid rgba(255,107,138,0.3);}
+.view-toggle{display:flex;gap:6px;margin-bottom:14px;}
+.view-btn{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:transparent;border:1px solid var(--border2);color:var(--text2);padding:4px 12px;border-radius:5px;cursor:pointer;transition:all 0.15s;}
+.view-btn.active{background:rgba(232,185,74,0.12);border-color:var(--gold);color:var(--gold);}
+
 /* ── BOOK TABS ───────────────────────────────────────── */
 .book-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
 .book-tab{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;background:transparent;border:1px solid var(--border2);color:var(--text2);padding:5px 12px;border-radius:5px;cursor:pointer;transition:all 0.15s;}
@@ -359,7 +380,7 @@ select.form-input{cursor:pointer;}
       <div class="protocol-title">⚙ Today's Card — T1-T15 + R1-R7 Full Engine</div>
       <div class="protocol-subtitle">Auto-updates 9AM ET · All 30 teams · Pitcher FIP · Bullpen 48hr · Collision + Regression</div>
     </div>
-    <span id="protocol-arrow" style="color:var(--gold);font-size:18px;transition:transform 0.2s;">▼</span>
+    <span id="protocol-arrow" style="color:var(--gold);font-size:18px;transition:transform 0.2s;transform:rotate(180deg);">▼</span>
   </div>
   <div class="protocol-body open" id="protocol-body">
     <div id="collision-table-container">
@@ -421,7 +442,11 @@ select.form-input{cursor:pointer;}
       <div class="section-title">Book</div>
       <div style="font-size:11px;color:var(--text3);" id="game-count"></div>
     </div>
-    <div class="book-tabs" id="book-tabs"></div>
+    <div class="view-toggle">
+      <button class="view-btn active" id="view-btn-grid" onclick="setView('grid')">📊 Grid View</button>
+      <button class="view-btn" id="view-btn-cards" onclick="setView('cards')">🃏 Card View</button>
+    </div>
+    <div id="book-tabs-cards" style="display:none;" class="book-tabs"></div>
 
     <div class="market-intel" id="market-intel" style="display:none;">
       <div class="intel-item"><div class="intel-lbl">Avg home dog</div><div class="intel-val gold" id="mi-avgdog">—</div></div>
@@ -459,6 +484,7 @@ select.form-input{cursor:pointer;}
         <a class="book-link fd" href="https://www.fanduel.com/sportsbook" target="_blank">FanDuel</a>
         <a class="book-link mgm" href="https://sports.nj.betmgm.com" target="_blank">BetMGM</a>
         <a class="book-link czr" href="https://www.caesars.com/sportsbook-and-casino" target="_blank">Caesars</a>
+        <a class="book-link" href="https://www.hardrock.bet" target="_blank" style="background:rgba(220,20,60,0.1);color:#ff6b8a;border:1px solid rgba(220,20,60,0.25);">Hard Rock</a>
       </div>
     </div>
   </div>
@@ -816,6 +842,136 @@ function analyzeMarket(games,bk){
 }
 
 // ── RENDER CARDS ─────────────────────────────────────────
+// Current view mode
+let currentView = 'grid';
+function setView(v){
+  currentView=v;
+  document.getElementById('view-btn-grid').classList.toggle('active',v==='grid');
+  document.getElementById('view-btn-cards').classList.toggle('active',v==='cards');
+  document.getElementById('book-tabs-cards').style.display=v==='cards'?'flex':'none';
+  if(allGames.length){
+    if(v==='grid') renderMultiBookGrid(allGames);
+    else{ const bk=document.querySelector('.book-tab.active')?.dataset?.key||allGames[0]?.bookmakers?.[0]?.key; renderCards(allGames,bk);}
+  }
+}
+
+// Book config
+const BOOKS=[
+  {key:'fanduel',label:'FanDuel',cls:'bl-fd',thCls:'bg-fd'},
+  {key:'betmgm',label:'BetMGM',cls:'bl-mgm',thCls:'bg-mgm'},
+  {key:'caesars',label:'Caesars',cls:'bl-czr',thCls:'bg-czr'},
+  {key:'hard_rock_bet',label:'Hard Rock',cls:'bl-hr',thCls:'bg-hr'},
+  {key:'draftkings',label:'DraftKings',cls:'bl-fd',thCls:'bg-fd'},
+];
+
+function getBookOdds(g, bookKey){
+  const bm=g.bookmakers?.find(b=>b.key===bookKey);
+  if(!bm)return null;
+  const h2h=bm.markets?.find(m=>m.key==='h2h');
+  const spreads=bm.markets?.find(m=>m.key==='spreads');
+  const totals=bm.markets?.find(m=>m.key==='totals');
+  return{
+    awayML:h2h?.outcomes?.find(o=>o.name===g.away_team)?.price,
+    homeML:h2h?.outcomes?.find(o=>o.name===g.home_team)?.price,
+    awayRL:spreads?.outcomes?.find(o=>o.name===g.away_team),
+    homeRL:spreads?.outcomes?.find(o=>o.name===g.home_team),
+    over:totals?.outcomes?.find(o=>o.name==='Over'),
+    under:totals?.outcomes?.find(o=>o.name==='Under'),
+  };
+}
+
+function renderMultiBookGrid(games){
+  const out=document.getElementById('card-output');
+  if(!games.length){out.innerHTML='<div class="status-box"><div class="status-title">No games found</div></div>';return;}
+
+  // Find which books are available in this data
+  const availBooks=new Set();
+  for(const g of games) for(const bk of (g.bookmakers||[])) availBooks.add(bk.key);
+  const books=BOOKS.filter(b=>availBooks.has(b.key));
+  if(!books.length){out.innerHTML='<div class="status-box"><div class="status-title">No book data available</div></div>';return;}
+
+  let html='';
+  let playCount=0;
+
+  // Group: qualifying plays first, then rest
+  const qualify=games.filter(g=>{
+    const bm=g.bookmakers?.[0]; if(!bm)return false;
+    const h2h=bm.markets?.find(m=>m.key==='h2h');
+    const hml=h2h?.outcomes?.find(o=>o.name===g.home_team)?.price;
+    return hml!=null&&((hml>=cfg.t1Min&&hml<=cfg.t1Max)||(hml<0&&Math.abs(hml)>=cfg.t11Min&&Math.abs(hml)<=cfg.t11Max));
+  });
+  const rest=games.filter(g=>!qualify.includes(g));
+  const sorted=[...qualify,...rest];
+
+  html+=`<table class="book-grid"><thead><tr>
+    <th style="text-align:left;color:var(--text3);border-color:var(--border2);">Game</th>
+    <th style="color:var(--text3);border-color:var(--border2);">Time</th>
+    ${books.map(b=>`<th colspan="3" class="${b.thCls}"><span class="book-logo ${b.cls}">${b.label}</span></th>`).join('')}
+    <th style="color:var(--text3);border-color:var(--border2);">System</th>
+  </tr>
+  <tr>
+    <th style="text-align:left;color:var(--text3);border-color:var(--border);font-size:9px;">Matchup</th>
+    <th style="color:var(--text3);border-color:var(--border);font-size:9px;">ET</th>
+    ${books.map(b=>`
+      <th style="color:var(--text3);border-color:var(--border);font-size:9px;">Away ML</th>
+      <th style="color:var(--text3);border-color:var(--border);font-size:9px;">Home ML</th>
+      <th style="color:var(--text3);border-color:var(--border);font-size:9px;">O/U</th>
+    `).join('')}
+    <th style="color:var(--text3);border-color:var(--border);font-size:9px;">Play</th>
+  </tr></thead><tbody>`;
+
+  for(const g of sorted){
+    const gameTime=new Date(g.commence_time);
+    const timeStr=gameTime.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    const away=g.away_team.split(' ').slice(-1)[0];
+    const home=g.home_team.split(' ').slice(-1)[0];
+
+    // Check for qualifying play
+    const plays=gradeMLBGame(g, books[0]?.key||'fanduel');
+    const hasPlay=plays.some(p=>p.type==='real');
+    const hasT11=plays.some(p=>p.trigger==='T11');
+    if(hasPlay)playCount++;
+
+    const rowStyle=hasPlay?'background:rgba(46,204,113,0.05);':hasT11?'background:rgba(243,156,18,0.04);':'';
+
+    html+=`<tr style="${rowStyle}">
+      <td class="game-col">
+        ${hasPlay?'<span style="color:var(--green);margin-right:4px;">●</span>':''}
+        ${hasT11&&!hasPlay?'<span style="color:var(--amber);margin-right:4px;">●</span>':''}
+        <span style="color:var(--text3);">${away}</span>
+        <span style="color:var(--text3);margin:0 4px;">@</span>
+        <span style="color:var(--text);">${home}</span>
+      </td>
+      <td class="game-time-col">${timeStr}</td>`;
+
+    // Each book
+    for(const b of books){
+      const o=getBookOdds(g,b.key);
+      if(!o){html+=`<td colspan="3" style="color:var(--text3);font-size:11px;">—</td>`;continue;}
+      const awayColor=o.awayML>0?'var(--gold)':'var(--text2)';
+      const homeColor=o.homeML>0?'var(--gold)':'var(--text2)';
+      const ouStr=o.over?`${o.over.point}`:'—';
+      html+=`
+        <td style="color:${awayColor}">${fmtOdds(o.awayML)}</td>
+        <td style="color:${homeColor};font-weight:${Math.abs(o.homeML||0)>=cfg.t11Min&&Math.abs(o.homeML||0)<=cfg.t11Max?'700':'400'}">${fmtOdds(o.homeML)}</td>
+        <td style="color:var(--text3);font-size:11px;">${ouStr}</td>`;
+    }
+
+    // System play column
+    let playHtml='<span style="color:var(--text3);font-size:11px;">—</span>';
+    if(plays.length){
+      const p=plays[0];
+      const col=p.colorClass==='blue'?'var(--blue)':p.colorClass==='green'?'var(--green)':p.colorClass==='teal'?'var(--teal)':'var(--amber)';
+      playHtml=`<span style="color:${col};font-weight:700;font-size:11px;">${p.trigger} $${p.amt}</span>`;
+    }
+    html+=`<td>${playHtml}</td></tr>`;
+  }
+
+  html+='</tbody></table>';
+  out.innerHTML=html;
+  document.getElementById('s-real').textContent=playCount||'—';
+}
+
 function renderCards(games,bk){
   const market=analyzeMarket(games,bk);
   const miEl=document.getElementById('market-intel');
@@ -933,10 +1089,11 @@ async function loadOdds(){
   document.getElementById('card-output').innerHTML='<div class="status-box"><div class="spinner" style="width:24px;height:24px;margin:0 auto 16px;display:block;"></div><div class="status-title">Fetching live lines...</div></div>';
 
   try{
-    const url=`/odds?sport=mlb`;
+    const API_KEY='75d619683f0d4cf8366179321ee08cc7';
+    const url=`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars,hard_rock_bet`;
     const res=await fetch(url);
     if(!res.ok)throw new Error('API error '+res.status);
-    const raw=await res.json(); allGames=Array.isArray(raw)?raw:(raw.data||raw.games||raw.odds||[]);
+    allGames=await res.json();
     document.getElementById('last-update-label').textContent='Updated '+new Date().toLocaleTimeString();
 
     // Build book tabs
@@ -955,9 +1112,22 @@ async function loadOdds(){
       tabsEl.appendChild(btn2);
     }
     document.getElementById('game-count').textContent=allGames.length+' games';
-    if(firstBook){try{renderCards(allGames,firstBook);}catch(e){document.getElementById("card-output").innerHTML="<div class='status-box'><div class='status-title' style='color:var(--red);'>Render error: "+e.message+"</div></div>";console.error(e);}}
+    // Build card view tabs too
+    const tabsEl=document.getElementById('book-tabs-cards');
+    tabsEl.innerHTML='';
+    for(const bk2 of books){
+      const btn3=document.createElement('button');
+      btn3.className='book-tab'+(bk2===firstBook?' active':'');
+      btn3.textContent=bookNames[bk2]||bk2;
+      btn3.dataset.key=bk2;
+      btn3.onclick=()=>{document.querySelectorAll('#book-tabs-cards .book-tab').forEach(b=>b.classList.remove('active'));btn3.classList.add('active');renderCards(allGames,bk2);};
+      tabsEl.appendChild(btn3);
+    }
+    // Default to grid view
+    if(currentView==='grid') renderMultiBookGrid(allGames);
+    else if(firstBook) renderCards(allGames,firstBook);
   }catch(err){
-    document.getElementById('card-output').innerHTML=`<div class="status-box"><div class="status-title">Could not load odds</div><div class="status-sub">${err.message}</div><div style="margin-top:16px;"><button class="add-btn" style="max-width:200px;margin:0 auto;display:block;" onclick="loadOdds()">Retry</button></div></div>`;
+    document.getElementById('card-output').innerHTML=`<div class="status-box"><div class="status-title" style="color:var(--red);">⚠ Could not load odds</div><div class="status-sub" style="color:var(--amber);font-family:var(--mono);font-size:12px;">${err.message}</div><div style="font-size:11px;color:var(--text3);margin-top:8px;">Check API key in Settings or try Refresh</div><div style="margin-top:16px;"><button class="add-btn" style="max-width:200px;margin:0 auto;display:block;" onclick="loadOdds()">Retry</button></div></div>`;
   }
   btn.disabled=false;
   document.getElementById('refresh-icon').textContent='⟳';
@@ -1318,7 +1488,18 @@ function renderFullPlayCard(scan){
         </div>
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px;">${a.recommendation}</div>
         <div style="font-size:13px;color:var(--text3);font-family:var(--mono);margin-bottom:6px;">${g.game} · ${new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div>
-        ${a.rlAddon ? `<div style="font-family:var(--mono);font-size:12px;margin-bottom:6px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:5px;border:1px solid rgba(255,255,255,0.06);"><span style="color:var(--text3);font-size:10px;text-transform:uppercase;">Run Line · </span><span style="color:var(--amber);font-weight:700;">${a.rlAddon.desc} · $${a.rlAddon.amt}</span></div>` : ""}
+        ${a.(()=>{
+          const hrl=a.rlDisplay&&a.rlDisplay.homeLine?a.rlDisplay.homeLine:{price:a.odds&&a.odds.homeRL?a.odds.homeRL:null,point:a.gateSide==='home'?1.5:-1.5};
+          const arl=a.rlDisplay&&a.rlDisplay.awayLine?a.rlDisplay.awayLine:{price:a.odds&&a.odds.awayRL?a.odds.awayRL:null,point:a.gateSide==='away'?1.5:-1.5};
+          let rlHtml='<div style="font-family:var(--mono);font-size:12px;margin-bottom:6px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:5px;border:1px solid rgba(255,255,255,0.06);">';
+          rlHtml+='<span style="color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;">Run Line · </span>';
+          if(hrl&&hrl.price!=null){const col=hrl.price>=115?'var(--green)':hrl.price<=-130?'var(--red)':'var(--text2)';rlHtml+=`<span style="color:var(--text2);">Home ${hrl.point>0?'+':''}${hrl.point} <b style="color:${col}">${hrl.price>0?'+':''}${hrl.price}</b></span>`;}
+          if(arl&&arl.price!=null){const col=arl.price>=115?'var(--green)':arl.price<=-130?'var(--red)':'var(--text2)';rlHtml+=`<span style="color:var(--text2);margin-left:12px;">Away ${arl.point>0?'+':''}${arl.point} <b style="color:${col}">${arl.price>0?'+':''}${arl.price}</b></span>`;}
+          if(!hrl.price&&!arl.price)rlHtml+='<span style="color:var(--text3);">Check book for run line</span>';
+          if(a.rlAddon)rlHtml+=`<span style="color:var(--amber);margin-left:12px;font-weight:700;">→ BET: ${a.rlAddon.desc} · $${a.rlAddon.amt}${!a.rlAddon.qualifying?' (watch)':''}</span>`;
+          rlHtml+='</div>';
+          return rlHtml;
+        })()
         <div style="font-size:12px;color:var(--text3);font-family:var(--mono);line-height:1.7;border-top:1px solid var(--border);padding-top:6px;margin-top:4px;">${a.notes.slice(0,5).join('<br>')}</div>
         <div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-top:4px;">${pitNote} · ${a.collision.away} vs ${a.collision.home}</div>
       </div>`;
@@ -1417,12 +1598,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderPaper();
   initToggles();
   loadOdds();
-  loadMorningScan();
-  // Open protocol panel by default
-  const body=document.getElementById('protocol-body');
-  const arrow=document.getElementById('protocol-arrow');
-  if(body){body.classList.add('open');}
-  if(arrow){arrow.style.transform='rotate(180deg)';}
+  setTimeout(loadMorningScan, 500);
+  // Protocol panel starts open by default (set in HTML)
 });
 </script>
 </body>
