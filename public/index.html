@@ -908,11 +908,11 @@ function renderMultiBookGrid(games){
     <th style="color:var(--text3);border-color:var(--border2);">Time</th>
     ${books.map(b=>{
       const logoUrls={
-        fanduel:'https://www.fanduel.com/favicon.ico',
-        betmgm:'https://sports.betmgm.com/favicon.ico',
-        caesars:'https://www.caesars.com/sportsbook-and-casino/favicon.ico',
-        hard_rock_bet:'https://www.hardrock.bet/favicon.ico',
-        draftkings:'https://www.draftkings.com/favicon.ico',
+        fanduel:'https://www.google.com/s2/favicons?domain=fanduel.com&sz=64',
+        betmgm:'https://www.google.com/s2/favicons?domain=betmgm.com&sz=64',
+        caesars:'https://www.google.com/s2/favicons?domain=caesars.com&sz=64',
+        hard_rock_bet:'https://www.google.com/s2/favicons?domain=hardrock.bet&sz=64',
+        draftkings:'https://www.google.com/s2/favicons?domain=draftkings.com&sz=64',
       };
       const bookFullNames={fanduel:'FanDuel',betmgm:'BetMGM',caesars:'Caesars',hard_rock_bet:'Hard Rock',draftkings:'DraftKings'};
       const name=bookFullNames[b.key]||b.label;
