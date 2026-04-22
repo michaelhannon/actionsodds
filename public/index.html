@@ -1093,7 +1093,7 @@ async function loadOdds(){
     const url=`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars,hard_rock_bet`;
     const res=await fetch(url);
     if(!res.ok)throw new Error('API error '+res.status);
-    allGames=await res.json();
+    const raw2=await res.json(); allGames=Array.isArray(raw2)?raw2:(raw2.data||raw2.games||raw2.odds||[]);
     document.getElementById('last-update-label').textContent='Updated '+new Date().toLocaleTimeString();
 
     // Build book tabs
