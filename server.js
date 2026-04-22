@@ -3,7 +3,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const morningScan = require('./morning-scan');
-morningScan.scheduleScan(process.env.ODDS_API_KEY||'75d619683f0d4cf8366179321ee08cc7',{t1Min:140,t1Max:199,t11Min:115,t11Max:135,t12Min:110});
+morningScan.scheduleScan(process.env.ODDS_API_KEY||'4e4c9bcffc7311be69697d28952cf1a',{t1Min:140,t1Max:199,t11Min:115,t11Max:135,t12Min:110});
 
 
 const PORT = process.env.PORT || 3000;
@@ -500,7 +500,7 @@ var server = http.createServer(function(req, res) {
     return;
   }
   if(req.url==='/morning-scan'){const scan=morningScan.getLastScan();res.writeHead(200,{'Content-Type':'application/json','Access-Control-Allow-Origin':'*'});res.end(JSON.stringify(scan||{error:'No scan data yet'}));return;}
-  if(req.url==='/morning-scan/run'&&req.method==='POST'){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({status:'started'}));morningScan.runMorningScan(process.env.ODDS_API_KEY||'75d619683f0d4cf8366179321ee08cc7',{t1Min:140,t1Max:199,t11Min:115,t11Max:135,t12Min:110});return;}
+  if(req.url==='/morning-scan/run'&&req.method==='POST'){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({status:'started'}));morningScan.runMorningScan(process.env.ODDS_API_KEY||'4e4c9bcffc7311be69697d28952cf1a',{t1Min:140,t1Max:199,t11Min:115,t11Max:135,t12Min:110});return;}
     if (req.url === '/ai-brief' && req.method === 'POST') { proxyAnthropic(req, res); return; }
   if (req.url === '/favicon.svg') {
     var filePath = path.join(__dirname, 'public', 'favicon.svg');
