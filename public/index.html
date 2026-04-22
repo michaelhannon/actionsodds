@@ -1099,8 +1099,8 @@ async function loadOdds(){
     const books=new Set();
     for(const g of allGames)for(const bk of g.bookmakers)books.add(bk.key);
     const bookNames={'draftkings':'DraftKings','fanduel':'FanDuel','betmgm':'BetMGM','caesars':'Caesars','hard_rock_bet':'Hard Rock','williamhill_us':'WH','barstool':'Barstool'};
-    const tabsEl=document.getElementById('book-tabs');
-    tabsEl2.innerHTML='';
+    var tabsEl2=document.getElementById('book-tabs-cards');
+    if(tabsEl2)tabsEl2.innerHTML='';
     let firstBook=null;
     for(const bk of books){
       if(!firstBook)firstBook=bk;
