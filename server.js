@@ -505,6 +505,15 @@ var server = http.createServer(function(req, res) {
       res.end(content);
     }); return;
   }
+  if (req.url === '/grid.html') {
+    var gridPath = path.join(__dirname, 'public', 'grid.html');
+    fs.readFile(gridPath, function(err, content) {
+      if (err) { res.writeHead(404); res.end('Not found'); return; }
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(content);
+    });
+    return;
+  }
   if (req.url === '/' || req.url === '/index.html') {
     var filePath2 = path.join(__dirname, 'public', 'index.html');
     fs.readFile(filePath2, function(err, content) {
