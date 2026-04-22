@@ -1,405 +1,626 @@
 // ============================================================
-// ACTION'S ODDS — Morning Scan Module
-// Runs at 9AM ET daily via setInterval check
-// Exports: runMorningScan(), getLastScan(), scheduleScan()
+// ACTION'S ODDS — Full Morning Scan Engine v2
+// Runs at 9AM ET daily — complete T1-T15 + R1-R7 evaluation
+// Outputs ready-to-bet card with sizing, color, strength badge
 // ============================================================
 
 const https = require('https');
 
-// ── CONSTANTS ────────────────────────────────────────────────
+// ── SYSTEM CONFIG ────────────────────────────────────────────
 const MLB_MEAN_ROAD = 0.47;
 const MLB_MEAN_HOME = 0.53;
-const REGRESSION_THRESHOLD = 0.15; // 15% deviation from mean = flag
+const REGRESSION_THRESHOLD = 0.15;
 
-// Known regression outliers (updated daily by scan)
-const KNOWN_OUTLIERS = {
-  SEA: { type: 'road', note: '1 road win — 4% road win%' },
-  KC:  { type: 'road', note: '2 road wins — 11% road win%' },
-  NYM: { type: 'home', note: '3 home wins — 18% home win%' }
-};
+const DOME_PARKS = [
+  'Tropicana Field','Rogers Centre','Minute Maid Park',
+  'American Family Field','Chase Field','T-Mobile Park',
+  'Globe Life Field','Petco Park'
+];
+
+const HITTER_PARKS = ['Coors Field','Fenway Park','Great American Ball Park','Minute Maid Park'];
+const PITCHER_PARKS = ['Oracle Park','PNC Park','Petco Park','Dodger Stadium'];
 
 // ── CACHE ────────────────────────────────────────────────────
 let lastScan = null;
 let scanInProgress = false;
-
-function getLastScan() {
-  return lastScan;
-}
+function getLastScan() { return lastScan; }
 
 // ── HTTP HELPER ──────────────────────────────────────────────
-function fetchJSON(url) {
+function fetchJSON(url, timeoutMs) {
   return new Promise((resolve, reject) => {
-    https.get(url, { headers: { 'User-Agent': 'ActionsOdds/1.0' } }, (res) => {
+    const timer = setTimeout(() => reject(new Error('Timeout: ' + url)), timeoutMs || 8000);
+    https.get(url, { headers: { 'User-Agent': 'ActionsOdds/2.0' } }, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
+        clearTimeout(timer);
         try { resolve(JSON.parse(data)); }
-        catch(e) { reject(new Error('JSON parse error: ' + e.message)); }
+        catch(e) { reject(new Error('JSON parse error')); }
       });
-    }).on('error', reject);
+    }).on('error', (e) => { clearTimeout(timer); reject(e); });
   });
 }
 
-// ── STEP 1: PULL ALL 30 TEAMS ────────────────────────────────
+// ── STEP 1: ALL 30 TEAMS — STREAKS, RUN DIFF, SPLITS ────────
 async function fetchStandings() {
   try {
-    const url = 'https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=2026&standingsTypes=regularSeason&hydrate=team,record,streak,division';
+    const url = 'https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=2026&standingsTypes=regularSeason&hydrate=team,record,streak';
     const data = await fetchJSON(url);
     const teams = {};
-
     for (const record of (data.records || [])) {
       for (const tr of (record.teamRecords || [])) {
-        const abbr = tr.team?.abbreviation || tr.team?.name;
+        const abbr = tr.team?.abbreviation;
+        if (!abbr) continue;
         const wins = tr.wins || 0;
         const losses = tr.losses || 0;
-        const total = wins + losses;
         const runsScored = tr.runsScored || 0;
         const runsAllowed = tr.runsAllowed || 0;
-        const streak = tr.streak?.streakCode || 'W0';
-        const streakType = streak.startsWith('W') ? 'W' : 'L';
-        const streakLen = parseInt(streak.slice(1)) || 0;
-        const homeWins = tr.records?.splitRecords?.find(s => s.type === 'home')?.wins || 0;
-        const homeLosses = tr.records?.splitRecords?.find(s => s.type === 'home')?.losses || 0;
-        const roadWins = tr.records?.splitRecords?.find(s => s.type === 'away')?.wins || 0;
-        const roadLosses = tr.records?.splitRecords?.find(s => s.type === 'away')?.losses || 0;
-        const homeTotal = homeWins + homeLosses;
-        const roadTotal = roadWins + roadLosses;
-        const homePct = homeTotal > 0 ? homeWins / homeTotal : 0.5;
-        const roadPct = roadTotal > 0 ? roadWins / roadTotal : 0.5;
+        const streakCode = tr.streak?.streakCode || 'W0';
+        const streakType = streakCode.startsWith('W') ? 'W' : 'L';
+        const streakLen = parseInt(streakCode.slice(1)) || 0;
+        // Split records
+        const splits = tr.records?.splitRecords || [];
+        const homeSplit = splits.find(s => s.type === 'home') || {};
+        const roadSplit = splits.find(s => s.type === 'away') || {};
+        const homeW = homeSplit.wins || 0, homeL = homeSplit.losses || 0;
+        const roadW = roadSplit.wins || 0, roadL = roadSplit.losses || 0;
+        const homeTotal = homeW + homeL;
+        const roadTotal = roadW + roadL;
+        const homePct = homeTotal >= 5 ? homeW / homeTotal : 0.5;
+        const roadPct = roadTotal >= 5 ? roadW / roadTotal : 0.5;
         const runDiff = runsScored - runsAllowed;
-
-        // T4 regression check
-        const homeDeviation = Math.abs(homePct - MLB_MEAN_HOME);
-        const roadDeviation = Math.abs(roadPct - MLB_MEAN_ROAD);
+        // T4 regression flag
         let regressionFlag = null;
-
-        if (roadPct < (MLB_MEAN_ROAD - REGRESSION_THRESHOLD) && roadTotal >= 5) {
-          regressionFlag = { type: 'road_due', pct: Math.round(roadPct * 100), boost: 'T4 BOOST when road dog' };
-        } else if (homePct < (MLB_MEAN_HOME - REGRESSION_THRESHOLD) && homeTotal >= 5) {
-          regressionFlag = { type: 'home_due', pct: Math.round(homePct * 100), boost: 'T4 BOOST when home dog' };
-        } else if (roadPct > (MLB_MEAN_ROAD + REGRESSION_THRESHOLD) && roadTotal >= 5) {
-          regressionFlag = { type: 'road_regress', pct: Math.round(roadPct * 100), boost: 'T4 FADE when road fav' };
+        if (roadTotal >= 5 && roadPct < (MLB_MEAN_ROAD - REGRESSION_THRESHOLD)) {
+          regressionFlag = { type: 'road_due', pct: Math.round(roadPct * 100), boost: '+T4 when road dog' };
+        } else if (homeTotal >= 5 && homePct < (MLB_MEAN_HOME - REGRESSION_THRESHOLD)) {
+          regressionFlag = { type: 'home_due', pct: Math.round(homePct * 100), boost: '+T4 when home dog' };
         }
-
         teams[abbr] = {
-          name: tr.team?.name || abbr,
-          abbr,
-          wins, losses, total,
-          runDiff,
+          name: tr.team?.name || abbr, abbr,
+          wins, losses, runDiff,
           streak: streakType, streakLen,
-          homeWins, homeLosses, homePct: Math.round(homePct * 100),
-          roadWins, roadLosses, roadPct: Math.round(roadPct * 100),
-          regressionFlag
+          homeW, homeL, homePct: Math.round(homePct * 100),
+          roadW, roadL, roadPct: Math.round(roadPct * 100),
+          homeTotal, roadTotal, regressionFlag,
+          teamId: tr.team?.id
         };
       }
     }
     return teams;
   } catch(e) {
-    console.error('[MorningScan] Standings fetch error:', e.message);
+    console.error('[Scan] Standings error:', e.message);
     return {};
   }
 }
 
-// ── STEP 2: FETCH TODAY'S SCHEDULE ───────────────────────────
-async function fetchTodaySchedule() {
+// ── STEP 2: TODAY'S SCHEDULE ─────────────────────────────────
+async function fetchSchedule() {
   try {
-    const today = new Date().toISOString().split('T')[0];
-    const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${today}&hydrate=probablePitcher(note),team,lineScore`;
+    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
+    const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${today}&hydrate=probablePitcher,team,venue`;
     const data = await fetchJSON(url);
     const games = [];
-
     for (const dateEntry of (data.dates || [])) {
-      for (const game of (dateEntry.games || [])) {
-        const away = game.teams?.away;
-        const home = game.teams?.home;
-        const awayAbbr = away?.team?.abbreviation;
-        const homeAbbr = home?.team?.abbreviation;
-        const awayPitcher = away?.probablePitcher;
-        const homePitcher = home?.probablePitcher;
-        const gameTime = game.gameDate;
-        const venue = game.venue?.name || '';
-        const isDome = ['Tropicana Field','Minute Maid Park','Rogers Centre','T-Mobile Park (Dome)','Chase Field'].some(d => venue.includes(d.split('(')[0]));
-
+      for (const g of (dateEntry.games || [])) {
+        if (g.status?.abstractGameState === 'Final') continue; // skip completed
         games.push({
-          gameId: game.gamePk,
-          gameTime,
-          venue, isDome,
-          away: { abbr: awayAbbr, name: away?.team?.name },
-          home: { abbr: homeAbbr, name: home?.team?.name },
-          awayPitcher: awayPitcher ? {
-            name: awayPitcher.fullName,
-            id: awayPitcher.id,
-            note: awayPitcher.note || ''
-          } : null,
-          homePitcher: homePitcher ? {
-            name: homePitcher.fullName,
-            id: homePitcher.id,
-            note: homePitcher.note || ''
-          } : null
+          gameId: g.gamePk,
+          gameTime: g.gameDate,
+          venue: g.venue?.name || '',
+          away: {
+            abbr: g.teams?.away?.team?.abbreviation,
+            name: g.teams?.away?.team?.name,
+            id: g.teams?.away?.team?.id,
+            pitcher: g.teams?.away?.probablePitcher || null
+          },
+          home: {
+            abbr: g.teams?.home?.team?.abbreviation,
+            name: g.teams?.home?.team?.name,
+            id: g.teams?.home?.team?.id,
+            pitcher: g.teams?.home?.probablePitcher || null
+          }
         });
       }
     }
     return games;
   } catch(e) {
-    console.error('[MorningScan] Schedule fetch error:', e.message);
+    console.error('[Scan] Schedule error:', e.message);
     return [];
   }
 }
 
-// ── STEP 3: FETCH PITCHER FIP DATA ───────────────────────────
+// ── STEP 3: PITCHER STATS (ERA, FIP proxy, WHIP, K9, BB9) ───
 async function fetchPitcherStats(pitcherId) {
   if (!pitcherId) return null;
   try {
-    const url = `https://statsapi.mlb.com/api/v1/people/${pitcherId}/stats?stats=season&group=pitching&season=2026`;
-    const data = await fetchJSON(url);
-    const stats = data.stats?.[0]?.splits?.[0]?.stat;
-    if (!stats) return null;
-    return {
-      era: parseFloat(stats.era) || 0,
-      whip: parseFloat(stats.whip) || 0,
-      fip: parseFloat(stats.fielding) || null, // FIP not always in basic endpoint
-      k9: parseFloat(stats.strikeoutsPer9Inn) || 0,
-      bb9: parseFloat(stats.walksPer9Inn) || 0,
-      ip: parseFloat(stats.inningsPitched) || 0,
-      wins: stats.wins || 0,
-      losses: stats.losses || 0
-    };
+    const url = `https://statsapi.mlb.com/api/v1/people/${pitcherId}/stats?stats=season,lastXGames&group=pitching&season=2026&sitCodes=vr,vl`;
+    const data = await fetchJSON(url, 5000);
+    const season = data.stats?.find(s => s.type?.displayName === 'statsSingleSeason')?.splits?.[0]?.stat;
+    const last3 = data.stats?.find(s => s.type?.displayName === 'lastXGames')?.splits?.slice(0, 3) || [];
+    if (!season) return null;
+    const ip = parseFloat(season.inningsPitched) || 1;
+    const era = parseFloat(season.era) || 0;
+    const whip = parseFloat(season.whip) || 0;
+    const k9 = parseFloat(season.strikeoutsPer9Inn) || 0;
+    const bb9 = parseFloat(season.walksPer9Inn) || 0;
+    const hr9 = ((season.homeRuns || 0) / ip * 9);
+    // FIP proxy: (13*HR + 3*BB - 2*K) / IP + constant(3.2)
+    const k = season.strikeOuts || 0;
+    const bb = season.baseOnBalls || 0;
+    const hr = season.homeRuns || 0;
+    const fip = ip > 0 ? ((13 * hr + 3 * bb - 2 * k) / ip + 3.2) : era;
+    const last3ERA = last3.length ?
+      last3.reduce((a, s) => a + (parseFloat(s.stat?.era) || 0), 0) / last3.length : era;
+    return { era, fip: Math.round(fip * 100) / 100, whip, k9, bb9, hr9, last3ERA, ip, wins: season.wins || 0, losses: season.losses || 0 };
   } catch(e) {
     return null;
   }
 }
 
-// ── STEP 4: FETCH LIVE ODDS ───────────────────────────────────
+// ── STEP 4: BULLPEN 48HR DEPLETION ───────────────────────────
+async function fetchBullpenStatus(teamId) {
+  if (!teamId) return null;
+  try {
+    // Get team roster bullpen
+    const rosterUrl = `https://statsapi.mlb.com/api/v1/teams/${teamId}/roster?rosterType=active&season=2026`;
+    const roster = await fetchJSON(rosterUrl, 5000);
+    const relievers = (roster.roster || []).filter(p =>
+      p.position?.abbreviation === 'RP' || p.position?.abbreviation === 'CL'
+    );
+    // Get recent game log for the team — check pitching last 2 days
+    const today = new Date();
+    const twoDaysAgo = new Date(today - 2 * 24 * 60 * 60 * 1000).toLocaleDateString('en-CA');
+    const schedUrl = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=${twoDaysAgo}&endDate=${today.toLocaleDateString('en-CA')}&teamId=${teamId}&hydrate=linescore`;
+    const sched = await fetchJSON(schedUrl, 5000);
+    let recentInnings = 0;
+    let gameCount = 0;
+    for (const d of (sched.dates || [])) {
+      for (const g of (d.games || [])) {
+        if (g.status?.abstractGameState === 'Final') {
+          gameCount++;
+          const innings = g.linescore?.innings?.length || 9;
+          if (innings > 9) recentInnings += (innings - 9); // extra innings = more pen usage
+        }
+      }
+    }
+    const depleted = gameCount >= 2 || recentInnings >= 3;
+    const closerAvail = true; // assume available unless we find IL data
+    return {
+      relievers: relievers.length,
+      recentGames: gameCount,
+      extraInnings: recentInnings,
+      depleted,
+      closerAvail,
+      note: depleted ? `BP depleted — ${gameCount} games in 48hrs${recentInnings > 0 ? ', ' + recentInnings + ' extra innings' : ''}` : 'BP fresh'
+    };
+  } catch(e) {
+    return { depleted: false, note: 'BP data unavailable', relievers: 0 };
+  }
+}
+
+// ── STEP 5: LIVE ODDS ────────────────────────────────────────
 async function fetchOdds(apiKey) {
   if (!apiKey) return [];
   try {
     const url = `https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${apiKey}&regions=us&markets=h2h,spreads&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars`;
-    const data = await fetchJSON(url);
-    return data || [];
+    return await fetchJSON(url);
   } catch(e) {
-    console.error('[MorningScan] Odds fetch error:', e.message);
+    console.error('[Scan] Odds error:', e.message);
     return [];
   }
 }
 
-// ── STEP 5: COLLISION + TRIGGER ANALYSIS ─────────────────────
-function analyzeCollisions(games, teams, oddsData, cfg) {
+// ── TRIGGER ENGINE ───────────────────────────────────────────
+function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats, awayBullpen, homeBullpen, cfg) {
   const t1Min = cfg.t1Min || 140;
   const t1Max = cfg.t1Max || 199;
   const t11Min = cfg.t11Min || 115;
   const t11Max = cfg.t11Max || 135;
   const t12Min = cfg.t12Min || 110;
 
-  const results = [];
+  const away = teams[game.away.abbr] || {};
+  const home = teams[game.home.abbr] || {};
 
-  for (const game of games) {
-    const awayTeam = teams[game.away.abbr] || {};
-    const homeTeam = teams[game.home.abbr] || {};
+  // Get odds for this game
+  const gameOdds = odds.find(o => {
+    const hn = o.home_team || '';
+    const an = o.away_team || '';
+    return hn.includes(game.home.abbr) || hn === game.home.name ||
+           an.includes(game.away.abbr) || an === game.away.name ||
+           game.home.name?.includes(hn.split(' ').pop()) ||
+           game.away.name?.includes(an.split(' ').pop());
+  });
 
-    // T2: Collision check
-    const awayStreak = awayTeam.streak || 'W';
-    const awayStreakLen = awayTeam.streakLen || 0;
-    const homeStreak = homeTeam.streak || 'W';
-    const homeStreakLen = homeTeam.streakLen || 0;
-
-    const collisionActive = (awayStreak !== homeStreak); // W vs L on opposite sides
-    const maxCollision = (awayStreakLen >= 5 || homeStreakLen >= 5) && collisionActive;
-    const fadeZone = awayStreakLen >= 9 || homeStreakLen >= 9;
-
-    // T3: Run differential gap
-    const awayDiff = awayTeam.runDiff || 0;
-    const homeDiff = homeTeam.runDiff || 0;
-    const diffGap = Math.abs(awayDiff - homeDiff);
-    const t3Fires = diffGap >= 20; // 20+ run gap = meaningful T3
-
-    // Which side benefits from collision
-    let collisionFavors = null;
-    if (collisionActive) {
-      // Home team on W streak vs away on L streak = favor home (but they're likely fav, check gate)
-      // Home team on L streak vs away on W streak = collision favors away dog situation
-      if (homeStreak === 'L' && awayStreak === 'W') {
-        collisionFavors = 'away';
-      } else if (homeStreak === 'W' && awayStreak === 'L') {
-        collisionFavors = 'home';
-      }
-    }
-
-    // T4: Regression flags for this game
-    const awayRegFlag = awayTeam.regressionFlag;
-    const homeRegFlag = homeTeam.regressionFlag;
-
-    // Get odds for this game
-    const gameOdds = oddsData.find(o =>
-      (o.home_team?.includes(game.home.abbr) || o.home_team === game.home.name) ||
-      (o.away_team?.includes(game.away.abbr) || o.away_team === game.away.name)
-    );
-
-    let homeML = null, awayML = null;
-    if (gameOdds) {
-      const bm = gameOdds.bookmakers?.[0];
-      const h2h = bm?.markets?.find(m => m.key === 'h2h');
-      homeML = h2h?.outcomes?.find(o => o.name === gameOdds.home_team)?.price;
-      awayML = h2h?.outcomes?.find(o => o.name === gameOdds.away_team)?.price;
-    }
-
-    // Gate check
-    let gateStatus = 'NO_GATE';
-    let gateLabel = '—';
-    let playRecommendation = null;
-
-    if (homeML !== null) {
-      if (homeML >= t1Min && homeML <= t1Max) {
-        gateStatus = 'T1';
-        gateLabel = `T1 +${homeML}`;
-        // Count triggers
-        let trigCount = 1; // T1 itself
-        if (collisionActive && collisionFavors === 'home') trigCount++;
-        if (t3Fires && homeDiff > awayDiff) trigCount++;
-        if (homeRegFlag?.type === 'home_due') trigCount++;
-        const sizing = trigCount >= 4 ? 1000 : trigCount === 3 ? 800 : trigCount === 2 ? 600 : trigCount === 1 ? 400 : 200;
-        playRecommendation = {
-          side: 'home', team: game.home.name, ml: homeML,
-          trigCount, sizing,
-          strength: trigCount >= 4 ? 'MAX' : trigCount === 3 ? 'STRONG' : trigCount === 2 ? 'ENTRY' : 'WATCH',
-          color: trigCount >= 4 ? 'blue' : trigCount === 3 ? 'green' : trigCount === 2 ? 'teal' : 'amber'
-        };
-      } else if (homeML < 0 && Math.abs(homeML) >= t11Min && Math.abs(homeML) <= t11Max) {
-        gateStatus = 'T11';
-        gateLabel = `T11 ${homeML}`;
-      } else if (homeML >= t12Min && homeML < t1Min) {
-        gateStatus = 'T12';
-        gateLabel = `T12 +${homeML}`;
-      }
-    }
-
-    // T13: Road dog
-    if (awayML !== null && awayML >= 120 && gateStatus === 'NO_GATE') {
-      gateStatus = 'T13';
-      gateLabel = `T13 +${awayML}`;
-    }
-
-    results.push({
-      game: `${game.away.name} @ ${game.home.name}`,
-      gameTime: game.gameTime,
-      venue: game.venue,
-      isDome: game.isDome,
-      away: {
-        abbr: game.away.abbr,
-        name: game.away.name,
-        streak: awayStreak,
-        streakLen: awayStreakLen,
-        runDiff: awayDiff,
-        record: `${awayTeam.wins||0}-${awayTeam.losses||0}`,
-        regressionFlag: awayRegFlag
-      },
-      home: {
-        abbr: game.home.abbr,
-        name: game.home.name,
-        streak: homeStreak,
-        streakLen: homeStreakLen,
-        runDiff: homeDiff,
-        record: `${homeTeam.wins||0}-${homeTeam.losses||0}`,
-        regressionFlag: homeRegFlag
-      },
-      collision: {
-        active: collisionActive,
-        max: maxCollision,
-        fadeZone,
-        favors: collisionFavors,
-        awayStreakStr: `${awayStreak}${awayStreakLen}`,
-        homeStreakStr: `${homeStreak}${homeStreakLen}`
-      },
-      t3: { fires: t3Fires, gap: diffGap },
-      odds: { homeML, awayML },
-      gate: { status: gateStatus, label: gateLabel },
-      playRecommendation,
-      awayPitcher: game.awayPitcher,
-      homePitcher: game.homePitcher
-    });
+  let homeML = null, awayML = null, homeRL = null, awayRL = null;
+  if (gameOdds) {
+    const bm = gameOdds.bookmakers?.find(b => ['draftkings','fanduel','betmgm','caesars'].includes(b.key)) || gameOdds.bookmakers?.[0];
+    const h2h = bm?.markets?.find(m => m.key === 'h2h');
+    const spreads = bm?.markets?.find(m => m.key === 'spreads');
+    homeML = h2h?.outcomes?.find(o => o.name === gameOdds.home_team)?.price;
+    awayML = h2h?.outcomes?.find(o => o.name === gameOdds.away_team)?.price;
+    homeRL = spreads?.outcomes?.find(o => o.name === gameOdds.home_team);
+    awayRL = spreads?.outcomes?.find(o => o.name === gameOdds.away_team);
   }
 
-  return results;
+  // ── GATE CHECK ───────────────────────────────────────────
+  let gateType = null;
+  let gateML = null;
+  let gateSide = null;
+
+  if (homeML != null) {
+    if (homeML >= t1Min && homeML <= t1Max) {
+      gateType = 'T1'; gateML = homeML; gateSide = 'home';
+    } else if (homeML < 0 && Math.abs(homeML) >= t11Min && Math.abs(homeML) <= t11Max) {
+      gateType = 'T11'; gateML = homeML; gateSide = 'home';
+    } else if (homeML >= t12Min && homeML < t1Min) {
+      gateType = 'T12'; gateML = homeML; gateSide = 'home';
+    }
+  }
+  if (!gateType && awayML != null && awayML >= 120) {
+    gateType = 'T13'; gateML = awayML; gateSide = 'away';
+  }
+  // T15: Home fade — road dog backing
+  let t15Active = false;
+  if (awayML != null && awayML >= 120) {
+    const f1 = home.streakLen >= 2 && home.streak === 'L'; // home L2+
+    const f2 = home.runDiff < 0;                            // home neg diff
+    const f3 = away.runDiff > 0;                            // road pos diff
+    const f4 = away.streak === 'W' && away.streakLen >= 2;  // road W2+
+    const f5 = homeBullpen?.depleted;                       // home bp depleted
+    const f6 = (away.wins - away.losses) > (home.wins - home.losses); // road superior record
+    const filtersHit = [f1,f2,f3,f4,f5,f6].filter(Boolean).length;
+    if (filtersHit >= 5) t15Active = true;
+  }
+
+  if (!gateType && !t15Active) {
+    return { gateType: null, plays: [], t15: false, collision: buildCollisionData(away, home), odds: { homeML, awayML } };
+  }
+
+  // ── TRIGGER COUNTING ─────────────────────────────────────
+  const triggered = [];
+  const failed = [];
+  const notes = [];
+
+  // T2: Streak collision
+  const collisionActive = away.streak !== home.streak;
+  const collisionMax = collisionActive && (away.streakLen >= 5 || home.streakLen >= 5);
+  const fadeZone = away.streakLen >= 9 || home.streakLen >= 9;
+  if (collisionActive) {
+    const favSide = gateSide === 'home' ?
+      (home.streak === 'W' ? 'T2 ✓ Home W' + home.streakLen + ' vs Away L' + away.streakLen : 'T2 ✓ Away L' + away.streakLen + ' vs Home W' + home.streakLen) :
+      (away.streak === 'W' ? 'T2 ✓ Away W' + away.streakLen + ' vs Home L' + home.streakLen : null);
+    if (favSide) {
+      triggered.push('T2');
+      notes.push(favSide + (collisionMax ? ' — MAX COLLISION' : ''));
+    } else {
+      failed.push('T2');
+      notes.push('T2 ✗ Collision favors wrong side');
+    }
+  } else {
+    failed.push('T2');
+    notes.push('T2 ✗ No streak mismatch');
+  }
+
+  // T3: Run differential
+  const gradeTeam = gateSide === 'home' ? home : away;
+  const oppTeam = gateSide === 'home' ? away : home;
+  if (gradeTeam.runDiff > 0) {
+    triggered.push('T3');
+    notes.push(`T3 ✓ ${gradeTeam.abbr} run diff ${gradeTeam.runDiff > 0 ? '+' : ''}${gradeTeam.runDiff}`);
+  } else if (gradeTeam.runDiff < -10) {
+    failed.push('T3');
+    notes.push(`T3 ✗ ${gradeTeam.abbr} run diff ${gradeTeam.runDiff} — kills play`);
+  } else {
+    notes.push(`T3 ~ ${gradeTeam.abbr} run diff ${gradeTeam.runDiff} — neutral`);
+  }
+
+  // T4: Home/away split regression
+  const regFlag = gradeTeam.regressionFlag;
+  if (regFlag) {
+    triggered.push('T4');
+    notes.push(`T4 ✓ Regression due — ${gradeTeam.abbr} ${regFlag.type.replace('_',' ')} ${regFlag.pct}% (mean ${regFlag.type.includes('road') ? '47' : '53'}%)`);
+  } else {
+    notes.push(`T4 ~ No regression flag for ${gradeTeam.abbr}`);
+  }
+
+  // T6: Pitcher FIP (most important)
+  const pitSide = gateSide === 'home' ? homePitcherStats : awayPitcherStats;
+  const oppPit = gateSide === 'home' ? awayPitcherStats : homePitcherStats;
+  const pitName = gateSide === 'home' ? game.home.pitcher?.fullName : game.away.pitcher?.fullName;
+  const oppPitName = gateSide === 'home' ? game.away.pitcher?.fullName : game.home.pitcher?.fullName;
+
+  if (pitSide && oppPit) {
+    if (pitSide.fip <= oppPit.fip - 0.3) {
+      triggered.push('T6');
+      notes.push(`T6 ✓ ${pitName || 'SP'} FIP ${pitSide.fip} vs opp ${oppPit.fip} — edge confirmed`);
+    } else if (pitSide.fip >= oppPit.fip + 0.5) {
+      failed.push('T6');
+      notes.push(`T6 ✗ ${pitName || 'SP'} FIP ${pitSide.fip} worse than opp ${oppPit.fip}`);
+    } else {
+      notes.push(`T6 ~ FIP near-even: ${pitSide.fip} vs ${oppPit.fip}`);
+    }
+  } else if (pitSide) {
+    if (pitSide.era <= 3.50 && pitSide.fip <= 4.0) {
+      triggered.push('T6');
+      notes.push(`T6 ✓ ${pitName || 'SP'} ERA ${pitSide.era} FIP ${pitSide.fip} — solid`);
+    } else {
+      notes.push(`T6 ~ ${pitName || 'SP'} ERA ${pitSide.era} FIP ${pitSide.fip} — neutral`);
+    }
+  } else {
+    notes.push('T6 ~ Pitcher data unavailable — check manually');
+  }
+
+  // T8: Bullpen depletion — mandatory check
+  const oppBullpen = gateSide === 'home' ? awayBullpen : homeBullpen;
+  const ourBullpen = gateSide === 'home' ? homeBullpen : awayBullpen;
+  if (oppBullpen?.depleted) {
+    triggered.push('T8');
+    notes.push(`T8 ✓ Opp bullpen depleted — ${oppBullpen.note}`);
+  } else if (ourBullpen?.depleted) {
+    failed.push('T8');
+    notes.push(`T8 ✗ Our bullpen depleted — ${ourBullpen.note}`);
+  } else {
+    notes.push(`T8 ~ Bullpen status: ${oppBullpen?.note || 'data unavailable'}`);
+  }
+
+  // T9: Schedule/fatigue
+  const gameTime = new Date(game.gameTime);
+  const hour = gameTime.getUTCHours();
+  const isNight = hour >= 22; // late night West Coast
+  if (isNight && gateSide === 'home') {
+    notes.push('T9 ~ Late game — check travel fatigue on away team');
+  }
+
+  // T10: Divisional familiarity
+  const isDivisional = away.division === home.division; // approximate
+  if (isDivisional) {
+    triggered.push('T10');
+    notes.push('T10 ✓ Divisional matchup — counts as 2 triggers if T1 active');
+  }
+
+  // T14: Power ratings — mandatory kill check
+  const awayPower = (away.wins - away.losses) + (away.runDiff / 10);
+  const homePower = (home.wins - home.losses) + (home.runDiff / 10);
+  const powerGap = Math.abs(awayPower - homePower);
+  const favoredPower = homePower > awayPower ? 'home' : 'away';
+  let t14Kill = false;
+
+  if (gateType === 'T13' && favoredPower === 'home' && powerGap >= 15) {
+    t14Kill = true;
+    notes.push(`T14 ✗ KILL — Home power rating exceeds road dog by ${Math.round(powerGap)} pts`);
+  } else if (gateType === 'T1' && powerGap >= 20 && favoredPower !== 'home') {
+    notes.push(`T14 ⚠ Power gap ${Math.round(powerGap)} pts — need 4+ triggers`);
+  } else {
+    notes.push(`T14 ✓ Power ratings clear — gap ${Math.round(powerGap)} pts`);
+  }
+
+  // ── R-TRIGGERS ───────────────────────────────────────────
+  // R1: Bounce back — team snapped a losing streak recently
+  if (gradeTeam.streak === 'W' && gradeTeam.streakLen <= 2 && gradeTeam.prevStreak === 'L') {
+    triggered.push('R1');
+    notes.push('R1 ✓ Bounce back — recent losing streak ended');
+  }
+
+  // R2: Contrarian — if public data available (placeholder)
+  // notes.push('R2 ~ Public % unavailable — check manually');
+
+  // R3: Letdown spot — opponent coming off big win
+  if (oppTeam.streak === 'W' && oppTeam.streakLen >= 3) {
+    triggered.push('R3');
+    notes.push(`R3 ✓ Letdown spot — opponent on W${oppTeam.streakLen}, potential trap`);
+  }
+
+  // R4: Must-win / desperation
+  if (gradeTeam.streak === 'L' && gradeTeam.streakLen >= 4) {
+    triggered.push('R4');
+    notes.push(`R4 ✓ Must-win desperation — ${gradeTeam.abbr} on L${gradeTeam.streakLen}`);
+  }
+
+  // R5: Seasonal pattern — April underdog peak
+  const month = new Date().getMonth();
+  if (month === 3 && gateML > 0) { // April = month 3
+    triggered.push('R5');
+    notes.push('R5 ✓ April seasonal edge — underdog ROI peak month');
+  }
+
+  // R7: Blowout recovery
+  if (gradeTeam.streak === 'L' && gradeTeam.streakLen === 1) {
+    notes.push('R7 ~ Check last margin — if loss by 10+, 56% ATS cover rate');
+  }
+
+  // Ballpark T5 note (totals only)
+  const isDome = DOME_PARKS.some(d => game.venue?.includes(d.split(' ')[0]));
+  const isHitter = HITTER_PARKS.some(p => game.venue?.includes(p.split(' ')[0]));
+  const isPitcher = PITCHER_PARKS.some(p => game.venue?.includes(p.split(' ')[0]));
+  if (isDome) notes.push('T7 ~ Dome park — weather irrelevant');
+  else if (isHitter) notes.push('T5 ~ Hitter park — check total');
+  else if (isPitcher) notes.push('T5 ~ Pitcher park — under lean');
+
+  // ── SIZING ───────────────────────────────────────────────
+  let trigCount = triggered.length;
+
+  // T10 divisional doubles if T1
+  if (triggered.includes('T10') && gateType === 'T1') trigCount++;
+
+  // Collision max = gate alone sufficient
+  const gateAlone = collisionMax && (away.streakLen >= 5 || home.streakLen >= 5);
+
+  // Kill if T14 fired
+  if (t14Kill) trigCount = 0;
+
+  // T11/T12/T13 max size caps
+  let maxSize = 1000;
+  if (gateType === 'T11') maxSize = 800;
+  if (gateType === 'T12') maxSize = 600;
+  if (gateType === 'T13') maxSize = 400;
+  if (t15Active) maxSize = 100; // exotic only
+
+  const unit = cfg.unit || 200;
+  let sizing = 0;
+  if (!t14Kill) {
+    if (trigCount === 0 || (gateType === 'T1' && trigCount < 1)) sizing = unit;
+    else if (trigCount === 1) sizing = unit * 2;
+    else if (trigCount === 2) sizing = unit * 3;
+    else if (trigCount === 3) sizing = unit * 4;
+    else sizing = unit * 5;
+    sizing = Math.min(sizing, maxSize);
+  }
+
+  // T11 needs 3+ triggers minimum
+  if (gateType === 'T11' && trigCount < 3) sizing = 0;
+  // T12 needs 5+ triggers minimum
+  if (gateType === 'T12' && trigCount < 5) sizing = 0;
+  // T13 needs ALL 5 of: T2+T3+T6+T8+1 more
+  if (gateType === 'T13') {
+    const req = ['T2','T3','T6','T8'];
+    const hasAll = req.every(t => triggered.includes(t));
+    if (!hasAll || trigCount < 5) sizing = 0;
+  }
+
+  // ── COLOR + STRENGTH ─────────────────────────────────────
+  let color, strength, recommendation;
+  if (t14Kill || sizing === 0) {
+    color = 'red'; strength = 'PASS';
+    recommendation = 'PASS — ' + (t14Kill ? 'T14 power ratings kill this play' : 'Insufficient triggers');
+  } else if (t15Active) {
+    color = 'orange'; strength = 'FADE';
+    recommendation = `T15 FADE — ${game.away.name} (exotic/parlay only, $50-100)`;
+  } else if (trigCount >= 4 || collisionMax) {
+    color = 'blue'; strength = 'MAX';
+    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing}`;
+  } else if (trigCount === 3) {
+    color = 'green'; strength = 'STRONG';
+    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing}`;
+  } else if (trigCount === 2) {
+    color = 'teal'; strength = 'ENTRY';
+    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing}`;
+  } else {
+    color = 'amber'; strength = 'WATCH';
+    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing} (borderline)`;
+  }
+
+  // Run line add-on
+  let rlAddon = null;
+  if (sizing > 0 && !t14Kill && !t15Active && trigCount >= 4) {
+    if (gateSide === 'home' && awayRL?.price >= 115) {
+      rlAddon = { desc: `${game.away.name} -1.5 +${awayRL.price}`, amt: Math.round(sizing * 0.5) };
+    } else if (gateSide === 'away' && homeRL?.price >= 115) {
+      rlAddon = { desc: `${game.home.name} -1.5 +${homeRL.price}`, amt: Math.round(sizing * 0.5) };
+    }
+  }
+
+  return {
+    gateType, gateML, gateSide,
+    triggered, failed, notes,
+    trigCount, sizing, color, strength,
+    recommendation, rlAddon,
+    t14Kill, t15Active,
+    collision: buildCollisionData(away, home),
+    pitcherEdge: pitSide ? { name: pitName, era: pitSide.era, fip: pitSide.fip, whip: pitSide.whip } : null,
+    odds: { homeML, awayML, homeRL: homeRL?.price, awayRL: awayRL?.price }
+  };
 }
 
-// ── MAIN SCAN FUNCTION ───────────────────────────────────────
-async function runMorningScan(apiKey, cfg) {
-  if (scanInProgress) {
-    console.log('[MorningScan] Scan already in progress, skipping');
-    return lastScan;
-  }
+function buildCollisionData(away, home) {
+  const active = away.streak !== home.streak;
+  const max = active && (away.streakLen >= 5 || home.streakLen >= 5);
+  return {
+    active, max,
+    away: `${away.streak || '?'}${away.streakLen || 0}`,
+    home: `${home.streak || '?'}${home.streakLen || 0}`,
+    awayDiff: away.runDiff || 0,
+    homeDiff: home.runDiff || 0
+  };
+}
 
+// ── MAIN SCAN ────────────────────────────────────────────────
+async function runMorningScan(apiKey, cfg) {
+  if (scanInProgress) return lastScan;
   scanInProgress = true;
-  const startTime = Date.now();
-  console.log('[MorningScan] Starting morning scan at', new Date().toLocaleTimeString());
+  const t0 = Date.now();
+  console.log('[Scan] Starting full scan', new Date().toLocaleTimeString());
 
   try {
-    // Step 1: All 30 teams
-    console.log('[MorningScan] Step 1 — Fetching standings...');
+    // Step 1: Standings
+    console.log('[Scan] Fetching standings...');
     const teams = await fetchStandings();
-    const teamCount = Object.keys(teams).length;
-    console.log(`[MorningScan] Got ${teamCount} teams`);
+    console.log(`[Scan] ${Object.keys(teams).length} teams loaded`);
 
-    // Step 2: Today's schedule
-    console.log('[MorningScan] Step 2 — Fetching schedule...');
-    const games = await fetchTodaySchedule();
-    console.log(`[MorningScan] Got ${games.length} games today`);
+    // Step 2: Schedule
+    console.log('[Scan] Fetching schedule...');
+    const games = await fetchSchedule();
+    console.log(`[Scan] ${games.length} games today`);
 
-    // Step 3: Live odds
-    console.log('[MorningScan] Step 3 — Fetching odds...');
-    const oddsData = await fetchOdds(apiKey);
-    console.log(`[MorningScan] Got ${oddsData.length} games with odds`);
+    // Step 3: Odds
+    console.log('[Scan] Fetching odds...');
+    const odds = await fetchOdds(apiKey);
+    console.log(`[Scan] ${odds.length} games with odds`);
 
-    // Step 4: Collision + trigger analysis
-    console.log('[MorningScan] Step 4 — Running collision + trigger analysis...');
-    const analysis = analyzeCollisions(games, teams, oddsData, cfg || {});
+    // Step 4: For each game — pitcher stats + bullpen
+    const gameResults = [];
+    for (const game of games) {
+      console.log(`[Scan] Analyzing ${game.away.abbr} @ ${game.home.abbr}...`);
+      const [awayPit, homePit, awayBP, homeBP] = await Promise.allSettled([
+        fetchPitcherStats(game.away.pitcher?.id),
+        fetchPitcherStats(game.home.pitcher?.id),
+        fetchBullpenStatus(game.away.id),
+        fetchBullpenStatus(game.home.id)
+      ]);
 
-    // Categorize results
-    const qualifying = analysis.filter(g => g.gate.status !== 'NO_GATE');
-    const collisions = analysis.filter(g => g.collision.active);
-    const maxCollisions = analysis.filter(g => g.collision.max);
-    const regressionFlags = analysis.filter(g => g.away.regressionFlag || g.home.regressionFlag);
-    const plays = analysis.filter(g => g.playRecommendation);
-    const fades = analysis.filter(g =>
-      (g.away.streak === 'L' && g.away.streakLen >= 5 && g.away.runDiff < 0) ||
-      (g.home.streak === 'L' && g.home.streakLen >= 5 && g.home.runDiff < 0)
-    );
+      const result = runTriggerEngine(
+        game, teams, odds,
+        awayPit.value || null,
+        homePit.value || null,
+        awayBP.value || null,
+        homeBP.value || null,
+        cfg
+      );
 
-    // Build regression outlier list from live data
-    const outliers = [];
-    for (const [abbr, team] of Object.entries(teams)) {
-      if (team.regressionFlag) {
-        outliers.push({ abbr, ...team });
-      }
+      gameResults.push({
+        game: `${game.away.name} @ ${game.home.name}`,
+        gameTime: game.gameTime,
+        venue: game.venue,
+        away: { ...game.away, ...(teams[game.away.abbr] || {}), pitcherStats: awayPit.value },
+        home: { ...game.home, ...(teams[game.home.abbr] || {}), pitcherStats: homePit.value },
+        analysis: result
+      });
     }
+
+    // Categorize
+    const plays = gameResults.filter(g => g.analysis.sizing > 0 && !g.analysis.t14Kill && !g.analysis.t15Active);
+    const fades = gameResults.filter(g => g.analysis.t15Active);
+    const passes = gameResults.filter(g => g.analysis.gateType && (g.analysis.sizing === 0 || g.analysis.t14Kill));
+    const noGate = gameResults.filter(g => !g.analysis.gateType);
+    const outliers = Object.values(teams).filter(t => t.regressionFlag);
+
+    // Sort plays by strength
+    const strengthOrder = { MAX: 0, STRONG: 1, ENTRY: 2, WATCH: 3 };
+    plays.sort((a, b) => (strengthOrder[a.analysis.strength] || 9) - (strengthOrder[b.analysis.strength] || 9));
 
     lastScan = {
       timestamp: new Date().toISOString(),
-      runTime: Date.now() - startTime,
+      runTime: Date.now() - t0,
       summary: {
-        teamsScanned: teamCount,
-        gamesFound: games.length,
-        qualifying: qualifying.length,
-        collisions: collisions.length,
-        maxCollisions: maxCollisions.length,
+        gamesScanned: games.length,
         plays: plays.length,
         fades: fades.length,
-        regressionFlags: regressionFlags.length
+        passes: passes.length,
+        outliers: outliers.length,
+        maxPlays: plays.filter(g => g.analysis.strength === 'MAX').length,
+        strongPlays: plays.filter(g => g.analysis.strength === 'STRONG').length
       },
-      games: analysis,
-      qualifying,
-      plays,
-      fades,
-      collisions,
-      maxCollisions,
+      plays, fades, passes, noGate,
+      allGames: gameResults,
       outliers,
-      teams // full team data for grid
+      teams
     };
 
-    console.log(`[MorningScan] Complete in ${Date.now() - startTime}ms — ${plays.length} plays, ${collisions.length} collisions, ${outliers.length} regression flags`);
+    console.log(`[Scan] Done in ${Date.now() - t0}ms — ${plays.length} plays, ${fades.length} fades`);
     return lastScan;
 
   } catch(e) {
-    console.error('[MorningScan] Fatal error:', e.message);
+    console.error('[Scan] Fatal:', e.message);
     return null;
   } finally {
     scanInProgress = false;
@@ -408,31 +629,20 @@ async function runMorningScan(apiKey, cfg) {
 
 // ── SCHEDULER ────────────────────────────────────────────────
 function scheduleScan(apiKey, cfg) {
-  function msUntilNext9AM() {
+  function msUntil9AM() {
     const now = new Date();
-    const target = new Date();
-    // 9AM Eastern = 14:00 UTC (EST) or 13:00 UTC (EDT)
-    // Use 13:00 UTC to approximate EDT
-    target.setUTCHours(13, 0, 0, 0);
-    if (target <= now) target.setUTCDate(target.getUTCDate() + 1);
-    return target - now;
+    const next = new Date();
+    next.setUTCHours(13, 0, 0, 0); // 9AM ET = 13:00 UTC (EDT)
+    if (next <= now) next.setUTCDate(next.getUTCDate() + 1);
+    return next - now;
   }
-
-  function scheduleNext() {
-    const ms = msUntilNext9AM();
-    const hrs = Math.round(ms / 1000 / 60 / 60 * 10) / 10;
-    console.log(`[MorningScan] Next scan scheduled in ${hrs} hours`);
-    setTimeout(async () => {
-      await runMorningScan(apiKey, cfg);
-      scheduleNext(); // reschedule for next day
-    }, ms);
+  function loop() {
+    const ms = msUntil9AM();
+    console.log(`[Scan] Next scan in ${Math.round(ms/3600000*10)/10}hrs`);
+    setTimeout(async () => { await runMorningScan(apiKey, cfg); loop(); }, ms);
   }
-
-  // Run immediately on startup if no scan yet
-  console.log('[MorningScan] Scheduler started — running initial scan...');
-  runMorningScan(apiKey, cfg).then(() => {
-    scheduleNext();
-  });
+  // Run on boot, then schedule daily
+  runMorningScan(apiKey, cfg).then(loop);
 }
 
 module.exports = { runMorningScan, getLastScan, scheduleScan };

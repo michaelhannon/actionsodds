@@ -1301,103 +1301,148 @@ function toggleTheme(){
 
 // ── INIT ─────────────────────────────────────────────────
 // ── MORNING SCAN FETCH ────────────────────────────────────────
+
+// ── FULL PLAY CARD RENDER ─────────────────────────────────────
 async function loadMorningScan(){
   try{
     const res=await fetch('/morning-scan');
     const scan=await res.json();
     if(!scan||scan.error){
-      document.getElementById('collision-table-container').innerHTML='<div class="empty">No scan data yet — server will auto-scan at 9AM ET or <button onclick="triggerManualScan()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;text-decoration:underline;">run now</button></div>';
+      document.getElementById('collision-table-container').innerHTML='<div class="empty" style="padding:16px;">No scan data yet<br><button onclick="triggerManualScan()" style="margin-top:8px;background:var(--gold);border:none;color:var(--black);cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:700;padding:6px 16px;border-radius:5px;">Run Now</button></div>';
       return;
     }
-    renderCollisionGrid(scan);
+    renderFullPlayCard(scan);
     renderRegressionFlags(scan.outliers||[]);
   }catch(e){
-    document.getElementById('collision-table-container').innerHTML='<div class="empty">Offline — scan loads automatically on server</div>';
+    document.getElementById('collision-table-container').innerHTML='<div class="empty">Offline — scan loads on server boot</div>';
   }
 }
 
+
 async function triggerManualScan(){
-  document.getElementById('collision-table-container').innerHTML='<div class="empty" style="color:var(--amber);">Running scan... ~15 seconds</div>';
+  document.getElementById('collision-table-container').innerHTML='<div class="empty" style="color:var(--amber);">Running full scan — T1-T15 + R1-R7 engine firing... (~30 seconds)</div>';
   try{
     await fetch('/morning-scan/run',{method:'POST'});
-    setTimeout(loadMorningScan,15000);
+    setTimeout(loadMorningScan,30000);
   }catch(e){}
 }
 
-function renderCollisionGrid(scan){
-  const games=scan.games||[];
-  if(!games.length){
-    document.getElementById('collision-table-container').innerHTML='<div class="empty">No games found for today</div>';
-    return;
+// ── FULL PLAY CARD FROM SERVER SCAN ──────────────────────────
+function renderFullPlayCard(scan){
+  const container=document.getElementById('collision-table-container');
+  const plays=scan.plays||[];
+  const fades=scan.fades||[];
+  const allGames=scan.allGames||[];
+  const s=scan.summary||{};
+  const ts=new Date(scan.timestamp);
+
+  // Header bar
+  let html=`<div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:10px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;">
+    <span style="color:var(--gold);">🕘 ${ts.toLocaleTimeString()}</span>
+    <span>${s.gamesScanned||0} games scanned</span>
+    <span style="color:var(--green);font-weight:600;">${s.plays||0} plays</span>
+    <span style="color:var(--red);">${s.fades||0} fades</span>
+    <span style="color:var(--teal);">${s.outliers||0} T4 flags</span>
+    <span style="color:var(--amber);">${Math.round((scan.runTime||0)/1000)}s scan time</span>
+    <button onclick="triggerManualScan()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-family:var(--mono);font-size:9px;text-decoration:underline;padding:0;margin-left:auto;">↻ Rescan</button>
+  </div>`;
+
+  // PLAY CARDS
+  if(plays.length){
+    html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);margin-bottom:8px;">✅ TODAY'S PLAYS (${plays.length})</div>`;
+    for(const g of plays){
+      const a=g.analysis;
+      const colMap={blue:'var(--blue)',green:'var(--green)',teal:'var(--teal)',amber:'var(--amber)',red:'var(--red)',orange:'var(--orange)'};
+      const col=colMap[a.color]||'var(--teal)';
+      const sbMap={MAX:'sb-blue',STRONG:'sb-green',ENTRY:'sb-teal',WATCH:'sb-amber'};
+      const sbClass=sbMap[a.strength]||'sb-teal';
+      const pitNote=a.pitcherEdge?`${a.pitcherEdge.name||'SP'} ERA ${a.pitcherEdge.era} FIP ${a.pitcherEdge.fip}`:'SP data N/A';
+      const trigStr=a.triggered.join('+');
+      const failStr=a.failed.length?` | ✗ ${a.failed.join(',')}`:'';
+      html+=`<div class="play-box" style="margin-bottom:10px;">
+        <div class="color-bar" style="background:${col};height:3px;border-radius:99px;width:100%;margin-bottom:8px;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="tbadge tbadge-real">${a.gateType}</span>
+            <span class="strength-badge ${sbClass}">${a.strength}</span>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--text3);">${trigStr}${failStr}</span>
+          </div>
+          <span style="font-family:var(--mono);font-size:12px;color:${col};font-weight:700;">$${a.sizing}</span>
+        </div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px;">${a.recommendation}</div>
+        <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:6px;">${g.game} · ${new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div>
+        ${a.rlAddon?`<div style="font-family:var(--mono);font-size:10px;color:var(--amber);margin-bottom:4px;">+ RL add-on: ${a.rlAddon.desc} · $${a.rlAddon.amt}</div>`:''}
+        <div style="font-size:9px;color:var(--text3);font-family:var(--mono);line-height:1.7;border-top:1px solid var(--border);padding-top:6px;margin-top:4px;">${a.notes.slice(0,5).join('<br>')}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:4px;">${pitNote} · ${a.collision.away} vs ${a.collision.home}</div>
+      </div>`;
+    }
+  } else {
+    html+=`<div style="background:rgba(231,76,60,0.06);border:1px solid rgba(231,76,60,0.15);border-radius:8px;padding:12px;font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:10px;">
+      <span style="color:var(--red);font-weight:700;">NO PLAYS TODAY</span> — No games cleared all required gates + triggers. Sit out. Season record protected.
+    </div>`;
   }
-  let html=`<table class="cg-table">
-    <thead><tr>
-      <th>Matchup</th>
-      <th>Away Streak</th>
-      <th>Away Diff</th>
-      <th>Home Streak</th>
-      <th>Home Diff</th>
-      <th>Collision</th>
-      <th>Gate</th>
-      <th>Rec</th>
-    </tr></thead><tbody>`;
 
-  for(const g of games){
-    const awayStreakClass=g.away.streak==='W'?'cg-streak-w':'cg-streak-l';
-    const homeStreakClass=g.home.streak==='W'?'cg-streak-w':'cg-streak-l';
-    const awayDiffClass=g.away.runDiff>0?'cg-diff-pos':g.away.runDiff<0?'cg-diff-neg':'cg-diff-flat';
-    const homeDiffClass=g.home.runDiff>0?'cg-diff-pos':g.home.runDiff<0?'cg-diff-neg':'cg-diff-flat';
-    const awayDiffStr=(g.away.runDiff>0?'+':'')+g.away.runDiff;
-    const homeDiffStr=(g.home.runDiff>0?'+':'')+g.home.runDiff;
-
-    let collisionHtml='<span class="cg-no-coll">—</span>';
-    if(g.collision.max){
-      collisionHtml='<span class="cg-collision max">⚡ MAX</span>';
-    }else if(g.collision.active){
-      collisionHtml='<span class="cg-collision">COLL</span>';
+  // FADE CARDS
+  if(fades.length){
+    html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--red);margin:10px 0 8px;">🔴 T15 FADES (${fades.length}) — exotic/parlay only</div>`;
+    for(const g of fades){
+      const a=g.analysis;
+      html+=`<div class="play-box fade-play" style="margin-bottom:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <span class="tbadge tbadge-fade">T15 FADE</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--red);">$50-100 parlay only</span>
+        </div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--text);">${a.recommendation}</div>
+        <div style="font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:4px;">${g.game}</div>
+      </div>`;
     }
+  }
 
+  // FULL GAME TABLE
+  html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin:12px 0 6px;">ALL GAMES — Full Scan</div>`;
+  html+=`<table class="cg-table"><thead><tr>
+    <th>Matchup</th><th>Away</th><th>Diff</th><th>Home</th><th>Diff</th><th>Collision</th><th>Gate</th><th>Triggers</th><th>Result</th>
+  </tr></thead><tbody>`;
+
+  for(const g of allGames){
+    const a=g.analysis;
+    const awayT=g.away; const homeT=g.home;
+    const awayS=awayT.streak||'?'; const awayL=awayT.streakLen||0;
+    const homeS=homeT.streak||'?'; const homeL=homeT.streakLen||0;
+    const awayD=awayT.runDiff||0; const homeD=homeT.runDiff||0;
+    const awayDStr=(awayD>0?'+':'')+awayD;
+    const homeDStr=(homeD>0?'+':'')+homeD;
+    const coll=a.collision||{};
+    let collHtml='<span class="cg-no-coll">—</span>';
+    if(coll.max) collHtml='<span class="cg-collision max">⚡MAX</span>';
+    else if(coll.active) collHtml='<span class="cg-collision">COLL</span>';
     let gateHtml='<span class="cg-gate-fail">—</span>';
-    if(g.gate.status==='T1') gateHtml=`<span class="cg-gate-pass">${g.gate.label}</span>`;
-    else if(g.gate.status==='T11'||g.gate.status==='T12') gateHtml=`<span class="cg-gate-warn">${g.gate.label}</span>`;
-    else if(g.gate.status==='T13') gateHtml=`<span style="color:var(--teal);">${g.gate.label}</span>`;
-
+    if(a.gateType==='T1') gateHtml=`<span class="cg-gate-pass">T1 +${a.gateML}</span>`;
+    else if(a.gateType==='T11') gateHtml=`<span class="cg-gate-warn">T11 ${a.gateML}</span>`;
+    else if(a.gateType==='T12') gateHtml=`<span class="cg-gate-warn">T12 +${a.gateML}</span>`;
+    else if(a.gateType==='T13') gateHtml=`<span style="color:var(--teal);">T13 +${a.gateML}</span>`;
+    const trigStr=(a.triggered||[]).join('+') || '—';
     let recHtml='<span class="cg-no-coll">PASS</span>';
-    if(g.playRecommendation){
-      const p=g.playRecommendation;
-      const col=p.color==='blue'?'var(--blue)':p.color==='green'?'var(--green)':p.color==='teal'?'var(--teal)':'var(--amber)';
-      recHtml=`<span style="color:${col};font-weight:700;">${p.strength} $${p.sizing}</span>`;
-    }
-
-    // Reg flag indicators
-    const awayReg=g.away.regressionFlag?` <span style="color:var(--teal);font-size:8px;">T4↑</span>`:'';
-    const homeReg=g.home.regressionFlag?` <span style="color:var(--teal);font-size:8px;">T4↑</span>`:'';
-
+    const colMap2={blue:'var(--blue)',green:'var(--green)',teal:'var(--teal)',amber:'var(--amber)',red:'var(--red)'};
+    if(a.sizing>0&&!a.t14Kill) recHtml=`<span style="color:${colMap2[a.color]||'var(--teal)'};font-weight:700;">${a.strength} $${a.sizing}</span>`;
+    else if(a.t14Kill) recHtml='<span style="color:var(--red);">T14 KILL</span>';
+    else if(a.t15Active) recHtml='<span style="color:var(--orange);">FADE</span>';
+    const awayReg=awayT.regressionFlag?'<span style="color:var(--teal);font-size:8px;"> T4↑</span>':'';
+    const homeReg=homeT.regressionFlag?'<span style="color:var(--teal);font-size:8px;"> T4↑</span>':'';
     html+=`<tr>
-      <td style="color:var(--text2);">${g.away.abbr} @ ${g.home.abbr}</td>
-      <td class="${awayStreakClass}">${g.away.streak}${g.away.streakLen}${awayReg}</td>
-      <td class="${awayDiffClass}">${awayDiffStr}</td>
-      <td class="${homeStreakClass}">${g.home.streak}${g.home.streakLen}${homeReg}</td>
-      <td class="${homeDiffClass}">${homeDiffStr}</td>
-      <td>${collisionHtml}</td>
+      <td style="color:var(--text2);white-space:nowrap;">${awayT.abbr||'?'} @ ${homeT.abbr||'?'}</td>
+      <td class="${awayS==='W'?'cg-streak-w':'cg-streak-l'}">${awayS}${awayL}${awayReg}</td>
+      <td class="${awayD>0?'cg-diff-pos':awayD<0?'cg-diff-neg':'cg-diff-flat'}">${awayDStr}</td>
+      <td class="${homeS==='W'?'cg-streak-w':'cg-streak-l'}">${homeS}${homeL}${homeReg}</td>
+      <td class="${homeD>0?'cg-diff-pos':homeD<0?'cg-diff-neg':'cg-diff-flat'}">${homeDStr}</td>
+      <td>${collHtml}</td>
       <td>${gateHtml}</td>
+      <td style="font-family:var(--mono);font-size:9px;color:var(--text3);">${trigStr}</td>
       <td>${recHtml}</td>
     </tr>`;
   }
   html+='</tbody></table>';
-
-  // Summary line
-  const s=scan.summary;
-  html=`<div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:6px;display:flex;gap:16px;">
-    <span>🕘 ${new Date(scan.timestamp).toLocaleTimeString()}</span>
-    <span>${s.gamesFound} games</span>
-    <span style="color:var(--green);">${s.plays} plays</span>
-    <span style="color:var(--amber);">${s.collisions} collisions</span>
-    <span style="color:var(--teal);">${s.regressionFlags} T4 flags</span>
-    <button onclick="triggerManualScan()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-family:var(--mono);font-size:9px;text-decoration:underline;padding:0;">↻ Rescan</button>
-  </div>`+html;
-
-  document.getElementById('collision-table-container').innerHTML=html;
+  container.innerHTML=html;
 }
 
 function renderRegressionFlags(outliers){
