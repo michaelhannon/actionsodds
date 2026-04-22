@@ -906,7 +906,16 @@ function renderMultiBookGrid(games){
   html+=`<table class="book-grid"><thead><tr>
     <th style="text-align:left;color:var(--text3);border-color:var(--border2);">Game</th>
     <th style="color:var(--text3);border-color:var(--border2);">Time</th>
-    ${books.map(b=>`<th colspan="3" class="${b.thCls}"><span class="book-logo ${b.cls}">${b.label}</span></th>`).join('')}
+    ${books.map(b=>{
+      const logos={
+        fanduel:'<svg width="80" height="24" viewBox="0 0 80 24"><rect width="80" height="24" rx="4" fill="rgba(27,205,143,0.15)"/><text x="8" y="17" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="#1bcd8f">FanDuel</text></svg>',
+        betmgm:'<svg width="76" height="24" viewBox="0 0 76 24"><rect width="76" height="24" rx="4" fill="rgba(200,151,58,0.15)"/><text x="8" y="17" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="#c8973a">BetMGM</text></svg>',
+        caesars:'<svg width="80" height="24" viewBox="0 0 80 24"><rect width="80" height="24" rx="4" fill="rgba(122,179,240,0.15)"/><text x="8" y="17" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="#7ab3f0">Caesars</text></svg>',
+        hard_rock_bet:'<svg width="96" height="24" viewBox="0 0 96 24"><rect width="96" height="24" rx="4" fill="rgba(255,107,138,0.15)"/><text x="6" y="17" font-family="Arial Black,sans-serif" font-size="12" font-weight="900" fill="#ff6b8a">Hard Rock</text></svg>',
+        draftkings:'<svg width="96" height="24" viewBox="0 0 96 24"><rect width="96" height="24" rx="4" fill="rgba(98,179,224,0.15)"/><text x="4" y="17" font-family="Arial Black,sans-serif" font-size="12" font-weight="900" fill="#62b3e0">DraftKings</text></svg>',
+      };
+      return `<th colspan="3" class="${b.thCls}" style="padding:8px 4px;">${logos[b.key]||('<span class="book-logo '+b.cls+'">'+b.label+'</span>')}</th>`;
+    }).join('')}
     <th style="color:var(--text3);border-color:var(--border2);">System</th>
   </tr>
   <tr>
