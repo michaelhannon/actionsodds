@@ -1430,7 +1430,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   initToggles();
   loadOdds();
   loadMorningScan();
-  toggleProtocol();
+  // Open protocol panel by default
+  const body=document.getElementById('protocol-body');
+  const arrow=document.getElementById('protocol-arrow');
+  if(body){body.classList.add('open');}
+  if(arrow){arrow.style.transform='rotate(180deg)';}
 });
 </script>
 </body>
