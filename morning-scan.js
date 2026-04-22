@@ -103,7 +103,13 @@ async function fetchSchedule() {
     const games = [];
     for (const dateEntry of (data.dates || [])) {
       for (const g of (dateEntry.games || [])) {
-        if (g.status?.abstractGameState === 'Final') continue; // skip completed
+        const state = g.status?.abstractGameState;
+        const detail = g.status?.detailedState || '';
+        // Skip games already started or completed
+        if (state === 'Final' || state === 'Live' || detail.includes('In Progress') || detail.includes('Delayed') ) continue;
+        // Also skip if game time has already passed
+        const gTime = new Date(g.gameDate);
+        if (gTime < new Date(Date.now() - 5 * 60 * 1000)) continue; // 5min grace
         games.push({
           gameId: g.gamePk,
           gameTime: g.gameDate,
@@ -310,7 +316,8 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
     notes.push(`T3 ✓ ${gradeTeam.abbr} run diff ${gradeTeam.runDiff > 0 ? '+' : ''}${gradeTeam.runDiff}`);
   } else if (gradeTeam.runDiff < -10) {
     failed.push('T3');
-    notes.push(`T3 ✗ ${gradeTeam.abbr} run diff ${gradeTeam.runDiff} — kills play`);
+    notes.push(`T3 ✗ ${gradeTeam.abbr} run diff ${gradeTeam.runDiff} — KILLS PLAY (T3 hard kill)`);
+    // T3 hard kill flag — will zero sizing below
   } else {
     notes.push(`T3 ~ ${gradeTeam.abbr} run diff ${gradeTeam.runDiff} — neutral`);
   }
@@ -467,6 +474,10 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
     sizing = Math.min(sizing, maxSize);
   }
 
+  // T3 hard kill — negative run diff below -10 kills any play
+  const t3Kill = gradeTeam.runDiff < -10;
+  if (t3Kill) { sizing = 0; }
+
   // T11 needs 3+ triggers minimum
   if (gateType === 'T11' && trigCount < 3) sizing = 0;
   // T12 needs 5+ triggers minimum
@@ -515,7 +526,7 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
     triggered, failed, notes,
     trigCount, sizing, color, strength,
     recommendation, rlAddon,
-    t14Kill, t15Active,
+    t14Kill, t15Active, t3Kill,
     collision: buildCollisionData(away, home),
     pitcherEdge: pitSide ? { name: pitName, era: pitSide.era, fip: pitSide.fip, whip: pitSide.whip } : null,
     odds: { homeML, awayML, homeRL: homeRL?.price, awayRL: awayRL?.price }
@@ -588,15 +599,22 @@ async function runMorningScan(apiKey, cfg) {
     }
 
     // Categorize
-    const plays = gameResults.filter(g => g.analysis.sizing > 0 && !g.analysis.t14Kill && !g.analysis.t15Active);
+    const plays = gameResults.filter(g => g.analysis.sizing > 0 && !g.analysis.t14Kill && !g.analysis.t15Active && !g.analysis.t3Kill);
     const fades = gameResults.filter(g => g.analysis.t15Active);
     const passes = gameResults.filter(g => g.analysis.gateType && (g.analysis.sizing === 0 || g.analysis.t14Kill));
     const noGate = gameResults.filter(g => !g.analysis.gateType);
     const outliers = Object.values(teams).filter(t => t.regressionFlag);
 
-    // Sort plays by strength
+    // Sort all games by start time
+    gameResults.sort((a, b) => new Date(a.gameTime) - new Date(b.gameTime));
+
+    // Sort plays: by strength first, then by start time
     const strengthOrder = { MAX: 0, STRONG: 1, ENTRY: 2, WATCH: 3 };
-    plays.sort((a, b) => (strengthOrder[a.analysis.strength] || 9) - (strengthOrder[b.analysis.strength] || 9));
+    plays.sort((a, b) => {
+      const sDiff = (strengthOrder[a.analysis.strength] || 9) - (strengthOrder[b.analysis.strength] || 9);
+      if (sDiff !== 0) return sDiff;
+      return new Date(a.gameTime) - new Date(b.gameTime);
+    });
 
     lastScan = {
       timestamp: new Date().toISOString(),
