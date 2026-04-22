@@ -361,7 +361,7 @@ select.form-input{cursor:pointer;}
     </div>
     <span id="protocol-arrow" style="color:var(--gold);font-size:18px;transition:transform 0.2s;">▼</span>
   </div>
-  <div class="protocol-body" id="protocol-body">
+  <div class="protocol-body open" id="protocol-body">
     <div id="collision-table-container">
       <div class="empty" style="padding:16px;">No scan data yet — server auto-scans at 9AM ET<br>
         <button onclick="triggerManualScan()" style="margin-top:8px;background:var(--gold);border:none;color:var(--black);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:6px 16px;border-radius:5px;letter-spacing:0.08em;text-transform:uppercase;">▶ Run Now</button>
@@ -933,8 +933,7 @@ async function loadOdds(){
   document.getElementById('card-output').innerHTML='<div class="status-box"><div class="spinner" style="width:24px;height:24px;margin:0 auto 16px;display:block;"></div><div class="status-title">Fetching live lines...</div></div>';
 
   try{
-    const API_KEY='75d619683f0d4cf8366179321ee08cc7';
-    const url=`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars`;
+    const url=`/odds?sport=mlb`;
     const res=await fetch(url);
     if(!res.ok)throw new Error('API error '+res.status);
     allGames=await res.json();
