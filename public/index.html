@@ -1112,7 +1112,7 @@ async function loadOdds(){
     }
     document.getElementById('game-count').textContent=allGames.length+' games';
     // Build card view tabs too
-    const tabsEl2=document.getElementById('book-tabs-cards');
+    var tabsEl2=document.getElementById('book-tabs-cards');
     tabsEl2.innerHTML='';
     for(const bk2 of books){
       const btn3=document.createElement('button');
