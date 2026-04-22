@@ -229,13 +229,23 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   const home = teams[game.home.abbr] || {};
 
   // Get odds for this game
+  // Fuzzy team matching — MLB Stats API names vs Odds API names differ
+  function teamMatch(oddsName, statsName, abbr) {
+    if (!oddsName || !statsName) return false;
+    if (oddsName === statsName) return true;
+    // Last word match (e.g. "Tigers" in both)
+    const oLast = oddsName.split(' ').pop().toLowerCase();
+    const sLast = statsName.split(' ').pop().toLowerCase();
+    if (oLast === sLast && oLast.length > 3) return true;
+    // City match
+    const oFirst = oddsName.split(' ')[0].toLowerCase();
+    const sFirst = statsName.split(' ')[0].toLowerCase();
+    if (oFirst === sFirst && oFirst.length > 3) return true;
+    return false;
+  }
   const gameOdds = odds.find(o => {
-    const hn = o.home_team || '';
-    const an = o.away_team || '';
-    return hn.includes(game.home.abbr) || hn === game.home.name ||
-           an.includes(game.away.abbr) || an === game.away.name ||
-           game.home.name?.includes(hn.split(' ').pop()) ||
-           game.away.name?.includes(an.split(' ').pop());
+    return (teamMatch(o.home_team, game.home.name, game.home.abbr) ||
+            teamMatch(o.away_team, game.away.name, game.away.abbr));
   });
 
   let homeML = null, awayML = null, homeRL = null, awayRL = null;
