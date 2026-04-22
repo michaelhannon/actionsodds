@@ -490,8 +490,21 @@ select.form-input{cursor:pointer;}
       </div>
     </div>
 
-    <!-- Sportsbook Links -->
+    <!-- Bloomberg Grid Link -->
     <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+      <div class="section-title" style="margin-bottom:10px;">Tools</div>
+      <a href="/grid.html" style="display:flex;align-items:center;gap:12px;background:rgba(232,185,74,0.08);border:1px solid rgba(232,185,74,0.25);border-radius:10px;padding:12px 16px;text-decoration:none;transition:background 0.15s;margin-bottom:16px;" onmouseover="this.style.background='rgba(232,185,74,0.14)'" onmouseout="this.style.background='rgba(232,185,74,0.08)'">
+        <div style="font-size:22px;">📊</div>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.06em;color:var(--gold);">MLB Bloomberg Grid</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--text3);letter-spacing:0.05em;">T2 Collision · T3 Run Diff · T4 Regression · Play/Fade List</div>
+        </div>
+        <div style="margin-left:auto;color:var(--gold);font-size:18px;">→</div>
+      </a>
+    </div>
+
+    <!-- Sportsbook Links -->
+    <div style="padding-top:16px;border-top:1px solid var(--border);">
       <div class="section-title" style="margin-bottom:10px;">Quick access — NJ books</div>
       <div class="book-links">
         <a class="book-link dk" href="https://sportsbook.draftkings.com" target="_blank">DraftKings</a>
@@ -972,7 +985,7 @@ async function loadOdds(){
   document.getElementById('card-output').innerHTML='<div class="status-box"><div class="spinner" style="width:24px;height:24px;margin:0 auto 16px;display:block;"></div><div class="status-title">Fetching live lines...</div></div>';
 
   try{
-    const API_KEY='aee47b9e9574d5dc9e29e96e69a92eec';
+    const API_KEY='75d619683f0d4cf8366179321ee08cc7';
     const url=`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars`;
     const res=await fetch(url);
     if(!res.ok)throw new Error('API error '+res.status);
