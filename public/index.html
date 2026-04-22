@@ -936,7 +936,7 @@ async function loadOdds(){
     const url=`/odds?sport=mlb`;
     const res=await fetch(url);
     if(!res.ok)throw new Error('API error '+res.status);
-    allGames=await res.json();
+    const raw=await res.json(); allGames=Array.isArray(raw)?raw:(raw.data||raw.games||raw.odds||[]);
     document.getElementById('last-update-label').textContent='Updated '+new Date().toLocaleTimeString();
 
     // Build book tabs
