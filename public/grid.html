@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MLB Trigger Grid — Apr 21, 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg:#0a0a0a; --surface:#111; --border:#1e1e1e; --border-bright:#2a2a2a;
+    --text-primary:#e8e8e8; --text-secondary:#888; --text-dim:#555;
+    --gold:#f0b429; --green:#22c55e; --red:#ef4444; --blue:#3b82f6;
+    --blue-bright:#60a5fa; --teal:#14b8a6; --amber:#f59e0b; --orange:#f97316;
+  }
+  body { background:var(--bg); color:var(--text-primary); font-family:'IBM Plex Mono',monospace; font-size:12px; min-height:100vh; padding:16px; }
+
+  /* HEADER */
+  .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border-bright); }
+  .header-title { font-family:'IBM Plex Sans',sans-serif; font-size:17px; font-weight:600; color:var(--gold); letter-spacing:.05em; }
+  .header-sub { font-size:10px; color:var(--text-secondary); letter-spacing:.08em; margin-top:2px; }
+  .header-right { display:flex; gap:18px; align-items:center; }
+  .stat-pill .label { font-size:9px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; }
+  .stat-pill .value { font-size:13px; font-weight:700; }
+  .stat-pill .value.pos { color:var(--green); }
+  .stat-pill .value.neg { color:var(--red); }
+  .stat-pill .value.gold { color:var(--gold); }
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  .cursor { display:inline-block; width:7px; height:12px; background:var(--gold); animation:blink 1.2s step-end infinite; vertical-align:middle; margin-left:2px; }
+
+  /* LEGEND */
+  .legend { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center; }
+  .legend-label { font-size:9px; color:var(--text-dim); letter-spacing:.1em; }
+  .badge { display:inline-flex; align-items:center; gap:3px; padding:2px 6px; border-radius:2px; font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+  .badge-blue   { background:#1e3a5f; color:#60a5fa; border-left:2px solid #3b82f6; }
+  .badge-green  { background:#14301f; color:#4ade80; border-left:2px solid #22c55e; }
+  .badge-teal   { background:#0d2926; color:#2dd4bf; border-left:2px solid #14b8a6; }
+  .badge-amber  { background:#2d1e05; color:#fbbf24; border-left:2px solid #f59e0b; }
+  .badge-red    { background:#2d0808; color:#f87171; border-left:2px solid #ef4444; }
+
+  /* SECTION */
+  .section-header { display:flex; align-items:center; gap:10px; margin:14px 0 7px; }
+  .section-title { font-size:9px; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--text-secondary); white-space:nowrap; }
+  .section-line { flex:1; height:1px; background:var(--border); }
+  .section-count { font-size:9px; color:var(--text-dim); }
+
+  /* TABLE */
+  .grid-wrapper { overflow-x:auto; margin-bottom:4px; }
+  table { width:100%; border-collapse:collapse; }
+  thead th { background:var(--surface); padding:5px 7px; text-align:left; font-size:9px; font-weight:700; color:var(--text-dim); letter-spacing:.12em; text-transform:uppercase; border-bottom:1px solid var(--border-bright); white-space:nowrap; }
+  thead th.r { text-align:right; }
+  thead th.c { text-align:center; }
+  tbody tr { border-bottom:1px solid var(--border); }
+  tbody tr:hover { background:#141414; }
+  td { padding:6px 7px; font-size:11px; white-space:nowrap; vertical-align:middle; }
+  td.r { text-align:right; }
+  td.c { text-align:center; }
+
+  /* ROW ACCENT */
+  tr.play-blue td:first-child   { border-left:2px solid #3b82f6; }
+  tr.play-green td:first-child  { border-left:2px solid #22c55e; }
+  tr.play-teal td:first-child   { border-left:2px solid #14b8a6; }
+  tr.fade-row td:first-child    { border-left:2px solid #ef4444; }
+  tr.matchup-play td:first-child  { border-left:2px solid #22c55e; }
+  tr.matchup-fade td:first-child  { border-left:2px solid #ef4444; }
+  tr.matchup-skip td:first-child  { border-left:2px solid #555; }
+
+  /* CELLS */
+  .team-cell { display:flex; align-items:center; gap:7px; }
+  .team-abbr { font-weight:700; font-size:13px; min-width:34px; }
+  .team-name { font-size:10px; color:var(--text-secondary); }
+  .record { color:var(--text-secondary); }
+  .diff-pos { color:var(--green); font-weight:600; }
+  .diff-neg { color:var(--red); font-weight:600; }
+  .streak-win { color:var(--green); font-weight:700; }
+  .streak-loss { color:var(--red); font-weight:700; }
+  .odds-pos { color:var(--gold); font-weight:600; }
+  .odds-neg { color:var(--text-secondary); }
+  .odds-na  { color:var(--text-dim); }
+  .unit-max    { color:#60a5fa; font-weight:700; }
+  .unit-strong { color:#4ade80; font-weight:700; }
+  .unit-entry  { color:#2dd4bf; font-weight:700; }
+  .unit-fade   { color:#f87171; font-weight:700; }
+  .unit-watch  { color:#fbbf24; font-weight:700; }
+
+  /* TRIGGER DOTS */
+  .tdots { display:flex; gap:3px; flex-wrap:wrap; align-items:center; }
+  .dot { width:17px; height:17px; border-radius:2px; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; }
+  .da-blue  { background:#1e3a5f; color:#60a5fa; }
+  .da-green { background:#14301f; color:#4ade80; }
+  .da-teal  { background:#0d2926; color:#2dd4bf; }
+  .da-amber { background:#2d1e05; color:#fbbf24; }
+  .da-red   { background:#2a0808; color:#f87171; }
+  .di       { background:#1a1a1a; color:#333; }
+
+  /* T8 CELL */
+  .t8-good  { color:#4ade80; font-weight:600; font-size:10px; }
+  .t8-warn  { color:#fbbf24; font-weight:600; font-size:10px; }
+  .t8-bad   { color:#f87171; font-weight:600; font-size:10px; }
+  .t8-na    { color:#555; font-size:10px; }
+
+  /* BULLPEN RANK BADGE */
+  .bp-rank { display:inline-flex; align-items:center; justify-content:center; width:20px; height:16px; border-radius:2px; font-size:9px; font-weight:700; margin-right:3px; }
+  .bp-top  { background:#14301f; color:#4ade80; }
+  .bp-mid  { background:#1a1a1a; color:#888; }
+  .bp-bad  { background:#2a0808; color:#f87171; }
+
+  /* COLLISION */
+  .collision { display:inline-flex; align-items:center; gap:2px; background:#1a0a00; border:1px solid #a05c00; color:#f59e0b; padding:1px 5px; border-radius:2px; font-size:8px; font-weight:700; }
+
+  /* CONF BADGE */
+  .conf-badge { padding:2px 7px; border-radius:2px; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+
+  /* BULLPEN SECTION TABLE */
+  .bp-table { width:100%; border-collapse:collapse; margin-top:4px; }
+  .bp-table th { background:var(--surface); padding:5px 8px; font-size:9px; font-weight:700; color:var(--text-dim); letter-spacing:.12em; text-transform:uppercase; border-bottom:1px solid var(--border-bright); text-align:left; white-space:nowrap; }
+  .bp-table th.r { text-align:right; }
+  .bp-table td { padding:5px 8px; font-size:11px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  .bp-table td.r { text-align:right; }
+
+  /* FOOTER */
+  .footer { margin-top:14px; padding-top:10px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:10px; }
+  .footer-note { font-size:9px; color:var(--text-dim); line-height:1.7; }
+  .footer-right { display:flex; gap:14px; }
+  .footer-stat .fl { font-size:9px; color:var(--text-dim); text-align:right; }
+  .footer-stat .fv { font-size:13px; font-weight:700; text-align:right; }
+  .footer-stat .fv.pos { color:var(--green); }
+  .footer-stat .fv.neg { color:var(--red); }
+  .footer-stat .fv.gold { color:var(--gold); }
+
+  ::-webkit-scrollbar { width:4px; height:4px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:#333; border-radius:2px; }
+</style>
+</head>
+<body>
+<div style="background:#0a0a0b;border-bottom:1px solid #1e1e1e;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;">
+  <a href="/" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#e8b94a;text-decoration:none;letter-spacing:0.08em;">← Action's Odds</a>
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#555;letter-spacing:0.1em;">MLB BLOOMBERG GRID</span>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="header-title">MLB TRIGGER GRID + T8 BULLPEN<span class="cursor"></span></div>
+    <div class="header-sub">TUE APR 21, 2026 · MORNING SCAN · T1–T15 + BULLPEN POWER RATINGS LOADED</div>
+  </div>
+  <div class="header-right">
+    <div class="stat-pill"><span class="label">Season P&L</span><span class="value pos">+$4,746</span></div>
+    <div class="stat-pill"><span class="label">Record</span><span class="value gold">20W–8L</span></div>
+    <div class="stat-pill"><span class="label">Win Rate</span><span class="value pos">71%</span></div>
+    <div class="stat-pill"><span class="label">Pending</span><span class="value gold">ATL+CHC</span></div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <span class="legend-label">SIGNAL →</span>
+  <span class="badge badge-blue">● MAX $1,000</span>
+  <span class="badge badge-green">● STRONG $800</span>
+  <span class="badge badge-teal">● ENTRY $400–600</span>
+  <span class="badge badge-amber">● WATCH</span>
+  <span class="badge badge-red">● FADE / T15</span>
+  <span style="margin-left:10px;font-size:9px;color:#444">|</span>
+  <span style="font-size:9px;color:#555;margin-left:6px;">BP RANK: <span style="color:#4ade80">■</span> TOP10  <span style="color:#888">■</span> MID  <span style="color:#f87171">■</span> BOT10</span>
+</div>
+
+<!-- ═══ BULLPEN POWER RATINGS (T8 DATA) ══════════════════════════════════ -->
+<div class="section-header">
+  <span class="section-title">◈ T8 — BULLPEN POWER RATINGS (thru Apr 19, 2026 · source: VSiN/Makinen)</span>
+  <span class="section-line"></span>
+  <span class="section-count">ALL 12 RELEVANT TEAMS</span>
+</div>
+
+<div class="grid-wrapper">
+<table class="bp-table">
+  <thead>
+    <tr>
+      <th style="width:110px">TEAM</th>
+      <th class="r" style="width:50px">BP RANK</th>
+      <th class="r" style="width:40px">BP PR</th>
+      <th class="r" style="width:55px">BP ERA</th>
+      <th class="r" style="width:55px">BP WHIP</th>
+      <th class="r" style="width:60px">L7 WHIP</th>
+      <th class="r" style="width:55px">K/9</th>
+      <th style="width:200px">T8 READ</th>
+      <th class="r" style="width:55px">T8 SIGNAL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- PLAY TEAMS -->
+    <tr class="play-blue">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#ce1141">ATL</span><span class="team-name">Braves</span></div></td>
+      <td class="r"><span class="bp-rank bp-top">#2</span></td>
+      <td class="r"><span class="diff-pos">25</span></td>
+      <td class="r"><span class="t8-good">2.69</span></td>
+      <td class="r"><span class="t8-good">1.05</span></td>
+      <td class="r"><span class="t8-good">—</span></td>
+      <td class="r" style="color:#888">—</td>
+      <td style="font-size:10px;color:#4ade80;">#1 WHIP in MLB · elite pen · T8 fires FOR ATL</td>
+      <td class="r"><span class="t8-good">✔ ELITE</span></td>
+    </tr>
+    <tr class="play-blue">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#0e3386">CHC</span><span class="team-name">Cubs</span></div></td>
+      <td class="r"><span class="bp-rank bp-top">#8</span></td>
+      <td class="r"><span class="diff-pos">15</span></td>
+      <td class="r"><span class="t8-good">—</span></td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r" style="color:#888">—</td>
+      <td style="font-size:10px;color:#4ade80;">PR +15 · top-8 bullpen · T8 fires FOR CHC</td>
+      <td class="r"><span class="t8-good">✔ STRONG</span></td>
+    </tr>
+    <tr class="play-green">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#005a9c">LAD</span><span class="team-name">Dodgers</span></div></td>
+      <td class="r"><span class="bp-rank bp-top">#4</span></td>
+      <td class="r"><span class="diff-pos">18</span></td>
+      <td class="r"><span class="t8-good">—</span></td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r" style="color:#888">—</td>
+      <td style="font-size:10px;color:#4ade80;">PR +18 · T8 fires FOR LAD tonight vs SF</td>
+      <td class="r"><span class="t8-good">✔ STRONG</span></td>
+    </tr>
+    <tr class="play-green">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#2f241d">SD</span><span class="team-name">Padres</span></div></td>
+      <td class="r"><span class="bp-rank bp-top">#1</span></td>
+      <td class="r"><span class="diff-pos">26</span></td>
+      <td class="r"><span class="t8-good">2.91</span></td>
+      <td class="r"><span class="t8-good">1.19</span></td>
+      <td class="r"><span class="t8-good">1.11</span></td>
+      <td class="r" style="color:#888">—</td>
+      <td style="font-size:10px;color:#4ade80;">#1 BP in MLB · ERA+WHIP+L7 all elite · T8 MAX</td>
+      <td class="r"><span class="t8-good">✔ MAX</span></td>
+    </tr>
+    <tr class="play-teal">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#fdb827">PIT</span><span class="team-name">Pirates</span></div></td>
+      <td class="r"><span class="bp-rank bp-mid">#17</span></td>
+      <td class="r"><span class="diff-pos">7</span></td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r"><span class="t8-good">9.91</span></td>
+      <td style="font-size:10px;color:#fbbf24;">PR +7 · K/9 top-5 nationally · neutral T8</td>
+      <td class="r"><span class="t8-warn">~ NEUTRAL</span></td>
+    </tr>
+    <tr class="play-teal">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#003087">NYY</span><span class="team-name">Yankees</span></div></td>
+      <td class="r"><span class="bp-rank bp-mid">#18</span></td>
+      <td class="r"><span class="diff-pos">6</span></td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r"><span class="t8-bad">1.73</span></td>
+      <td class="r" style="color:#888">—</td>
+      <td style="font-size:10px;color:#fbbf24;">PR +6 BUT L7 WHIP 1.73 = worst-5 · downgraded -7 pts · CAUTION</td>
+      <td class="r"><span class="t8-warn">⚠ CAUTION</span></td>
+    </tr>
+    <!-- DIVIDER -->
+    <tr><td colspan="9" style="padding:3px 0;background:transparent;border-bottom:1px solid var(--border-bright);"></td></tr>
+    <!-- FADE TEAMS -->
+    <tr class="fade-row">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#e81828">PHI</span><span class="team-name">Phillies</span></div></td>
+      <td class="r"><span class="bp-rank bp-mid">#15</span></td>
+      <td class="r"><span class="diff-pos">8</span></td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r" style="color:#888">—</td>
+      <td style="font-size:10px;color:#888;">PR +8 but team on L6 — bullpen not saving them</td>
+      <td class="r"><span class="t8-na">NEUTRAL</span></td>
+    </tr>
+    <tr class="fade-row">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#092c5c">TB</span><span class="team-name">Rays</span></div></td>
+      <td class="r"><span class="bp-rank bp-bad">#23</span></td>
+      <td class="r"><span class="diff-neg">-1</span></td>
+      <td class="r"><span class="t8-bad">5.38</span></td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r"><span class="t8-bad">7.86</span></td>
+      <td style="font-size:10px;color:#f87171;">BP ERA 5.38 = 5th WORST · K/9 bottom-5 · T8 fires AGAINST TB</td>
+      <td class="r"><span class="t8-bad">✕ DEPLETED</span></td>
+    </tr>
+    <tr class="fade-row">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#004687">KC</span><span class="team-name">Royals</span></div></td>
+      <td class="r"><span class="bp-rank bp-bad">#25</span></td>
+      <td class="r"><span class="diff-neg">-4</span></td>
+      <td class="r"><span class="t8-bad">6.18</span></td>
+      <td class="r"><span class="t8-bad">1.67</span></td>
+      <td class="r"><span class="t8-bad">1.89</span></td>
+      <td class="r" style="color:#888">—</td>
+      <td style="font-size:10px;color:#f87171;">#30 ERA, #30 WHIP, #28 L7 · worst pen in baseball · T8 MAX FADE</td>
+      <td class="r"><span class="t8-bad">✕ WORST</span></td>
+    </tr>
+    <tr class="fade-row">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#fd5a1e">SF</span><span class="team-name">Giants</span></div></td>
+      <td class="r"><span class="bp-rank bp-mid">#14</span></td>
+      <td class="r"><span class="diff-pos">9</span></td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r"><span class="t8-good">0.93</span></td>
+      <td class="r" style="color:#888">—</td>
+      <td style="font-size:10px;color:#fbbf24;">L7 WHIP #1 in MLB (0.93) — but up 10 pts this week = regression likely · don't overweight</td>
+      <td class="r"><span class="t8-warn">⚠ HOT/REGRESS</span></td>
+    </tr>
+    <tr class="fade-row">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#002d72">NYM</span><span class="team-name">Mets</span></div></td>
+      <td class="r"><span class="bp-rank bp-mid">#16</span></td>
+      <td class="r"><span class="diff-pos">7</span></td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r" style="color:#888">—</td>
+      <td class="r"><span class="t8-bad">7.73</span></td>
+      <td style="font-size:10px;color:#f87171;">K/9 bottom-3 in MLB · 0-10 L10 means bullpen isn't holding leads either</td>
+      <td class="r"><span class="t8-bad">✕ POOR</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+<!-- ═══ PLAY LIST ══════════════════════════════════════════════════════ -->
+<div class="section-header" style="margin-top:16px;">
+  <span class="section-title">▲ PLAY LIST — FULL TRIGGER COUNT WITH T8</span>
+  <span class="section-line"></span>
+  <span class="section-count">6 TEAMS</span>
+</div>
+
+<div class="grid-wrapper">
+<table>
+  <thead>
+    <tr>
+      <th style="width:120px">TEAM</th>
+      <th class="r" style="width:55px">RECORD</th>
+      <th class="r" style="width:42px">DIFF</th>
+      <th class="c" style="width:46px">STREAK</th>
+      <th class="c" style="width:42px">L10</th>
+      <th style="width:220px">TRIGGERS FIRED</th>
+      <th class="c" style="width:55px">T8 STATUS</th>
+      <th class="c" style="width:52px">TRIG COUNT</th>
+      <th class="c" style="width:72px">CONFIDENCE</th>
+      <th class="r" style="width:52px">UNIT SIZE</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="play-blue">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#ce1141">ATL</span><span class="team-name">Braves</span></div></td>
+      <td class="r"><span class="record">16–7</span></td>
+      <td class="r"><span class="diff-pos">+62</span></td>
+      <td class="c"><span class="streak-win">W6</span></td>
+      <td class="c" style="color:#4ade80">8–2</td>
+      <td>
+        <div class="tdots">
+          <span class="dot da-blue">T1</span><span class="dot da-blue">T2</span><span class="dot da-blue">T3</span>
+          <span class="dot da-blue">T4</span><span class="dot da-blue">T8</span><span class="dot da-blue">T9</span>
+          <span class="dot da-blue">T14</span><span class="dot da-blue">R5</span>
+          <span class="collision">⚡W6</span>
+        </div>
+      </td>
+      <td class="c"><span class="t8-good">✔ #2 ELITE</span></td>
+      <td class="c" style="color:#60a5fa;font-weight:700;">8 + COLL</td>
+      <td class="c"><span class="conf-badge badge-blue">MAX</span></td>
+      <td class="r"><span class="unit-max">$550</span></td>
+    </tr>
+    <tr class="play-blue">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#0e3386">CHC</span><span class="team-name">Cubs</span></div></td>
+      <td class="r"><span class="record">13–9</span></td>
+      <td class="r"><span class="diff-pos">+34</span></td>
+      <td class="c"><span class="streak-win">W6</span></td>
+      <td class="c" style="color:#4ade80">7–3</td>
+      <td>
+        <div class="tdots">
+          <span class="dot da-blue">T1</span><span class="dot da-blue">T2</span><span class="dot da-blue">T3</span>
+          <span class="dot da-blue">T4</span><span class="dot da-blue">T8</span><span class="dot da-blue">T14</span>
+          <span class="dot da-blue">R5</span>
+          <span class="collision">⚡W6 vs PHI L6</span>
+        </div>
+      </td>
+      <td class="c"><span class="t8-good">✔ #8 STRONG</span></td>
+      <td class="c" style="color:#60a5fa;font-weight:700;">7 + COLL</td>
+      <td class="c"><span class="conf-badge badge-blue">MAX</span></td>
+      <td class="r"><span class="unit-max">$400</span></td>
+    </tr>
+    <tr class="play-green">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#005a9c">LAD</span><span class="team-name">Dodgers</span></div></td>
+      <td class="r"><span class="record">16–6</span></td>
+      <td class="r"><span class="diff-pos">+57</span></td>
+      <td class="c"><span class="streak-win">W1</span></td>
+      <td class="c" style="color:#4ade80">7–3</td>
+      <td>
+        <div class="tdots">
+          <span class="dot da-green">T3</span><span class="dot da-green">T4</span><span class="dot da-green">T6</span>
+          <span class="dot da-green">T8</span><span class="dot da-green">T14</span>
+          <span class="dot di">T2</span><span class="dot di">T9</span>
+          <span style="font-size:9px;color:#888;margin-left:3px;">ROAD FAV vs SF</span>
+        </div>
+      </td>
+      <td class="c"><span class="t8-good">✔ #4 PR+18</span></td>
+      <td class="c" style="color:#4ade80;font-weight:700;">5</td>
+      <td class="c"><span class="conf-badge badge-green">STRONG</span></td>
+      <td class="r"><span class="unit-strong">$300</span></td>
+    </tr>
+    <tr class="play-green">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#2f241d">SD</span><span class="team-name">Padres</span></div></td>
+      <td class="r"><span class="record">15–7</span></td>
+      <td class="r"><span class="diff-pos">+17</span></td>
+      <td class="c"><span class="streak-win">W2</span></td>
+      <td class="c" style="color:#4ade80">9–1</td>
+      <td>
+        <div class="tdots">
+          <span class="dot da-green">T3</span><span class="dot da-green">T4</span><span class="dot da-green">T8</span>
+          <span class="dot da-green">T14</span><span class="dot da-amber">T2</span>
+          <span style="font-size:9px;color:#4ade80;margin-left:3px;">PETCO PK · #1 BP MLB</span>
+        </div>
+      </td>
+      <td class="c"><span class="t8-good">✔ #1 MAX</span></td>
+      <td class="c" style="color:#4ade80;font-weight:700;">5</td>
+      <td class="c"><span class="conf-badge badge-green">STRONG</span></td>
+      <td class="r"><span class="unit-strong">$400</span></td>
+    </tr>
+    <tr class="play-teal">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#fdb827">PIT</span><span class="team-name">Pirates</span></div></td>
+      <td class="r"><span class="record">13–9</span></td>
+      <td class="r"><span class="diff-pos">+25</span></td>
+      <td class="c"><span class="streak-win">W1</span></td>
+      <td class="c" style="color:#fbbf24">6–4</td>
+      <td>
+        <div class="tdots">
+          <span class="dot da-teal">T3</span><span class="dot da-teal">T4</span><span class="dot da-teal">T14</span>
+          <span class="dot di">T2</span><span class="dot di">T6</span>
+          <span style="font-size:9px;color:#fbbf24;margin-left:3px;">NEED SP DATA</span>
+        </div>
+      </td>
+      <td class="c"><span class="t8-warn">~ #17 NEUTRAL</span></td>
+      <td class="c" style="color:#2dd4bf;font-weight:700;">3</td>
+      <td class="c"><span class="conf-badge badge-teal">ENTRY</span></td>
+      <td class="r"><span class="unit-entry">$200</span></td>
+    </tr>
+    <tr class="play-teal">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#003087">NYY</span><span class="team-name">Yankees</span></div></td>
+      <td class="r"><span class="record">13–9</span></td>
+      <td class="r"><span class="diff-pos">+82RS</span></td>
+      <td class="c"><span class="streak-win">W3</span></td>
+      <td class="c" style="color:#fbbf24">5–5</td>
+      <td>
+        <div class="tdots">
+          <span class="dot da-teal">T2</span><span class="dot da-teal">T4</span><span class="dot da-teal">T14</span>
+          <span class="dot di">T3</span><span class="dot di">T6</span>
+          <span style="font-size:9px;color:#fbbf24;margin-left:3px;">L7 WHIP WARNING</span>
+        </div>
+      </td>
+      <td class="c"><span class="t8-warn">⚠ L7 DEGRADED</span></td>
+      <td class="c" style="color:#fbbf24;font-weight:700;">3⚠</td>
+      <td class="c"><span class="conf-badge badge-amber">WATCH</span></td>
+      <td class="r"><span class="unit-watch">HOLD</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+<!-- ═══ FADE LIST ══════════════════════════════════════════════════════ -->
+<div class="section-header" style="margin-top:16px;">
+  <span class="section-title">▼ FADE LIST — T15 PROTOCOL + T8 CONFIRMS</span>
+  <span class="section-line"></span>
+  <span class="section-count">6 TEAMS</span>
+</div>
+
+<div class="grid-wrapper">
+<table>
+  <thead>
+    <tr>
+      <th style="width:120px">TEAM</th>
+      <th class="r" style="width:55px">RECORD</th>
+      <th class="r" style="width:42px">DIFF</th>
+      <th class="c" style="width:46px">STREAK</th>
+      <th class="c" style="width:42px">L10</th>
+      <th style="width:220px">FADE TRIGGERS</th>
+      <th class="c" style="width:72px">T8 STATUS</th>
+      <th class="c" style="width:72px">SIGNAL</th>
+      <th class="r" style="width:52px">ACTION</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="fade-row">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#e81828">PHI</span><span class="team-name">Phillies</span></div></td>
+      <td class="r"><span class="record">8–14</span></td>
+      <td class="r"><span class="diff-neg">–42</span></td>
+      <td class="c"><span class="streak-loss">L6</span></td>
+      <td class="c" style="color:#f87171">2–8</td>
+      <td><div class="tdots"><span class="dot da-red">F1</span><span class="dot da-red">F2</span><span class="dot da-red">T2↓</span><span style="font-size:9px;color:#f87171;margin-left:3px;">WORST RD NL · L6 FREE FALL</span></div></td>
+      <td class="c"><span class="t8-na">NEUTRAL</span></td>
+      <td class="c"><span class="conf-badge badge-red">T15 FADE</span></td>
+      <td class="r"><span class="unit-fade">FADE</span></td>
+    </tr>
+    <tr class="fade-row">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#092c5c">TB</span><span class="team-name">Rays</span></div></td>
+      <td class="r"><span class="record">12–10</span></td>
+      <td class="r"><span class="diff-neg">–11</span></td>
+      <td class="c"><span class="streak-loss">L2</span></td>
+      <td class="c" style="color:#fbbf24">7–3</td>
+      <td><div class="tdots"><span class="dot da-red">F2</span><span class="dot da-red">T4↓</span><span style="font-size:9px;color:#f87171;margin-left:3px;">HOME .455 · NEG DIFF</span></div></td>
+      <td class="c"><span class="t8-bad">✕ #23 ERA 5.38</span></td>
+      <td class="c"><span class="conf-badge badge-red">AVOID</span></td>
+      <td class="r"><span class="unit-fade">AVOID</span></td>
+    </tr>
+    <tr class="fade-row">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#004687">KC</span><span class="team-name">Royals</span></div></td>
+      <td class="r"><span class="record">7–16</span></td>
+      <td class="r"><span class="diff-neg">–34</span></td>
+      <td class="c"><span class="streak-loss">L8</span></td>
+      <td class="c" style="color:#f87171">2–8</td>
+      <td><div class="tdots"><span class="dot da-red">F1</span><span class="dot da-red">F2</span><span class="dot da-red">T2↓</span><span class="dot da-red">T14↓</span><span style="font-size:9px;color:#f87171;margin-left:3px;">L8 · WORST AL</span></div></td>
+      <td class="c"><span class="t8-bad">✕ #25 ERA 6.18</span></td>
+      <td class="c"><span class="conf-badge badge-red">T15 FADE</span></td>
+      <td class="r"><span class="unit-fade">FADE</span></td>
+    </tr>
+    <tr class="fade-row">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#fd5a1e">SF</span><span class="team-name">Giants</span></div></td>
+      <td class="r"><span class="record">9–13</span></td>
+      <td class="r"><span class="diff-neg">–21</span></td>
+      <td class="c"><span class="streak-loss">L1</span></td>
+      <td class="c" style="color:#fbbf24">5–5</td>
+      <td><div class="tdots"><span class="dot da-red">F2</span><span class="dot da-red">T4↓</span><span class="dot da-amber">T6⚠</span><span style="font-size:9px;color:#fbbf24;margin-left:3px;">T1 PRICE +152 BUT NEG DIFF</span></div></td>
+      <td class="c"><span class="t8-warn">⚠ L7 HOT→REGRESS</span></td>
+      <td class="c"><span class="conf-badge badge-amber">SKIP</span></td>
+      <td class="r"><span class="unit-fade">SKIP</span></td>
+    </tr>
+    <tr class="fade-row">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#002d72">NYM</span><span class="team-name">Mets</span></div></td>
+      <td class="r"><span class="record">7–15</span></td>
+      <td class="r"><span class="diff-neg">–25</span></td>
+      <td class="c"><span class="streak-loss">L11</span></td>
+      <td class="c" style="color:#f87171">0–10</td>
+      <td><div class="tdots"><span class="dot da-red">F1</span><span class="dot da-red">F2</span><span class="dot da-red">T2↓</span><span class="dot da-red">T14↓</span><span style="font-size:9px;color:#f87171;margin-left:3px;">L11 · 0-10 L10</span></div></td>
+      <td class="c"><span class="t8-bad">✕ K/9 BOT-3</span></td>
+      <td class="c"><span class="conf-badge badge-red">T15 FADE</span></td>
+      <td class="r"><span class="unit-fade">FADE</span></td>
+    </tr>
+    <tr class="fade-row">
+      <td><div class="team-cell"><span class="team-abbr" style="color:#33006f">COL</span><span class="team-name">Rockies</span></div></td>
+      <td class="r"><span class="record">9–14</span></td>
+      <td class="r"><span class="diff-neg">–19</span></td>
+      <td class="c"><span class="streak-loss">L1</span></td>
+      <td class="c" style="color:#f87171">3–7</td>
+      <td><div class="tdots"><span class="dot da-red">F2</span><span class="dot da-red">T4↓</span><span style="font-size:9px;color:#f87171;margin-left:3px;">NEG DIFF · COORS INFLATION</span></div></td>
+      <td class="c" style="font-size:10px;color:#888;">ERA 3.17 but Coors skews</td>
+      <td class="c"><span class="conf-badge badge-red">FADE</span></td>
+      <td class="r"><span class="unit-fade">AVOID</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+<!-- ═══ TONIGHT'S KEY MATCHUPS ══════════════════════════════════════════ -->
+<div class="section-header" style="margin-top:16px;">
+  <span class="section-title">◈ TONIGHT'S KEY MATCHUPS — FULL T8 + GATE VERDICT</span>
+  <span class="section-line"></span>
+</div>
+
+<div class="grid-wrapper">
+<table>
+  <thead>
+    <tr>
+      <th style="width:145px">MATCHUP</th>
+      <th style="width:165px">PITCHERS</th>
+      <th class="c" style="width:60px">ML AWAY</th>
+      <th class="c" style="width:60px">ML HOME</th>
+      <th class="c" style="width:52px">T1 GATE</th>
+      <th class="c" style="width:90px">BP EDGE</th>
+      <th style="width:195px">FULL READ</th>
+      <th class="r" style="width:60px">VERDICT</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="matchup-play">
+      <td><span style="color:#0e3386;font-weight:700;">CHC</span> <span style="color:#555">vs</span> <span style="color:#e81828">PHI</span></td>
+      <td style="color:#888;font-size:10px;">TBD vs TBD</td>
+      <td class="c"><span class="odds-na">—</span></td>
+      <td class="c"><span class="odds-neg">-120</span></td>
+      <td class="c" style="color:#22c55e;font-weight:700;">T11 ✔</td>
+      <td class="c"><span style="color:#4ade80;font-weight:700;">CHC +7 pts</span></td>
+      <td style="font-size:10px;color:#4ade80;">CHC #8 BP vs PHI #15. W6 collision vs L6. MAX play. ACTIVE.</td>
+      <td class="r"><span class="conf-badge badge-blue">LIVE ✔</span></td>
+    </tr>
+    <tr class="matchup-play">
+      <td><span style="color:#ce1141;font-weight:700;">ATL</span> <span style="color:#555">vs</span> OPP</td>
+      <td style="color:#888;font-size:10px;">TBD</td>
+      <td class="c"><span class="odds-na">—</span></td>
+      <td class="c"><span class="odds-neg">-140</span></td>
+      <td class="c" style="color:#22c55e;font-weight:700;">T11 ✔</td>
+      <td class="c"><span style="color:#4ade80;font-weight:700;">#2 ELITE</span></td>
+      <td style="font-size:10px;color:#4ade80;">ATL best BP WHIP in MLB. W6. +62 diff. All systems go. ACTIVE.</td>
+      <td class="r"><span class="conf-badge badge-blue">LIVE ✔</span></td>
+    </tr>
+    <tr class="matchup-fade">
+      <td><span style="color:#005a9c;font-weight:700;">LAD</span> <span style="color:#555">@</span> <span style="color:#fd5a1e">SF</span></td>
+      <td style="color:#888;font-size:10px;">Yamamoto(2-1,2.10) vs Roupp(3-1,2.38)</td>
+      <td class="c"><span class="odds-neg">-180</span></td>
+      <td class="c"><span class="odds-pos">+152</span></td>
+      <td class="c" style="color:#fbbf24">⚠ SF +152</td>
+      <td class="c"><span style="color:#4ade80;">LAD #4 vs SF #14</span></td>
+      <td style="font-size:10px;color:#fbbf24;">SF hits T1 price but: -21 diff, .409 home record, T3/T4 fail. LAD BP crushes SF BP. SF L7 WHIP artificially hot (+10 pts, regression expected). LAD -180 is juice but BP edge is real.</td>
+      <td class="r"><span class="conf-badge badge-red">SF SKIP</span></td>
+    </tr>
+    <tr class="matchup-fade">
+      <td><span style="color:#092c5c;font-weight:700;">CIN</span> <span style="color:#555">@</span> <span style="color:#092c5c">TB</span></td>
+      <td style="color:#888;font-size:10px;">Burns(1-1,2.42) vs Matz(3-0,3.80)</td>
+      <td class="c"><span class="odds-neg">-110</span></td>
+      <td class="c"><span class="odds-neg">-110</span></td>
+      <td class="c" style="color:#555">—</td>
+      <td class="c"><span style="color:#4ade80;">CIN #3 vs TB #23</span></td>
+      <td style="font-size:10px;color:#f87171;">TB BP ERA 5.38, K/9 bottom-5. No T1. But CIN road + TB home below .500. T8 obliterates TB regardless. Pass on TB side.</td>
+      <td class="r"><span class="conf-badge badge-red">TB AVOID</span></td>
+    </tr>
+    <tr class="matchup-fade">
+      <td><span style="color:#004687;font-weight:700;">BAL</span> <span style="color:#555">@</span> <span style="color:#004687">KC</span></td>
+      <td style="color:#888;font-size:10px;">Baz(0-2,4.91) vs Bubic(2-1,3.97)</td>
+      <td class="c"><span class="odds-pos">+116</span></td>
+      <td class="c"><span class="odds-neg">-136</span></td>
+      <td class="c" style="color:#f87171">✕ KC FAV</td>
+      <td class="c"><span style="color:#4ade80;">BAL #19 vs KC #25</span></td>
+      <td style="font-size:10px;color:#f87171;">KC L8. BP ERA 6.18 = worst MLB. Bubic decent SP but pen will blow it. BAL +116 below T13 threshold. Both sides awkward — stay away.</td>
+      <td class="r"><span class="conf-badge badge-amber">PASS</span></td>
+    </tr>
+    <tr class="matchup-skip">
+      <td><span style="color:#e8e8e8">HOU</span> <span style="color:#555">@</span> <span style="color:#e8e8e8">CLE</span></td>
+      <td style="color:#888;font-size:10px;">Weiss(0-2,6.75) vs Messick(3-0,1.05)</td>
+      <td class="c"><span class="odds-pos">+129</span></td>
+      <td class="c"><span class="odds-neg">-149</span></td>
+      <td class="c" style="color:#f87171">✕ +129</td>
+      <td class="c" style="color:#888;">HOU #26 bad</td>
+      <td style="font-size:10px;color:#888;">HOU below T1 floor AND BP ranked #26 (ERA 5.88). CLE -1.5 +135 intriguing run line but CLE isn't a home dog play. Monitor only.</td>
+      <td class="r"><span class="conf-badge badge-amber">PASS</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-note">
+    T8 SOURCE: VSiN/Makinen Bullpen Power Ratings thru Apr 19, 2026 · T5+T7 SIDELINED (totals only)<br>
+    ⚡ COLLISION: Any W streak vs L streak = active · W5+/L5+ = $1,000 hard cap · Gate trigger alone sufficient<br>
+    NYY DOWNGRADED: L7 WHIP 1.73 (worst-5 MLB) + -7 pt week = hold until pen stabilizes
+  </div>
+  <div class="footer-right">
+    <div class="footer-stat"><div class="fl">SEASON P&L</div><div class="fv pos">+$4,746</div></div>
+    <div class="footer-stat"><div class="fl">NHL P&L</div><div class="fv neg">–$291</div></div>
+    <div class="footer-stat"><div class="fl">TODAY PENDING</div><div class="fv gold">+$390</div></div>
+  </div>
+</div>
+
+</body>
+</html>
