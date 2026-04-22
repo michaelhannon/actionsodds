@@ -511,13 +511,26 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
     recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing} (borderline)`;
   }
 
-  // Run line add-on
+  // Run line — always display both sides, flag qualifying add-on separately
+  // Rule: fav -1.5 must pay +115+. Dog +1.5 must pay +100+. Add-on only when 4+ triggers.
+  const rlDisplay = {
+    homeLine: homeRL ? { point: homeRL.point, price: homeRL.price } : null,
+    awayLine: awayRL ? { point: awayRL.point, price: awayRL.price } : null
+  };
+
   let rlAddon = null;
-  if (sizing > 0 && !t14Kill && !t15Active && trigCount >= 4) {
-    if (gateSide === 'home' && awayRL?.price >= 115) {
-      rlAddon = { desc: `${game.away.name} -1.5 +${awayRL.price}`, amt: Math.round(sizing * 0.5) };
-    } else if (gateSide === 'away' && homeRL?.price >= 115) {
-      rlAddon = { desc: `${game.home.name} -1.5 +${homeRL.price}`, amt: Math.round(sizing * 0.5) };
+  if (!t14Kill && !t15Active && trigCount >= 3) {
+    // Fav -1.5 at plus money (best value)
+    if (gateSide === 'home' && awayRL?.point <= -1 && awayRL?.price >= 115) {
+      rlAddon = { desc: `${game.away.name} -1.5 ${awayRL.price > 0 ? '+' : ''}${awayRL.price}`, amt: Math.round((sizing||200) * 0.5), qualifying: true };
+    } else if (gateSide === 'away' && homeRL?.point <= -1 && homeRL?.price >= 115) {
+      rlAddon = { desc: `${game.home.name} -1.5 ${homeRL.price > 0 ? '+' : ''}${homeRL.price}`, amt: Math.round((sizing||200) * 0.5), qualifying: true };
+    }
+    // Dog +1.5 at +100 or better
+    else if (gateSide === 'home' && homeRL?.point >= 1 && homeRL?.price >= 100) {
+      rlAddon = { desc: `${game.home.name} +1.5 ${homeRL.price > 0 ? '+' : ''}${homeRL.price}`, amt: Math.round((sizing||200) * 0.5), qualifying: trigCount >= 4 };
+    } else if (gateSide === 'away' && awayRL?.point >= 1 && awayRL?.price >= 100) {
+      rlAddon = { desc: `${game.away.name} +1.5 ${awayRL.price > 0 ? '+' : ''}${awayRL.price}`, amt: Math.round((sizing||200) * 0.5), qualifying: trigCount >= 4 };
     }
   }
 
@@ -525,7 +538,7 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
     gateType, gateML, gateSide,
     triggered, failed, notes,
     trigCount, sizing, color, strength,
-    recommendation, rlAddon,
+    recommendation, rlAddon, rlDisplay,
     t14Kill, t15Active, t3Kill,
     collision: buildCollisionData(away, home),
     pitcherEdge: pitSide ? { name: pitName, era: pitSide.era, fip: pitSide.fip, whip: pitSide.whip } : null,
