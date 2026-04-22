@@ -907,17 +907,20 @@ function renderMultiBookGrid(games){
     <th style="text-align:left;color:var(--text3);border-color:var(--border2);">Game</th>
     <th style="color:var(--text3);border-color:var(--border2);">Time</th>
     ${books.map(b=>{
-      const cfg2={
-        fanduel:{color:'#1bcd8f',bg:'rgba(27,205,143,0.12)',border:'rgba(27,205,143,0.3)',icon:'F'},
-        betmgm:{color:'#c8973a',bg:'rgba(200,151,58,0.12)',border:'rgba(200,151,58,0.3)',icon:'M'},
-        caesars:{color:'#7ab3f0',bg:'rgba(122,179,240,0.12)',border:'rgba(122,179,240,0.3)',icon:'C'},
-        hard_rock_bet:{color:'#ff6b8a',bg:'rgba(255,107,138,0.12)',border:'rgba(255,107,138,0.3)',icon:'HR'},
-        draftkings:{color:'#62b3e0',bg:'rgba(98,179,224,0.12)',border:'rgba(98,179,224,0.3)',icon:'DK'},
+      const logoUrls={
+        fanduel:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/FanDuel_logo.svg/320px-FanDuel_logo.svg.png',
+        betmgm:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/BetMGM_Logo.svg/320px-BetMGM_Logo.svg.png',
+        caesars:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Caesars_Sportsbook_logo.svg/320px-Caesars_Sportsbook_logo.svg.png',
+        hard_rock_bet:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Hard_Rock_logo.svg/320px-Hard_Rock_logo.svg.png',
+        draftkings:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/DraftKings_Logo.svg/320px-DraftKings_Logo.svg.png',
       };
-      const s=cfg2[b.key]||{color:'#999',bg:'rgba(150,150,150,0.1)',border:'rgba(150,150,150,0.2)',icon:'?'};
       const bookFullNames={fanduel:'FanDuel',betmgm:'BetMGM',caesars:'Caesars',hard_rock_bet:'Hard Rock',draftkings:'DraftKings'};
       const name=bookFullNames[b.key]||b.label;
-      return '<th colspan="3" class="'+b.thCls+'" style="padding:6px 4px;"><div style="display:inline-flex;align-items:center;gap:5px;background:'+s.bg+';border:1px solid '+s.border+';border-radius:5px;padding:4px 10px;"><span style="font-family:Arial Black,sans-serif;font-size:13px;font-weight:900;color:'+s.color+';letter-spacing:-0.3px;">'+name+'</span></div></th>';
+      const logoUrl=logoUrls[b.key];
+      const logoHtml=logoUrl
+        ? '<img src="'+logoUrl+'" alt="'+name+'" style="height:22px;max-width:90px;object-fit:contain;filter:brightness(0) invert(1);" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'inline\'">'+'<span style="display:none;font-family:Arial Black,sans-serif;font-size:12px;font-weight:900;color:#fff;">'+name+'</span>'
+        : '<span style="font-family:Arial Black,sans-serif;font-size:12px;font-weight:900;color:#fff;">'+name+'</span>';
+      return '<th colspan="3" class="'+b.thCls+'" style="padding:8px 4px;border-bottom:2px solid rgba(255,255,255,0.15);">'+logoHtml+'</th>';
     }).join('')}
     <th style="color:var(--text3);border-color:var(--border2);">System</th>
   </tr>
