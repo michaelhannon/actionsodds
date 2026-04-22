@@ -1300,13 +1300,132 @@ function toggleTheme(){
 }
 
 // ── INIT ─────────────────────────────────────────────────
+// ── MORNING SCAN FETCH ────────────────────────────────────────
+async function loadMorningScan(){
+  try{
+    const res=await fetch('/morning-scan');
+    const scan=await res.json();
+    if(!scan||scan.error){
+      document.getElementById('collision-table-container').innerHTML='<div class="empty">No scan data yet — server will auto-scan at 9AM ET or <button onclick="triggerManualScan()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;text-decoration:underline;">run now</button></div>';
+      return;
+    }
+    renderCollisionGrid(scan);
+    renderRegressionFlags(scan.outliers||[]);
+  }catch(e){
+    document.getElementById('collision-table-container').innerHTML='<div class="empty">Offline — scan loads automatically on server</div>';
+  }
+}
+
+async function triggerManualScan(){
+  document.getElementById('collision-table-container').innerHTML='<div class="empty" style="color:var(--amber);">Running scan... ~15 seconds</div>';
+  try{
+    await fetch('/morning-scan/run',{method:'POST'});
+    setTimeout(loadMorningScan,15000);
+  }catch(e){}
+}
+
+function renderCollisionGrid(scan){
+  const games=scan.games||[];
+  if(!games.length){
+    document.getElementById('collision-table-container').innerHTML='<div class="empty">No games found for today</div>';
+    return;
+  }
+  let html=`<table class="cg-table">
+    <thead><tr>
+      <th>Matchup</th>
+      <th>Away Streak</th>
+      <th>Away Diff</th>
+      <th>Home Streak</th>
+      <th>Home Diff</th>
+      <th>Collision</th>
+      <th>Gate</th>
+      <th>Rec</th>
+    </tr></thead><tbody>`;
+
+  for(const g of games){
+    const awayStreakClass=g.away.streak==='W'?'cg-streak-w':'cg-streak-l';
+    const homeStreakClass=g.home.streak==='W'?'cg-streak-w':'cg-streak-l';
+    const awayDiffClass=g.away.runDiff>0?'cg-diff-pos':g.away.runDiff<0?'cg-diff-neg':'cg-diff-flat';
+    const homeDiffClass=g.home.runDiff>0?'cg-diff-pos':g.home.runDiff<0?'cg-diff-neg':'cg-diff-flat';
+    const awayDiffStr=(g.away.runDiff>0?'+':'')+g.away.runDiff;
+    const homeDiffStr=(g.home.runDiff>0?'+':'')+g.home.runDiff;
+
+    let collisionHtml='<span class="cg-no-coll">—</span>';
+    if(g.collision.max){
+      collisionHtml='<span class="cg-collision max">⚡ MAX</span>';
+    }else if(g.collision.active){
+      collisionHtml='<span class="cg-collision">COLL</span>';
+    }
+
+    let gateHtml='<span class="cg-gate-fail">—</span>';
+    if(g.gate.status==='T1') gateHtml=`<span class="cg-gate-pass">${g.gate.label}</span>`;
+    else if(g.gate.status==='T11'||g.gate.status==='T12') gateHtml=`<span class="cg-gate-warn">${g.gate.label}</span>`;
+    else if(g.gate.status==='T13') gateHtml=`<span style="color:var(--teal);">${g.gate.label}</span>`;
+
+    let recHtml='<span class="cg-no-coll">PASS</span>';
+    if(g.playRecommendation){
+      const p=g.playRecommendation;
+      const col=p.color==='blue'?'var(--blue)':p.color==='green'?'var(--green)':p.color==='teal'?'var(--teal)':'var(--amber)';
+      recHtml=`<span style="color:${col};font-weight:700;">${p.strength} $${p.sizing}</span>`;
+    }
+
+    // Reg flag indicators
+    const awayReg=g.away.regressionFlag?` <span style="color:var(--teal);font-size:8px;">T4↑</span>`:'';
+    const homeReg=g.home.regressionFlag?` <span style="color:var(--teal);font-size:8px;">T4↑</span>`:'';
+
+    html+=`<tr>
+      <td style="color:var(--text2);">${g.away.abbr} @ ${g.home.abbr}</td>
+      <td class="${awayStreakClass}">${g.away.streak}${g.away.streakLen}${awayReg}</td>
+      <td class="${awayDiffClass}">${awayDiffStr}</td>
+      <td class="${homeStreakClass}">${g.home.streak}${g.home.streakLen}${homeReg}</td>
+      <td class="${homeDiffClass}">${homeDiffStr}</td>
+      <td>${collisionHtml}</td>
+      <td>${gateHtml}</td>
+      <td>${recHtml}</td>
+    </tr>`;
+  }
+  html+='</tbody></table>';
+
+  // Summary line
+  const s=scan.summary;
+  html=`<div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:6px;display:flex;gap:16px;">
+    <span>🕘 ${new Date(scan.timestamp).toLocaleTimeString()}</span>
+    <span>${s.gamesFound} games</span>
+    <span style="color:var(--green);">${s.plays} plays</span>
+    <span style="color:var(--amber);">${s.collisions} collisions</span>
+    <span style="color:var(--teal);">${s.regressionFlags} T4 flags</span>
+    <button onclick="triggerManualScan()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-family:var(--mono);font-size:9px;text-decoration:underline;padding:0;">↻ Rescan</button>
+  </div>`+html;
+
+  document.getElementById('collision-table-container').innerHTML=html;
+}
+
+function renderRegressionFlags(outliers){
+  if(!outliers||!outliers.length)return;
+  // Update the static flags with live data
+  const flagsEl=document.querySelector('.reg-flags');
+  if(!flagsEl)return;
+  // Keep existing static ones for known outliers, just add any new ones
+  const existing=['SEA','KC','NYM'];
+  const newOutliers=outliers.filter(o=>!existing.includes(o.abbr));
+  for(const o of newOutliers){
+    const div=document.createElement('div');
+    div.className='reg-flag due';
+    div.innerHTML=`<div class="reg-flag-title">⬆ Regression Due</div>
+      <div class="reg-flag-team">${o.name}</div>
+      <div class="reg-flag-stat">${o.regressionFlag?.pct}% (MLB mean ${o.regressionFlag?.type?.includes('road')?'~47%':'~53%'})</div>
+      <div class="reg-flag-boost">→ ${o.regressionFlag?.boost}</div>`;
+    flagsEl.appendChild(div);
+  }
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   updateSummary();
   renderLog();
   renderPaper();
   initToggles();
   loadOdds();
-  // Open protocol by default
+  loadMorningScan();
   toggleProtocol();
 });
 </script>
