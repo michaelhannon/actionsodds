@@ -1318,7 +1318,7 @@ function renderFullPlayCard(scan){
         </div>
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px;">${a.recommendation}</div>
         <div style="font-size:13px;color:var(--text3);font-family:var(--mono);margin-bottom:6px;">${g.game} · ${new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div>
-        ${a.(()=>{
+        ${(()=>{
           const hrl=a.rlDisplay&&a.rlDisplay.homeLine?a.rlDisplay.homeLine:{price:a.odds&&a.odds.homeRL?a.odds.homeRL:null,point:a.gateSide==='home'?1.5:-1.5};
           const arl=a.rlDisplay&&a.rlDisplay.awayLine?a.rlDisplay.awayLine:{price:a.odds&&a.odds.awayRL?a.odds.awayRL:null,point:a.gateSide==='away'?1.5:-1.5};
           let rlHtml='<div style="font-family:var(--mono);font-size:12px;margin-bottom:6px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:5px;border:1px solid rgba(255,255,255,0.06);">';
