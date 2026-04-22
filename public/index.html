@@ -942,7 +942,7 @@ async function loadOdds(){
     // Build book tabs
     const books=new Set();
     for(const g of allGames)for(const bk of g.bookmakers)books.add(bk.key);
-    const bookNames={'draftkings':'DraftKings','fanduel':'FanDuel','betmgm':'BetMGM','caesars':'Caesars','williamhill_us':'WH','barstool':'Barstool'};
+    const bookNames={'draftkings':'DraftKings','fanduel':'FanDuel','betmgm':'BetMGM','caesars':'Caesars','hard_rock_bet':'Hard Rock','williamhill_us':'WH','barstool':'Barstool'};
     const tabsEl=document.getElementById('book-tabs');
     tabsEl.innerHTML='';
     let firstBook=null;
@@ -955,7 +955,7 @@ async function loadOdds(){
       tabsEl.appendChild(btn2);
     }
     document.getElementById('game-count').textContent=allGames.length+' games';
-    if(firstBook)renderCards(allGames,firstBook);
+    if(firstBook){try{renderCards(allGames,firstBook);}catch(e){document.getElementById("card-output").innerHTML="<div class='status-box'><div class='status-title' style='color:var(--red);'>Render error: "+e.message+"</div></div>";console.error(e);}}
   }catch(err){
     document.getElementById('card-output').innerHTML=`<div class="status-box"><div class="status-title">Could not load odds</div><div class="status-sub">${err.message}</div><div style="margin-top:16px;"><button class="add-btn" style="max-width:200px;margin:0 auto;display:block;" onclick="loadOdds()">Retry</button></div></div>`;
   }
