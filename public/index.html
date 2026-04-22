@@ -1108,11 +1108,11 @@ async function loadOdds(){
       btn2.className='book-tab'+(bk===firstBook?' active':'');
       btn2.textContent=bookNames[bk]||bk;
       btn2.onclick=()=>{document.querySelectorAll('.book-tab').forEach(b=>b.classList.remove('active'));btn2.classList.add('active');renderCards(allGames,bk);};
-      tabsEl.appendChild(btn2);
+      // tabs handled by grid view
     }
     document.getElementById('game-count').textContent=allGames.length+' games';
     // Build card view tabs too
-    var tabsEl2=document.getElementById('book-tabs-cards');
+    tabsEl2=document.getElementById('book-tabs-cards');
     tabsEl2.innerHTML='';
     for(const bk2 of books){
       const btn3=document.createElement('button');
