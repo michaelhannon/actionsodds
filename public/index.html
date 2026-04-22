@@ -908,17 +908,17 @@ function renderMultiBookGrid(games){
     <th style="color:var(--text3);border-color:var(--border2);">Time</th>
     ${books.map(b=>{
       const logoUrls={
-        fanduel:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/FanDuel_logo.svg/320px-FanDuel_logo.svg.png',
-        betmgm:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/BetMGM_Logo.svg/320px-BetMGM_Logo.svg.png',
-        caesars:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Caesars_Sportsbook_logo.svg/320px-Caesars_Sportsbook_logo.svg.png',
-        hard_rock_bet:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Hard_Rock_logo.svg/320px-Hard_Rock_logo.svg.png',
-        draftkings:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/DraftKings_Logo.svg/320px-DraftKings_Logo.svg.png',
+        fanduel:'https://www.fanduel.com/favicon.ico',
+        betmgm:'https://sports.betmgm.com/favicon.ico',
+        caesars:'https://www.caesars.com/sportsbook-and-casino/favicon.ico',
+        hard_rock_bet:'https://www.hardrock.bet/favicon.ico',
+        draftkings:'https://www.draftkings.com/favicon.ico',
       };
       const bookFullNames={fanduel:'FanDuel',betmgm:'BetMGM',caesars:'Caesars',hard_rock_bet:'Hard Rock',draftkings:'DraftKings'};
       const name=bookFullNames[b.key]||b.label;
       const logoUrl=logoUrls[b.key];
       const logoHtml=logoUrl
-        ? '<img src="'+logoUrl+'" alt="'+name+'" style="height:22px;max-width:90px;object-fit:contain;filter:brightness(0) invert(1);" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'inline\'">'+'<span style="display:none;font-family:Arial Black,sans-serif;font-size:12px;font-weight:900;color:#fff;">'+name+'</span>'
+        ? '<img src="'+logoUrl+'" alt="'+name+'" style="height:28px;max-width:28px;object-fit:contain;border-radius:4px;" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'inline\'">'+'<span style="display:none;font-family:Arial Black,sans-serif;font-size:12px;font-weight:900;color:#fff;">'+name+'</span>'
         : '<span style="font-family:Arial Black,sans-serif;font-size:12px;font-weight:900;color:#fff;">'+name+'</span>';
       return '<th colspan="3" class="'+b.thCls+'" style="padding:8px 4px;border-bottom:2px solid rgba(255,255,255,0.15);">'+logoHtml+'</th>';
     }).join('')}
