@@ -112,9 +112,19 @@ body.mlb-theme .logplay-fields .form-input{background:#ffffff;border:1px solid r
 body.mlb-theme .logplay-fields .form-input:focus{border-color:#002d72;}
 body.mlb-theme .logplay-fields .form-input.lp-autofilled{border-color:#1a8a45;background:#e8f5ee;}
 body.mlb-theme .logplay-fields select.form-input{
+  background-color:#ffffff;
   background-image:
-    linear-gradient(45deg, transparent 50%, #002d72 50%, #002d72 calc(50% + 1.5px), transparent calc(50% + 1.5px)),
-    linear-gradient(-45deg, transparent 50%, #002d72 50%, #002d72 calc(50% + 1.5px), transparent calc(50% + 1.5px));
+    linear-gradient(45deg, transparent 50%, #002d72 50%),
+    linear-gradient(135deg, #002d72 50%, transparent 50%);
+  background-position: calc(100% - 13px) calc(50% - 1px), calc(100% - 9px) calc(50% - 1px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat, no-repeat;
+  padding-right:26px;
+}
+body.mlb-theme .logplay-fields select.form-input:disabled{
+  background-color:#f5f7fb;
+  color:#7a8aa5;
+  opacity:1;
 }
 body.mlb-theme .logplay-btn{background:#bf0d3e;color:#ffffff;}
 body.mlb-theme .logplay-btn:hover{background:#dc1f4f;}
@@ -446,16 +456,16 @@ select.lp-input{cursor:pointer;}
   appearance:none;-webkit-appearance:none;
 }
 .logplay-fields select.form-input{
-  /* CSS-only chevron using two linear-gradients to draw a downward V */
+  /* CSS-only chevron drawn with two small angled triangles in a tiny background area */
   background-image:
-    linear-gradient(45deg, transparent 50%, #999 50%, #999 calc(50% + 1.5px), transparent calc(50% + 1.5px)),
-    linear-gradient(-45deg, transparent 50%, #999 50%, #999 calc(50% + 1.5px), transparent calc(50% + 1.5px));
+    linear-gradient(45deg, transparent 50%, #999 50%),
+    linear-gradient(135deg, #999 50%, transparent 50%);
   background-position:
-    calc(100% - 14px) 50%,
-    calc(100% - 9px) 50%;
-  background-size: 5px 5px;
+    calc(100% - 13px) calc(50% - 1px),
+    calc(100% - 9px) calc(50% - 1px);
+  background-size: 5px 5px, 5px 5px;
   background-repeat: no-repeat;
-  padding-right: 24px;
+  padding-right: 26px;
   cursor: pointer;
 }
 .logplay-fields select.form-input:disabled{opacity:0.5;cursor:not-allowed;}
@@ -1071,7 +1081,7 @@ select.form-input{cursor:pointer;}
 
 <!-- ── LOG PLAY (compact strip) ─────────────────────── -->
 <div class="logplay-strip">
-  <div class="logplay-strip-title">⚡ Log Play</div>
+  <div class="logplay-strip-title">Log Play</div>
   <div class="logplay-fields">
     <select class="form-input lp-game" id="l-game" onchange="onLogGameChange()">
       <option value="">Loading games…</option>
