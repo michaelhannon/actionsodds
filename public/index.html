@@ -1125,7 +1125,7 @@ async function loadOdds(){
     const books=new Set();
     for(const g of allGames)for(const bk of g.bookmakers)books.add(bk.key);
     const bookNames={'draftkings':'DraftKings','fanduel':'FanDuel','betmgm':'BetMGM','caesars':'Caesars','hard_rock_bet':'Hard Rock','williamhill_us':'WH','barstool':'Barstool'};
-    const tabsEl=document.getElementById('book-tabs');
+    var tabsEl=document.getElementById('book-tabs');
     tabsEl.innerHTML='';
     let firstBook=null;
     for(const bk of books){
@@ -1134,11 +1134,11 @@ async function loadOdds(){
       btn2.className='book-tab'+(bk===firstBook?' active':'');
       btn2.textContent=bookNames[bk]||bk;
       btn2.onclick=()=>{document.querySelectorAll('.book-tab').forEach(b=>b.classList.remove('active'));btn2.classList.add('active');renderCards(allGames,bk);};
-      tabsEl.appendChild(btn2);
+      if(tabsEl)tabsEl.appendChild(btn2);
     }
     document.getElementById('game-count').textContent=allGames.length+' games';
     // Build card view tabs too
-    const tabsEl=document.getElementById('book-tabs-cards');
+    var tabsEl2=document.getElementById('book-tabs-cards');
     tabsEl.innerHTML='';
     for(const bk2 of books){
       const btn3=document.createElement('button');
