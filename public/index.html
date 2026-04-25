@@ -1563,6 +1563,18 @@ function renderMultiBookGrid(games){
   const out=document.getElementById('card-output');
   if(!games.length){out.innerHTML='<div class="status-box"><div class="status-title">No games found</div></div>';return;}
 
+  // Filter to today only (Eastern Time)
+  const etDate = (iso) => {
+    if(!iso) return '';
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/New_York',
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date(iso));
+  };
+  const today = etDate(new Date().toISOString());
+  games = games.filter(g => etDate(g.commence_time) === today);
+  if(!games.length){out.innerHTML='<div class="status-box"><div class="status-title">No games today</div></div>';return;}
+
   // Find which books are available in this data
   const availBooks=new Set();
   for(const g of games) for(const bk of (g.bookmakers||[])) availBooks.add(bk.key);
@@ -1652,6 +1664,17 @@ function renderMultiBookGrid(games){
 }
 
 function renderCards(games,bk){
+  // Filter to today only (Eastern Time)
+  const etDate = (iso) => {
+    if(!iso) return '';
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/New_York',
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date(iso));
+  };
+  const today = etDate(new Date().toISOString());
+  games = games.filter(g => etDate(g.commence_time) === today);
+
   const market=analyzeMarket(games,bk);
   const miEl=document.getElementById('market-intel');
   if(market.avgDog>0){
