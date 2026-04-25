@@ -717,6 +717,57 @@ body.mlb-theme .hm-vs{color:rgba(0,30,80,0.5);}
 .cg-gate-fail{color:var(--text3);}
 .cg-gate-warn{color:var(--amber);font-weight:600;}
 
+/* Grouped game table — 2 rows per game */
+.cg-table-grouped td{vertical-align:middle;}
+.cg-table-grouped .cg-row-away td{
+  border-bottom:1px dashed rgba(255,255,255,0.04);
+  padding-top:8px;padding-bottom:3px;
+}
+.cg-table-grouped .cg-row-home td{
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  padding-top:3px;padding-bottom:8px;
+}
+body.mlb-theme .cg-table-grouped .cg-row-away td{border-bottom:1px dashed rgba(0,30,80,0.06);}
+body.mlb-theme .cg-table-grouped .cg-row-home td{border-bottom:1px solid rgba(0,30,80,0.1);}
+.cg-table-grouped tr:hover td{background:rgba(255,255,255,0.02);}
+body.mlb-theme .cg-table-grouped .cg-row-away:hover td,
+body.mlb-theme .cg-table-grouped .cg-row-home:hover td{background:rgba(0,30,80,0.025);}
+
+.cg-game-cell{
+  vertical-align:middle;background:rgba(255,255,255,0.02);
+  font-family:var(--mono);font-size:10px;color:var(--text2);
+  border-right:1px solid rgba(255,255,255,0.06);
+  padding:6px 10px;line-height:1.3;
+}
+body.mlb-theme .cg-game-cell{
+  background:rgba(0,30,80,0.03);border-right:1px solid rgba(0,30,80,0.08);color:var(--text2);
+}
+.cg-game-time{font-size:10px;color:var(--gold);font-weight:600;letter-spacing:0.05em;}
+body.mlb-theme .cg-game-time{color:#bf0d3e;}
+.cg-game-vs{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.04em;color:var(--text);margin-top:1px;}
+
+.cg-team-cell{padding:4px 8px;}
+.cg-team-row{display:inline-flex;align-items:center;gap:6px;}
+.cg-team-name{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--text);letter-spacing:0.04em;}
+.cg-team-side{
+  font-family:var(--mono);font-size:8px;font-weight:600;
+  letter-spacing:0.1em;color:var(--text3);
+  background:rgba(255,255,255,0.04);padding:1px 5px;border-radius:3px;
+}
+body.mlb-theme .cg-team-side{background:rgba(0,30,80,0.06);color:#7a8aa5;}
+
+.cg-merged-cell{
+  vertical-align:middle;text-align:center;
+  border-left:1px solid rgba(255,255,255,0.04);
+}
+body.mlb-theme .cg-merged-cell{border-left:1px solid rgba(0,30,80,0.05);}
+
+.cg-reg-flag{
+  color:var(--teal);font-size:9px;font-weight:700;margin-left:3px;
+  background:rgba(20,184,166,0.12);padding:1px 4px;border-radius:3px;
+}
+body.mlb-theme .cg-reg-flag{color:#0066b2;background:rgba(0,102,178,0.1);}
+
 /* Regression flags */
 .reg-flags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
 .reg-flag{background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.25);border-radius:6px;padding:8px 12px;font-family:var(--mono);font-size:10px;min-width:180px;}
@@ -2481,8 +2532,8 @@ function renderFullPlayCard(scan){
 
   // FULL GAME TABLE
   html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin:12px 0 6px;">ALL GAMES — Full Scan</div>`;
-  html+=`<table class="cg-table"><thead><tr>
-    <th>Matchup</th><th>Away</th><th>Diff</th><th>Home</th><th>Diff</th><th>Collision</th><th>Result</th>
+  html+=`<table class="cg-table cg-table-grouped"><thead><tr>
+    <th>Game</th><th>Team</th><th>Streak</th><th>Run Diff</th><th>Collision</th><th>Result</th>
   </tr></thead><tbody>`;
 
   for(const g of allGames){
@@ -2497,27 +2548,36 @@ function renderFullPlayCard(scan){
     let collHtml='<span class="cg-no-coll">—</span>';
     if(coll.max) collHtml='<span class="cg-collision max">MAX</span>';
     else if(coll.active) collHtml='<span class="cg-collision">COLL</span>';
-    let gateHtml='<span class="cg-gate-fail">—</span>';
-    if(a.gateType==='T1') gateHtml=`<span class="cg-gate-pass">T1 +${a.gateML}</span>`;
-    else if(a.gateType==='T11') gateHtml=`<span class="cg-gate-warn">T11 ${a.gateML}</span>`;
-    else if(a.gateType==='T12') gateHtml=`<span class="cg-gate-warn">T12 +${a.gateML}</span>`;
-    else if(a.gateType==='T13') gateHtml=`<span style="color:var(--teal);">T13 +${a.gateML}</span>`;
-    const trigStr=(a.triggered||[]).join('+') || '—';
     let recHtml='<span class="cg-no-coll">PASS</span>';
     const colMap2={blue:'var(--blue)',green:'var(--green)',teal:'var(--teal)',amber:'var(--amber)',red:'var(--red)'};
     if(a.sizing>0&&!a.t14Kill) recHtml=`<span style="color:${colMap2[a.color]||'var(--teal)'};font-weight:700;">${a.strength} $${a.sizing}</span>`;
-    else if(a.t14Kill) recHtml='<span style="color:var(--red);">T14 KILL</span>';
+    else if(a.t14Kill) recHtml='<span style="color:var(--red);">KILL</span>';
     else if(a.t15Active) recHtml='<span style="color:var(--orange);">FADE</span>';
-    const awayReg=awayT.regressionFlag?'<span style="color:var(--teal);font-size:8px;"> T4↑</span>':'';
-    const homeReg=homeT.regressionFlag?'<span style="color:var(--teal);font-size:8px;"> T4↑</span>':'';
-    html+=`<tr>
-      <td style="color:var(--text2);white-space:nowrap;"><span style="display:inline-flex;align-items:center;gap:4px;vertical-align:middle;">${teamLogoHtml(awayT.abbr,'sm')}${awayT.abbr||'?'} <span style="opacity:0.6;">@</span> ${teamLogoHtml(homeT.abbr,'sm')}${homeT.abbr||'?'}</span></td>
+    const awayReg=awayT.regressionFlag?'<span class="cg-reg-flag" title="Regression flag">↑</span>':'';
+    const homeReg=homeT.regressionFlag?'<span class="cg-reg-flag" title="Regression flag">↑</span>':'';
+    const gameTime = g.gameTime ? new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : '';
+
+    // Away row (first) — gets rowspan for Game / Collision / Result columns
+    html+=`<tr class="cg-game-row cg-row-away">
+      <td rowspan="2" class="cg-game-cell">
+        <div class="cg-game-time">${gameTime}</div>
+        <div class="cg-game-vs">${(awayT.abbr||'?')} @ ${(homeT.abbr||'?')}</div>
+      </td>
+      <td class="cg-team-cell">
+        <span class="cg-team-row">${teamLogoHtml(awayT.abbr,'sm')}<span class="cg-team-name">${awayT.abbr||'?'}</span><span class="cg-team-side">AWAY</span></span>
+      </td>
       <td class="${awayS==='W'?'cg-streak-w':'cg-streak-l'}">${awayS}${awayL}${awayReg}</td>
       <td class="${awayD>0?'cg-diff-pos':awayD<0?'cg-diff-neg':'cg-diff-flat'}">${awayDStr}</td>
+      <td rowspan="2" class="cg-merged-cell">${collHtml}</td>
+      <td rowspan="2" class="cg-merged-cell">${recHtml}</td>
+    </tr>`;
+    // Home row (second)
+    html+=`<tr class="cg-game-row cg-row-home">
+      <td class="cg-team-cell">
+        <span class="cg-team-row">${teamLogoHtml(homeT.abbr,'sm')}<span class="cg-team-name">${homeT.abbr||'?'}</span><span class="cg-team-side">HOME</span></span>
+      </td>
       <td class="${homeS==='W'?'cg-streak-w':'cg-streak-l'}">${homeS}${homeL}${homeReg}</td>
       <td class="${homeD>0?'cg-diff-pos':homeD<0?'cg-diff-neg':'cg-diff-flat'}">${homeDStr}</td>
-      <td>${collHtml}</td>
-      <td>${recHtml}</td>
     </tr>`;
   }
   html+='</tbody></table>';
