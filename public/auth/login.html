@@ -72,7 +72,7 @@
     // If already logged in, redirect to dashboard
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) window.location.href = '/dashboard.html';
+      if (session) window.location.href = '/';
     })();
 
     form.addEventListener('submit', async (e) => {
@@ -89,7 +89,7 @@
         if (error) throw error;
 
         // Successful login → redirect to dashboard
-        window.location.href = '/dashboard.html';
+        window.location.href = '/';
       } catch (err) {
         showAlert('error', err.message || 'Login failed. Please check your credentials.');
         submitBtn.disabled = false;
