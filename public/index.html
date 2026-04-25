@@ -1770,12 +1770,22 @@ async function loadOdds(){
     if(!res.ok)throw new Error('API error '+res.status);
     const raw = await res.json();
     // Dedup games — Odds API sometimes returns the same matchup multiple times
-    // (rescheduled games, stale entries with different commence_time). Group by
-    // away+home+date and keep the entry with the most bookmaker coverage.
+    // (rescheduled games, stale entries). Group by away+home+local date (ET) and
+    // keep the entry with the most bookmaker coverage.
+    // Using local-time date is critical: UTC date splits same-day evening games into "tomorrow".
+    const localDay = (iso) => {
+      if(!iso) return 'no-date';
+      const d = new Date(iso);
+      // Get YYYY-MM-DD in America/New_York
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/New_York',
+        year: 'numeric', month: '2-digit', day: '2-digit'
+      }).format(d);
+      return parts; // en-CA gives YYYY-MM-DD
+    };
     const groups = new Map();
     for(const g of raw){
-      const day = g.commence_time ? new Date(g.commence_time).toISOString().slice(0,10) : 'no-date';
-      const key = `${g.away_team}|${g.home_team}|${day}`;
+      const key = `${g.away_team}|${g.home_team}|${localDay(g.commence_time)}`;
       const existing = groups.get(key);
       const score = (g.bookmakers || []).length;
       if(!existing || score > existing.score){
