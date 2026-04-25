@@ -41,8 +41,9 @@ const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
 
 // ─── Auth & Stripe modules (Phase 1 SaaS) ──────────────────────────────────
 const { stripeWebhookHandler } = require('./server/stripe-webhook');
-const { requireAuth } = require('./server/auth');
+const { requireAuth, supabaseAdmin } = require('./server/auth');
 const { createCheckoutSession } = require('./server/stripe-checkout');
+const { createBillingPortalSession } = require('./server/stripe-billing-portal');
 
 // =============================================================================
 // MIDDLEWARE — order matters
@@ -499,12 +500,35 @@ app.post('/ai-brief', (req, res) => {
 // =============================================================================
 
 // /api/me — verify auth, return current user info
-app.get('/api/me', requireAuth, (req, res) => {
-  res.json({ user: req.user });
+app.get('/api/me', requireAuth, async (req, res) => {
+  try {
+    const [profileRes, subsRes] = await Promise.all([
+      supabaseAdmin.from('profiles')
+        .select('display_name, is_admin, starting_bankroll, current_bankroll')
+        .eq('user_id', req.user.id).single(),
+      supabaseAdmin.from('subscriptions')
+        .select('sport_id, cadence, is_bundle, status, current_period_end, cancel_at_period_end')
+        .eq('user_id', req.user.id).order('sport_id'),
+    ]);
+    res.json({
+      id: req.user.id,
+      email: req.user.email,
+      display_name: profileRes.data?.display_name || req.user.email,
+      is_admin: !!profileRes.data?.is_admin,
+      starting_bankroll: Number(profileRes.data?.starting_bankroll) || 0,
+      current_bankroll: Number(profileRes.data?.current_bankroll) || 0,
+      subscriptions: subsRes.data || [],
+    });
+  } catch (err) {
+    console.error('/api/me error:', err);
+    res.status(500).json({ error: 'Failed to load profile' });
+  }
+});
 });
 
 // /api/stripe/create-checkout — start a Stripe Checkout session (Phase 2 client)
 app.post('/api/stripe/create-checkout', requireAuth, createCheckoutSession);
+app.post('/api/stripe/billing-portal', requireAuth, createBillingPortalSession);
 
 // =============================================================================
 // STATIC FILE SERVING

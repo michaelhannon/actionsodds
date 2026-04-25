@@ -1049,6 +1049,72 @@ select.form-input{cursor:pointer;}
 </style>
 </head>
 <body>
+<!--
+  Phase 2 Auth Gate — paste this block as the FIRST thing inside <body>
+  in public/index.html. It runs synchronously-ish and redirects:
+    - Not logged in → /landing.html
+    - Logged in + no active sub + not admin → /pricing.html
+    - Logged in + has access → continues to dashboard
+
+  The block hides the page (display:none on body) until the check finishes,
+  then reveals it. This prevents a flash of dashboard content before redirect.
+-->
+<script type="module" id="auth-gate">
+  // Hide page until gate decision is made
+  document.documentElement.style.visibility = 'hidden';
+
+  import('https://esm.sh/@supabase/supabase-js@2').then(async ({ createClient }) => {
+    const supabase = createClient(
+      'https://xlfsaxfpdpxsdkovvhxs.supabase.co',
+      'sb_publishable_3L81CVKvE9w2agrz6yMe5g_BC4O0pws'
+    );
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      // 1. Not logged in → public landing page
+      if (!session) {
+        window.location.replace('/landing.html');
+        return;
+      }
+
+      // 2. Logged in — check for access (admin OR active subscription)
+      const res = await fetch('/api/me', {
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      });
+
+      if (!res.ok) {
+        // Token invalid / expired — clear it and bounce to landing
+        await supabase.auth.signOut();
+        window.location.replace('/landing.html');
+        return;
+      }
+
+      const me = await res.json();
+      const hasActiveSub = (me.subscriptions || []).some(s => s.status === 'active');
+
+      if (!me.is_admin && !hasActiveSub) {
+        // Logged in but no access → pricing page
+        window.location.replace('/pricing.html?welcome=1');
+        return;
+      }
+
+      // 3. All clear — show the dashboard
+      // Stash user info on window for the dashboard to use
+      window.__currentUser = me;
+      document.documentElement.style.visibility = '';
+    } catch (err) {
+      console.error('Auth gate error:', err);
+      // On error, fall through and show the page — fail-open is safer than
+      // accidentally locking everyone out if Supabase is down.
+      document.documentElement.style.visibility = '';
+    }
+  }).catch(err => {
+    console.error('Auth gate import failed:', err);
+    document.documentElement.style.visibility = '';
+  });
+</script>
+
 
 <header>
   <div class="logo">

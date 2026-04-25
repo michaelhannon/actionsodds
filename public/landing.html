@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Action's Odds — Trigger-Based Sports Betting System</title>
+  <meta name="description" content="40 years of betting research. T1–T15 trigger framework. Real P&amp;L. Action's Odds is a data-driven sports betting system for serious bettors.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0a0e1a;--panel:#121826;--panel2:#1a2234;--border:#2a3447;
+      --text:#e8ebf1;--text2:#a0a8b8;--text3:#6b7488;
+      --gold:#d4af37;--green:#26a269;--red:#c53030;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:#0a0e1a;
+      color:var(--text);
+      font-family:'Barlow Condensed',sans-serif;
+      line-height:1.6;
+    }
+    .nav{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:20px 32px;
+      max-width:1200px;margin:0 auto;
+    }
+    .nav-logo{
+      font-family:'Bebas Neue',sans-serif;
+      font-size:24px;letter-spacing:0.04em;
+      color:var(--text);
+      text-decoration:none;
+    }
+    .nav-logo span{color:var(--red);}
+    .nav-links{display:flex;gap:8px;align-items:center;}
+    .nav-link{
+      color:var(--text2);
+      text-decoration:none;
+      padding:8px 16px;
+      font-size:14px;
+      letter-spacing:0.06em;
+      text-transform:uppercase;
+      transition:color 0.15s ease;
+    }
+    .nav-link:hover{color:var(--text);}
+    .nav-cta{
+      background:var(--gold);color:#0a0e1a;
+      padding:10px 20px;
+      border-radius:6px;
+      text-decoration:none;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:14px;letter-spacing:0.08em;
+      transition:all 0.15s ease;
+    }
+    .nav-cta:hover{background:#e6c454;}
+
+    /* Hero */
+    .hero{
+      max-width:1100px;
+      margin:40px auto 80px;
+      padding:0 32px;
+      text-align:center;
+      position:relative;
+    }
+    .hero::before{
+      content:'';
+      position:absolute;
+      top:-100px;left:50%;transform:translateX(-50%);
+      width:80%;height:400px;
+      background:radial-gradient(ellipse at center, rgba(212,175,55,0.08) 0%, transparent 60%);
+      pointer-events:none;z-index:-1;
+    }
+    .eyebrow{
+      display:inline-block;
+      padding:6px 14px;
+      background:rgba(212,175,55,0.1);
+      border:1px solid rgba(212,175,55,0.3);
+      color:var(--gold);
+      font-size:12px;
+      letter-spacing:0.16em;
+      text-transform:uppercase;
+      border-radius:4px;
+      margin-bottom:24px;
+    }
+    .hero h1{
+      font-family:'Bebas Neue',sans-serif;
+      font-size:72px;
+      letter-spacing:0.01em;
+      line-height:1.05;
+      margin-bottom:24px;
+    }
+    .hero h1 span{color:var(--gold);}
+    .hero-sub{
+      font-size:20px;
+      color:var(--text2);
+      max-width:680px;
+      margin:0 auto 36px;
+    }
+    .hero-ctas{
+      display:flex;justify-content:center;gap:12px;flex-wrap:wrap;
+    }
+    .btn-primary{
+      background:var(--gold);color:#0a0e1a;
+      padding:16px 32px;
+      border:none;
+      border-radius:8px;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:18px;letter-spacing:0.08em;
+      text-decoration:none;
+      cursor:pointer;
+      transition:all 0.15s ease;
+    }
+    .btn-primary:hover{background:#e6c454;transform:translateY(-2px);}
+    .btn-secondary{
+      background:transparent;
+      border:1px solid var(--border);
+      color:var(--text);
+      padding:16px 28px;
+      border-radius:8px;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:18px;letter-spacing:0.08em;
+      text-decoration:none;
+      transition:all 0.15s ease;
+    }
+    .btn-secondary:hover{border-color:var(--gold);color:var(--gold);}
+
+    /* Stats strip */
+    .stats{
+      max-width:900px;
+      margin:0 auto 80px;
+      padding:0 32px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:24px;
+    }
+    .stat{
+      text-align:center;
+      padding:20px;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:10px;
+    }
+    .stat-num{
+      font-family:'Bebas Neue',sans-serif;
+      font-size:42px;
+      color:var(--gold);
+      line-height:1;
+      margin-bottom:6px;
+    }
+    .stat-label{
+      color:var(--text2);
+      font-size:13px;
+      letter-spacing:0.1em;
+      text-transform:uppercase;
+    }
+
+    /* Sections */
+    .section{
+      max-width:1100px;
+      margin:0 auto 80px;
+      padding:0 32px;
+    }
+    .section-title{
+      font-family:'Bebas Neue',sans-serif;
+      font-size:42px;
+      text-align:center;
+      margin-bottom:8px;
+      letter-spacing:0.02em;
+    }
+    .section-sub{
+      text-align:center;
+      color:var(--text2);
+      font-size:17px;
+      max-width:600px;
+      margin:0 auto 48px;
+    }
+
+    /* Feature grid */
+    .features{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:20px;
+    }
+    .feature{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:28px;
+    }
+    .feature-icon{
+      width:42px;height:42px;
+      background:rgba(212,175,55,0.1);
+      border:1px solid rgba(212,175,55,0.3);
+      border-radius:8px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:20px;
+      margin-bottom:16px;
+    }
+    .feature-title{
+      font-family:'Bebas Neue',sans-serif;
+      font-size:22px;
+      letter-spacing:0.03em;
+      margin-bottom:8px;
+    }
+    .feature-desc{
+      color:var(--text2);
+      font-size:15px;
+    }
+
+    /* How it works */
+    .steps{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:20px;
+    }
+    .step{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:28px;
+      position:relative;
+    }
+    .step-num{
+      position:absolute;top:-14px;left:24px;
+      background:var(--gold);
+      color:#0a0e1a;
+      width:32px;height:32px;
+      border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:18px;
+    }
+    .step-title{
+      font-family:'Bebas Neue',sans-serif;
+      font-size:20px;
+      letter-spacing:0.03em;
+      margin:8px 0;
+    }
+    .step-desc{
+      color:var(--text2);
+      font-size:14px;
+    }
+
+    /* Final CTA */
+    .final-cta{
+      max-width:800px;
+      margin:0 auto 60px;
+      padding:48px 32px;
+      background:linear-gradient(135deg, rgba(212,175,55,0.1) 0%, var(--panel) 100%);
+      border:1px solid var(--gold);
+      border-radius:16px;
+      text-align:center;
+    }
+    .final-cta h2{
+      font-family:'Bebas Neue',sans-serif;
+      font-size:42px;
+      margin-bottom:12px;
+    }
+    .final-cta p{
+      color:var(--text2);
+      font-size:17px;
+      margin-bottom:24px;
+    }
+
+    /* Footer */
+    .footer{
+      max-width:1100px;
+      margin:0 auto;
+      padding:32px;
+      border-top:1px solid var(--border);
+      text-align:center;
+      color:var(--text3);
+      font-size:13px;
+    }
+    .footer a{color:var(--text2);text-decoration:none;margin:0 8px;}
+    .footer a:hover{color:var(--gold);}
+    .disclaimer{
+      max-width:700px;
+      margin:24px auto 0;
+      font-size:12px;
+      color:var(--text3);
+      line-height:1.6;
+    }
+
+    @media (max-width: 640px) {
+      .hero h1{font-size:48px;}
+      .hero-sub{font-size:17px;}
+      .section-title{font-size:32px;}
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/landing.html" class="nav-logo">ACTION'S<span>ODDS</span></a>
+    <div class="nav-links">
+      <a href="/auth/login.html" class="nav-link">Sign In</a>
+      <a href="/auth/signup.html" class="nav-cta">Get Started</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="eyebrow">Trigger-Based Sports Betting System</div>
+    <h1>Bet smarter.<br><span>Built on 40 years of research.</span></h1>
+    <p class="hero-sub">
+      Action's Odds is a data-driven sports betting system. T1–T15 triggers. Power ratings. Bullpen depletion. Streak collisions. Real P&amp;L tracking. Built for bettors who want an edge — not picks.
+    </p>
+    <div class="hero-ctas">
+      <a href="/auth/signup.html" class="btn-primary">Start Free Trial →</a>
+      <a href="#how-it-works" class="btn-secondary">How It Works</a>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stat">
+      <div class="stat-num">+$5,587</div>
+      <div class="stat-label">2026 Season P&amp;L</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">25-9</div>
+      <div class="stat-label">Win-Loss Record</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">74%</div>
+      <div class="stat-label">Win Rate</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">15+</div>
+      <div class="stat-label">Active Triggers</div>
+    </div>
+  </section>
+
+  <section class="section" id="how-it-works">
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-sub">A disciplined, repeatable framework for finding edges. No hot takes. No tipsters.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Daily Scan</div>
+        <p class="step-desc">Every morning at 9 AM ET, the system pulls standings, FIP, bullpen depletion, weather, and line moves across all 30 teams.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Trigger Match</div>
+        <p class="step-desc">Each game runs through the T1–T15 framework. Streak collisions, run differentials, regression flags. Only qualifying plays surface.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Sized &amp; Tracked</div>
+        <p class="step-desc">Bet sizing is mechanical — base unit scales with confidence tier. Every play tracked in your private ledger with live P&amp;L.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">What's Inside</h2>
+    <p class="section-sub">Tools and data, not opinions.</p>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">Live Slate Grid</div>
+        <p class="feature-desc">Multi-book odds across Caesars, Hard Rock, DraftKings, FanDuel, and BetMGM. Best line auto-highlighted per game.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title">Trigger Framework</div>
+        <p class="feature-desc">T1–T15 entry gates with R1–R8 root modifiers. Power ratings, regression checks, divisional amplifiers. All transparent.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📈</div>
+        <div class="feature-title">P&amp;L Ledger</div>
+        <p class="feature-desc">Track every play. Live W/L, ROI, sport-by-sport breakdown, exotics separated from core. Your numbers, not theirs.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">Line Move Alerts</div>
+        <p class="feature-desc">Sharp money signals. Significant movement in either direction flagged automatically. Re-evaluate triggers when lines shift.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔥</div>
+        <div class="feature-title">Streak Collision Engine</div>
+        <p class="feature-desc">Highest-value scenario in the system: any winning streak vs losing streak on opposite sides. Auto-detected, max-confidence sized.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🤖</div>
+        <div class="feature-title">AI Brief</div>
+        <p class="feature-desc">Sharp two-sentence reads on each qualifying play. Context, not noise.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="final-cta">
+    <h2>Ready to bet with an edge?</h2>
+    <p>Start with MLB. Add NHL playoffs as the system rolls out. Cancel anytime.</p>
+    <a href="/auth/signup.html" class="btn-primary">Create Account →</a>
+  </section>
+
+  <footer class="footer">
+    <div>
+      <a href="/auth/login.html">Sign In</a>
+      <a href="/auth/signup.html">Sign Up</a>
+      <a href="mailto:support@actionsodds.com">Support</a>
+    </div>
+    <div style="margin-top:16px;">
+      © 2026 Action's Odds · All rights reserved
+    </div>
+    <p class="disclaimer">
+      Action's Odds is a sports betting research and analytics platform. We do not place wagers on behalf of users and we do not guarantee outcomes. Past performance does not indicate future results. Bet responsibly. If gambling is causing problems, call 1-800-GAMBLER. Must be 21+ to bet (18+ in some jurisdictions). Check your local laws — sports betting legality varies by state.
+    </p>
+  </footer>
+</body>
+</html>
