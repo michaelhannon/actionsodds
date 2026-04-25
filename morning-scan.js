@@ -299,7 +299,7 @@ async function fetchBullpenStatus(teamId) {
 async function fetchOdds(apiKey) {
   if (!apiKey) return [];
   try {
-    const url = `https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${apiKey}&regions=us&markets=h2h,spreads&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars,hard_rock_bet`;
+    const url = `https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${apiKey}&regions=us&markets=h2h,spreads,totals&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars,hard_rock_bet`;
     return await fetchJSON(url);
   } catch(e) {
     console.error('[Scan] Odds error:', e.message);
@@ -339,14 +339,24 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   });
 
   let homeML = null, awayML = null, homeRL = null, awayRL = null;
+  let totalsLine = null, overPrice = null, underPrice = null, totalsBook = null;
   if (gameOdds) {
     const bm = gameOdds.bookmakers?.find(b => ['draftkings','fanduel','betmgm','caesars','hard_rock_bet'].includes(b.key)) || gameOdds.bookmakers?.[0];
     const h2h = bm?.markets?.find(m => m.key === 'h2h');
     const spreads = bm?.markets?.find(m => m.key === 'spreads');
+    const totals = bm?.markets?.find(m => m.key === 'totals');
     homeML = h2h?.outcomes?.find(o => o.name === gameOdds.home_team)?.price;
     awayML = h2h?.outcomes?.find(o => o.name === gameOdds.away_team)?.price;
     homeRL = spreads?.outcomes?.find(o => o.name === gameOdds.home_team);
     awayRL = spreads?.outcomes?.find(o => o.name === gameOdds.away_team);
+    const overOutcome  = totals?.outcomes?.find(o => o.name === 'Over');
+    const underOutcome = totals?.outcomes?.find(o => o.name === 'Under');
+    if (overOutcome || underOutcome) {
+      totalsLine  = overOutcome?.point ?? underOutcome?.point ?? null;
+      overPrice   = overOutcome?.price ?? null;
+      underPrice  = underOutcome?.price ?? null;
+      totalsBook  = bm?.key || null;
+    }
   }
 
   // ── GATE CHECK ───────────────────────────────────────────
@@ -380,7 +390,7 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   }
 
   if (!gateType && !t15Active) {
-    return { gateType: null, plays: [], t15: false, collision: buildCollisionData(away, home), odds: { homeML, awayML } };
+    return { gateType: null, plays: [], t15: false, collision: buildCollisionData(away, home), odds: { homeML, awayML }, totals: { line: totalsLine, overPrice, underPrice, book: totalsBook } };
   }
 
   // ── TRIGGER COUNTING ─────────────────────────────────────
@@ -690,7 +700,8 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
     t14Kill, t15Active, t3Kill,
     collision: buildCollisionData(away, home),
     pitcherEdge: pitSide ? { name: pitName, era: pitSide.era, fip: pitSide.fip, whip: pitSide.whip } : null,
-    odds: { homeML, awayML, homeRL: homeRL?.price, awayRL: awayRL?.price }
+    odds: { homeML, awayML, homeRL: homeRL?.price, awayRL: awayRL?.price },
+    totals: { line: totalsLine, overPrice, underPrice, book: totalsBook }
   };
 }
 

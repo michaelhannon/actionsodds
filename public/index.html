@@ -1581,9 +1581,19 @@ function onLogGameChange(){
   }
   opts.push('</optgroup>');
   // Totals
+  const totals = an.totals || {};
+  const tLine = totals.line;
+  const tOver = totals.overPrice;
+  const tUnder = totals.underPrice;
   opts.push('<optgroup label="Game Total">');
-  opts.push(`<option value="Over ${a}/${h}">Over (enter line + odds)</option>`);
-  opts.push(`<option value="Under ${a}/${h}">Under (enter line + odds)</option>`);
+  if(tLine != null){
+    const lineLabel = (Number.isInteger(tLine) ? tLine : tLine.toFixed(1));
+    opts.push(`<option value="Over ${lineLabel}" data-odds="${fmtPrice(tOver)}">Over ${lineLabel}${tOver!=null?' · '+fmtPrice(tOver):''}</option>`);
+    opts.push(`<option value="Under ${lineLabel}" data-odds="${fmtPrice(tUnder)}">Under ${lineLabel}${tUnder!=null?' · '+fmtPrice(tUnder):''}</option>`);
+  } else {
+    opts.push(`<option value="Over ${a}/${h}">Over (enter line + odds)</option>`);
+    opts.push(`<option value="Under ${a}/${h}">Under (enter line + odds)</option>`);
+  }
   opts.push('</optgroup>');
   // First 5 innings
   opts.push('<optgroup label="First 5 Innings">');
