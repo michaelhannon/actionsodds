@@ -1611,18 +1611,7 @@ function renderFullPlayCard(scan){
         </div>
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px;">${a.recommendation}</div>
         <div style="font-size:13px;color:var(--text3);font-family:var(--mono);margin-bottom:6px;">${g.game} · ${new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div>
-        ${a.(()=>{
-          const hrl=a.rlDisplay&&a.rlDisplay.homeLine?a.rlDisplay.homeLine:{price:a.odds&&a.odds.homeRL?a.odds.homeRL:null,point:a.gateSide==='home'?1.5:-1.5};
-          const arl=a.rlDisplay&&a.rlDisplay.awayLine?a.rlDisplay.awayLine:{price:a.odds&&a.odds.awayRL?a.odds.awayRL:null,point:a.gateSide==='away'?1.5:-1.5};
-          let rlHtml='<div style="font-family:var(--mono);font-size:12px;margin-bottom:6px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:5px;border:1px solid rgba(255,255,255,0.06);">';
-          rlHtml+='<span style="color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;">Run Line · </span>';
-          if(hrl&&hrl.price!=null){const col=hrl.price>=115?'var(--green)':hrl.price<=-130?'var(--red)':'var(--text2)';rlHtml+=`<span style="color:var(--text2);">Home ${hrl.point>0?'+':''}${hrl.point} <b style="color:${col}">${hrl.price>0?'+':''}${hrl.price}</b></span>`;}
-          if(arl&&arl.price!=null){const col=arl.price>=115?'var(--green)':arl.price<=-130?'var(--red)':'var(--text2)';rlHtml+=`<span style="color:var(--text2);margin-left:12px;">Away ${arl.point>0?'+':''}${arl.point} <b style="color:${col}">${arl.price>0?'+':''}${arl.price}</b></span>`;}
-          if(!hrl.price&&!arl.price)rlHtml+='<span style="color:var(--text3);">Check book for run line</span>';
-          if(a.rlAddon)rlHtml+=`<span style="color:var(--amber);margin-left:12px;font-weight:700;">→ BET: ${a.rlAddon.desc} · $${a.rlAddon.amt}${!a.rlAddon.qualifying?' (watch)':''}</span>`;
-          rlHtml+='</div>';
-          return rlHtml;
-        })()
+        ${a.rlAddon?`<div style="font-family:var(--mono);font-size:12px;margin-bottom:6px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:5px;"><span style="color:var(--text3);font-size:10px;text-transform:uppercase;">Run Line</span> <span style="color:var(--amber);font-weight:700;">${a.rlAddon.desc} $${a.rlAddon.amt}</span></div>`:""}
         <div style="font-size:12px;color:var(--text3);font-family:var(--mono);line-height:1.7;border-top:1px solid var(--border);padding-top:6px;margin-top:4px;">${a.notes.slice(0,5).join('<br>')}</div>
         <div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-top:4px;">${pitNote} · ${a.collision.away} vs ${a.collision.home}</div>
       </div>`;
