@@ -1876,7 +1876,14 @@ async function loadOdds(){
       btn2.onclick=()=>{document.querySelectorAll('.book-tab').forEach(b=>b.classList.remove('active'));btn2.classList.add('active');renderCards(allGames,bk);};
       // tabs appended below
     }
-    document.getElementById('game-count').textContent=allGames.length+' games';
+    // Count today's games only (matches the filtered grid/cards view)
+    const _etDate = (iso) => {
+      if(!iso) return '';
+      return new Intl.DateTimeFormat('en-CA', {timeZone:'America/New_York', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date(iso));
+    };
+    const _today = _etDate(new Date().toISOString());
+    const todayCount = allGames.filter(g => _etDate(g.commence_time) === _today).length;
+    document.getElementById('game-count').textContent = todayCount + ' games today';
     // Build card view tabs too
     var tabsEl2=document.getElementById('book-tabs-cards');
     if(tabsEl2)tabsEl2.innerHTML='';
