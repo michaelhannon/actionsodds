@@ -1768,7 +1768,23 @@ async function loadOdds(){
     const url=`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars,hard_rock_bet`;
     const res=await fetch(url);
     if(!res.ok)throw new Error('API error '+res.status);
-    allGames=await res.json();
+    const raw = await res.json();
+    // Dedup games — Odds API sometimes returns the same matchup multiple times
+    // (rescheduled games, stale entries with different commence_time). Group by
+    // away+home+date and keep the entry with the most bookmaker coverage.
+    const groups = new Map();
+    for(const g of raw){
+      const day = g.commence_time ? new Date(g.commence_time).toISOString().slice(0,10) : 'no-date';
+      const key = `${g.away_team}|${g.home_team}|${day}`;
+      const existing = groups.get(key);
+      const score = (g.bookmakers || []).length;
+      if(!existing || score > existing.score){
+        groups.set(key, { game: g, score });
+      }
+    }
+    allGames = Array.from(groups.values()).map(v => v.game);
+    // Sort chronologically
+    allGames.sort((a,b) => new Date(a.commence_time||0) - new Date(b.commence_time||0));
     document.getElementById('last-update-label').textContent='Updated '+new Date().toLocaleTimeString();
 
     // Build book tabs
