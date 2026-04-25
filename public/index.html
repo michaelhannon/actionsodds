@@ -88,6 +88,31 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .protocol-body{display:none;}
 .protocol-body.open{display:block;}
 
+/* ── STREAK HEAT MAP ──────────────────────────────────── */
+.heatmap-section{background:var(--dark);border-bottom:1px solid var(--border);padding:14px 24px;}
+.heatmap-section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;}
+.heatmap-section-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.08em;color:var(--gold);}
+.heatmap-section-subtitle{font-size:12px;color:var(--text3);font-family:var(--mono);letter-spacing:0.04em;}
+.heatmap-legend{display:flex;gap:6px;flex-wrap:wrap;}
+.hm-legend-chip{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.1em;color:#fff;padding:3px 8px;border-radius:3px;}
+.hm-grid-wrapper{background:rgba(20,20,28,0.8);border:1px solid var(--border2);border-radius:var(--radius);padding:14px;margin-bottom:12px;overflow-x:auto;}
+.hm-grid-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.hm-grid-title .hm-grid-meta{color:var(--text3);font-weight:400;letter-spacing:0.05em;}
+.hm-table{border-collapse:separate;border-spacing:3px;font-family:var(--mono);font-size:11px;margin:0 auto;}
+.hm-table th{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;padding:4px 6px;text-align:center;}
+.hm-table th.hm-axis-label{color:var(--gold);font-size:10px;}
+.hm-table td.hm-row-label{font-size:10px;font-weight:700;color:var(--text2);padding:4px 8px;text-align:right;background:rgba(255,255,255,0.02);border-radius:3px;}
+.hm-cell{width:74px;height:46px;border-radius:4px;text-align:center;font-size:10px;font-weight:600;color:#0a0a0f;cursor:default;transition:transform 0.1s;position:relative;padding:2px 4px;}
+.hm-cell:hover{transform:scale(1.05);z-index:2;outline:2px solid #fff;}
+.hm-cell.hm-empty{background:rgba(255,255,255,0.03);color:var(--text3);font-weight:400;}
+.hm-cell.hm-game-cell{cursor:pointer;}
+.hm-cell-label{font-size:10px;font-weight:700;line-height:1.1;}
+.hm-cell-sub{font-size:8px;font-weight:500;opacity:0.85;line-height:1.1;margin-top:2px;}
+.hm-cell-game{font-size:9px;font-weight:700;color:#fff;line-height:1.1;}
+.hm-cell-game-time{font-size:7px;color:rgba(255,255,255,0.85);margin-top:1px;}
+.hm-axis-corner{font-size:9px;color:var(--text3);font-weight:600;text-align:center;padding:4px;}
+.hm-no-games{padding:20px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:11px;}
+
 /* Collision grid */
 .collision-grid{background:rgba(20,20,28,0.8);border:1px solid var(--border2);border-radius:var(--radius);padding:12px;margin-bottom:10px;overflow-x:auto;}
 .collision-grid-title{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
@@ -116,6 +141,16 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .reg-flag-boost{color:var(--amber);font-size:9px;margin-top:2px;font-weight:600;}
 .reg-flag.due{background:rgba(46,204,113,0.06);border-color:rgba(46,204,113,0.2);}
 .reg-flag.due .reg-flag-title{color:var(--green);}
+
+/* ── TOP BANNER ─────────────────────────────────────── */
+.top-banner{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--dark);border-bottom:1px solid var(--border);}
+.top-banner-box{text-align:center;padding:12px 8px;border-right:1px solid var(--border);}
+.top-banner-box:last-child{border-right:none;}
+.top-banner-label{font-size:11px;color:var(--text3);font-family:'Barlow Condensed',sans-serif;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;}
+.top-banner-val{font-family:'Bebas Neue',sans-serif;font-size:32px;line-height:1;}
+.top-banner-val.w{color:var(--green);}
+.top-banner-val.l{color:var(--red);}
+.top-banner-val.pct{color:var(--gold);}
 
 /* ── LAYOUT ──────────────────────────────────────────── */
 .layout{display:grid;grid-template-columns:1fr 380px;min-height:calc(100vh - 64px);}
@@ -398,6 +433,46 @@ select.form-input{cursor:pointer;}
   </div>
 </header>
 
+<!-- ── TOP STATS BANNER ─────────────────────────────── -->
+<div class="top-banner">
+  <div class="top-banner-box">
+    <div class="top-banner-label">Wins</div>
+    <div class="top-banner-val w" id="tb-wins">25</div>
+  </div>
+  <div class="top-banner-box">
+    <div class="top-banner-label">Losses</div>
+    <div class="top-banner-val l" id="tb-losses">9</div>
+  </div>
+  <div class="top-banner-box">
+    <div class="top-banner-label">Pending</div>
+    <div class="top-banner-val" id="tb-pend">0</div>
+  </div>
+  <div class="top-banner-box">
+    <div class="top-banner-label">Win %</div>
+    <div class="top-banner-val pct" id="tb-pct">74%</div>
+  </div>
+</div>
+
+<!-- ── STREAK HEAT MAP ──────────────────────────────────── -->
+<div class="heatmap-section">
+  <div class="heatmap-section-header">
+    <div>
+      <div class="heatmap-section-title">🔥 Streak Collision Heat Map</div>
+      <div class="heatmap-section-subtitle">Away streak × Home streak · Green=Play · Yellow=Caution · Red=Fade</div>
+    </div>
+    <div class="heatmap-legend">
+      <span class="hm-legend-chip" style="background:#16a34a;">MAX</span>
+      <span class="hm-legend-chip" style="background:#65a30d;">PLAY</span>
+      <span class="hm-legend-chip" style="background:#ca8a04;color:#0a0a0f;">CAUTION</span>
+      <span class="hm-legend-chip" style="background:#ea580c;">REDUCE</span>
+      <span class="hm-legend-chip" style="background:#dc2626;">FADE</span>
+    </div>
+  </div>
+  <div id="streak-heatmap-container">
+    <div class="empty" style="padding:16px;">Heat map loads with morning scan…</div>
+  </div>
+</div>
+
 <!-- ── MORNING PROTOCOL SECTION ──────────────────────── -->
 <div class="protocol-section">
   <div class="protocol-header" onclick="toggleProtocol()">
@@ -525,25 +600,12 @@ select.form-input{cursor:pointer;}
 
     <!-- LIVE PLAYS TAB -->
     <div id="ptab-log">
-      <div class="wl-strip">
-        <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w" id="lw-w">21</div></div>
-        <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l" id="lw-l">9</div></div>
-        <div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val" id="lw-pend">0</div></div>
-        <div class="wl-box"><div class="wl-label">Win %</div><div class="wl-val" id="lw-roi">70%</div></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
-        <div class="stat-box green" style="padding:10px 12px;">
-          <div class="stat-label">Core P&L (straight bets)</div>
-          <div class="stat-val green" style="font-size:20px;" id="lw-pnl">+$4,486</div>
-        </div>
-        <div class="stat-box amber" style="padding:10px 12px;">
-          <div class="stat-label">Exotic P&L (parlays)</div>
-          <div class="stat-val gold" style="font-size:20px;" id="lw-exotic">+$100</div>
-        </div>
-      </div>
-      <div style="background:rgba(232,185,74,0.06);border:1px solid rgba(232,185,74,0.15);border-radius:6px;padding:8px 10px;margin-bottom:12px;font-family:var(--mono);font-size:9px;color:var(--text3);">
-        ⚠ W/L record = straight bets ONLY · Parlays + exotics tracked separately · Never mixed into win%
-      </div>
+      <div style="display:none;" id="lw-w"></div>
+      <div style="display:none;" id="lw-l"></div>
+      <div style="display:none;" id="lw-pend"></div>
+      <div style="display:none;" id="lw-roi"></div>
+      <div style="display:none;" id="lw-pnl"></div>
+      <div style="display:none;" id="lw-exotic"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
         <div class="section-title" style="font-size:11px;">Play history</div>
         <select id="log-filter" onchange="renderLog()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;background:var(--panel2);border:1px solid var(--border2);color:var(--text2);padding:3px 8px;border-radius:4px;cursor:pointer;">
@@ -1114,7 +1176,7 @@ async function loadOdds(){
   document.getElementById('card-output').innerHTML='<div class="status-box"><div class="spinner" style="width:24px;height:24px;margin:0 auto 16px;display:block;"></div><div class="status-title">Fetching live lines...</div></div>';
 
   try{
-    const API_KEY='75d619683f0d4cf8366179321ee08cc7';
+    const API_KEY='0d5909c1b14d690f7f04c032df0123d9';
     const url=`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars,hard_rock_bet`;
     const res=await fetch(url);
     if(!res.ok)throw new Error('API error '+res.status);
@@ -1125,8 +1187,8 @@ async function loadOdds(){
     const books=new Set();
     for(const g of allGames)for(const bk of g.bookmakers)books.add(bk.key);
     const bookNames={'draftkings':'DraftKings','fanduel':'FanDuel','betmgm':'BetMGM','caesars':'Caesars','hard_rock_bet':'Hard Rock','williamhill_us':'WH','barstool':'Barstool'};
-    var tabsEl=document.getElementById('book-tabs');
-    tabsEl.innerHTML='';
+    var tabsEl=document.getElementById('book-tabs-cards');
+    // card view tabs handled below
     let firstBook=null;
     for(const bk of books){
       if(!firstBook)firstBook=bk;
@@ -1134,19 +1196,19 @@ async function loadOdds(){
       btn2.className='book-tab'+(bk===firstBook?' active':'');
       btn2.textContent=bookNames[bk]||bk;
       btn2.onclick=()=>{document.querySelectorAll('.book-tab').forEach(b=>b.classList.remove('active'));btn2.classList.add('active');renderCards(allGames,bk);};
-      if(tabsEl)tabsEl.appendChild(btn2);
+      // tabs appended below
     }
     document.getElementById('game-count').textContent=allGames.length+' games';
     // Build card view tabs too
     var tabsEl2=document.getElementById('book-tabs-cards');
-    tabsEl.innerHTML='';
+    if(tabsEl2)tabsEl2.innerHTML='';
     for(const bk2 of books){
       const btn3=document.createElement('button');
       btn3.className='book-tab'+(bk2===firstBook?' active':'');
       btn3.textContent=bookNames[bk2]||bk2;
       btn3.dataset.key=bk2;
       btn3.onclick=()=>{document.querySelectorAll('#book-tabs-cards .book-tab').forEach(b=>b.classList.remove('active'));btn3.classList.add('active');renderCards(allGames,bk2);};
-      tabsEl.appendChild(btn3);
+      if(tabsEl2)tabsEl2.appendChild(btn3);
     }
     // Default to grid view
     if(currentView==='grid') renderMultiBookGrid(allGames);
@@ -1357,6 +1419,11 @@ function updateSummary(){
   const lwRoi=document.getElementById('lw-roi');if(lwRoi)lwRoi.textContent=totalWinPct+'%';
   const lwPnl=document.getElementById('lw-pnl');if(lwPnl){lwPnl.textContent=fmt(totalCore);lwPnl.style.color=totalCore>=0?'':'var(--red)';}
   const lwExotic=document.getElementById('lw-exotic');if(lwExotic){lwExotic.textContent=fmt(totalExotic);lwExotic.style.color=totalExotic>=0?'':'var(--red)';}
+  // Update top banner
+  const tbW=document.getElementById('tb-wins');if(tbW)tbW.textContent=totalWins;
+  const tbL=document.getElementById('tb-losses');if(tbL)tbL.textContent=totalLosses;
+  const tbPend=document.getElementById('tb-pend');if(tbPend)tbPend.textContent=pending;
+  const tbPct=document.getElementById('tb-pct');if(tbPct)tbPct.textContent=totalWinPct+'%';
 }
 
 // ── PAPER TRADES ─────────────────────────────────────────
@@ -1456,6 +1523,7 @@ async function loadMorningScan(){
     renderBloombergGrid(scan);
     renderFullPlayCard(scan);
     renderRegressionFlags(scan.outliers||[]);
+    renderStreakHeatmap(scan);
   }catch(e){
     document.getElementById('collision-table-container').innerHTML='<div class="empty">Offline — scan loads on server boot</div>';
   }
@@ -1713,6 +1781,158 @@ function renderRegressionFlags(outliers){
       <div class="reg-flag-boost">→ ${o.regressionFlag?.boost}</div>`;
     flagsEl.appendChild(div);
   }
+}
+
+// ── STREAK HEAT MAP ───────────────────────────────────────────
+// Axis order: most negative (L5+) at top-left, most positive (W5+) at bottom-right
+// Cell color = signal strength based on T2 collision rules
+const HM_ROWS = ['L5+','L4','L3','L2','—','W2','W3','W4','W5+'];  // Away team
+const HM_COLS = ['L5+','L4','L3','L2','—','W2','W3','W4','W5+'];  // Home team
+
+// Map streak label to numeric: negative=losing, positive=winning, 0=none
+function hmStreakValue(label){
+  if(label==='—') return 0;
+  const sign = label.startsWith('W') ? 1 : -1;
+  const num = parseInt(label.replace(/[^0-9]/g,''),10) || 0;
+  // Treat W5+ as 5, L5+ as -5 for grading purposes
+  return sign * num;
+}
+
+// Map a team's actual streak to the closest grid label
+function hmStreakLabel(streak, len){
+  if(!streak || !len || len < 2) return '—';
+  if(len >= 5) return streak + '5+';
+  return streak + len;
+}
+
+// Grade a cell: away streak vs home streak → signal
+// Returns { color, bg, label, sublabel }
+function hmGradeCell(awayLabel, homeLabel){
+  const a = hmStreakValue(awayLabel);  // away team
+  const h = hmStreakValue(homeLabel);  // home team
+  const aAbs = Math.abs(a), hAbs = Math.abs(h);
+
+  // Both flat — no signal
+  if(a === 0 && h === 0){
+    return { bg:'rgba(255,255,255,0.04)', color:'#64748b', label:'—', sub:'no edge' };
+  }
+
+  // Collision: opposite signs, both ≥2 magnitude
+  if(a * h < 0 && aAbs >= 2 && hAbs >= 2){
+    const total = aAbs + hAbs;
+    // Home dog scenario: home losing, away winning → bet home dog
+    // Away dog scenario: away losing, home winning → bet away dog
+    if(total >= 10) return { bg:'#16a34a', color:'#fff', label:'MAX', sub:'collision · cap' };
+    if(total >= 7)  return { bg:'#22c55e', color:'#0a0a0f', label:'STRONG', sub:'collision' };
+    if(total >= 5)  return { bg:'#65a30d', color:'#0a0a0f', label:'PLAY', sub:'collision' };
+    return { bg:'#84cc16', color:'#0a0a0f', label:'PLAY', sub:'min collision' };
+  }
+
+  // Same direction, both winning → caution (no fade value, both hot)
+  if(a > 0 && h > 0){
+    if(a >= 5 || h >= 5) return { bg:'#ca8a04', color:'#0a0a0f', label:'CAUTION', sub:'both hot' };
+    return { bg:'#eab308', color:'#0a0a0f', label:'CAUTION', sub:'both up' };
+  }
+
+  // Same direction, both losing → reduce/avoid (low info)
+  if(a < 0 && h < 0){
+    if(aAbs >= 5 || hAbs >= 5) return { bg:'#ea580c', color:'#fff', label:'REDUCE', sub:'both cold' };
+    return { bg:'#f97316', color:'#0a0a0f', label:'REDUCE', sub:'both down' };
+  }
+
+  // One side flat — partial signal
+  if(a === 0 || h === 0){
+    const live = a === 0 ? h : a;
+    const liveAbs = Math.abs(live);
+    if(liveAbs >= 5) return { bg:'#ca8a04', color:'#0a0a0f', label:'WATCH', sub:'one extreme' };
+    if(liveAbs >= 3) return { bg:'#facc15', color:'#0a0a0f', label:'WATCH', sub:'one streak' };
+    return { bg:'rgba(255,255,255,0.06)', color:'#94a3b8', label:'—', sub:'thin' };
+  }
+
+  // Fade zone: extreme (9+ in real life) — return to standard
+  // Approximated here as W5+ vs flat or similar — already handled above
+
+  return { bg:'rgba(255,255,255,0.04)', color:'#64748b', label:'—', sub:'' };
+}
+
+function renderStreakHeatmap(scan){
+  const container = document.getElementById('streak-heatmap-container');
+  if(!container) return;
+  const teams = scan.teams || {};
+  const games = scan.allGames || [];
+
+  // ── Grid 1: Static framework reference ──
+  let g1 = `<div class="hm-grid-wrapper">
+    <div class="hm-grid-title">Framework Reference <span class="hm-grid-meta">· Signal strength by streak combination · T2 collision logic</span></div>
+    <table class="hm-table"><thead><tr>
+      <th class="hm-axis-corner">Away ↓ / Home →</th>`;
+  for(const c of HM_COLS) g1 += `<th>${c}</th>`;
+  g1 += `</tr></thead><tbody>`;
+  for(const r of HM_ROWS){
+    g1 += `<tr><td class="hm-row-label">${r}</td>`;
+    for(const c of HM_COLS){
+      const grade = hmGradeCell(r, c);
+      g1 += `<td class="hm-cell" style="background:${grade.bg};color:${grade.color};" title="Away ${r} @ Home ${c} → ${grade.label}">
+        <div class="hm-cell-label">${grade.label}</div>
+        <div class="hm-cell-sub">${grade.sub}</div>
+      </td>`;
+    }
+    g1 += `</tr>`;
+  }
+  g1 += `</tbody></table></div>`;
+
+  // ── Grid 2: Live games positioned in their cells ──
+  // Build a map: "awayLabel|homeLabel" → array of {away, home, time}
+  const cellGames = {};
+  for(const g of games){
+    if(!g.away || !g.home) continue;
+    const aLabel = hmStreakLabel(g.away.streak, g.away.streakLen);
+    const hLabel = hmStreakLabel(g.home.streak, g.home.streakLen);
+    const key = aLabel + '|' + hLabel;
+    if(!cellGames[key]) cellGames[key] = [];
+    cellGames[key].push({
+      away: g.away.abbr || g.away.name || '?',
+      home: g.home.abbr || g.home.name || '?',
+      time: g.gameTime ? new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : ''
+    });
+  }
+
+  const totalGames = games.length;
+  let g2 = `<div class="hm-grid-wrapper">
+    <div class="hm-grid-title">Today's Live Matchups <span class="hm-grid-meta">· ${totalGames} games positioned by actual streaks</span></div>`;
+
+  if(totalGames === 0){
+    g2 += `<div class="hm-no-games">No games on schedule.</div></div>`;
+  } else {
+    g2 += `<table class="hm-table"><thead><tr>
+      <th class="hm-axis-corner">Away ↓ / Home →</th>`;
+    for(const c of HM_COLS) g2 += `<th>${c}</th>`;
+    g2 += `</tr></thead><tbody>`;
+    for(const r of HM_ROWS){
+      g2 += `<tr><td class="hm-row-label">${r}</td>`;
+      for(const c of HM_COLS){
+        const key = r + '|' + c;
+        const list = cellGames[key];
+        if(list && list.length){
+          const grade = hmGradeCell(r, c);
+          // Show first game; if multiple, indicate
+          const first = list[0];
+          const more = list.length > 1 ? ` <span style="opacity:0.7;">+${list.length-1}</span>` : '';
+          const titleList = list.map(g=>`${g.away} @ ${g.home} ${g.time}`).join(' / ');
+          g2 += `<td class="hm-cell hm-game-cell" style="background:${grade.bg};color:${grade.color};" title="${titleList} · ${grade.label}">
+            <div class="hm-cell-game">${first.away}@${first.home}${more}</div>
+            <div class="hm-cell-game-time">${first.time}</div>
+          </td>`;
+        } else {
+          g2 += `<td class="hm-cell hm-empty"></td>`;
+        }
+      }
+      g2 += `</tr>`;
+    }
+    g2 += `</tbody></table></div>`;
+  }
+
+  container.innerHTML = g1 + g2;
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
