@@ -80,6 +80,90 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .confidence-bar{height:3px;background:var(--border2);border-radius:99px;margin-top:8px;overflow:hidden;}
 .confidence-fill{height:100%;border-radius:99px;background:var(--green);transition:width 0.5s;}
 
+/* ── HERO PLAYS (top of page) ────────────────────────── */
+.hero-plays-section{
+  position:relative;
+  background:linear-gradient(180deg, rgba(232,185,74,0.04) 0%, rgba(10,10,15,0) 100%), var(--dark);
+  border-bottom:1px solid var(--border);
+  padding:18px 24px 22px;
+  overflow:hidden;
+}
+.hero-plays-bg-glow{
+  position:absolute;top:-100px;right:-100px;width:400px;height:400px;
+  background:radial-gradient(circle, rgba(232,185,74,0.08) 0%, transparent 70%);
+  pointer-events:none;
+}
+.hero-plays-header{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  margin-bottom:14px;position:relative;z-index:1;flex-wrap:wrap;gap:10px;
+}
+.hero-plays-eyebrow{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:4px;opacity:0.85;
+}
+.hero-plays-title{
+  font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:0.04em;
+  color:var(--text);line-height:1;
+}
+.hero-plays-meta{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:11px;color:var(--text3);
+  background:rgba(255,255,255,0.04);padding:6px 12px;border-radius:99px;
+  border:1px solid rgba(255,255,255,0.08);
+}
+.hpm-pulse{
+  display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:var(--green);box-shadow:0 0 10px var(--green);
+  animation:hpmPulse 2s ease-in-out infinite;
+}
+@keyframes hpmPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.3);}}
+.hero-plays-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+  gap:14px;position:relative;z-index:1;
+}
+.hero-plays-empty{
+  padding:30px;text-align:center;color:var(--text3);font-family:var(--mono);
+  font-size:12px;background:rgba(255,255,255,0.02);border-radius:8px;
+  border:1px dashed rgba(255,255,255,0.08);
+}
+.hero-no-plays{
+  padding:24px;text-align:center;font-family:var(--mono);font-size:13px;
+  color:var(--text3);background:linear-gradient(135deg,rgba(231,76,60,0.06),rgba(231,76,60,0.02));
+  border:1px solid rgba(231,76,60,0.18);border-radius:10px;
+}
+.hero-no-plays b{color:var(--red);letter-spacing:0.1em;}
+.hp-card{
+  position:relative;background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;
+  backdrop-filter:blur(10px);transition:transform 0.15s, border-color 0.15s, box-shadow 0.2s;
+  overflow:hidden;
+}
+.hp-card:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.18);box-shadow:0 8px 24px rgba(0,0,0,0.35);}
+.hp-card-glow{position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0;}
+.hp-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap;}
+.hp-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.hp-trig{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.05em;}
+.hp-fail{color:var(--red);}
+.hp-stake{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:0.04em;}
+.hp-rec{
+  font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;
+  color:var(--text);line-height:1.15;margin-bottom:4px;
+}
+.hp-game{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:10px;}
+.hp-rl{
+  font-family:var(--mono);font-size:11px;padding:7px 10px;
+  background:rgba(255,255,255,0.03);border-radius:6px;
+  border:1px solid rgba(255,255,255,0.06);margin-bottom:8px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+}
+.hp-rl-label{color:var(--text3);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;}
+.hp-rl-bet{color:var(--amber);font-weight:700;margin-left:auto;}
+.hp-notes{
+  font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.65;
+  border-top:1px solid rgba(255,255,255,0.06);padding-top:8px;margin-top:6px;
+}
+.hp-pitcher{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px;opacity:0.8;}
+
 /* ── MORNING PROTOCOL GRID ───────────────────────────── */
 .protocol-section{background:var(--dark);border-bottom:1px solid var(--border);padding:14px 24px;}
 .protocol-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer;}
@@ -88,30 +172,64 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .protocol-body{display:none;}
 .protocol-body.open{display:block;}
 
-/* ── STREAK HEAT MAP ──────────────────────────────────── */
-.heatmap-section{background:var(--dark);border-bottom:1px solid var(--border);padding:14px 24px;}
-.heatmap-section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;}
+/* ── STREAK HEAT MAP (compact + modern) ──────────────── */
+.heatmap-section.heatmap-modern{
+  position:relative;
+  background:linear-gradient(180deg, rgba(15,15,22,0.6) 0%, rgba(10,10,15,1) 100%);
+  border-bottom:1px solid var(--border);padding:14px 24px 18px;
+}
+.heatmap-section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:10px;}
 .heatmap-section-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.08em;color:var(--gold);}
-.heatmap-section-subtitle{font-size:12px;color:var(--text3);font-family:var(--mono);letter-spacing:0.04em;}
-.heatmap-legend{display:flex;gap:6px;flex-wrap:wrap;}
-.hm-legend-chip{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.1em;color:#fff;padding:3px 8px;border-radius:3px;}
-.hm-grid-wrapper{background:rgba(20,20,28,0.8);border:1px solid var(--border2);border-radius:var(--radius);padding:14px;margin-bottom:12px;overflow-x:auto;}
-.hm-grid-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
-.hm-grid-title .hm-grid-meta{color:var(--text3);font-weight:400;letter-spacing:0.05em;}
-.hm-table{border-collapse:separate;border-spacing:3px;font-family:var(--mono);font-size:11px;margin:0 auto;}
-.hm-table th{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;padding:4px 6px;text-align:center;}
-.hm-table th.hm-axis-label{color:var(--gold);font-size:10px;}
-.hm-table td.hm-row-label{font-size:10px;font-weight:700;color:var(--text2);padding:4px 8px;text-align:right;background:rgba(255,255,255,0.02);border-radius:3px;}
-.hm-cell{width:74px;height:46px;border-radius:4px;text-align:center;font-size:10px;font-weight:600;color:#0a0a0f;cursor:default;transition:transform 0.1s;position:relative;padding:2px 4px;}
-.hm-cell:hover{transform:scale(1.05);z-index:2;outline:2px solid #fff;}
-.hm-cell.hm-empty{background:rgba(255,255,255,0.03);color:var(--text3);font-weight:400;}
-.hm-cell.hm-game-cell{cursor:pointer;}
-.hm-cell-label{font-size:10px;font-weight:700;line-height:1.1;}
-.hm-cell-sub{font-size:8px;font-weight:500;opacity:0.85;line-height:1.1;margin-top:2px;}
-.hm-cell-game{font-size:9px;font-weight:700;color:#fff;line-height:1.1;}
-.hm-cell-game-time{font-size:7px;color:rgba(255,255,255,0.85);margin-top:1px;}
-.hm-axis-corner{font-size:9px;color:var(--text3);font-weight:600;text-align:center;padding:4px;}
-.hm-no-games{padding:20px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:11px;}
+.heatmap-section-subtitle{font-size:11px;color:var(--text3);font-family:var(--mono);letter-spacing:0.04em;}
+.heatmap-legend{display:flex;gap:5px;flex-wrap:wrap;}
+.hm-legend-chip{
+  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:0.1em;
+  color:#fff;padding:3px 7px;border-radius:99px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.3);
+}
+.hm-grids-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:980px){.hm-grids-row{grid-template-columns:1fr;}}
+.hm-grid-wrapper{
+  background:linear-gradient(135deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.005) 100%);
+  border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px 10px 12px;
+  backdrop-filter:blur(8px);overflow-x:auto;position:relative;
+}
+.hm-grid-wrapper::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(232,185,74,0.4),transparent);
+}
+.hm-grid-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);
+  margin-bottom:8px;display:flex;align-items:center;gap:6px;
+}
+.hm-grid-title .hm-grid-meta{color:var(--text3);font-weight:400;letter-spacing:0.05em;font-size:9px;}
+.hm-table{border-collapse:separate;border-spacing:2px;font-family:var(--mono);font-size:9px;margin:0 auto;width:100%;}
+.hm-table th{
+  font-size:8px;font-weight:700;color:var(--text3);letter-spacing:0.08em;
+  text-transform:uppercase;padding:2px 3px;text-align:center;
+}
+.hm-table th.hm-axis-label{color:var(--gold);}
+.hm-table td.hm-row-label{
+  font-size:8px;font-weight:700;color:var(--text2);padding:2px 5px;text-align:right;
+  background:rgba(255,255,255,0.025);border-radius:3px;letter-spacing:0.05em;
+}
+.hm-cell{
+  width:34px;height:24px;border-radius:4px;text-align:center;
+  font-size:8px;font-weight:700;color:#0a0a0f;cursor:default;
+  transition:transform 0.12s, box-shadow 0.12s;position:relative;padding:1px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.15);
+}
+.hm-cell:hover{transform:scale(1.18);z-index:5;box-shadow:0 4px 12px rgba(0,0,0,0.5), 0 0 0 1.5px #fff;}
+.hm-cell.hm-empty{
+  background:rgba(255,255,255,0.02);color:var(--text3);font-weight:400;
+  box-shadow:none;border:1px dashed rgba(255,255,255,0.05);
+}
+.hm-cell-label{font-size:8px;font-weight:700;line-height:1;letter-spacing:0.04em;}
+.hm-cell-game{font-size:8px;font-weight:700;color:#fff;line-height:1;text-shadow:0 1px 2px rgba(0,0,0,0.4);}
+.hm-cell-game-time{font-size:7px;color:rgba(255,255,255,0.85);line-height:1;}
+.hm-axis-corner{font-size:8px;color:var(--text3);font-weight:600;text-align:center;padding:2px;}
+.hm-no-games{padding:14px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:10px;}
 
 /* Collision grid */
 .collision-grid{background:rgba(20,20,28,0.8);border:1px solid var(--border2);border-radius:var(--radius);padding:12px;margin-bottom:10px;overflow-x:auto;}
@@ -453,23 +571,21 @@ select.form-input{cursor:pointer;}
   </div>
 </div>
 
-<!-- ── STREAK HEAT MAP ──────────────────────────────────── -->
-<div class="heatmap-section">
-  <div class="heatmap-section-header">
+<!-- ── HERO: TODAY'S PLAYS ─────────────────────────────── -->
+<div class="hero-plays-section">
+  <div class="hero-plays-bg-glow"></div>
+  <div class="hero-plays-header">
     <div>
-      <div class="heatmap-section-title">🔥 Streak Collision Heat Map</div>
-      <div class="heatmap-section-subtitle">Away streak × Home streak · Green=Play · Yellow=Caution · Red=Fade</div>
+      <div class="hero-plays-eyebrow">⚡ Live Action</div>
+      <div class="hero-plays-title">Today's Plays</div>
     </div>
-    <div class="heatmap-legend">
-      <span class="hm-legend-chip" style="background:#16a34a;">MAX</span>
-      <span class="hm-legend-chip" style="background:#65a30d;">PLAY</span>
-      <span class="hm-legend-chip" style="background:#ca8a04;color:#0a0a0f;">CAUTION</span>
-      <span class="hm-legend-chip" style="background:#ea580c;">REDUCE</span>
-      <span class="hm-legend-chip" style="background:#dc2626;">FADE</span>
+    <div class="hero-plays-meta" id="hero-plays-meta">
+      <span class="hpm-pulse"></span>
+      <span id="hpm-status">Loading…</span>
     </div>
   </div>
-  <div id="streak-heatmap-container">
-    <div class="empty" style="padding:16px;">Heat map loads with morning scan…</div>
+  <div id="hero-plays-container">
+    <div class="hero-plays-empty">Loading today's qualifying plays…</div>
   </div>
 </div>
 
@@ -477,7 +593,7 @@ select.form-input{cursor:pointer;}
 <div class="protocol-section">
   <div class="protocol-header" onclick="toggleProtocol()">
     <div>
-      <div class="protocol-title">⚡ Bloomberg Collision Grid — Play List · Fade List · Parlay Targets</div>
+      <div class="protocol-title">⚡ Bloomberg Collision Grid — Full Game Scan · Fades · Parlay Targets</div>
       <div class="protocol-subtitle">Auto-updates 9AM ET · W2+/L2+ minimum · Run diff filter · Streak depth color-coded</div>
     </div>
     <span id="protocol-arrow" style="color:var(--gold);font-size:18px;transition:transform 0.2s;transform:rotate(180deg);">▼</span>
@@ -488,6 +604,26 @@ select.form-input{cursor:pointer;}
         <button onclick="triggerManualScan()" style="margin-top:8px;background:var(--gold);border:none;color:var(--black);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:6px 16px;border-radius:5px;letter-spacing:0.08em;text-transform:uppercase;">▶ Run Now</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ── STREAK HEAT MAP ──────────────────────────────────── -->
+<div class="heatmap-section heatmap-modern">
+  <div class="heatmap-section-header">
+    <div>
+      <div class="heatmap-section-title">🔥 Streak Collision Heat Map</div>
+      <div class="heatmap-section-subtitle">Away ↓ × Home → · T2 collision logic · Hover for details</div>
+    </div>
+    <div class="heatmap-legend">
+      <span class="hm-legend-chip" style="background:linear-gradient(135deg,#16a34a,#22c55e);">MAX</span>
+      <span class="hm-legend-chip" style="background:linear-gradient(135deg,#65a30d,#84cc16);color:#0a0a0f;">PLAY</span>
+      <span class="hm-legend-chip" style="background:linear-gradient(135deg,#ca8a04,#eab308);color:#0a0a0f;">CAUTION</span>
+      <span class="hm-legend-chip" style="background:linear-gradient(135deg,#ea580c,#f97316);">REDUCE</span>
+      <span class="hm-legend-chip" style="background:linear-gradient(135deg,#dc2626,#ef4444);">FADE</span>
+    </div>
+  </div>
+  <div id="streak-heatmap-container">
+    <div class="empty" style="padding:16px;">Heat map loads with morning scan…</div>
   </div>
 </div>
 
@@ -1520,6 +1656,7 @@ async function loadMorningScan(){
       document.getElementById('collision-table-container').innerHTML='<div class="empty" style="padding:16px;">No scan data yet<br><button onclick="triggerManualScan()" style="margin-top:8px;background:var(--gold);border:none;color:var(--black);cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:700;padding:6px 16px;border-radius:5px;">Run Now</button></div>';
       return;
     }
+    renderHeroPlays(scan);
     renderBloombergGrid(scan);
     renderFullPlayCard(scan);
     renderRegressionFlags(scan.outliers||[]);
@@ -1655,51 +1792,8 @@ function renderFullPlayCard(scan){
     <button onclick="triggerManualScan()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-family:var(--mono);font-size:9px;text-decoration:underline;padding:0;margin-left:auto;">↻ Rescan</button>
   </div>`;
 
-  // PLAY CARDS
-  if(plays.length){
-    html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);margin-bottom:8px;">✅ TODAY'S PLAYS (${plays.length})</div>`;
-    for(const g of plays){
-      const a=g.analysis;
-      const colMap={blue:'var(--blue)',green:'var(--green)',teal:'var(--teal)',amber:'var(--amber)',red:'var(--red)',orange:'var(--orange)'};
-      const col=colMap[a.color]||'var(--teal)';
-      const sbMap={MAX:'sb-blue',STRONG:'sb-green',ENTRY:'sb-teal',WATCH:'sb-amber'};
-      const sbClass=sbMap[a.strength]||'sb-teal';
-      const pitNote=a.pitcherEdge?`${a.pitcherEdge.name||'SP'} ERA ${a.pitcherEdge.era} FIP ${a.pitcherEdge.fip}`:'SP data N/A';
-      const trigStr=a.triggered.join('+');
-      const failStr=a.failed.length?` | ✗ ${a.failed.join(',')}`:'';
-      html+=`<div class="play-box" style="margin-bottom:10px;">
-        <div class="color-bar" style="background:${col};height:3px;border-radius:99px;width:100%;margin-bottom:8px;"></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <span class="tbadge tbadge-real">${a.gateType}</span>
-            <span class="strength-badge ${sbClass}">${a.strength}</span>
-            <span style="font-family:var(--mono);font-size:12px;color:var(--text3);">${trigStr}${failStr}</span>
-          </div>
-          <span style="font-family:var(--mono);font-size:12px;color:${col};font-weight:700;">$${a.sizing}</span>
-        </div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px;">${a.recommendation}</div>
-        <div style="font-size:13px;color:var(--text3);font-family:var(--mono);margin-bottom:6px;">${g.game} · ${new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div>
-        ${(()=>{
-          const hrl=a.rlDisplay&&a.rlDisplay.homeLine?a.rlDisplay.homeLine:{price:a.odds&&a.odds.homeRL?a.odds.homeRL:null,point:a.gateSide==='home'?1.5:-1.5};
-          const arl=a.rlDisplay&&a.rlDisplay.awayLine?a.rlDisplay.awayLine:{price:a.odds&&a.odds.awayRL?a.odds.awayRL:null,point:a.gateSide==='away'?1.5:-1.5};
-          let rlHtml='<div style="font-family:var(--mono);font-size:12px;margin-bottom:6px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:5px;border:1px solid rgba(255,255,255,0.06);">';
-          rlHtml+='<span style="color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;">Run Line · </span>';
-          if(hrl&&hrl.price!=null){const col=hrl.price>=115?'var(--green)':hrl.price<=-130?'var(--red)':'var(--text2)';rlHtml+=`<span style="color:var(--text2);">Home ${hrl.point>0?'+':''}${hrl.point} <b style="color:${col}">${hrl.price>0?'+':''}${hrl.price}</b></span>`;}
-          if(arl&&arl.price!=null){const col=arl.price>=115?'var(--green)':arl.price<=-130?'var(--red)':'var(--text2)';rlHtml+=`<span style="color:var(--text2);margin-left:12px;">Away ${arl.point>0?'+':''}${arl.point} <b style="color:${col}">${arl.price>0?'+':''}${arl.price}</b></span>`;}
-          if(!hrl.price&&!arl.price)rlHtml+='<span style="color:var(--text3);">Check book for run line</span>';
-          if(a.rlAddon)rlHtml+=`<span style="color:var(--amber);margin-left:12px;font-weight:700;">→ BET: ${a.rlAddon.desc} · $${a.rlAddon.amt}${!a.rlAddon.qualifying?' (watch)':''}</span>`;
-          rlHtml+='</div>';
-          return rlHtml;
-        })()}
-        <div style="font-size:12px;color:var(--text3);font-family:var(--mono);line-height:1.7;border-top:1px solid var(--border);padding-top:6px;margin-top:4px;">${a.notes.slice(0,5).join('<br>')}</div>
-        <div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-top:4px;">${pitNote} · ${a.collision.away} vs ${a.collision.home}</div>
-      </div>`;
-    }
-  } else {
-    html+=`<div style="background:rgba(231,76,60,0.06);border:1px solid rgba(231,76,60,0.15);border-radius:8px;padding:12px;font-family:var(--mono);font-size:13px;color:var(--text3);margin-bottom:10px;">
-      <span style="color:var(--red);font-weight:700;">NO PLAYS TODAY</span> — No games cleared all required gates + triggers. Sit out. Season record protected.
-    </div>`;
-  }
+  // PLAY CARDS now render in the Hero Plays section above (renderHeroPlays).
+  // This Bloomberg block only covers scan metadata, T15 fades, and the full game table.
 
   // FADE CARDS
   if(fades.length){
@@ -1783,6 +1877,77 @@ function renderRegressionFlags(outliers){
   }
 }
 
+// ── HERO PLAYS RENDER ──────────────────────────────────────────
+function renderHeroPlays(scan){
+  const container = document.getElementById('hero-plays-container');
+  const meta = document.getElementById('hpm-status');
+  if(!container) return;
+  const plays = scan.plays || [];
+  const ts = scan.timestamp ? new Date(scan.timestamp) : new Date();
+  if(meta){
+    if(plays.length){
+      meta.textContent = `${plays.length} qualifying ${plays.length===1?'play':'plays'} · ${ts.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}`;
+    } else {
+      meta.textContent = `Scanned ${(scan.summary&&scan.summary.gamesScanned)||0} games · ${ts.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}`;
+    }
+  }
+
+  if(!plays.length){
+    container.innerHTML = `<div class="hero-no-plays"><b>NO PLAYS TODAY</b> — no games cleared all required gates + triggers. Sit out. Season record protected.</div>`;
+    return;
+  }
+
+  const colMap = {blue:'var(--blue)', green:'var(--green)', teal:'var(--teal)', amber:'var(--amber)', red:'var(--red)', orange:'var(--orange)'};
+  const sbMap  = {MAX:'sb-blue', STRONG:'sb-green', ENTRY:'sb-teal', WATCH:'sb-amber'};
+
+  const cards = plays.map(g => {
+    const a = g.analysis;
+    const col = colMap[a.color] || 'var(--teal)';
+    const sbClass = sbMap[a.strength] || 'sb-teal';
+    const trigStr = (a.triggered||[]).join('+');
+    const failStr = a.failed && a.failed.length ? ` <span class="hp-fail">| ✗ ${a.failed.join(',')}</span>` : '';
+    const pitNote = a.pitcherEdge ? `${a.pitcherEdge.name||'SP'} ERA ${a.pitcherEdge.era} FIP ${a.pitcherEdge.fip}` : 'SP data N/A';
+    const gameTime = g.gameTime ? new Date(g.gameTime).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'}) : '';
+
+    // Run line block
+    const hrl = a.rlDisplay && a.rlDisplay.homeLine ? a.rlDisplay.homeLine : {price: a.odds && a.odds.homeRL ? a.odds.homeRL : null, point: a.gateSide==='home' ? 1.5 : -1.5};
+    const arl = a.rlDisplay && a.rlDisplay.awayLine ? a.rlDisplay.awayLine : {price: a.odds && a.odds.awayRL ? a.odds.awayRL : null, point: a.gateSide==='away' ? 1.5 : -1.5};
+    let rlInner = `<span class="hp-rl-label">Run Line</span>`;
+    if(hrl && hrl.price != null){
+      const cc = hrl.price>=115?'var(--green)':hrl.price<=-130?'var(--red)':'var(--text2)';
+      rlInner += ` <span style="color:var(--text2);">Home ${hrl.point>0?'+':''}${hrl.point} <b style="color:${cc}">${hrl.price>0?'+':''}${hrl.price}</b></span>`;
+    }
+    if(arl && arl.price != null){
+      const cc = arl.price>=115?'var(--green)':arl.price<=-130?'var(--red)':'var(--text2)';
+      rlInner += ` <span style="color:var(--text2);">Away ${arl.point>0?'+':''}${arl.point} <b style="color:${cc}">${arl.price>0?'+':''}${arl.price}</b></span>`;
+    }
+    if(!hrl.price && !arl.price) rlInner += ` <span style="color:var(--text3);">Check book for run line</span>`;
+    if(a.rlAddon) rlInner += ` <span class="hp-rl-bet">→ BET: ${a.rlAddon.desc} · $${a.rlAddon.amt}${!a.rlAddon.qualifying?' (watch)':''}</span>`;
+
+    const notes = (a.notes||[]).slice(0,5).join('<br>');
+    const collDesc = a.collision ? `${a.collision.away||'?'} vs ${a.collision.home||'?'}` : '';
+
+    return `<div class="hp-card">
+      <div class="hp-card-glow" style="background:${col};box-shadow:0 0 16px ${col}, 0 0 4px ${col};"></div>
+      <div class="hp-card-top">
+        <div class="hp-badges">
+          <span class="tbadge tbadge-real">${a.gateType||''}</span>
+          <span class="strength-badge ${sbClass}">${a.strength||''}</span>
+          <span class="hp-trig">${trigStr}${failStr}</span>
+        </div>
+        <span class="hp-stake" style="color:${col};">$${a.sizing||0}</span>
+      </div>
+      <div class="hp-rec">${a.recommendation||''}</div>
+      <div class="hp-game">${g.game||''}${gameTime?' · '+gameTime:''}</div>
+      <div class="hp-rl">${rlInner}</div>
+      ${notes ? `<div class="hp-notes">${notes}</div>` : ''}
+      <div class="hp-pitcher">${pitNote}${collDesc?' · '+collDesc:''}</div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `<div class="hero-plays-grid">${cards}</div>`;
+}
+
 // ── STREAK HEAT MAP ───────────────────────────────────────────
 // Axis order: most negative (L5+) at top-left, most positive (W5+) at bottom-right
 // Cell color = signal strength based on T2 collision rules
@@ -1814,75 +1979,67 @@ function hmGradeCell(awayLabel, homeLabel){
 
   // Both flat — no signal
   if(a === 0 && h === 0){
-    return { bg:'rgba(255,255,255,0.04)', color:'#64748b', label:'—', sub:'no edge' };
+    return { bg:'rgba(255,255,255,0.03)', color:'#475569', label:'—' };
   }
 
   // Collision: opposite signs, both ≥2 magnitude
   if(a * h < 0 && aAbs >= 2 && hAbs >= 2){
     const total = aAbs + hAbs;
-    // Home dog scenario: home losing, away winning → bet home dog
-    // Away dog scenario: away losing, home winning → bet away dog
-    if(total >= 10) return { bg:'#16a34a', color:'#fff', label:'MAX', sub:'collision · cap' };
-    if(total >= 7)  return { bg:'#22c55e', color:'#0a0a0f', label:'STRONG', sub:'collision' };
-    if(total >= 5)  return { bg:'#65a30d', color:'#0a0a0f', label:'PLAY', sub:'collision' };
-    return { bg:'#84cc16', color:'#0a0a0f', label:'PLAY', sub:'min collision' };
+    if(total >= 10) return { bg:'linear-gradient(135deg,#15803d,#22c55e)', color:'#fff', label:'MAX' };
+    if(total >= 7)  return { bg:'linear-gradient(135deg,#16a34a,#4ade80)', color:'#0a0a0f', label:'STRONG' };
+    if(total >= 5)  return { bg:'linear-gradient(135deg,#65a30d,#a3e635)', color:'#0a0a0f', label:'PLAY' };
+    return { bg:'linear-gradient(135deg,#84cc16,#bef264)', color:'#0a0a0f', label:'PLAY' };
   }
 
-  // Same direction, both winning → caution (no fade value, both hot)
+  // Same direction, both winning → caution
   if(a > 0 && h > 0){
-    if(a >= 5 || h >= 5) return { bg:'#ca8a04', color:'#0a0a0f', label:'CAUTION', sub:'both hot' };
-    return { bg:'#eab308', color:'#0a0a0f', label:'CAUTION', sub:'both up' };
+    if(a >= 5 || h >= 5) return { bg:'linear-gradient(135deg,#a16207,#eab308)', color:'#0a0a0f', label:'CAUTION' };
+    return { bg:'linear-gradient(135deg,#ca8a04,#facc15)', color:'#0a0a0f', label:'CAUTION' };
   }
 
-  // Same direction, both losing → reduce/avoid (low info)
+  // Same direction, both losing → reduce
   if(a < 0 && h < 0){
-    if(aAbs >= 5 || hAbs >= 5) return { bg:'#ea580c', color:'#fff', label:'REDUCE', sub:'both cold' };
-    return { bg:'#f97316', color:'#0a0a0f', label:'REDUCE', sub:'both down' };
+    if(aAbs >= 5 || hAbs >= 5) return { bg:'linear-gradient(135deg,#9a3412,#ea580c)', color:'#fff', label:'REDUCE' };
+    return { bg:'linear-gradient(135deg,#c2410c,#f97316)', color:'#fff', label:'REDUCE' };
   }
 
   // One side flat — partial signal
   if(a === 0 || h === 0){
     const live = a === 0 ? h : a;
     const liveAbs = Math.abs(live);
-    if(liveAbs >= 5) return { bg:'#ca8a04', color:'#0a0a0f', label:'WATCH', sub:'one extreme' };
-    if(liveAbs >= 3) return { bg:'#facc15', color:'#0a0a0f', label:'WATCH', sub:'one streak' };
-    return { bg:'rgba(255,255,255,0.06)', color:'#94a3b8', label:'—', sub:'thin' };
+    if(liveAbs >= 5) return { bg:'linear-gradient(135deg,#854d0e,#eab308)', color:'#0a0a0f', label:'WATCH' };
+    if(liveAbs >= 3) return { bg:'linear-gradient(135deg,#a16207,#facc15)', color:'#0a0a0f', label:'WATCH' };
+    return { bg:'rgba(255,255,255,0.05)', color:'#64748b', label:'—' };
   }
 
-  // Fade zone: extreme (9+ in real life) — return to standard
-  // Approximated here as W5+ vs flat or similar — already handled above
-
-  return { bg:'rgba(255,255,255,0.04)', color:'#64748b', label:'—', sub:'' };
+  return { bg:'rgba(255,255,255,0.03)', color:'#475569', label:'—' };
 }
 
 function renderStreakHeatmap(scan){
   const container = document.getElementById('streak-heatmap-container');
   if(!container) return;
-  const teams = scan.teams || {};
   const games = scan.allGames || [];
 
-  // ── Grid 1: Static framework reference ──
-  let g1 = `<div class="hm-grid-wrapper">
-    <div class="hm-grid-title">Framework Reference <span class="hm-grid-meta">· Signal strength by streak combination · T2 collision logic</span></div>
-    <table class="hm-table"><thead><tr>
-      <th class="hm-axis-corner">Away ↓ / Home →</th>`;
-  for(const c of HM_COLS) g1 += `<th>${c}</th>`;
-  g1 += `</tr></thead><tbody>`;
-  for(const r of HM_ROWS){
-    g1 += `<tr><td class="hm-row-label">${r}</td>`;
-    for(const c of HM_COLS){
-      const grade = hmGradeCell(r, c);
-      g1 += `<td class="hm-cell" style="background:${grade.bg};color:${grade.color};" title="Away ${r} @ Home ${c} → ${grade.label}">
-        <div class="hm-cell-label">${grade.label}</div>
-        <div class="hm-cell-sub">${grade.sub}</div>
-      </td>`;
+  // Build grid 1: framework reference
+  const buildFrameworkGrid = () => {
+    let h = `<table class="hm-table"><thead><tr><th class="hm-axis-corner">A↓ / H→</th>`;
+    for(const c of HM_COLS) h += `<th>${c}</th>`;
+    h += `</tr></thead><tbody>`;
+    for(const r of HM_ROWS){
+      h += `<tr><td class="hm-row-label">${r}</td>`;
+      for(const c of HM_COLS){
+        const grade = hmGradeCell(r, c);
+        h += `<td class="hm-cell" style="background:${grade.bg};color:${grade.color};" title="Away ${r} @ Home ${c} → ${grade.label}">
+          <div class="hm-cell-label">${grade.label}</div>
+        </td>`;
+      }
+      h += `</tr>`;
     }
-    g1 += `</tr>`;
-  }
-  g1 += `</tbody></table></div>`;
+    h += `</tbody></table>`;
+    return h;
+  };
 
-  // ── Grid 2: Live games positioned in their cells ──
-  // Build a map: "awayLabel|homeLabel" → array of {away, home, time}
+  // Build grid 2: live games
   const cellGames = {};
   for(const g of games){
     if(!g.away || !g.home) continue;
@@ -1896,43 +2053,48 @@ function renderStreakHeatmap(scan){
       time: g.gameTime ? new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : ''
     });
   }
-
   const totalGames = games.length;
-  let g2 = `<div class="hm-grid-wrapper">
-    <div class="hm-grid-title">Today's Live Matchups <span class="hm-grid-meta">· ${totalGames} games positioned by actual streaks</span></div>`;
 
-  if(totalGames === 0){
-    g2 += `<div class="hm-no-games">No games on schedule.</div></div>`;
-  } else {
-    g2 += `<table class="hm-table"><thead><tr>
-      <th class="hm-axis-corner">Away ↓ / Home →</th>`;
-    for(const c of HM_COLS) g2 += `<th>${c}</th>`;
-    g2 += `</tr></thead><tbody>`;
+  const buildLiveGrid = () => {
+    if(totalGames === 0){
+      return `<div class="hm-no-games">No games on schedule.</div>`;
+    }
+    let h = `<table class="hm-table"><thead><tr><th class="hm-axis-corner">A↓ / H→</th>`;
+    for(const c of HM_COLS) h += `<th>${c}</th>`;
+    h += `</tr></thead><tbody>`;
     for(const r of HM_ROWS){
-      g2 += `<tr><td class="hm-row-label">${r}</td>`;
+      h += `<tr><td class="hm-row-label">${r}</td>`;
       for(const c of HM_COLS){
         const key = r + '|' + c;
         const list = cellGames[key];
         if(list && list.length){
           const grade = hmGradeCell(r, c);
-          // Show first game; if multiple, indicate
           const first = list[0];
-          const more = list.length > 1 ? ` <span style="opacity:0.7;">+${list.length-1}</span>` : '';
-          const titleList = list.map(g=>`${g.away} @ ${g.home} ${g.time}`).join(' / ');
-          g2 += `<td class="hm-cell hm-game-cell" style="background:${grade.bg};color:${grade.color};" title="${titleList} · ${grade.label}">
-            <div class="hm-cell-game">${first.away}@${first.home}${more}</div>
-            <div class="hm-cell-game-time">${first.time}</div>
+          const more = list.length > 1 ? `+${list.length-1}` : '';
+          const titleList = list.map(g=>`${g.away} @ ${g.home} ${g.time}`).join(' · ');
+          h += `<td class="hm-cell" style="background:${grade.bg};" title="${titleList} → ${grade.label}">
+            <div class="hm-cell-game">${first.away}@${first.home}${more?' '+more:''}</div>
           </td>`;
         } else {
-          g2 += `<td class="hm-cell hm-empty"></td>`;
+          h += `<td class="hm-cell hm-empty"></td>`;
         }
       }
-      g2 += `</tr>`;
+      h += `</tr>`;
     }
-    g2 += `</tbody></table></div>`;
-  }
+    h += `</tbody></table>`;
+    return h;
+  };
 
-  container.innerHTML = g1 + g2;
+  container.innerHTML = `<div class="hm-grids-row">
+    <div class="hm-grid-wrapper">
+      <div class="hm-grid-title">Framework <span class="hm-grid-meta">· signal by streak combo</span></div>
+      ${buildFrameworkGrid()}
+    </div>
+    <div class="hm-grid-wrapper">
+      <div class="hm-grid-title">Live <span class="hm-grid-meta">· ${totalGames} games today</span></div>
+      ${buildLiveGrid()}
+    </div>
+  </div>`;
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
