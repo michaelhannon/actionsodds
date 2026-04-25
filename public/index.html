@@ -1191,7 +1191,7 @@ select.form-input{cursor:pointer;}
 <div class="protocol-section">
   <div class="protocol-header" onclick="toggleProtocol()">
     <div>
-      <div class="protocol-title">⚡ Bloomberg Collision Grid — Full Game Scan · Fades · Parlay Targets</div>
+      <div class="protocol-title">Today's Full Slate</div>
       <div class="protocol-subtitle">Auto-updates 9AM ET · W2+/L2+ minimum · Run diff filter · Streak depth color-coded</div>
     </div>
     <span id="protocol-arrow" style="color:var(--gold);font-size:18px;transition:transform 0.2s;transform:rotate(180deg);">▼</span>
@@ -2508,7 +2508,7 @@ function renderFullPlayCard(scan){
   // FULL GAME TABLE
   html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin:12px 0 6px;">ALL GAMES — Full Scan</div>`;
   html+=`<table class="cg-table"><thead><tr>
-    <th>Matchup</th><th>Away</th><th>Diff</th><th>Home</th><th>Diff</th><th>Collision</th><th>Gate</th><th>Triggers</th><th>Result</th>
+    <th>Matchup</th><th>Away</th><th>Diff</th><th>Home</th><th>Diff</th><th>Collision</th><th>Result</th>
   </tr></thead><tbody>`;
 
   for(const g of allGames){
@@ -2543,8 +2543,6 @@ function renderFullPlayCard(scan){
       <td class="${homeS==='W'?'cg-streak-w':'cg-streak-l'}">${homeS}${homeL}${homeReg}</td>
       <td class="${homeD>0?'cg-diff-pos':homeD<0?'cg-diff-neg':'cg-diff-flat'}">${homeDStr}</td>
       <td>${collHtml}</td>
-      <td>${gateHtml}</td>
-      <td style="font-family:var(--mono);font-size:12px;color:var(--text3);">${trigStr}</td>
       <td>${recHtml}</td>
     </tr>`;
   }
@@ -2631,7 +2629,6 @@ function renderHeroPlays(scan){
       <div class="hp-card-glow" style="background:${col};box-shadow:0 0 16px ${col}, 0 0 4px ${col};"></div>
       <div class="hp-card-top">
         <div class="hp-badges">
-          <span class="tbadge tbadge-real">${a.gateType||''}</span>
           <span class="strength-badge ${sbClass}">${a.strength||''}</span>
         </div>
         <span class="hp-stake" style="color:${col};">$${a.sizing||0}</span>
