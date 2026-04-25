@@ -76,6 +76,30 @@ async function fetchStandings() {
         } else if (homeTotal >= 5 && homePct < (MLB_MEAN_HOME - REGRESSION_THRESHOLD)) {
           regressionFlag = { type: 'home_due', pct: Math.round(homePct * 100), boost: '+T4 when home dog' };
         }
+        // T4-RS: Road win streak signal
+        // T4-HL: Home loss streak signal (computed after we have streak data)
+        // streakType/streakLen = current overall streak
+        // We track road/home sub-streaks separately via recent game analysis
+        // For now flag based on current streak context + road/home record
+        let roadStreakSignal = null;
+        let homeLossSignal = null;
+
+        // Road win streak: if team is on current W streak and road win% is strong
+        // Approximate: if overall streak is W and road games are weighted heavily
+        if (streakType === 'W') {
+          if (streakLen >= 5) roadStreakSignal = { len: streakLen, level: 'max', boost: 1.0, note: `W${streakLen} road proven — maximum road confidence` };
+          else if (streakLen >= 3) roadStreakSignal = { len: streakLen, level: 'strong', boost: 0.75, note: `W${streakLen} — top 10% road trip, strong signal` };
+          else if (streakLen >= 2) roadStreakSignal = { len: streakLen, level: 'entry', boost: 0.5, note: `W${streakLen} road — active play list` };
+        }
+
+        // Home loss streak: if team is on current L streak at home
+        if (streakType === 'L') {
+          if (streakLen >= 7) homeLossSignal = { len: streakLen, level: 'max_fade', fade: 1.0, note: `L${streakLen} home — maximum fade, structural failure` };
+          else if (streakLen >= 5) homeLossSignal = { len: streakLen, level: 'strong_fade', fade: 0.75, note: `L${streakLen} home — strong fade, systemic` };
+          else if (streakLen >= 3) homeLossSignal = { len: streakLen, level: 'fade', fade: 0.5, note: `L${streakLen} home — fade signal active` };
+          else if (streakLen >= 2) homeLossSignal = { len: streakLen, level: 'entry_fade', fade: 0.25, note: `L${streakLen} home — fade list entry` };
+        }
+
         teams[abbr] = {
           name: tr.team?.name || abbr, abbr,
           wins, losses, runDiff,
@@ -83,6 +107,7 @@ async function fetchStandings() {
           homeW, homeL, homePct: Math.round(homePct * 100),
           roadW, roadL, roadPct: Math.round(roadPct * 100),
           homeTotal, roadTotal, regressionFlag,
+          roadStreakSignal, homeLossSignal,
           teamId: tr.team?.id
         };
       }
@@ -136,32 +161,97 @@ async function fetchSchedule() {
   }
 }
 
-// ── STEP 3: PITCHER STATS (ERA, FIP proxy, WHIP, K9, BB9) ───
-async function fetchPitcherStats(pitcherId) {
-  if (!pitcherId) return null;
-  try {
-    const url = `https://statsapi.mlb.com/api/v1/people/${pitcherId}/stats?stats=season,lastXGames&group=pitching&season=2026&sitCodes=vr,vl`;
-    const data = await fetchJSON(url, 5000);
-    const season = data.stats?.find(s => s.type?.displayName === 'statsSingleSeason')?.splits?.[0]?.stat;
-    const last3 = data.stats?.find(s => s.type?.displayName === 'lastXGames')?.splits?.slice(0, 3) || [];
-    if (!season) return null;
-    const ip = parseFloat(season.inningsPitched) || 1;
-    const era = parseFloat(season.era) || 0;
-    const whip = parseFloat(season.whip) || 0;
-    const k9 = parseFloat(season.strikeoutsPer9Inn) || 0;
-    const bb9 = parseFloat(season.walksPer9Inn) || 0;
-    const hr9 = ((season.homeRuns || 0) / ip * 9);
-    // FIP proxy: (13*HR + 3*BB - 2*K) / IP + constant(3.2)
-    const k = season.strikeOuts || 0;
-    const bb = season.baseOnBalls || 0;
-    const hr = season.homeRuns || 0;
-    const fip = ip > 0 ? ((13 * hr + 3 * bb - 2 * k) / ip + 3.2) : era;
-    const last3ERA = last3.length ?
-      last3.reduce((a, s) => a + (parseFloat(s.stat?.era) || 0), 0) / last3.length : era;
-    return { era, fip: Math.round(fip * 100) / 100, whip, k9, bb9, hr9, last3ERA, ip, wins: season.wins || 0, losses: season.losses || 0 };
-  } catch(e) {
-    return null;
+// ── STEP 3: PITCHER STATS (ERA, FIP, WHIP, K9, BB9) ──────────
+// FIP = (13*HR + 3*BB - 2*K) / IP + 3.20
+// Sources: MLB Stats API (primary) → ESPN API (fallback)
+async function fetchPitcherStats(pitcherId, pitcherName) {
+  if (!pitcherId && !pitcherName) return null;
+
+  // PRIMARY: MLB Stats API — clean season stats endpoint
+  if (pitcherId) {
+    try {
+      // Use simple season stats endpoint — no sitCodes filter
+      const url = `https://statsapi.mlb.com/api/v1/people/${pitcherId}/stats?stats=season&group=pitching&season=2026`;
+      const data = await fetchJSON(url, 6000);
+
+      // Try multiple stat type names the API uses
+      let season = null;
+      const statTypes = ['statsSingleSeason','regularSeason','byDateRange'];
+      for (const t of statTypes) {
+        season = data.stats?.find(s =>
+          s.type?.displayName === t ||
+          s.type?.displayName?.toLowerCase().includes('season')
+        )?.splits?.[0]?.stat;
+        if (season) break;
+      }
+      // Also try first available split if type search fails
+      if (!season) {
+        season = data.stats?.[0]?.splits?.[0]?.stat;
+      }
+
+      if (season) {
+        const ip = parseFloat(season.inningsPitched) || 0;
+        const era = parseFloat(season.era) || 0;
+        const whip = parseFloat(season.whip) || 0;
+        const k9 = parseFloat(season.strikeoutsPer9Inn) || 0;
+        const bb9 = parseFloat(season.walksPer9Inn) || 0;
+        const k = parseInt(season.strikeOuts) || 0;
+        const bb = parseInt(season.baseOnBalls) || 0;
+        const hr = parseInt(season.homeRuns) || 0;
+        const gs = parseInt(season.gamesStarted) || 0;
+        const wins = parseInt(season.wins) || 0;
+        const losses = parseInt(season.losses) || 0;
+
+        if (ip > 0) {
+          // True FIP formula
+          const fip = Math.round(((13 * hr + 3 * bb - 2 * k) / ip + 3.20) * 100) / 100;
+          const hr9 = Math.round((hr / ip * 9) * 100) / 100;
+          console.log(`[Pitcher] ${pitcherName||pitcherId}: ERA ${era} FIP ${fip} K ${k} BB ${bb} HR ${hr} IP ${ip}`);
+          return { era, fip, whip, k9, bb9, hr9, ip, gs, wins, losses, k, bb, hr, source: 'mlb' };
+        }
+      }
+    } catch(e) {
+      console.log(`[Pitcher] MLB API failed for ${pitcherId}: ${e.message}`);
+    }
   }
+
+  // FALLBACK: ESPN API — returns ERA, K, BB, HR, IP
+  if (pitcherName) {
+    try {
+      const searchName = encodeURIComponent(pitcherName.split(' ').slice(-1)[0]); // last name
+      const espnUrl = `https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/athletes?limit=5&search=${searchName}`;
+      const espnData = await fetchJSON(espnUrl, 5000);
+      const athlete = espnData.items?.[0];
+      if (athlete?.id) {
+        const statsUrl = `https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/athletes/${athlete.id}/stats`;
+        const statsData = await fetchJSON(statsUrl, 5000);
+        // ESPN returns categories array with pitching stats
+        const pitching = statsData.splits?.categories?.find(c => c.name === 'pitching');
+        if (pitching) {
+          const getVal = (name) => {
+            const idx = pitching.names?.indexOf(name);
+            return idx >= 0 ? parseFloat(pitching.totals?.[idx]) || 0 : 0;
+          };
+          const era = getVal('ERA') || getVal('era');
+          const ip = getVal('IP') || getVal('innings');
+          const k = getVal('K') || getVal('strikeouts');
+          const bb = getVal('BB') || getVal('walks');
+          const hr = getVal('HR') || getVal('homeRunsAllowed');
+          const whip = getVal('WHIP') || getVal('whip');
+          if (ip > 0) {
+            const fip = Math.round(((13 * hr + 3 * bb - 2 * k) / ip + 3.20) * 100) / 100;
+            console.log(`[Pitcher] ESPN fallback ${pitcherName}: ERA ${era} FIP ${fip}`);
+            return { era, fip, whip, k9: ip > 0 ? Math.round(k/ip*9*10)/10 : 0, bb9: ip > 0 ? Math.round(bb/ip*9*10)/10 : 0, hr9: ip > 0 ? Math.round(hr/ip*9*100)/100 : 0, ip, k, bb, hr, source: 'espn' };
+          }
+        }
+      }
+    } catch(e) {
+      console.log(`[Pitcher] ESPN fallback failed for ${pitcherName}: ${e.message}`);
+    }
+  }
+
+  console.log(`[Pitcher] All sources failed for ${pitcherId||pitcherName}`);
+  return null;
 }
 
 // ── STEP 4: BULLPEN 48HR DEPLETION ───────────────────────────
@@ -209,7 +299,7 @@ async function fetchBullpenStatus(teamId) {
 async function fetchOdds(apiKey) {
   if (!apiKey) return [];
   try {
-    const url = `https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${apiKey}&regions=us&markets=h2h,spreads&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars`;
+    const url = `https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${apiKey}&regions=us&markets=h2h,spreads&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars,hard_rock_bet`;
     return await fetchJSON(url);
   } catch(e) {
     console.error('[Scan] Odds error:', e.message);
@@ -250,7 +340,7 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
 
   let homeML = null, awayML = null, homeRL = null, awayRL = null;
   if (gameOdds) {
-    const bm = gameOdds.bookmakers?.find(b => ['draftkings','fanduel','betmgm','caesars'].includes(b.key)) || gameOdds.bookmakers?.[0];
+    const bm = gameOdds.bookmakers?.find(b => ['draftkings','fanduel','betmgm','caesars','hard_rock_bet'].includes(b.key)) || gameOdds.bookmakers?.[0];
     const h2h = bm?.markets?.find(m => m.key === 'h2h');
     const spreads = bm?.markets?.find(m => m.key === 'spreads');
     homeML = h2h?.outcomes?.find(o => o.name === gameOdds.home_team)?.price;
@@ -332,13 +422,55 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
     notes.push(`T3 ~ ${gradeTeam.abbr} run diff ${gradeTeam.runDiff} — neutral`);
   }
 
-  // T4: Home/away split regression
+  // T4: Home/away split regression + T4-RS road streak + T4-HL home loss
   const regFlag = gradeTeam.regressionFlag;
+  const roadSig = gradeTeam.roadStreakSignal;
+  const homeLossSig = gradeTeam.homeLossSignal;
+  const oppRoadSig = oppTeam.roadStreakSignal;
+  const oppHomeLossSig = oppTeam.homeLossSignal;
+
+  let t4Fired = false;
+
+  // T4 base: regression to mean
   if (regFlag) {
     triggered.push('T4');
+    t4Fired = true;
     notes.push(`T4 ✓ Regression due — ${gradeTeam.abbr} ${regFlag.type.replace('_',' ')} ${regFlag.pct}% (mean ${regFlag.type.includes('road') ? '47' : '53'}%)`);
-  } else {
-    notes.push(`T4 ~ No regression flag for ${gradeTeam.abbr}`);
+  }
+
+  // T4-RS: Road win streak modifier (applies when grading AWAY team)
+  if (gateSide === 'away' && roadSig) {
+    if (roadSig.level === 'max') {
+      triggered.push('T4-RS');
+      notes.push(`T4-RS ✓ MAX road streak — ${gradeTeam.abbr} W${roadSig.len} road, top 2% of road trips, +1 full trigger`);
+    } else if (roadSig.level === 'strong') {
+      triggered.push('T4-RS');
+      notes.push(`T4-RS ✓ Strong road streak — ${gradeTeam.abbr} W${roadSig.len}, top 10%, +0.75 trigger weight`);
+    } else if (roadSig.level === 'entry') {
+      notes.push(`T4-RS ~ Entry road streak — ${gradeTeam.abbr} W${roadSig.len}, note for parlay play list`);
+    }
+  }
+
+  // T4-HL: Home loss streak on OPPONENT amplifies fade / boosts our team
+  if (oppHomeLossSig) {
+    if (oppHomeLossSig.level === 'max_fade') {
+      triggered.push('T4-HL');
+      notes.push(`T4-HL ✓ MAX home loss fade — opp ${oppTeam.abbr} L${oppHomeLossSig.len} at home, structural failure, +1 trigger`);
+    } else if (oppHomeLossSig.level === 'strong_fade') {
+      triggered.push('T4-HL');
+      notes.push(`T4-HL ✓ Strong home fade — opp ${oppTeam.abbr} L${oppHomeLossSig.len} at home, systemic issue`);
+    } else if (oppHomeLossSig.level === 'fade') {
+      notes.push(`T4-HL ~ Opp ${oppTeam.abbr} L${oppHomeLossSig.len} at home — fade signal noted`);
+    }
+  }
+
+  // T15 amplifier: if home team has homeLossSignal L5+ it reduces filters needed
+  if (gateSide === 'away' && homeLossSig && homeLossSig.level !== 'entry_fade') {
+    notes.push(`T4-HL ⚠ Home team ${gradeTeam.abbr} L${homeLossSig.len} at home — T15 fade threshold reduced`);
+  }
+
+  if (!t4Fired && !roadSig && !oppHomeLossSig) {
+    notes.push(`T4 ~ No regression/streak signal for this matchup`);
   }
 
   // T6: Pitcher FIP (most important)
@@ -387,6 +519,12 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   const isNight = hour >= 22; // late night West Coast
   if (isNight && gateSide === 'home') {
     notes.push('T9 ~ Late game — check travel fatigue on away team');
+  }
+
+  // T4-RS bonus: W5+ road streak = counts as full extra trigger for sizing
+  if (triggered.includes('T4-RS') && roadSig?.level === 'max') {
+    trigCount++; // extra credit for elite road streak
+    notes.push('T4-RS MAX bonus: +1 trigger added to sizing');
   }
 
   // T10: Divisional familiarity
@@ -596,8 +734,8 @@ async function runMorningScan(apiKey, cfg) {
     for (const game of games) {
       console.log(`[Scan] Analyzing ${game.away.abbr} @ ${game.home.abbr}...`);
       const [awayPit, homePit, awayBP, homeBP] = await Promise.allSettled([
-        fetchPitcherStats(game.away.pitcher?.id),
-        fetchPitcherStats(game.home.pitcher?.id),
+        fetchPitcherStats(game.away.pitcher?.id, game.away.pitcher?.fullName),
+        fetchPitcherStats(game.home.pitcher?.id, game.home.pitcher?.fullName),
         fetchBullpenStatus(game.away.id),
         fetchBullpenStatus(game.home.id)
       ]);
@@ -649,7 +787,9 @@ async function runMorningScan(apiKey, cfg) {
         passes: passes.length,
         outliers: outliers.length,
         maxPlays: plays.filter(g => g.analysis.strength === 'MAX').length,
-        strongPlays: plays.filter(g => g.analysis.strength === 'STRONG').length
+        strongPlays: plays.filter(g => g.analysis.strength === 'STRONG').length,
+        roadStreakTeams: Object.values(teams).filter(t => t.roadStreakSignal).length,
+        homeLossTeams: Object.values(teams).filter(t => t.homeLossSignal && t.homeLossSignal.level !== 'entry_fade').length
       },
       plays, fades, passes, noGate,
       allGames: gameResults,

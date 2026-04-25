@@ -333,6 +333,31 @@ select.form-input{cursor:pointer;}
 .book-link.czr{background:rgba(150,100,30,0.12);color:#e8c060;border-color:rgba(150,100,30,0.3);}
 .book-link:hover{opacity:0.8;}
 
+/* ── BLOOMBERG GRID ──────────────────────────────────── */
+.bloomberg-grid{width:100%;padding:0;}
+.bg-section-label{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);padding:8px 0 4px;}
+.bg-col-headers{display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 90px;gap:1px;margin-bottom:2px;}
+.bg-col-hdr{font-size:10px;color:var(--text3);padding:4px 8px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;}
+.bg-row{display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 90px;gap:1px;margin-bottom:2px;border-radius:6px;overflow:hidden;}
+.bg-cell{padding:7px 8px;font-size:13px;background:var(--panel);}
+.bg-cell-team{font-weight:600;color:var(--text);font-size:13px;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.03em;}
+.bg-streak-bar{height:5px;border-radius:3px;margin-top:3px;background:var(--border2);}
+.bg-streak-fill{height:100%;border-radius:3px;transition:width 0.4s;}
+.bg-diff-pos{color:var(--green);font-family:var(--mono);font-size:12px;font-weight:600;}
+.bg-diff-neg{color:var(--red);font-family:var(--mono);font-size:12px;font-weight:600;}
+.bg-diff-neu{color:var(--text3);font-family:var(--mono);font-size:12px;}
+.bg-opp{color:var(--text3);font-size:12px;font-family:'Barlow Condensed',sans-serif;}
+.bg-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:0.06em;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;}
+.bgl-max{background:rgba(59,130,246,0.15);color:var(--blue);border:1px solid rgba(59,130,246,0.3);}
+.bgl-str{background:rgba(46,204,113,0.12);color:var(--green);border:1px solid rgba(46,204,113,0.25);}
+.bgl-ent{background:rgba(20,184,166,0.12);color:var(--teal);border:1px solid rgba(20,184,166,0.25);}
+.bgl-watch{background:rgba(243,156,18,0.12);color:var(--amber);border:1px solid rgba(243,156,18,0.25);}
+.bgl-fade{background:rgba(231,76,60,0.1);color:var(--red);border:1px solid rgba(231,76,60,0.2);}
+.bgl-skip{background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);}
+.bg-parlay-box{margin-top:12px;padding:10px 12px;background:rgba(232,185,74,0.06);border:1px solid rgba(232,185,74,0.2);border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.bg-parlay-label{font-size:10px;color:var(--text3);font-family:'Barlow Condensed',sans-serif;letter-spacing:0.1em;text-transform:uppercase;}
+.bg-parlay-val{font-size:15px;font-weight:700;color:var(--gold);font-family:'Barlow Condensed',sans-serif;}
+
 /* Scrollbar */
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:var(--black);}
@@ -377,8 +402,8 @@ select.form-input{cursor:pointer;}
 <div class="protocol-section">
   <div class="protocol-header" onclick="toggleProtocol()">
     <div>
-      <div class="protocol-title">⚙ Today's Card — T1-T15 + R1-R7 Full Engine</div>
-      <div class="protocol-subtitle">Auto-updates 9AM ET · All 30 teams · Pitcher FIP · Bullpen 48hr · Collision + Regression</div>
+      <div class="protocol-title">⚡ Bloomberg Collision Grid — Play List · Fade List · Parlay Targets</div>
+      <div class="protocol-subtitle">Auto-updates 9AM ET · W2+/L2+ minimum · Run diff filter · Streak depth color-coded</div>
     </div>
     <span id="protocol-arrow" style="color:var(--gold);font-size:18px;transition:transform 0.2s;transform:rotate(180deg);">▼</span>
   </div>
@@ -906,22 +931,7 @@ function renderMultiBookGrid(games){
   html+=`<table class="book-grid"><thead><tr>
     <th style="text-align:left;color:var(--text3);border-color:var(--border2);">Game</th>
     <th style="color:var(--text3);border-color:var(--border2);">Time</th>
-    ${books.map(b=>{
-      const logoUrls={
-        fanduel:'https://www.google.com/s2/favicons?domain=fanduel.com&sz=64',
-        betmgm:'https://www.google.com/s2/favicons?domain=betmgm.com&sz=64',
-        caesars:'https://www.google.com/s2/favicons?domain=caesars.com&sz=64',
-        hard_rock_bet:'https://www.google.com/s2/favicons?domain=hardrock.bet&sz=64',
-        draftkings:'https://www.google.com/s2/favicons?domain=draftkings.com&sz=64',
-      };
-      const bookFullNames={fanduel:'FanDuel',betmgm:'BetMGM',caesars:'Caesars',hard_rock_bet:'Hard Rock',draftkings:'DraftKings'};
-      const name=bookFullNames[b.key]||b.label;
-      const logoUrl=logoUrls[b.key];
-      const logoHtml=logoUrl
-        ? '<img src="'+logoUrl+'" alt="'+name+'" style="height:28px;max-width:28px;object-fit:contain;border-radius:4px;" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'inline\'">'+'<span style="display:none;font-family:Arial Black,sans-serif;font-size:12px;font-weight:900;color:#fff;">'+name+'</span>'
-        : '<span style="font-family:Arial Black,sans-serif;font-size:12px;font-weight:900;color:#fff;">'+name+'</span>';
-      return '<th colspan="3" class="'+b.thCls+'" style="padding:8px 4px;border-bottom:2px solid rgba(255,255,255,0.15);">'+logoHtml+'</th>';
-    }).join('')}
+    ${books.map(b=>`<th colspan="3" class="${b.thCls}"><span class="book-logo ${b.cls}">${b.label}</span></th>`).join('')}
     <th style="color:var(--text3);border-color:var(--border2);">System</th>
   </tr>
   <tr>
@@ -1104,18 +1114,19 @@ async function loadOdds(){
   document.getElementById('card-output').innerHTML='<div class="status-box"><div class="spinner" style="width:24px;height:24px;margin:0 auto 16px;display:block;"></div><div class="status-title">Fetching live lines...</div></div>';
 
   try{
-        const url=`/odds?sport=mlb`;
+    const API_KEY='75d619683f0d4cf8366179321ee08cc7';
+    const url=`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars,hard_rock_bet`;
     const res=await fetch(url);
     if(!res.ok)throw new Error('API error '+res.status);
-    const raw2=await res.json(); allGames=Array.isArray(raw2)?raw2:(raw2.data||raw2.games||raw2.odds||[]);
+    allGames=await res.json();
     document.getElementById('last-update-label').textContent='Updated '+new Date().toLocaleTimeString();
 
     // Build book tabs
     const books=new Set();
     for(const g of allGames)for(const bk of g.bookmakers)books.add(bk.key);
     const bookNames={'draftkings':'DraftKings','fanduel':'FanDuel','betmgm':'BetMGM','caesars':'Caesars','hard_rock_bet':'Hard Rock','williamhill_us':'WH','barstool':'Barstool'};
-    var tabsEl2=document.getElementById('book-tabs-cards');
-    if(tabsEl2)tabsEl2.innerHTML='';
+    const tabsEl=document.getElementById('book-tabs');
+    tabsEl.innerHTML='';
     let firstBook=null;
     for(const bk of books){
       if(!firstBook)firstBook=bk;
@@ -1123,19 +1134,19 @@ async function loadOdds(){
       btn2.className='book-tab'+(bk===firstBook?' active':'');
       btn2.textContent=bookNames[bk]||bk;
       btn2.onclick=()=>{document.querySelectorAll('.book-tab').forEach(b=>b.classList.remove('active'));btn2.classList.add('active');renderCards(allGames,bk);};
-      // tabs handled by grid view
+      tabsEl.appendChild(btn2);
     }
     document.getElementById('game-count').textContent=allGames.length+' games';
     // Build card view tabs too
-    tabsEl2=document.getElementById('book-tabs-cards');
-    tabsEl2.innerHTML='';
+    const tabsEl=document.getElementById('book-tabs-cards');
+    tabsEl.innerHTML='';
     for(const bk2 of books){
       const btn3=document.createElement('button');
       btn3.className='book-tab'+(bk2===firstBook?' active':'');
       btn3.textContent=bookNames[bk2]||bk2;
       btn3.dataset.key=bk2;
       btn3.onclick=()=>{document.querySelectorAll('#book-tabs-cards .book-tab').forEach(b=>b.classList.remove('active'));btn3.classList.add('active');renderCards(allGames,bk2);};
-      tabsEl2.appendChild(btn3);
+      tabsEl.appendChild(btn3);
     }
     // Default to grid view
     if(currentView==='grid') renderMultiBookGrid(allGames);
@@ -1317,11 +1328,11 @@ function updateSummary(){
   const atRisk=core.filter(p=>!p.result).reduce((a,p)=>a+(parseFloat(p.amt)||0),0);
 
   // Use baseline + logged
-  const BASE_CORE=4486,BASE_EXOTIC=100;
+  const BASE_CORE=5024,BASE_EXOTIC=899;
   const totalCore=BASE_CORE+Math.round(corePnl);
   const totalExotic=BASE_EXOTIC+Math.round(exoticPnl);
   const totalCombined=totalCore+totalExotic;
-  const totalWins=21+wins,totalLosses=9+losses;
+  const totalWins=25+wins,totalLosses=9+losses;
   const totalWinPct=totalWins+totalLosses>0?Math.round(totalWins/(totalWins+totalLosses)*100):70;
 
   const fmt=(n)=>(n>=0?'+':'-')+'$'+Math.abs(n).toLocaleString();
@@ -1442,6 +1453,7 @@ async function loadMorningScan(){
       document.getElementById('collision-table-container').innerHTML='<div class="empty" style="padding:16px;">No scan data yet<br><button onclick="triggerManualScan()" style="margin-top:8px;background:var(--gold);border:none;color:var(--black);cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:700;padding:6px 16px;border-radius:5px;">Run Now</button></div>';
       return;
     }
+    renderBloombergGrid(scan);
     renderFullPlayCard(scan);
     renderRegressionFlags(scan.outliers||[]);
   }catch(e){
@@ -1459,6 +1471,103 @@ async function triggerManualScan(){
 }
 
 // ── FULL PLAY CARD FROM SERVER SCAN ──────────────────────────
+function renderBloombergGrid(scan){
+  const container=document.getElementById('collision-table-container');
+  if(!container)return;
+  const bgTeams=scan.teams||{};
+  const bgGames=scan.allGames||[];
+
+  // Build play list and fade list from scan data
+  const playList=[];
+  const fadeList=[];
+
+  for(const [abbr,t] of Object.entries(bgTeams)){
+    if(t.streak==='W' && t.streakLen>=2 && t.runDiff>0){
+      // Find next game
+      const nextGame=bgGames.find(g=>g.away&&g.away.abbr===abbr||g.home&&g.home.abbr===abbr);
+      const isHome=nextGame?.home?.abbr===abbr;
+      const opp=isHome?nextGame?.away:nextGame?.home;
+      const oppTeam=opp?.abbr?bgTeams[opp.abbr]:null;
+      const oppDiff=oppTeam?.runDiff||0;
+      const oppStreak=oppTeam?`${oppTeam.streak}${oppTeam.streakLen}`:'—';
+      const fadeZone=t.streakLen>=9;
+      const signal=fadeZone?'Fade zone':t.streakLen>=5?'MAX':t.streakLen>=3?'Strong':'Entry';
+      const badgeCls=fadeZone?'bgl-skip':t.streakLen>=5?'bgl-max':t.streakLen>=3?'bgl-str':'bgl-ent';
+      playList.push({...t,abbr,nextOpp:opp?.abbr||'—',oppDiff,oppStreak,signal,badgeCls,fadeZone});
+    }
+    if(t.streak==='L' && t.streakLen>=2 && t.runDiff<0){
+      const nextGame=bgGames.find(g=>g.away&&g.away.abbr===abbr||g.home&&g.home.abbr===abbr);
+      const isHome=nextGame?.home?.abbr===abbr;
+      const opp=isHome?nextGame?.away:nextGame?.home;
+      const oppTeam=opp?.abbr?bgTeams[opp.abbr]:null;
+      const oppDiff=oppTeam?.runDiff||0;
+      const fadeZone=t.streakLen>=9;
+      const signal=fadeZone?'Fade zone':'Fade';
+      const badgeCls=fadeZone?'bgl-skip':'bgl-fade';
+      fadeList.push({...t,abbr,nextOpp:opp?.abbr||'—',oppDiff,signal,badgeCls,fadeZone});
+    }
+  }
+
+  // Sort by streak length desc
+  playList.sort((a,b)=>b.streakLen-a.streakLen);
+  fadeList.sort((a,b)=>b.streakLen-a.streakLen);
+
+  // Best parlay: top 2 play list teams where opponent has negative diff
+  const parlayLegs=playList.filter(t=>!t.fadeZone&&t.oppDiff<0).slice(0,2);
+  const parlayStr=parlayLegs.length>=2
+    ?parlayLegs.map(t=>t.name?.split(' ').slice(-1)[0]||t.abbr).join(' × ')+' — $200 RR'
+    :'Need 2+ qualifying legs for parlay';
+
+  const colHdrs=`<div class="bg-col-headers">
+    <div class="bg-col-hdr">Team</div>
+    <div class="bg-col-hdr">Streak</div>
+    <div class="bg-col-hdr">Run diff</div>
+    <div class="bg-col-hdr">Next opp</div>
+    <div class="bg-col-hdr">Opp diff</div>
+    <div class="bg-col-hdr">Signal</div>
+  </div>`;
+
+  function makeRow(t){
+    const barPct=Math.min(t.streakLen/10*100,100);
+    const barColor=t.streak==='W'?'var(--blue)':'var(--red)';
+    const streakColor=t.streak==='W'?'var(--blue)':'var(--red)';
+    const diffStr=(t.runDiff>0?'+':'')+t.runDiff;
+    const diffCls=t.runDiff>0?'bg-diff-pos':t.runDiff<0?'bg-diff-neg':'bg-diff-neu';
+    const oppDiffStr=t.oppDiff!=null?(t.oppDiff>0?'+':'')+t.oppDiff:'—';
+    const oppDiffCls=t.oppDiff>0?'bg-diff-pos':t.oppDiff<0?'bg-diff-neg':'bg-diff-neu';
+    return `<div class="bg-row">
+      <div class="bg-cell bg-cell-team">${t.name?.split(' ').slice(-1)[0]||t.abbr} <span style="color:var(--text3);font-size:10px;">${t.abbr}</span></div>
+      <div class="bg-cell"><span style="color:${streakColor};font-weight:700;font-family:var(--mono);">${t.streak}${t.streakLen}</span><div class="bg-streak-bar"><div class="bg-streak-fill" style="width:${barPct}%;background:${barColor};"></div></div></div>
+      <div class="bg-cell ${diffCls}">${diffStr}</div>
+      <div class="bg-cell bg-opp">${t.nextOpp}</div>
+      <div class="bg-cell ${oppDiffCls}">${oppDiffStr}</div>
+      <div class="bg-cell"><span class="bg-badge ${t.badgeCls}">${t.signal}</span></div>
+    </div>`;
+  }
+
+  const ts=new Date(scan.timestamp);
+  let html=`<div class="bloomberg-grid">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);">Updated ${ts.toLocaleTimeString()}</div>
+      <button onclick="triggerManualScan()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-family:var(--mono);font-size:10px;text-decoration:underline;padding:0;">↻ Rescan</button>
+    </div>
+    ${colHdrs}
+    <div class="bg-section-label">Play list — W2+ · positive run diff</div>
+    ${playList.length?playList.map(makeRow).join(''):'<div class="empty" style="font-size:12px;">No qualifying play list teams today</div>'}
+    <div class="bg-section-label" style="margin-top:10px;">Fade list — L2+ · negative run diff</div>
+    ${fadeList.length?fadeList.map(makeRow).join(''):'<div class="empty" style="font-size:12px;">No qualifying fade list teams today</div>'}
+    <div class="bg-parlay-box">
+      <div>
+        <div class="bg-parlay-label">Tomorrow's parlay target</div>
+        <div class="bg-parlay-val">${parlayStr}</div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-align:right;">Exotic bucket only<br>Never in W/L record</div>
+    </div>
+  </div>`;
+
+  container.innerHTML=html;
+}
+
 function renderFullPlayCard(scan){
   const container=document.getElementById('collision-table-container');
   const plays=scan.plays||[];
@@ -1502,7 +1611,18 @@ function renderFullPlayCard(scan){
         </div>
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px;">${a.recommendation}</div>
         <div style="font-size:13px;color:var(--text3);font-family:var(--mono);margin-bottom:6px;">${g.game} · ${new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div>
-        ${a.rlAddon?`<div style="font-family:var(--mono);font-size:12px;margin-bottom:6px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:5px;"><span style="color:var(--text3);font-size:10px;text-transform:uppercase;">Run Line · </span><span style="color:var(--amber);font-weight:700;">${a.rlAddon.desc} $${a.rlAddon.amt}</span></div>`:""}
+        ${a.(()=>{
+          const hrl=a.rlDisplay&&a.rlDisplay.homeLine?a.rlDisplay.homeLine:{price:a.odds&&a.odds.homeRL?a.odds.homeRL:null,point:a.gateSide==='home'?1.5:-1.5};
+          const arl=a.rlDisplay&&a.rlDisplay.awayLine?a.rlDisplay.awayLine:{price:a.odds&&a.odds.awayRL?a.odds.awayRL:null,point:a.gateSide==='away'?1.5:-1.5};
+          let rlHtml='<div style="font-family:var(--mono);font-size:12px;margin-bottom:6px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:5px;border:1px solid rgba(255,255,255,0.06);">';
+          rlHtml+='<span style="color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;">Run Line · </span>';
+          if(hrl&&hrl.price!=null){const col=hrl.price>=115?'var(--green)':hrl.price<=-130?'var(--red)':'var(--text2)';rlHtml+=`<span style="color:var(--text2);">Home ${hrl.point>0?'+':''}${hrl.point} <b style="color:${col}">${hrl.price>0?'+':''}${hrl.price}</b></span>`;}
+          if(arl&&arl.price!=null){const col=arl.price>=115?'var(--green)':arl.price<=-130?'var(--red)':'var(--text2)';rlHtml+=`<span style="color:var(--text2);margin-left:12px;">Away ${arl.point>0?'+':''}${arl.point} <b style="color:${col}">${arl.price>0?'+':''}${arl.price}</b></span>`;}
+          if(!hrl.price&&!arl.price)rlHtml+='<span style="color:var(--text3);">Check book for run line</span>';
+          if(a.rlAddon)rlHtml+=`<span style="color:var(--amber);margin-left:12px;font-weight:700;">→ BET: ${a.rlAddon.desc} · $${a.rlAddon.amt}${!a.rlAddon.qualifying?' (watch)':''}</span>`;
+          rlHtml+='</div>';
+          return rlHtml;
+        })()
         <div style="font-size:12px;color:var(--text3);font-family:var(--mono);line-height:1.7;border-top:1px solid var(--border);padding-top:6px;margin-top:4px;">${a.notes.slice(0,5).join('<br>')}</div>
         <div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-top:4px;">${pitNote} · ${a.collision.away} vs ${a.collision.home}</div>
       </div>`;
