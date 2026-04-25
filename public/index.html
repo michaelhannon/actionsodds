@@ -210,6 +210,9 @@ body.mlb-theme ::-webkit-scrollbar-thumb{background:rgba(0,30,80,0.2);}
 
 /* Team logo styles - shared across themes */
 .team-logo{display:inline-block;vertical-align:middle;flex-shrink:0;object-fit:contain;}
+.team-logo-link{display:inline-flex;align-items:center;text-decoration:none;color:inherit;cursor:pointer;transition:transform 0.12s;line-height:0;}
+.team-logo-link:hover{transform:scale(1.15);}
+.bg-team-cell{display:inline-flex;align-items:center;gap:5px;}
 .team-logo-sm{width:18px;height:18px;}
 .team-logo-md{width:22px;height:22px;}
 .team-logo-lg{width:28px;height:28px;}
@@ -1345,20 +1348,55 @@ const MLB_TEAM_IDS = {
   // NL West
   'ARI':109,'AZ':109,'COL':115,'LAD':119,'SD':135,'SF':137
 };
+// ESPN team page slug map - clickable team logos link here
+const ESPN_TEAM_SLUGS = {
+  'BAL':'bal','BOS':'bos','NYY':'nyy','TB':'tb','TOR':'tor',
+  'CWS':'chw','CHW':'chw','CLE':'cle','DET':'det','KC':'kc','MIN':'min',
+  'HOU':'hou','LAA':'laa','OAK':'oak','ATH':'oak','SEA':'sea','TEX':'tex',
+  'ATL':'atl','MIA':'mia','NYM':'nym','PHI':'phi','WSH':'wsh','WAS':'wsh',
+  'CHC':'chc','CIN':'cin','MIL':'mil','PIT':'pit','STL':'stl',
+  'ARI':'ari','AZ':'ari','COL':'col','LAD':'lad','SD':'sd','SF':'sf'
+};
+// Reverse-map: full team name → abbreviation (used by BOOK grid where API returns full names)
+const MLB_NAME_TO_ABBR = {
+  'Baltimore Orioles':'BAL','Boston Red Sox':'BOS','New York Yankees':'NYY','Tampa Bay Rays':'TB','Toronto Blue Jays':'TOR',
+  'Chicago White Sox':'CWS','Cleveland Guardians':'CLE','Detroit Tigers':'DET','Kansas City Royals':'KC','Minnesota Twins':'MIN',
+  'Houston Astros':'HOU','Los Angeles Angels':'LAA','Oakland Athletics':'OAK','Athletics':'OAK','Seattle Mariners':'SEA','Texas Rangers':'TEX',
+  'Atlanta Braves':'ATL','Miami Marlins':'MIA','New York Mets':'NYM','Philadelphia Phillies':'PHI','Washington Nationals':'WSH',
+  'Chicago Cubs':'CHC','Cincinnati Reds':'CIN','Milwaukee Brewers':'MIL','Pittsburgh Pirates':'PIT','St. Louis Cardinals':'STL',
+  'Arizona Diamondbacks':'ARI','Colorado Rockies':'COL','Los Angeles Dodgers':'LAD','San Diego Padres':'SD','San Francisco Giants':'SF'
+};
+function nameToAbbr(name){
+  if(!name) return null;
+  return MLB_NAME_TO_ABBR[name] || null;
+}
+
 function mlbLogoUrl(abbr){
   if(!abbr) return null;
   const id = MLB_TEAM_IDS[abbr.toUpperCase()];
   return id ? `https://www.mlbstatic.com/team-logos/${id}.svg` : null;
 }
+function espnTeamUrl(abbr){
+  if(!abbr) return null;
+  const slug = ESPN_TEAM_SLUGS[abbr.toUpperCase()];
+  return slug ? `https://www.espn.com/mlb/team/_/name/${slug}` : null;
+}
 function teamLogoHtml(abbr, size){
-  // Render an inline logo with abbreviation fallback
+  // Render an inline logo (clickable to ESPN team page) with abbreviation fallback
   const cls = size === 'lg' ? 'team-logo-lg' : (size === 'md' ? 'team-logo-md' : 'team-logo-sm');
   const url = mlbLogoUrl(abbr);
+  const espnUrl = espnTeamUrl(abbr);
   const safe = (abbr||'?').toString().replace(/[^A-Za-z0-9]/g,'').slice(0,3).toUpperCase();
+  let inner;
   if(!url){
-    return `<span class="team-logo-fallback ${cls}" title="${safe}">${safe}</span>`;
+    inner = `<span class="team-logo-fallback ${cls}" title="${safe}">${safe}</span>`;
+  } else {
+    inner = `<img class="team-logo ${cls}" src="${url}" alt="${safe}" title="${safe}" onerror="this.outerHTML='<span class=\\'team-logo-fallback ${cls}\\' title=\\'${safe}\\'>${safe}</span>';" />`;
   }
-  return `<img class="team-logo ${cls}" src="${url}" alt="${safe}" title="${safe}" onerror="this.outerHTML='<span class=\\'team-logo-fallback ${cls}\\' title=\\'${safe}\\'>${safe}</span>';" />`;
+  if(espnUrl){
+    return `<a href="${espnUrl}" target="_blank" rel="noopener" class="team-logo-link" title="${safe} on ESPN" onclick="event.stopPropagation();">${inner}</a>`;
+  }
+  return inner;
 }
 
 </script>
@@ -1625,13 +1663,16 @@ function renderMultiBookGrid(games){
 
     const rowStyle=hasPlay?'background:rgba(46,204,113,0.05);':hasT11?'background:rgba(243,156,18,0.04);':'';
 
+    const awayAbbr = nameToAbbr(g.away_team) || away.toUpperCase().slice(0,3);
+    const homeAbbr = nameToAbbr(g.home_team) || home.toUpperCase().slice(0,3);
+
     html+=`<tr style="${rowStyle}">
       <td class="game-col">
         ${hasPlay?'<span style="color:var(--green);margin-right:4px;">●</span>':''}
         ${hasT11&&!hasPlay?'<span style="color:var(--amber);margin-right:4px;">●</span>':''}
-        <span style="color:var(--text3);">${away}</span>
+        <span class="bg-team-cell">${teamLogoHtml(awayAbbr,'sm')}<span style="color:var(--text3);">${away}</span></span>
         <span style="color:var(--text3);margin:0 4px;">@</span>
-        <span style="color:var(--text);">${home}</span>
+        <span class="bg-team-cell">${teamLogoHtml(homeAbbr,'sm')}<span style="color:var(--text);">${home}</span></span>
       </td>
       <td class="game-time-col">${timeStr}</td>`;
 
