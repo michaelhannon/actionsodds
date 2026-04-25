@@ -111,7 +111,11 @@ body.mlb-theme .logplay-strip-title{color:#bf0d3e;}
 body.mlb-theme .logplay-fields .form-input{background:#ffffff;border:1px solid rgba(0,30,80,0.15);color:#0a1a3a;}
 body.mlb-theme .logplay-fields .form-input:focus{border-color:#002d72;}
 body.mlb-theme .logplay-fields .form-input.lp-autofilled{border-color:#1a8a45;background:#e8f5ee;}
-body.mlb-theme .logplay-fields select.form-input{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23002d72' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");}
+body.mlb-theme .logplay-fields select.form-input{
+  background-image:
+    linear-gradient(45deg, transparent 50%, #002d72 50%, #002d72 calc(50% + 1.5px), transparent calc(50% + 1.5px)),
+    linear-gradient(-45deg, transparent 50%, #002d72 50%, #002d72 calc(50% + 1.5px), transparent calc(50% + 1.5px));
+}
 body.mlb-theme .logplay-btn{background:#bf0d3e;color:#ffffff;}
 body.mlb-theme .logplay-btn:hover{background:#dc1f4f;}
 body.mlb-theme .logplay-toggle-date{color:#7a8aa5;}
@@ -323,6 +327,17 @@ select.lp-input{cursor:pointer;}
   border-style:solid;border-width:17px 0 17px 8px;
   border-color:transparent transparent transparent #991b1b;
 }
+.ticker-pulse-dot{
+  width:8px;height:8px;border-radius:50%;background:#ffffff;
+  box-shadow:0 0 0 0 rgba(255,255,255,0.7);
+  animation:tickerPulse 1.6s ease-in-out infinite;
+  flex-shrink:0;
+}
+@keyframes tickerPulse{
+  0%   {box-shadow:0 0 0 0 rgba(255,255,255,0.65);transform:scale(1);}
+  60%  {box-shadow:0 0 0 8px rgba(255,255,255,0);transform:scale(1.1);}
+  100% {box-shadow:0 0 0 0 rgba(255,255,255,0);transform:scale(1);}
+}
 .ticker-track{
   flex:1;overflow:hidden;display:flex;align-items:center;
   position:relative;min-width:0;
@@ -431,8 +446,17 @@ select.lp-input{cursor:pointer;}
   appearance:none;-webkit-appearance:none;
 }
 .logplay-fields select.form-input{
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23999' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-  background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;cursor:pointer;
+  /* CSS-only chevron using two linear-gradients to draw a downward V */
+  background-image:
+    linear-gradient(45deg, transparent 50%, #999 50%, #999 calc(50% + 1.5px), transparent calc(50% + 1.5px)),
+    linear-gradient(-45deg, transparent 50%, #999 50%, #999 calc(50% + 1.5px), transparent calc(50% + 1.5px));
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 9px) 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 24px;
+  cursor: pointer;
 }
 .logplay-fields select.form-input:disabled{opacity:0.5;cursor:not-allowed;}
 .logplay-fields .form-input::placeholder{color:var(--text3);opacity:0.7;}
@@ -983,7 +1007,7 @@ select.form-input{cursor:pointer;}
 
 <!-- ── MARKET TICKER ─────────────────────────────────── -->
 <div class="ticker-bar">
-  <div class="ticker-label">📡 LIVE</div>
+  <div class="ticker-label"><span class="ticker-pulse-dot"></span>LIVE</div>
   <div class="ticker-track" id="ticker-track">
     <div class="ticker-content" id="ticker-content">
       <span class="ticker-empty">Loading today's slate…</span>
