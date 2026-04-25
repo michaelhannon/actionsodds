@@ -80,6 +80,148 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .confidence-bar{height:3px;background:var(--border2);border-radius:99px;margin-top:8px;overflow:hidden;}
 .confidence-fill{height:100%;border-radius:99px;background:var(--green);transition:width 0.5s;}
 
+/* ── LOG PLAY STRIP ──────────────────────────────────── */
+.logplay-strip{
+  background:linear-gradient(180deg, rgba(232,185,74,0.03) 0%, rgba(10,10,15,0) 100%), var(--dark);
+  border-bottom:1px solid var(--border);
+  padding:14px 24px 16px;
+}
+.logplay-strip-header{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  margin-bottom:10px;flex-wrap:wrap;gap:8px;
+}
+.logplay-eyebrow{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:2px;opacity:0.85;
+}
+.logplay-title{
+  font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.04em;
+  color:var(--text);line-height:1;
+}
+.logplay-meta{
+  font-family:var(--mono);font-size:10px;color:var(--text3);
+  letter-spacing:0.05em;
+}
+.logplay-form-row{
+  display:grid;
+  grid-template-columns: 1.5fr 1.5fr 0.9fr 0.9fr 1.6fr 0.9fr 0.9fr auto;
+  gap:8px;align-items:center;
+}
+.lp-input{
+  font-family:var(--mono);font-size:11px;background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);color:var(--text);
+  padding:8px 10px;border-radius:6px;outline:none;transition:border-color 0.12s, background 0.12s;
+  width:100%;
+}
+.lp-input:focus{border-color:var(--gold);background:rgba(255,255,255,0.06);}
+.lp-input::placeholder{color:var(--text3);opacity:0.6;}
+select.lp-input{cursor:pointer;}
+.lp-submit{
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:0.12em;text-transform:uppercase;
+  background:var(--gold);color:#0a0a0f;border:none;
+  padding:9px 18px;border-radius:6px;cursor:pointer;
+  transition:transform 0.1s, box-shadow 0.15s;white-space:nowrap;
+}
+.lp-submit:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,185,74,0.3);}
+@media (max-width:1100px){
+  .logplay-form-row{grid-template-columns:1fr 1fr 1fr;}
+}
+@media (max-width:600px){
+  .logplay-form-row{grid-template-columns:1fr 1fr;}
+}
+
+/* ── HEADER GEAR ICON ────────────────────────────────── */
+#settings-gear{
+  background:transparent;border:1px solid var(--border2);color:var(--text2);
+  padding:6px 11px;border-radius:6px;cursor:pointer;font-size:15px;
+  transition:color 0.15s, border-color 0.15s, transform 0.3s;
+}
+#settings-gear:hover{color:var(--gold);border-color:var(--gold);transform:rotate(45deg);}
+
+/* ── LOG PLAY STRIP ──────────────────────────────────── */
+.logplay-strip{
+  background:linear-gradient(180deg, rgba(232,185,74,0.06), rgba(10,10,15,0));
+  border-bottom:1px solid var(--border);
+  padding:12px 24px;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.logplay-strip-title{
+  font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:0.08em;
+  color:var(--gold);white-space:nowrap;
+}
+.logplay-fields{
+  display:grid;
+  grid-template-columns:minmax(200px,1.6fr) minmax(170px,1.2fr) minmax(80px,0.6fr) minmax(90px,0.6fr) minmax(130px,1fr) minmax(85px,0.6fr) auto;
+  gap:8px;flex:1;align-items:center;
+}
+.logplay-fields .form-input{
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  color:var(--text);padding:8px 10px;border-radius:6px;
+  font-family:var(--mono);font-size:11px;width:100%;transition:border-color 0.15s;
+  appearance:none;-webkit-appearance:none;
+}
+.logplay-fields select.form-input{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23999' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;cursor:pointer;
+}
+.logplay-fields select.form-input:disabled{opacity:0.5;cursor:not-allowed;}
+.logplay-fields .form-input::placeholder{color:var(--text3);opacity:0.7;}
+.logplay-fields .form-input:focus{outline:none;border-color:var(--gold);}
+.logplay-fields .form-input.lp-autofilled{border-color:rgba(46,204,113,0.4);background:rgba(46,204,113,0.04);}
+.logplay-btn{
+  background:var(--gold);color:var(--black);border:none;
+  padding:9px 16px;border-radius:6px;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:0.12em;text-transform:uppercase;
+  transition:background 0.15s;white-space:nowrap;
+}
+.logplay-btn:hover{background:var(--gold2);}
+.logplay-extra{
+  display:flex;align-items:center;gap:10px;width:100%;
+  font-family:var(--mono);font-size:10px;
+}
+.logplay-toggle-date{color:var(--text3);text-decoration:none;cursor:pointer;letter-spacing:0.05em;}
+.logplay-toggle-date:hover{color:var(--gold);}
+@media (max-width:1100px){
+  .logplay-fields{grid-template-columns:repeat(3,1fr);}
+  .logplay-fields .lp-game{grid-column:1/-1;}
+}
+@media (max-width:600px){
+  .logplay-fields{grid-template-columns:repeat(2,1fr);}
+}
+
+/* ── SETTINGS MODAL ──────────────────────────────────── */
+.settings-modal{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);
+  z-index:1000;display:flex;align-items:flex-start;justify-content:center;
+  padding:60px 20px 20px;overflow-y:auto;
+  animation:settingsFadeIn 0.18s ease-out;
+}
+@keyframes settingsFadeIn{from{opacity:0;}to{opacity:1;}}
+.settings-modal-inner{
+  background:var(--dark);border:1px solid var(--border2);border-radius:12px;
+  width:100%;max-width:680px;
+  box-shadow:0 30px 80px rgba(0,0,0,0.6);
+  animation:settingsSlide 0.22s ease-out;
+}
+@keyframes settingsSlide{from{transform:translateY(-12px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.settings-modal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;border-bottom:1px solid var(--border);
+}
+.settings-modal-title{
+  font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.08em;color:var(--gold);
+}
+.settings-modal-close{
+  background:transparent;border:none;color:var(--text3);font-size:24px;
+  cursor:pointer;line-height:1;padding:4px 10px;border-radius:4px;
+  transition:color 0.15s, background 0.15s;
+}
+.settings-modal-close:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+.settings-modal-body{padding:18px 20px 20px;}
+
 /* ── HERO PLAYS (top of page) ────────────────────────── */
 .hero-plays-section{
   position:relative;
@@ -545,6 +687,7 @@ select.form-input{cursor:pointer;}
     <span class="sport-badge" id="sport-badge">MLB</span>
     <span class="last-update" id="last-update-label">—</span>
     <button id="theme-toggle" onclick="toggleTheme()">☀</button>
+    <button id="settings-gear" onclick="openSettingsModal()" title="Settings" aria-label="Open settings">⚙</button>
     <button class="refresh-btn" id="refresh-btn" onclick="loadOdds()">
       <span id="refresh-icon">⟳</span> Refresh
     </button>
@@ -569,6 +712,97 @@ select.form-input{cursor:pointer;}
     <div class="top-banner-label">Win %</div>
     <div class="top-banner-val pct" id="tb-pct">74%</div>
   </div>
+</div>
+
+<!-- ── LOG PLAY (compact strip) ─────────────────────── -->
+<div class="logplay-strip">
+  <div class="logplay-strip-title">⚡ Log Play</div>
+  <div class="logplay-fields">
+    <select class="form-input lp-game" id="l-game" onchange="onLogGameChange()">
+      <option value="">Loading games…</option>
+    </select>
+    <select class="form-input" id="l-bet" onchange="onLogBetChange()" disabled>
+      <option value="">Pick game first</option>
+    </select>
+    <input class="form-input" id="l-odds" placeholder="Odds (-120)">
+    <input class="form-input" id="l-amt" placeholder="$ Amount">
+    <input class="form-input" id="l-trigger" placeholder="Triggers">
+    <select class="form-input" id="l-type">
+      <option value="core">Core</option>
+      <option value="exotic">Exotic</option>
+    </select>
+    <button class="logplay-btn" onclick="addLog()">Log Play</button>
+  </div>
+  <div class="logplay-extra">
+    <a href="#" class="logplay-toggle-date" id="logplay-toggle-date" onclick="toggleLogDate(event)">+ different date</a>
+    <input class="form-input" id="l-date" placeholder="Date (MM/DD/YYYY)" style="display:none;width:160px;">
+  </div>
+</div>
+
+<!-- ── SETTINGS MODAL ─────────────────────────────────── -->
+<div id="settings-modal" class="settings-modal" style="display:none;" onclick="if(event.target===this)closeSettingsModal()">
+  <div class="settings-modal-inner">
+    <div class="settings-modal-header">
+      <div class="settings-modal-title">⚙ Settings</div>
+      <button class="settings-modal-close" onclick="closeSettingsModal()" aria-label="Close">×</button>
+    </div>
+    <div class="settings-modal-body">
+      <div class="cfg-section">
+        <div class="cfg-section-title">Bankroll & Units</div>
+        <div class="cfg-grid">
+          <div><div class="cfg-lbl">Bankroll ($)</div><input class="form-input" id="cfg-bankroll" type="number" placeholder="3400"></div>
+          <div><div class="cfg-lbl">Base unit ($)</div><input class="form-input" id="cfg-unit" type="number" placeholder="200"></div>
+        </div>
+      </div>
+      <div class="cfg-section">
+        <div class="cfg-section-title">T1 Gate Thresholds</div>
+        <div class="cfg-grid">
+          <div><div class="cfg-lbl">T1 min (+XXX)</div><input class="form-input" id="cfg-t1-min" type="number" placeholder="140"></div>
+          <div><div class="cfg-lbl">T1 max (+XXX)</div><input class="form-input" id="cfg-t1-max" type="number" placeholder="199"></div>
+          <div><div class="cfg-lbl">T11 fav min (-XXX)</div><input class="form-input" id="cfg-t11-min" type="number" placeholder="115"></div>
+          <div><div class="cfg-lbl">T11 fav max (-XXX)</div><input class="form-input" id="cfg-t11-max" type="number" placeholder="135"></div>
+          <div><div class="cfg-lbl">T12 dog min (+XXX)</div><input class="form-input" id="cfg-t12-min" type="number" placeholder="110"></div>
+          <div><div class="cfg-lbl">T12 dog max (+XXX)</div><input class="form-input" id="cfg-t12-max" type="number" placeholder="134"></div>
+        </div>
+      </div>
+      <div class="cfg-section">
+        <div class="cfg-section-title">Dynamic Engine</div>
+        <div class="toggle-row">
+          <div><div class="toggle-lbl">Dynamic thresholds</div><div class="toggle-sub">Auto-tune T1A based on today's slate</div></div>
+          <button class="toggle" id="tog-dynamic" onclick="toggleSetting('dynamic')"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-lbl">Collision alerts</div><div class="toggle-sub">Highlight W streak vs L streak matchups</div></div>
+          <button class="toggle" id="tog-collision" onclick="toggleSetting('collision')"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-lbl">Regression flags</div><div class="toggle-sub">Flag SEA/KC/NYM and 15%+ outliers</div></div>
+          <button class="toggle" id="tog-regression" onclick="toggleSetting('regression')"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-lbl">Sharp divergence</div><div class="toggle-sub">Alert on 10+ point book disagreements</div></div>
+          <button class="toggle" id="tog-sharp" onclick="toggleSetting('sharp')"></button>
+        </div>
+      </div>
+      <button class="save-btn" onclick="saveCfg();closeSettingsModal();">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden stubs for JS state IDs (former tracker tabs - kept so existing functions don't break) -->
+<div style="display:none;" aria-hidden="true">
+  <div id="lw-w"></div><div id="lw-l"></div><div id="lw-pend"></div><div id="lw-roi"></div>
+  <div id="lw-pnl"></div><div id="lw-exotic"></div>
+  <select id="log-filter"><option value="all">All plays</option></select>
+  <div id="log-list"></div>
+  <div id="paper-wl-strip">
+    <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">0</div></div>
+    <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">0</div></div>
+    <div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val">0</div></div>
+    <div class="wl-box"><div class="wl-label">Win%</div><div class="wl-val">—</div></div>
+  </div>
+  <div id="paper-list"></div>
+  <input id="p-game"><input id="p-bet"><input id="p-odds"><input id="p-trigger"><input id="p-note">
 </div>
 
 <!-- ── HERO: TODAY'S PLAYS ─────────────────────────────── -->
@@ -725,186 +959,6 @@ select.form-input{cursor:pointer;}
     </div>
   </div>
 
-  <!-- ── TRACKER PANEL ──────────────────────────────── -->
-  <div class="tracker-panel">
-    <div class="panel-tabs">
-      <button class="panel-tab active" id="tab-btn-log" onclick="showTab('log')">Live Plays</button>
-      <button class="panel-tab" id="tab-btn-paper" onclick="showTab('paper')">Paper</button>
-      <button class="panel-tab" id="tab-btn-ledger" onclick="showTab('ledger')">Ledger</button>
-      <button class="panel-tab" id="tab-btn-settings" onclick="showTab('settings')">Settings</button>
-    </div>
-
-    <!-- LIVE PLAYS TAB -->
-    <div id="ptab-log">
-      <div style="display:none;" id="lw-w"></div>
-      <div style="display:none;" id="lw-l"></div>
-      <div style="display:none;" id="lw-pend"></div>
-      <div style="display:none;" id="lw-roi"></div>
-      <div style="display:none;" id="lw-pnl"></div>
-      <div style="display:none;" id="lw-exotic"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div class="section-title" style="font-size:11px;">Play history</div>
-        <select id="log-filter" onchange="renderLog()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;background:var(--panel2);border:1px solid var(--border2);color:var(--text2);padding:3px 8px;border-radius:4px;cursor:pointer;">
-          <option value="all">All plays</option>
-          <option value="core">Core only</option>
-          <option value="exotic">Exotic only</option>
-          <option value="pending">Pending</option>
-          <option value="W">Wins</option>
-          <option value="L">Losses</option>
-        </select>
-      </div>
-      <div id="log-list"><div class="empty">No plays logged yet.</div></div>
-      <div class="add-form">
-        <div class="add-form-title">Log play</div>
-        <div class="form-grid full"><input class="form-input" id="l-game" placeholder="Game (e.g. CHC vs PHI)"></div>
-        <div class="form-grid">
-          <input class="form-input" id="l-bet" placeholder="Bet (CHC ML)">
-          <input class="form-input" id="l-odds" placeholder="Odds (-120)">
-        </div>
-        <div class="form-grid">
-          <input class="form-input" id="l-amt" placeholder="$ Amount">
-          <input class="form-input" id="l-trigger" placeholder="Triggers (T1+T2+T3)">
-        </div>
-        <div class="form-grid">
-          <select class="form-input" id="l-type">
-            <option value="core">Core (straight bet)</option>
-            <option value="exotic">Exotic (parlay/live)</option>
-          </select>
-          <input class="form-input" id="l-date" placeholder="Date (blank=today)">
-        </div>
-        <button class="add-btn" onclick="addLog()">Log Play</button>
-      </div>
-    </div>
-
-    <!-- PAPER TAB -->
-    <div id="ptab-paper" style="display:none;">
-      <div class="wl-strip" id="paper-wl-strip">
-        <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">0</div></div>
-        <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">0</div></div>
-        <div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val">0</div></div>
-        <div class="wl-box"><div class="wl-label">Win%</div><div class="wl-val">—</div></div>
-      </div>
-      <div id="paper-list"><div class="empty">No paper trades yet.</div></div>
-      <div class="add-form">
-        <div class="add-form-title">Add paper trade</div>
-        <div class="form-grid full"><input class="form-input" id="p-game" placeholder="Game (e.g. NYY @ BOS)"></div>
-        <div class="form-grid">
-          <input class="form-input" id="p-bet" placeholder="Bet (O 8.5)">
-          <input class="form-input" id="p-odds" placeholder="Odds (+110)">
-        </div>
-        <div class="form-grid">
-          <input class="form-input" id="p-trigger" placeholder="Trigger (T2)">
-          <input class="form-input" id="p-note" placeholder="Note">
-        </div>
-        <button class="add-btn" onclick="addPaper()">Add Trade</button>
-      </div>
-    </div>
-
-    <!-- LEDGER TAB -->
-    <div id="ptab-ledger" style="display:none;">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;">2026 Season Ledger</div>
-      <div class="ledger-grid">
-        <div class="ledger-box core">
-          <div class="ledger-lbl">Core Straight Bets</div>
-          <div class="ledger-val" style="color:var(--green);">+$4,486</div>
-          <div class="ledger-note">21W–9L · 70% win rate</div>
-        </div>
-        <div class="ledger-box exotic">
-          <div class="ledger-lbl">Exotic P&L</div>
-          <div class="ledger-val" style="color:var(--amber);">+$100</div>
-          <div class="ledger-note">Parlays / live bets</div>
-        </div>
-        <div class="ledger-box combined" style="grid-column:1/-1;">
-          <div class="ledger-lbl">Combined Total</div>
-          <div class="ledger-val" style="color:var(--gold);font-size:26px;">+$4,586</div>
-          <div class="ledger-note">Apr 11 – Apr 22, 2026</div>
-        </div>
-      </div>
-
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin:14px 0 8px;">Exotic Breakdown</div>
-      <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--mono);font-size:10px;">
-        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);color:var(--text3);">
-          <span>ATL –1.5 + CHC parlay</span><span style="color:var(--red);">–$100</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);color:var(--text3);">
-          <span>STL+CHC+SD 3-team live parlay</span><span style="color:var(--green);">+$200</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;font-weight:600;">
-          <span style="color:var(--text);">Exotic running total</span><span style="color:var(--amber);">+$100</span>
-        </div>
-      </div>
-
-      <div style="background:rgba(231,76,60,0.06);border:1px solid rgba(231,76,60,0.15);border-radius:6px;padding:10px;margin-top:12px;font-family:var(--mono);font-size:9px;color:var(--text3);line-height:1.8;">
-        <span style="color:var(--red);font-weight:600;">ACCOUNTING RULES:</span><br>
-        W/L record = core straight bets ONLY<br>
-        Parlays + exotics → exotic bucket (never in win%)<br>
-        Cashouts logged at net loss (stake minus return)<br>
-        Combined total = core + exotic running sum
-      </div>
-
-      <div style="margin-top:14px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">NHL Active Positions</div>
-        <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--mono);font-size:10px;">
-          <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);">
-            <span style="color:var(--text3);">COL+TB 2-team series parlay</span>
-            <span style="color:var(--amber);">$500→$800</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);">
-            <span style="color:var(--text3);">5-team series RR (TB+COL+UTA+CAR+ANA)</span>
-            <span style="color:var(--amber);">$300→$1,800</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:4px 0;">
-            <span style="color:var(--text3);">MTL +1.5 series hedge</span>
-            <span style="color:var(--amber);">$127 active</span>
-          </div>
-          <div style="padding:6px 0 0;font-size:9px;color:var(--red);">NHL running P&L: –$291 through Apr 20</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SETTINGS TAB -->
-    <div id="ptab-settings" style="display:none;">
-      <div class="cfg-section">
-        <div class="cfg-section-title">Bankroll & Units</div>
-        <div class="cfg-grid">
-          <div><div class="cfg-lbl">Bankroll ($)</div><input class="form-input" id="cfg-bankroll" type="number" placeholder="3400"></div>
-          <div><div class="cfg-lbl">Base unit ($)</div><input class="form-input" id="cfg-unit" type="number" placeholder="200"></div>
-        </div>
-      </div>
-      <div class="cfg-section">
-        <div class="cfg-section-title">T1 Gate Thresholds</div>
-        <div class="cfg-grid">
-          <div><div class="cfg-lbl">T1 min (+XXX)</div><input class="form-input" id="cfg-t1-min" type="number" placeholder="140"></div>
-          <div><div class="cfg-lbl">T1 max (+XXX)</div><input class="form-input" id="cfg-t1-max" type="number" placeholder="199"></div>
-          <div><div class="cfg-lbl">T11 fav min (-XXX)</div><input class="form-input" id="cfg-t11-min" type="number" placeholder="115"></div>
-          <div><div class="cfg-lbl">T11 fav max (-XXX)</div><input class="form-input" id="cfg-t11-max" type="number" placeholder="135"></div>
-          <div><div class="cfg-lbl">T12 dog min (+XXX)</div><input class="form-input" id="cfg-t12-min" type="number" placeholder="110"></div>
-          <div><div class="cfg-lbl">T12 dog max (+XXX)</div><input class="form-input" id="cfg-t12-max" type="number" placeholder="134"></div>
-        </div>
-      </div>
-      <div class="cfg-section">
-        <div class="cfg-section-title">Dynamic Engine</div>
-        <div class="toggle-row">
-          <div><div class="toggle-lbl">Dynamic thresholds</div><div class="toggle-sub">Auto-tune T1A based on today's slate</div></div>
-          <button class="toggle" id="tog-dynamic" onclick="toggleSetting('dynamic')"></button>
-        </div>
-        <div class="toggle-row">
-          <div><div class="toggle-lbl">Collision alerts</div><div class="toggle-sub">Highlight W streak vs L streak matchups</div></div>
-          <button class="toggle" id="tog-collision" onclick="toggleSetting('collision')"></button>
-        </div>
-        <div class="toggle-row">
-          <div><div class="toggle-lbl">Regression flags</div><div class="toggle-sub">Flag SEA/KC/NYM and 15%+ outliers</div></div>
-          <button class="toggle" id="tog-regression" onclick="toggleSetting('regression')"></button>
-        </div>
-        <div class="toggle-row">
-          <div><div class="toggle-lbl">Sharp divergence</div><div class="toggle-sub">Alert on 10+ point book disagreements</div></div>
-          <button class="toggle" id="tog-sharp" onclick="toggleSetting('sharp')"></button>
-        </div>
-      </div>
-      <button class="save-btn" onclick="saveCfg()">Save Settings</button>
-    </div>
-
-  </div>
 </div>
 
 <script>
@@ -1443,21 +1497,193 @@ function showTab(tab){
 }
 
 // ── LOG PLAYS ────────────────────────────────────────────
-function addLog(){
-  const game=document.getElementById('l-game').value.trim();
-  const bet=document.getElementById('l-bet').value.trim();
-  if(!game||!bet)return;
-  logPlays.push({
-    game,bet,
-    odds:document.getElementById('l-odds').value.trim(),
-    amt:document.getElementById('l-amt').value.trim(),
-    trigger:document.getElementById('l-trigger').value.trim()||'T1',
-    type:document.getElementById('l-type').value||'core',
-    date:document.getElementById('l-date').value.trim()||new Date().toLocaleDateString(),
-    result:null
+// Cache today's games for the log play form
+let _logGameCache = [];
+
+function populateLogPlayGames(scan){
+  const sel = document.getElementById('l-game');
+  if(!sel) return;
+  const games = (scan && scan.allGames) || [];
+  // Filter to today only
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate()+1);
+  const todayGames = games.filter(g => {
+    if(!g.gameTime) return false;
+    const t = new Date(g.gameTime);
+    return t >= today && t < tomorrow;
   });
-  saveLog();renderLog();updateSummary();
-  ['l-game','l-bet','l-odds','l-amt','l-trigger','l-date'].forEach(id=>document.getElementById(id).value='');
+  _logGameCache = todayGames;
+  if(!todayGames.length){
+    sel.innerHTML = '<option value="">No games today</option>';
+    sel.disabled = true;
+    return;
+  }
+  sel.disabled = false;
+  let opts = '<option value="">Select game…</option>';
+  todayGames.forEach((g,i) => {
+    const a = (g.away && (g.away.abbr||g.away.name)) || '?';
+    const h = (g.home && (g.home.abbr||g.home.name)) || '?';
+    const t = g.gameTime ? new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : '';
+    opts += `<option value="${i}">${a} @ ${h}${t?' · '+t:''}</option>`;
+  });
+  sel.innerHTML = opts;
+}
+
+function onLogGameChange(){
+  const sel = document.getElementById('l-game');
+  const betSel = document.getElementById('l-bet');
+  const oddsEl = document.getElementById('l-odds');
+  const trigEl = document.getElementById('l-trigger');
+  if(!sel || !betSel) return;
+  const idx = sel.value;
+  // Reset downstream fields
+  oddsEl.value = ''; oddsEl.classList.remove('lp-autofilled');
+  trigEl.value = ''; trigEl.classList.remove('lp-autofilled');
+  if(idx === ''){
+    betSel.innerHTML = '<option value="">Pick game first</option>';
+    betSel.disabled = true;
+    return;
+  }
+  const g = _logGameCache[parseInt(idx,10)];
+  if(!g){ betSel.disabled = true; return; }
+  const a = (g.away && (g.away.abbr||g.away.name)) || 'AWAY';
+  const h = (g.home && (g.home.abbr||g.home.name)) || 'HOME';
+  const an = g.analysis || {};
+  const odds = an.odds || {};
+  const rl = an.rlDisplay || {};
+  const homeRL = rl.homeLine || (odds.homeRL ? {price:odds.homeRL,point:-1.5} : null);
+  const awayRL = rl.awayLine || (odds.awayRL ? {price:odds.awayRL,point:1.5} : null);
+
+  const fmtPrice = p => p == null ? '' : (p>0?'+':'')+p;
+  const fmtPoint = p => p == null ? '' : (p>0?'+':'')+p;
+
+  // Build bet menu - data-odds attribute carries auto-fill price
+  const opts = [];
+  opts.push(`<option value="">Select bet…</option>`);
+  // Moneylines
+  opts.push('<optgroup label="Moneyline">');
+  opts.push(`<option value="${a} ML" data-odds="${fmtPrice(odds.awayML)}">${a} ML${odds.awayML!=null?' · '+fmtPrice(odds.awayML):''}</option>`);
+  opts.push(`<option value="${h} ML" data-odds="${fmtPrice(odds.homeML)}">${h} ML${odds.homeML!=null?' · '+fmtPrice(odds.homeML):''}</option>`);
+  opts.push('</optgroup>');
+  // Run lines
+  opts.push('<optgroup label="Run Line">');
+  if(awayRL){
+    opts.push(`<option value="${a} ${fmtPoint(awayRL.point)}" data-odds="${fmtPrice(awayRL.price)}">${a} ${fmtPoint(awayRL.point)}${awayRL.price!=null?' · '+fmtPrice(awayRL.price):''}</option>`);
+  } else {
+    opts.push(`<option value="${a} +1.5">${a} +1.5</option>`);
+    opts.push(`<option value="${a} -1.5">${a} -1.5</option>`);
+  }
+  if(homeRL){
+    opts.push(`<option value="${h} ${fmtPoint(homeRL.point)}" data-odds="${fmtPrice(homeRL.price)}">${h} ${fmtPoint(homeRL.point)}${homeRL.price!=null?' · '+fmtPrice(homeRL.price):''}</option>`);
+  } else {
+    opts.push(`<option value="${h} +1.5">${h} +1.5</option>`);
+    opts.push(`<option value="${h} -1.5">${h} -1.5</option>`);
+  }
+  opts.push('</optgroup>');
+  // Totals
+  opts.push('<optgroup label="Game Total">');
+  opts.push(`<option value="Over ${a}/${h}">Over (enter line + odds)</option>`);
+  opts.push(`<option value="Under ${a}/${h}">Under (enter line + odds)</option>`);
+  opts.push('</optgroup>');
+  // First 5 innings
+  opts.push('<optgroup label="First 5 Innings">');
+  opts.push(`<option value="${a} F5 ML">${a} F5 ML</option>`);
+  opts.push(`<option value="${h} F5 ML">${h} F5 ML</option>`);
+  opts.push(`<option value="${a} F5 -0.5">${a} F5 -0.5</option>`);
+  opts.push(`<option value="${a} F5 +0.5">${a} F5 +0.5</option>`);
+  opts.push(`<option value="${h} F5 -0.5">${h} F5 -0.5</option>`);
+  opts.push(`<option value="${h} F5 +0.5">${h} F5 +0.5</option>`);
+  opts.push(`<option value="F5 Over">F5 Over (enter line)</option>`);
+  opts.push(`<option value="F5 Under">F5 Under (enter line)</option>`);
+  opts.push('</optgroup>');
+  // Team totals
+  opts.push('<optgroup label="Team Totals">');
+  opts.push(`<option value="${a} TT Over">${a} Team Total Over</option>`);
+  opts.push(`<option value="${a} TT Under">${a} Team Total Under</option>`);
+  opts.push(`<option value="${h} TT Over">${h} Team Total Over</option>`);
+  opts.push(`<option value="${h} TT Under">${h} Team Total Under</option>`);
+  opts.push('</optgroup>');
+  // Props
+  opts.push('<optgroup label="Props">');
+  opts.push(`<option value="${a} Prop">${a} Player Prop (enter detail)</option>`);
+  opts.push(`<option value="${h} Prop">${h} Player Prop (enter detail)</option>`);
+  opts.push(`<option value="HR Prop">HR Prop</option>`);
+  opts.push(`<option value="K Prop">Strikeout Prop</option>`);
+  opts.push('</optgroup>');
+
+  betSel.innerHTML = opts.join('');
+  betSel.disabled = false;
+
+  // Auto-fill triggers from analysis
+  if(an.triggered && an.triggered.length){
+    trigEl.value = an.triggered.join('+');
+    trigEl.classList.add('lp-autofilled');
+  }
+}
+
+function onLogBetChange(){
+  const betSel = document.getElementById('l-bet');
+  const oddsEl = document.getElementById('l-odds');
+  if(!betSel || !oddsEl) return;
+  const opt = betSel.options[betSel.selectedIndex];
+  const auto = opt && opt.getAttribute('data-odds');
+  if(auto){
+    oddsEl.value = auto;
+    oddsEl.classList.add('lp-autofilled');
+  } else {
+    oddsEl.value = '';
+    oddsEl.classList.remove('lp-autofilled');
+  }
+}
+
+function toggleLogDate(e){
+  if(e) e.preventDefault();
+  const dEl = document.getElementById('l-date');
+  const link = document.getElementById('logplay-toggle-date');
+  if(!dEl) return;
+  if(dEl.style.display === 'none' || !dEl.style.display){
+    dEl.style.display = 'inline-block';
+    if(link) link.textContent = '× use today';
+  } else {
+    dEl.style.display = 'none';
+    dEl.value = '';
+    if(link) link.textContent = '+ different date';
+  }
+}
+
+function addLog(){
+  const sel = document.getElementById('l-game');
+  const idx = sel ? sel.value : '';
+  let game = '';
+  if(idx !== '' && _logGameCache[parseInt(idx,10)]){
+    const g = _logGameCache[parseInt(idx,10)];
+    const a = (g.away && (g.away.abbr||g.away.name)) || '?';
+    const h = (g.home && (g.home.abbr||g.home.name)) || '?';
+    game = `${a} @ ${h}`;
+  }
+  const bet = document.getElementById('l-bet').value.trim();
+  if(!game || !bet){
+    alert('Pick a game and a bet first.');
+    return;
+  }
+  logPlays.push({
+    game, bet,
+    odds: document.getElementById('l-odds').value.trim(),
+    amt: document.getElementById('l-amt').value.trim(),
+    trigger: document.getElementById('l-trigger').value.trim() || 'T1',
+    type: document.getElementById('l-type').value || 'core',
+    date: document.getElementById('l-date').value.trim() || new Date().toLocaleDateString(),
+    result: null
+  });
+  saveLog(); renderLog(); updateSummary();
+  // Reset form
+  document.getElementById('l-game').value = '';
+  document.getElementById('l-bet').innerHTML = '<option value="">Pick game first</option>';
+  document.getElementById('l-bet').disabled = true;
+  ['l-odds','l-amt','l-trigger','l-date'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el){ el.value = ''; el.classList.remove('lp-autofilled'); }
+  });
 }
 
 function updateLogResult(idx,result){
@@ -1639,6 +1865,29 @@ function initToggles(){
 }
 
 // ── THEME ────────────────────────────────────────────────
+// ── SETTINGS MODAL ───────────────────────────────────────
+function openSettingsModal(){
+  const m = document.getElementById('settings-modal');
+  if(!m) return;
+  m.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  // Pre-fill current settings on open
+  if(typeof loadCfg === 'function'){ try{ loadCfg(); }catch(e){} }
+}
+function closeSettingsModal(){
+  const m = document.getElementById('settings-modal');
+  if(!m) return;
+  m.style.display = 'none';
+  document.body.style.overflow = '';
+}
+// Escape key closes the modal
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){
+    const m = document.getElementById('settings-modal');
+    if(m && m.style.display === 'flex') closeSettingsModal();
+  }
+});
+
 function toggleTheme(){
   document.body.classList.toggle('light');
   document.getElementById('theme-toggle').textContent=document.body.classList.contains('light')?'🌙':'☀';
@@ -1661,6 +1910,7 @@ async function loadMorningScan(){
     renderFullPlayCard(scan);
     renderRegressionFlags(scan.outliers||[]);
     renderStreakHeatmap(scan);
+    populateLogPlayGames(scan);
   }catch(e){
     document.getElementById('collision-table-container').innerHTML='<div class="empty">Offline — scan loads on server boot</div>';
   }
@@ -1933,15 +2183,12 @@ function renderHeroPlays(scan){
         <div class="hp-badges">
           <span class="tbadge tbadge-real">${a.gateType||''}</span>
           <span class="strength-badge ${sbClass}">${a.strength||''}</span>
-          <span class="hp-trig">${trigStr}${failStr}</span>
         </div>
         <span class="hp-stake" style="color:${col};">$${a.sizing||0}</span>
       </div>
       <div class="hp-rec">${a.recommendation||''}</div>
       <div class="hp-game">${g.game||''}${gameTime?' · '+gameTime:''}</div>
       <div class="hp-rl">${rlInner}</div>
-      ${notes ? `<div class="hp-notes">${notes}</div>` : ''}
-      <div class="hp-pitcher">${pitNote}${collDesc?' · '+collDesc:''}</div>
     </div>`;
   }).join('');
 
