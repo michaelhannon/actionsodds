@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logging out — Action's Odds</title>
+  <link rel="stylesheet" href="/auth/auth.css">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <h1 class="auth-title">Signing you out...</h1>
+      <p class="auth-subtitle" id="status">One moment.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    const supabase = createClient(
+      'https://xlfsaxfpdpxsdkovvhxs.supabase.co',
+      'sb_publishable_3L81CVKvE9w2agrz6yMe5g_BC4O0pws'
+    );
+    const status = document.getElementById('status');
+    try {
+      await supabase.auth.signOut();
+      status.textContent = 'Signed out. Redirecting...';
+      setTimeout(() => { window.location.href = '/auth/login.html'; }, 800);
+    } catch (err) {
+      status.textContent = 'Sign-out error: ' + err.message;
+    }
+  </script>
+</body>
+</html>

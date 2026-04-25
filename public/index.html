@@ -1067,6 +1067,7 @@ select.form-input{cursor:pointer;}
     <span class="last-update" id="last-update-label">—</span>
     <button id="theme-toggle" onclick="toggleTheme()">☀</button>
     <button id="settings-gear" onclick="openSettingsModal()" title="Settings" aria-label="Open settings">⚙</button>
+    <a href="/auth/logout.html" id="signout-link" style="background:transparent;border:1px solid var(--border2);color:var(--text2);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;text-decoration:none;font-family:inherit;display:inline-block;line-height:1.2;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)';" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)';">Sign Out</a>
     <button class="refresh-btn" id="refresh-btn" onclick="loadOdds()">
       <span id="refresh-icon">⟳</span> Refresh
     </button>
