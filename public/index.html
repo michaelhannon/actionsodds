@@ -1648,8 +1648,6 @@ function renderCards(games,bk){
       <div class="game-card-header">
         <div class="game-time">${timeStr}</div>
         <div style="display:flex;align-items:center;gap:8px;">
-          ${isT1?'<span class="tbadge tbadge-real">T1 ✓</span>':''}
-          ${isT11?'<span class="tbadge tbadge-paper">T11</span>':''}
           <div class="game-sport">MLB</div>
         </div>
       </div>
@@ -1690,13 +1688,11 @@ function renderCards(games,bk){
           <div class="color-bar ${barColor}"></div>
           <div class="play-header">
             <div style="display:flex;align-items:center;gap:6px;">
-              <span class="tbadge ${p.type==='real'?'tbadge-real':'tbadge-paper'}">${p.trigger}</span>
               <span class="strength-badge ${sbClass}">${p.strengthBadge}</span>
             </div>
             <div class="play-unit">$${p.amt}</div>
           </div>
           <div class="play-desc">${p.desc}</div>
-          <div class="play-note">${p.note}</div>
         </div>`;
       }
       html+=`</div>`;
