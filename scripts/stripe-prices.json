@@ -1,0 +1,38 @@
+{
+  "mode": "test",
+  "generated_at": "2026-04-25T20:02:47.955Z",
+  "prices": {
+    "individual": {
+      "mlb": {
+        "weekly": "price_1TQCPSCfbuW2LaSgt5oTXKhM",
+        "monthly": "price_1TQCPTCfbuW2LaSg3dUNfvmH",
+        "yearly": "price_1TQCPTCfbuW2LaSgkTFfMJgA"
+      },
+      "nhl": {
+        "weekly": "price_1TQCPUCfbuW2LaSgelTKmFiP",
+        "monthly": "price_1TQCPUCfbuW2LaSgHOK552XW",
+        "yearly": "price_1TQCPVCfbuW2LaSgLfH1jrep"
+      },
+      "nba": {
+        "weekly": "price_1TQCPWCfbuW2LaSg7aDigGOt",
+        "monthly": "price_1TQCPWCfbuW2LaSg4th9JUmQ",
+        "yearly": "price_1TQCPWCfbuW2LaSg4LxD9Sf9"
+      },
+      "nfl": {
+        "weekly": "price_1TQCPXCfbuW2LaSgUKQXOg20",
+        "monthly": "price_1TQCPYCfbuW2LaSgsxXdgQND",
+        "yearly": "price_1TQCPYCfbuW2LaSgCk4rW1Z4"
+      },
+      "golf": {
+        "weekly": "price_1TQCPZCfbuW2LaSg0v9GgVPd",
+        "monthly": "price_1TQCPZCfbuW2LaSgmEQCDEs5",
+        "yearly": "price_1TQCPaCfbuW2LaSgSjvdRsTM"
+      }
+    },
+    "bundle": {
+      "weekly": "price_1TQCPbCfbuW2LaSgZ8fr689p",
+      "monthly": "price_1TQCPbCfbuW2LaSg0wTywRia",
+      "yearly": "price_1TQCPbCfbuW2LaSgkmDsqugu"
+    }
+  }
+}

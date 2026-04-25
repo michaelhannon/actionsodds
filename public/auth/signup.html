@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up — Action's Odds</title>
+  <link rel="stylesheet" href="/auth/auth.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-logo">
+      <div class="auth-logo-mark">ACTION'S<span>ODDS</span></div>
+      <div class="auth-logo-sub">MLB · NHL · NBA · NFL · GOLF</div>
+    </div>
+
+    <div class="auth-card">
+      <h1 class="auth-title">Create your account</h1>
+      <p class="auth-subtitle">Sign up to start tracking plays. You'll choose your sports on the next step.</p>
+
+      <div id="alert" style="display:none;"></div>
+
+      <form id="signup-form" autocomplete="on">
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input class="form-input" type="email" id="email" name="email" required autocomplete="email" autofocus>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="display_name">Display name</label>
+          <input class="form-input" type="text" id="display_name" name="display_name" required autocomplete="name" placeholder="What should we call you?">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-input" type="password" id="password" name="password" required autocomplete="new-password" minlength="8">
+          <div class="helper-text">Minimum 8 characters.</div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="submit-btn">Create account</button>
+      </form>
+
+      <div class="auth-link-row">
+        Already have an account? <a href="/auth/login.html">Log in</a>
+      </div>
+    </div>
+
+    <div class="footer-link">
+      <a href="/">← Back to home</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const SUPABASE_URL = window.SUPABASE_URL || 'https://xlfsaxfpdpxsdkovvhxs.supabase.co';
+    const SUPABASE_KEY = window.SUPABASE_ANON_KEY || 'sb_publishable_3L81CVKvE9w2agrz6yMe5g_BC4O0pws';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const form = document.getElementById('signup-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const alertEl = document.getElementById('alert');
+
+    function showAlert(type, message) {
+      alertEl.className = `alert alert-${type}`;
+      alertEl.textContent = message;
+      alertEl.style.display = 'block';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertEl.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>Creating account...';
+
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+      const display_name = document.getElementById('display_name').value.trim();
+
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { display_name },
+            emailRedirectTo: `${window.location.origin}/auth/login.html`,
+          },
+        });
+
+        if (error) throw error;
+
+        showAlert('success', `✓ Account created! Check your email (${email}) to verify, then log in.`);
+        form.reset();
+      } catch (err) {
+        showAlert('error', err.message || 'Something went wrong. Please try again.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create account';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In — Action's Odds</title>
+  <link rel="stylesheet" href="/auth/auth.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-logo">
+      <div class="auth-logo-mark">ACTION'S<span>ODDS</span></div>
+      <div class="auth-logo-sub">MLB · NHL · NBA · NFL · GOLF</div>
+    </div>
+
+    <div class="auth-card">
+      <h1 class="auth-title">Welcome back</h1>
+      <p class="auth-subtitle">Log in to access your dashboard.</p>
+
+      <div id="alert" style="display:none;"></div>
+
+      <form id="login-form" autocomplete="on">
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input class="form-input" type="email" id="email" name="email" required autocomplete="email" autofocus>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-input" type="password" id="password" name="password" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn-primary" id="submit-btn">Log in</button>
+      </form>
+
+      <div class="auth-link-row" style="margin-top:14px;">
+        <a href="/auth/forgot-password.html">Forgot your password?</a>
+      </div>
+
+      <div class="auth-divider">or</div>
+
+      <div class="auth-link-row" style="margin-top:0;">
+        New here? <a href="/auth/signup.html">Create an account</a>
+      </div>
+    </div>
+
+    <div class="footer-link">
+      <a href="/">← Back to home</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const SUPABASE_URL = window.SUPABASE_URL || 'https://xlfsaxfpdpxsdkovvhxs.supabase.co';
+    const SUPABASE_KEY = window.SUPABASE_ANON_KEY || 'sb_publishable_3L81CVKvE9w2agrz6yMe5g_BC4O0pws';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const form = document.getElementById('login-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const alertEl = document.getElementById('alert');
+
+    function showAlert(type, message) {
+      alertEl.className = `alert alert-${type}`;
+      alertEl.textContent = message;
+      alertEl.style.display = 'block';
+    }
+
+    // If already logged in, redirect to dashboard
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) window.location.href = '/dashboard.html';
+    })();
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertEl.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>Logging in...';
+
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+
+        // Successful login → redirect to dashboard
+        window.location.href = '/dashboard.html';
+      } catch (err) {
+        showAlert('error', err.message || 'Login failed. Please check your credentials.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Log in';
+      }
+    });
+  </script>
+</body>
+</html>

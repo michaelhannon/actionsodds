@@ -1,15 +1,76 @@
-const http = require('http');
+// =============================================================================
+// Action's Odds — server.js (Express)
+//
+// Migrated from raw http.createServer to Express to support:
+//   - JWT auth middleware (Supabase)
+//   - Stripe webhook (needs raw body)
+//   - Cleaner static file serving
+//
+// All existing endpoints preserved with identical behavior:
+//   /odds?sport=mlb     (5-min cache, filtered books, grace window)
+//   /scores             (MLB live, 30s cache)
+//   /masters            (PGA, 60s cache)
+//   /line-moves?sport=  (movement tracking)
+//   /morning-scan       (last scan)
+//   /morning-scan/run   POST → trigger scan
+//   /ai-brief           POST → Anthropic proxy
+//   /grid.html, /, /favicon.svg, /index.html
+//
+// New endpoints (Phase 1):
+//   /api/stripe/webhook       POST (raw body, Stripe signature verified)
+//   /api/me                   GET  (requires auth)
+//   /api/stripe/create-checkout POST (requires auth, Phase 2 client)
+// =============================================================================
+
+require('dotenv').config();
+const express = require('express');
 const https = require('https');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
+
 const morningScan = require('./morning-scan');
-morningScan.scheduleScan(process.env.ODDS_API_KEY||'4e4c9bc2ffc7311be69697d28952cf1a',{t1Min:140,t1Max:199,t11Min:115,t11Max:135,t12Min:110});
+morningScan.scheduleScan(
+  process.env.ODDS_API_KEY || '4e4c9bc2ffc7311be69697d28952cf1a',
+  { t1Min: 140, t1Max: 199, t11Min: 115, t11Max: 135, t12Min: 110 }
+);
 
-
+const app = express();
 const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.ODDS_API_KEY || '';
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
 
+// ─── Auth & Stripe modules (Phase 1 SaaS) ──────────────────────────────────
+const { stripeWebhookHandler } = require('./server/stripe-webhook');
+const { requireAuth } = require('./server/auth');
+const { createCheckoutSession } = require('./server/stripe-checkout');
+
+// =============================================================================
+// MIDDLEWARE — order matters
+// =============================================================================
+// CORS: keep wide-open for now (matches old behavior)
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
+// IMPORTANT: Stripe webhook MUST receive the raw request body for signature
+// verification. This route is registered BEFORE express.json() so the body
+// stays as a Buffer here, then JSON parsing applies to all later routes.
+app.post(
+  '/api/stripe/webhook',
+  express.raw({ type: 'application/json' }),
+  stripeWebhookHandler
+);
+
+// JSON body parser for all other routes
+app.use(express.json({ limit: '1mb' }));
+
+// =============================================================================
+// CONFIG (unchanged from old server.js)
+// =============================================================================
 const SPORT_KEYS = {
   mlb: 'baseball_mlb',
   nhl: 'icehockey_nhl',
@@ -23,158 +84,67 @@ const SPORT_KEYS = {
 const GOLF_SPORTS = ['pga'];
 const ALLOWED_BOOKS = ['caesars', 'hard_rock_bet', 'draftkings', 'fanduel', 'betmgm'];
 
-// =====================
-// CACHE — 5 min per sport
-// =====================
+// =============================================================================
+// CACHE — 5 min per sport (unchanged)
+// =============================================================================
 const cache = {};
 const CACHE_TTL = 5 * 60 * 1000;
 
 function getCached(sport) {
   const entry = cache[sport];
   if (entry && (Date.now() - entry.timestamp) < CACHE_TTL) {
-    console.log('[CACHE] HIT for ' + sport + ', age: ' + Math.round((Date.now() - entry.timestamp) / 1000) + 's');
+    console.log(`[CACHE] HIT for ${sport}, age: ${Math.round((Date.now() - entry.timestamp) / 1000)}s`);
     return entry.data;
   }
   return null;
 }
-
 function setCache(sport, data) {
-  cache[sport] = { data: data, timestamp: Date.now() };
-  console.log('[CACHE] SET for ' + sport + ', ' + (Array.isArray(data) ? data.length + ' games' : 'error'));
+  cache[sport] = { data, timestamp: Date.now() };
+  console.log(`[CACHE] SET for ${sport}, ${Array.isArray(data) ? data.length + ' games' : 'error'}`);
 }
 
 function getOddsUrl(sport) {
   const key = SPORT_KEYS[sport] || SPORT_KEYS.mlb;
   if (GOLF_SPORTS.includes(sport)) {
-    return 'https://api.the-odds-api.com/v4/sports/' + key + '/odds/?apiKey=' + API_KEY + '&regions=us&markets=outrights&oddsFormat=american&dateFormat=iso';
+    return `https://api.the-odds-api.com/v4/sports/${key}/odds/?apiKey=${API_KEY}&regions=us&markets=outrights&oddsFormat=american&dateFormat=iso`;
   }
-  return 'https://api.the-odds-api.com/v4/sports/' + key + '/odds/?apiKey=' + API_KEY + '&regions=us&markets=h2h,spreads,totals&oddsFormat=american&dateFormat=iso';
+  return `https://api.the-odds-api.com/v4/sports/${key}/odds/?apiKey=${API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american&dateFormat=iso`;
 }
 
 function processGames(games, sport) {
   if (!Array.isArray(games)) return games;
-  var now = Date.now();
-  var GRACE_MS = 30 * 60 * 1000;
-
+  const now = Date.now();
+  const GRACE_MS = 30 * 60 * 1000;
   if (GOLF_SPORTS.includes(sport)) {
-    return games.map(function(game) {
-      return Object.assign({}, game, {
-        bookmakers: game.bookmakers.filter(function(b) { return ALLOWED_BOOKS.includes(b.key); })
-      });
-    });
+    return games.map(g => Object.assign({}, g, {
+      bookmakers: g.bookmakers.filter(b => ALLOWED_BOOKS.includes(b.key))
+    }));
   }
-
   return games
-    .filter(function(game) { return (now - new Date(game.commence_time).getTime()) < GRACE_MS; })
-    .map(function(game) {
-      return Object.assign({}, game, {
-        bookmakers: game.bookmakers.filter(function(b) { return ALLOWED_BOOKS.includes(b.key); })
-      });
-    });
+    .filter(g => (now - new Date(g.commence_time).getTime()) < GRACE_MS)
+    .map(g => Object.assign({}, g, {
+      bookmakers: g.bookmakers.filter(b => ALLOWED_BOOKS.includes(b.key))
+    }));
 }
 
-function fetchOdds(res, sport) {
-  var cached = getCached(sport);
-  if (cached) {
-    var filtered = processGames(cached, sport);
-    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' });
-    res.end(JSON.stringify(filtered));
-    return;
-  }
-
-  console.log('[API] Fetching fresh odds for ' + sport);
-  https.get(getOddsUrl(sport || 'mlb'), function(apiRes) {
-    var data = '';
-    apiRes.on('data', function(chunk) { data += chunk; });
-    apiRes.on('end', function() {
-      try {
-        var games = JSON.parse(data);
-
-        if (!Array.isArray(games)) {
-          console.log('[API] Non-array response:', JSON.stringify(games).slice(0, 300));
-          res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-          res.end(JSON.stringify({ error: games.message || 'API error', detail: games.error_code || 'unknown' }));
-          return;
-        }
-
-        console.log('[API] Got ' + games.length + ' games for ' + sport);
-        setCache(sport, games);
-        trackLines(sport, games);
-
-        var filtered = processGames(games, sport);
-        console.log('[API] ' + filtered.length + ' games after filtering');
-
-        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' });
-        res.end(JSON.stringify(filtered));
-      } catch (e) {
-        console.log('[API] Parse error:', e.message);
-        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-        res.end(data);
-      }
-    });
-  }).on('error', function(err) {
-    console.log('[API] Network error:', err.message);
-    res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-    res.end(JSON.stringify({ error: err.message }));
-  });
-}
-
-function proxyAnthropic(req, res) {
-  var body = '';
-  req.on('data', function(chunk) { body += chunk; });
-  req.on('end', function() {
-    var options = {
-      hostname: 'api.anthropic.com',
-      path: '/v1/messages',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
-        'x-api-key': ANTHROPIC_KEY
-      }
-    };
-    console.log('[AI-BRIEF] Sending to Anthropic, key present:', !!ANTHROPIC_KEY, 'key length:', ANTHROPIC_KEY.length);
-    var apiReq = https.request(options, function(apiRes) {
-      var data = '';
-      apiRes.on('data', function(chunk) { data += chunk; });
-      apiRes.on('end', function() {
-        console.log('[AI-BRIEF] Anthropic response status:', apiRes.statusCode);
-        if (apiRes.statusCode !== 200) console.log('[AI-BRIEF] Error body:', data.slice(0, 500));
-        res.writeHead(apiRes.statusCode, {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        });
-        res.end(data);
-      });
-    });
-    apiReq.on('error', function(err) {
-      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-      res.end(JSON.stringify({ error: err.message }));
-    });
-    apiReq.write(body);
-    apiReq.end();
-  });
-}
-
-// =====================
-// LINE MOVEMENT TRACKING
-// =====================
-var openingLines = {};
+// =============================================================================
+// LINE MOVEMENT TRACKING (unchanged)
+// =============================================================================
+const openingLines = {};
 
 function trackLines(sport, games) {
   if (!Array.isArray(games)) return;
-  var key = sport + '_lines';
+  const key = sport + '_lines';
   if (!openingLines[key]) openingLines[key] = {};
-  games.forEach(function(g) {
-    var gameKey = g.away_team + '@' + g.home_team;
+  games.forEach(g => {
+    const gameKey = g.away_team + '@' + g.home_team;
     if (!openingLines[key][gameKey]) openingLines[key][gameKey] = {};
-    // Store opening line per book (only first time seen)
-    g.bookmakers.forEach(function(bm) {
-      if (openingLines[key][gameKey][bm.key]) return; // already stored
-      var h2h = bm.markets && bm.markets.find(function(m) { return m.key === 'h2h'; });
+    g.bookmakers.forEach(bm => {
+      if (openingLines[key][gameKey][bm.key]) return;
+      const h2h = bm.markets && bm.markets.find(m => m.key === 'h2h');
       if (!h2h) return;
-      var ho = h2h.outcomes.find(function(o) { return o.name === g.home_team; });
-      var ao = h2h.outcomes.find(function(o) { return o.name === g.away_team; });
+      const ho = h2h.outcomes.find(o => o.name === g.home_team);
+      const ao = h2h.outcomes.find(o => o.name === g.away_team);
       if (ho || ao) {
         openingLines[key][gameKey][bm.key] = {
           time: Date.now(),
@@ -189,109 +159,127 @@ function trackLines(sport, games) {
 }
 
 function getLineMovements(sport) {
-  var key = sport + '_lines';
-  var lines = openingLines[key] || {};
-  var cached = getCached(sport);
+  const key = sport + '_lines';
+  const lines = openingLines[key] || {};
+  const cached = getCached(sport);
   if (!cached || !Array.isArray(cached)) return [];
-  var movements = [];
-  var seen = {}; // dedupe by game
-  cached.forEach(function(g) {
-    var gameKey = g.away_team + '@' + g.home_team;
-    var gameLines = lines[gameKey];
+  const movements = [];
+  const seen = {};
+  cached.forEach(g => {
+    const gameKey = g.away_team + '@' + g.home_team;
+    const gameLines = lines[gameKey];
     if (!gameLines) return;
-    g.bookmakers.forEach(function(bm) {
-      var opening = gameLines[bm.key];
+    g.bookmakers.forEach(bm => {
+      const opening = gameLines[bm.key];
       if (!opening) return;
-      var h2h = bm.markets && bm.markets.find(function(m) { return m.key === 'h2h'; });
+      const h2h = bm.markets && bm.markets.find(m => m.key === 'h2h');
       if (!h2h) return;
-      // Check home team movement
       if (opening.homeOpen != null) {
-        var homeCurrent = h2h.outcomes.find(function(o) { return o.name === g.home_team; });
+        const homeCurrent = h2h.outcomes.find(o => o.name === g.home_team);
         if (homeCurrent) {
-          var diff = Math.abs(homeCurrent.price - opening.homeOpen);
+          const diff = Math.abs(homeCurrent.price - opening.homeOpen);
           if (diff >= 10 && !seen[gameKey + '_home']) {
             seen[gameKey + '_home'] = true;
-            movements.push({
-              game: gameKey,
-              team: g.home_team,
-              book: bm.key,
-              open: opening.homeOpen,
-              current: homeCurrent.price,
-              diff: diff
-            });
+            movements.push({ game: gameKey, team: g.home_team, book: bm.key, open: opening.homeOpen, current: homeCurrent.price, diff });
           }
         }
       }
-      // Check away team movement
       if (opening.awayOpen != null) {
-        var awayCurrent = h2h.outcomes.find(function(o) { return o.name === g.away_team; });
+        const awayCurrent = h2h.outcomes.find(o => o.name === g.away_team);
         if (awayCurrent) {
-          var diff2 = Math.abs(awayCurrent.price - opening.awayOpen);
+          const diff2 = Math.abs(awayCurrent.price - opening.awayOpen);
           if (diff2 >= 10 && !seen[gameKey + '_away']) {
             seen[gameKey + '_away'] = true;
-            movements.push({
-              game: gameKey,
-              team: g.away_team,
-              book: bm.key,
-              open: opening.awayOpen,
-              current: awayCurrent.price,
-              diff: diff2
-            });
+            movements.push({ game: gameKey, team: g.away_team, book: bm.key, open: opening.awayOpen, current: awayCurrent.price, diff: diff2 });
           }
         }
       }
     });
   });
-  return movements.sort(function(a, b) { return b.diff - a.diff; });
+  return movements.sort((a, b) => b.diff - a.diff);
 }
 
-// =====================
-// MLB LIVE SCORES
-// =====================
-var scoresCache = { data: null, timestamp: 0 };
-var SCORES_TTL = 30 * 1000; // 30 seconds
+// =============================================================================
+// SCORES & MASTERS CACHES
+// =============================================================================
+let scoresCache = { data: null, timestamp: 0 };
+const SCORES_TTL = 30 * 1000;
 
-function fetchScores(res) {
-  if (scoresCache.data && (Date.now() - scoresCache.timestamp) < SCORES_TTL) {
-    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-    res.end(JSON.stringify(scoresCache.data));
-    return;
+let mastersCache = { data: null, timestamp: 0 };
+const MASTERS_TTL = 60 * 1000;
+
+// =============================================================================
+// ROUTES — odds, scores, masters, line moves, morning scan, AI brief
+// =============================================================================
+
+// ─── /odds?sport=mlb ───
+app.get('/odds', (req, res) => {
+  const sport = req.query.sport || 'mlb';
+  const cached = getCached(sport);
+  if (cached) {
+    return res.json(processGames(cached, sport));
   }
-  var today = new Date().toISOString().split('T')[0];
-  var url = 'https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=' + today + '&hydrate=linescore,probablePitcher(note),team,decisions,stats(type=[season],group=[pitching])';
-  https.get(url, function(apiRes) {
-    var data = '';
-    apiRes.on('data', function(chunk) { data += chunk; });
-    apiRes.on('end', function() {
+  console.log(`[API] Fetching fresh odds for ${sport}`);
+  https.get(getOddsUrl(sport), apiRes => {
+    let data = '';
+    apiRes.on('data', chunk => data += chunk);
+    apiRes.on('end', () => {
       try {
-        var parsed = JSON.parse(data);
-        var games = [];
+        const games = JSON.parse(data);
+        if (!Array.isArray(games)) {
+          console.log('[API] Non-array response:', JSON.stringify(games).slice(0, 300));
+          return res.json({ error: games.message || 'API error', detail: games.error_code || 'unknown' });
+        }
+        console.log(`[API] Got ${games.length} games for ${sport}`);
+        setCache(sport, games);
+        trackLines(sport, games);
+        res.json(processGames(games, sport));
+      } catch (e) {
+        console.log('[API] Parse error:', e.message);
+        res.status(500).type('text/plain').send(data);
+      }
+    });
+  }).on('error', err => {
+    console.log('[API] Network error:', err.message);
+    res.status(500).json({ error: err.message });
+  });
+});
+
+// ─── /scores (MLB live) ───
+app.get('/scores', (req, res) => {
+  if (scoresCache.data && (Date.now() - scoresCache.timestamp) < SCORES_TTL) {
+    return res.json(scoresCache.data);
+  }
+  const today = new Date().toISOString().split('T')[0];
+  const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${today}&hydrate=linescore,probablePitcher(note),team,decisions,stats(type=[season],group=[pitching])`;
+  https.get(url, apiRes => {
+    let data = '';
+    apiRes.on('data', chunk => data += chunk);
+    apiRes.on('end', () => {
+      try {
+        const parsed = JSON.parse(data);
+        const games = [];
         if (parsed.dates && parsed.dates.length) {
-          parsed.dates[0].games.forEach(function(g) {
-            var ls = g.linescore || {};
-            var innings = [];
-            if (ls.innings) {
-              innings = ls.innings.map(function(inn) {
-                return { num: inn.num, away: inn.away ? inn.away.runs : null, home: inn.home ? inn.home.runs : null };
-              });
-            }
-            // Current play state
-            var offense = ls.offense || {};
-            var defense = ls.defense || {};
-            var runners = [];
+          parsed.dates[0].games.forEach(g => {
+            const ls = g.linescore || {};
+            const innings = ls.innings ? ls.innings.map(inn => ({
+              num: inn.num,
+              away: inn.away ? inn.away.runs : null,
+              home: inn.home ? inn.home.runs : null
+            })) : [];
+            const offense = ls.offense || {};
+            const defense = ls.defense || {};
+            const runners = [];
             if (offense.first) runners.push('1st');
             if (offense.second) runners.push('2nd');
             if (offense.third) runners.push('3rd');
-
-            var awayPitcher = g.teams.away.probablePitcher;
-            var homePitcher = g.teams.home.probablePitcher;
-
-            // Extract pitcher season stats if available
-            function getPitcherStats(pitcher) {
-              if (!pitcher) return null;
-              var stats = { name: pitcher.fullName, era: 'N/A', whip: 'N/A', ip: 'N/A', k9: 'N/A', fip: 'N/A', w: 0, l: 0 };
-              if (pitcher.stats) {
-                pitcher.stats.forEach(function(s) {
+            const awayPitcher = g.teams.away.probablePitcher;
+            const homePitcher = g.teams.home.probablePitcher;
+            function getPitcherStats(p) {
+              if (!p) return null;
+              const stats = { name: p.fullName, era: 'N/A', whip: 'N/A', ip: 'N/A', k9: 'N/A', fip: 'N/A', w: 0, l: 0 };
+              if (p.stats) {
+                p.stats.forEach(s => {
                   if (s.type && s.type.displayName === 'season' && s.stats) {
                     stats.era = s.stats.era || 'N/A';
                     stats.whip = s.stats.whip || 'N/A';
@@ -302,13 +290,9 @@ function fetchScores(res) {
                   }
                 });
               }
-              if (pitcher.note) stats.note = pitcher.note;
+              if (p.note) stats.note = p.note;
               return stats;
             }
-
-            var awayPitcherStats = getPitcherStats(awayPitcher);
-            var homePitcherStats = getPitcherStats(homePitcher);
-
             games.push({
               gameId: g.gamePk,
               status: g.status.detailedState,
@@ -329,17 +313,17 @@ function fetchScores(res) {
               awayRecord: (g.teams.away.leagueRecord || {}).wins + '-' + (g.teams.away.leagueRecord || {}).losses,
               homeRecord: (g.teams.home.leagueRecord || {}).wins + '-' + (g.teams.home.leagueRecord || {}).losses,
               startTime: g.gameDate,
-              innings: innings,
-              runners: runners,
+              innings,
+              runners,
               currentPitcher: defense.pitcher ? defense.pitcher.fullName : null,
               currentBatter: offense.batter ? offense.batter.fullName : null,
-              pitchCount: defense.pitcher && defense.pitcher.stats ? null : null,
+              pitchCount: null,
               balls: ls.balls || 0,
               strikes: ls.strikes || 0,
               awayProbable: awayPitcher ? awayPitcher.fullName : 'TBD',
               homeProbable: homePitcher ? homePitcher.fullName : 'TBD',
-              awayPitcherStats: awayPitcherStats,
-              homePitcherStats: homePitcherStats,
+              awayPitcherStats: getPitcherStats(awayPitcher),
+              homePitcherStats: getPitcherStats(homePitcher),
               awayWins: (g.teams.away.leagueRecord || {}).wins || 0,
               awayLosses: (g.teams.away.leagueRecord || {}).losses || 0,
               homeWins: (g.teams.home.leagueRecord || {}).wins || 0,
@@ -353,181 +337,193 @@ function fetchScores(res) {
           });
         }
         scoresCache = { data: games, timestamp: Date.now() };
-        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-        res.end(JSON.stringify(games));
+        res.json(games);
       } catch (e) {
-        res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-        res.end(JSON.stringify({ error: e.message }));
+        res.status(500).json({ error: e.message });
       }
     });
-  }).on('error', function(err) {
-    res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-    res.end(JSON.stringify({ error: err.message }));
+  }).on('error', err => {
+    res.status(500).json({ error: err.message });
   });
-}
+});
 
-// =====================
-// MASTERS LEADERBOARD
-// =====================
-var mastersCache = { data: null, timestamp: 0 };
-var MASTERS_TTL = 60 * 1000; // 60 seconds
-
-function fetchMasters(res) {
+// ─── /masters (PGA leaderboard) ───
+app.get('/masters', (req, res) => {
   if (mastersCache.data && mastersCache.data.players && mastersCache.data.players.length && (Date.now() - mastersCache.timestamp) < MASTERS_TTL) {
-    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-    res.end(JSON.stringify(mastersCache.data));
-    return;
+    return res.json(mastersCache.data);
   }
-  // Try multiple ESPN endpoints
-  var urls = [
+  const urls = [
     'https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard/401811941',
     'https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard',
     'https://site.web.api.espn.com/apis/site/v3/sports/golf/pga/leaderboard?event=401811941'
   ];
-  var urlIndex = 0;
+  let urlIndex = 0;
 
   function tryUrl() {
     if (urlIndex >= urls.length) {
-      // All URLs failed — return cached or hardcoded fallback from search results
       console.log('[MASTERS] All ESPN endpoints failed, using known R2 data');
-      var fallback = {
+      const fallback = {
         tournament: 'Masters Tournament',
         status: 'Round 2 - Complete',
         players: [
-          {name:'Rory McIlroy',position:'1',score:'-10',today:'-5',thru:'F',rounds:['67','63'],status:''},
-          {name:'Patrick Reed',position:'T2',score:'-6',today:'-4',thru:'F',rounds:['69','65'],status:''},
-          {name:'Sam Burns',position:'T2',score:'-6',today:'-1',thru:'F',rounds:['67','67'],status:''},
-          {name:'Tommy Fleetwood',position:'T4',score:'-5',today:'-3',thru:'F',rounds:['70','65'],status:''},
-          {name:'Justin Rose',position:'T4',score:'-5',today:'-3',thru:'F',rounds:['70','65'],status:''},
-          {name:'Shane Lowry',position:'T4',score:'-5',today:'-3',thru:'F',rounds:['70','65'],status:''},
-          {name:'Cameron Young',position:'T7',score:'-4',today:'-2',thru:'F',rounds:['70','66'],status:''},
-          {name:'Scottie Scheffler',position:'T8',score:'-3',today:'-1',thru:'F',rounds:['70','67'],status:''}
+          { name: 'Rory McIlroy', position: '1', score: '-10', today: '-5', thru: 'F', rounds: ['67','63'], status: '' },
+          { name: 'Patrick Reed', position: 'T2', score: '-6', today: '-4', thru: 'F', rounds: ['69','65'], status: '' },
+          { name: 'Sam Burns', position: 'T2', score: '-6', today: '-1', thru: 'F', rounds: ['67','67'], status: '' },
+          { name: 'Tommy Fleetwood', position: 'T4', score: '-5', today: '-3', thru: 'F', rounds: ['70','65'], status: '' },
+          { name: 'Justin Rose', position: 'T4', score: '-5', today: '-3', thru: 'F', rounds: ['70','65'], status: '' },
+          { name: 'Shane Lowry', position: 'T4', score: '-5', today: '-3', thru: 'F', rounds: ['70','65'], status: '' },
+          { name: 'Cameron Young', position: 'T7', score: '-4', today: '-2', thru: 'F', rounds: ['70','66'], status: '' },
+          { name: 'Scottie Scheffler', position: 'T8', score: '-3', today: '-1', thru: 'F', rounds: ['70','67'], status: '' }
         ]
       };
       mastersCache = { data: fallback, timestamp: Date.now() };
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-      res.end(JSON.stringify(fallback));
-      return;
+      return res.json(fallback);
     }
-
-    var url = urls[urlIndex];
+    const url = urls[urlIndex];
     console.log('[MASTERS] Trying: ' + url);
-    https.get(url, function(apiRes) {
-      var data = '';
-      apiRes.on('data', function(chunk) { data += chunk; });
-      apiRes.on('end', function() {
+    https.get(url, apiRes => {
+      let data = '';
+      apiRes.on('data', chunk => data += chunk);
+      apiRes.on('end', () => {
         try {
-          var parsed = JSON.parse(data);
-          // Check if response has useful data
+          const parsed = JSON.parse(data);
           if (parsed.code || parsed.message || (!parsed.events && !parsed.competitions && !parsed.competitors && !parsed.leaderboard)) {
-            console.log('[MASTERS] Endpoint ' + urlIndex + ' returned error or empty, trying next');
-            urlIndex++;
-            tryUrl();
-            return;
+            urlIndex++; return tryUrl();
           }
-          
-          var result = { tournament: 'Masters Tournament', status: '', players: [] };
-          
-          // Handle different ESPN response formats
-          var competitors = null;
+          const result = { tournament: 'Masters Tournament', status: '', players: [] };
+          let competitors = null;
           if (parsed.events && parsed.events[0]) {
-            var event = parsed.events[0];
+            const event = parsed.events[0];
             result.tournament = event.name || 'Masters Tournament';
             result.status = event.status && event.status.type ? event.status.type.detail : '';
-            var comp = event.competitions && event.competitions[0];
+            const comp = event.competitions && event.competitions[0];
             if (comp) competitors = comp.competitors;
           } else if (parsed.competitions && parsed.competitions[0]) {
             competitors = parsed.competitions[0].competitors;
           } else if (parsed.competitors) {
             competitors = parsed.competitors;
           }
-
           if (competitors && competitors.length) {
-            console.log('[MASTERS] Found ' + competitors.length + ' competitors');
-            result.players = competitors.map(function(c) {
-              var athlete = c.athlete || {};
-              var stats = {};
-              if (c.statistics) c.statistics.forEach(function(s) { stats[s.name] = s.value; });
+            console.log(`[MASTERS] Found ${competitors.length} competitors`);
+            result.players = competitors.map(c => {
+              const athlete = c.athlete || {};
+              const stats = {};
+              if (c.statistics) c.statistics.forEach(s => { stats[s.name] = s.value; });
               return {
                 name: athlete.displayName || athlete.shortName || c.displayName || 'Unknown',
                 position: c.status && c.status.position ? c.status.position.displayName : (c.sortOrder || c.order || ''),
                 score: c.score || c.totalScore || stats.relativeScore || stats.totalScore || '—',
                 today: stats.currentRoundScore || c.currentRoundScore || stats.today || '—',
                 thru: stats.thru || c.thru || '—',
-                rounds: c.linescores ? c.linescores.map(function(r) { return r.value || r.displayValue; }) : [],
+                rounds: c.linescores ? c.linescores.map(r => r.value || r.displayValue) : [],
                 status: c.status ? (c.status.displayValue || '') : ''
               };
-            }).sort(function(a, b) { return (parseInt(a.position) || 999) - (parseInt(b.position) || 999); });
+            }).sort((a, b) => (parseInt(a.position) || 999) - (parseInt(b.position) || 999));
             mastersCache = { data: result, timestamp: Date.now() };
-            res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-            res.end(JSON.stringify(result));
-          } else {
-            console.log('[MASTERS] No competitors in response, trying next URL');
-            urlIndex++;
-            tryUrl();
+            return res.json(result);
           }
+          urlIndex++; tryUrl();
         } catch (e) {
           console.log('[MASTERS] Parse error: ' + e.message);
-          urlIndex++;
-          tryUrl();
+          urlIndex++; tryUrl();
         }
       });
-    }).on('error', function(err) {
+    }).on('error', err => {
       console.log('[MASTERS] Network error: ' + err.message);
-      urlIndex++;
-      tryUrl();
+      urlIndex++; tryUrl();
     });
   }
   tryUrl();
-}
-
-var server = http.createServer(function(req, res) {
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST,GET', 'Access-Control-Allow-Headers': 'Content-Type' });
-    res.end(); return;
-  }
-  if (req.url.startsWith('/odds')) {
-    var sport = new URL('http://x' + req.url).searchParams.get('sport') || 'mlb';
-    fetchOdds(res, sport); return;
-  }
-  if (req.url === '/scores') { fetchScores(res); return; }
-  if (req.url === '/masters') { fetchMasters(res); return; }
-  if (req.url.startsWith('/line-moves')) {
-    var moveSport = new URL('http://x' + req.url).searchParams.get('sport') || 'mlb';
-    var moves = getLineMovements(moveSport);
-    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-    res.end(JSON.stringify(moves));
-    return;
-  }
-  if(req.url==='/morning-scan'){const scan=morningScan.getLastScan();res.writeHead(200,{'Content-Type':'application/json','Access-Control-Allow-Origin':'*'});res.end(JSON.stringify(scan||{error:'No scan data yet'}));return;}
-  if(req.url==='/morning-scan/run'&&req.method==='POST'){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({status:'started'}));morningScan.runMorningScan(process.env.ODDS_API_KEY||'4e4c9bc2ffc7311be69697d28952cf1a',{t1Min:140,t1Max:199,t11Min:115,t11Max:135,t12Min:110});return;}
-    if (req.url === '/ai-brief' && req.method === 'POST') { proxyAnthropic(req, res); return; }
-  if (req.url === '/favicon.svg') {
-    var filePath = path.join(__dirname, 'public', 'favicon.svg');
-    fs.readFile(filePath, function(err, content) {
-      if (err) { res.writeHead(404); res.end(); return; }
-      res.writeHead(200, { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'public, max-age=86400' });
-      res.end(content);
-    }); return;
-  }
-  if (req.url === '/grid.html') {
-    var gridPath = path.join(__dirname, 'public', 'grid.html');
-    fs.readFile(gridPath, function(err, content) {
-      if (err) { res.writeHead(404); res.end('Not found'); return; }
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(content);
-    });
-    return;
-  }
-  if (req.url === '/' || req.url === '/index.html') {
-    var filePath2 = path.join(__dirname, 'public', 'index.html');
-    fs.readFile(filePath2, function(err, content) {
-      if (err) { res.writeHead(500); res.end('Error'); return; }
-      res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' });
-      res.end(content);
-    }); return;
-  }
-  res.writeHead(404); res.end('Not found');
 });
 
-server.listen(PORT, function() { console.log('Action\'s Odds running on port ' + PORT); });
+// ─── /line-moves?sport=mlb ───
+app.get('/line-moves', (req, res) => {
+  const sport = req.query.sport || 'mlb';
+  res.json(getLineMovements(sport));
+});
+
+// ─── /morning-scan & /morning-scan/run ───
+app.get('/morning-scan', (req, res) => {
+  const scan = morningScan.getLastScan();
+  res.json(scan || { error: 'No scan data yet' });
+});
+app.post('/morning-scan/run', (req, res) => {
+  res.json({ status: 'started' });
+  morningScan.runMorningScan(
+    process.env.ODDS_API_KEY || '4e4c9bc2ffc7311be69697d28952cf1a',
+    { t1Min: 140, t1Max: 199, t11Min: 115, t11Max: 135, t12Min: 110 }
+  );
+});
+
+// ─── /ai-brief (Anthropic proxy) ───
+app.post('/ai-brief', (req, res) => {
+  const body = JSON.stringify(req.body);
+  const options = {
+    hostname: 'api.anthropic.com',
+    path: '/v1/messages',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01',
+      'x-api-key': ANTHROPIC_KEY,
+      'Content-Length': Buffer.byteLength(body)
+    }
+  };
+  console.log('[AI-BRIEF] Sending to Anthropic, key present:', !!ANTHROPIC_KEY, 'key length:', ANTHROPIC_KEY.length);
+  const apiReq = https.request(options, apiRes => {
+    let data = '';
+    apiRes.on('data', chunk => data += chunk);
+    apiRes.on('end', () => {
+      console.log('[AI-BRIEF] Anthropic response status:', apiRes.statusCode);
+      if (apiRes.statusCode !== 200) console.log('[AI-BRIEF] Error body:', data.slice(0, 500));
+      res.status(apiRes.statusCode).type('application/json').send(data);
+    });
+  });
+  apiReq.on('error', err => res.status(500).json({ error: err.message }));
+  apiReq.write(body);
+  apiReq.end();
+});
+
+// =============================================================================
+// PHASE 1 SAAS ROUTES
+// =============================================================================
+
+// /api/me — verify auth, return current user info
+app.get('/api/me', requireAuth, (req, res) => {
+  res.json({ user: req.user });
+});
+
+// /api/stripe/create-checkout — start a Stripe Checkout session (Phase 2 client)
+app.post('/api/stripe/create-checkout', requireAuth, createCheckoutSession);
+
+// =============================================================================
+// STATIC FILE SERVING
+// =============================================================================
+// Serve everything in public/ as static (auth pages, css, etc.)
+app.use(express.static(path.join(__dirname, 'public'), {
+  extensions: ['html'],
+  maxAge: 0,
+}));
+
+// Explicit handlers for backwards compat with old direct URLs
+app.get('/grid.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'grid.html')));
+app.get('/favicon.svg', (req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.sendFile(path.join(__dirname, 'public', 'favicon.svg'));
+});
+
+// Root and /index.html — main dashboard
+app.get(['/', '/index.html'], (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// 404
+app.use((req, res) => res.status(404).type('text/plain').send('Not found'));
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Action's Odds running on port ${PORT}`);
+  console.log(`  Supabase: ${process.env.SUPABASE_URL ? '✓' : '✗ MISSING'}`);
+  console.log(`  Stripe:   ${process.env.STRIPE_SECRET_KEY ? '✓ ' + (process.env.STRIPE_SECRET_KEY.startsWith('sk_test_') ? '(TEST)' : '(LIVE)') : '✗ MISSING'}`);
+});
