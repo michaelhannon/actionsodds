@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account — Action's Odds</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0a0e1a;--panel:#121826;--panel2:#1a2234;--border:#2a3447;
+      --text:#e8ebf1;--text2:#a0a8b8;--text3:#6b7488;
+      --gold:#d4af37;--green:#26a269;--red:#c53030;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:linear-gradient(180deg, #0a0e1a 0%, #0f1422 100%);
+      color:var(--text);
+      font-family:'Barlow Condensed',sans-serif;
+      min-height:100vh;
+      padding:32px 16px;
+    }
+    .container{max-width:760px;margin:0 auto;}
+    .header{text-align:center;margin-bottom:32px;}
+    .logo{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:0.04em;}
+    .logo span{color:var(--red);}
+    h1{font-family:'Bebas Neue',sans-serif;font-size:42px;margin:24px 0 24px;text-align:center;}
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:24px;
+      margin-bottom:20px;
+    }
+    .card h2{
+      font-family:'Bebas Neue',sans-serif;
+      font-size:22px;letter-spacing:0.04em;
+      margin-bottom:16px;
+      color:var(--gold);
+    }
+    .row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(42,52,71,0.5);}
+    .row:last-child{border-bottom:none;}
+    .row-label{color:var(--text2);font-size:14px;text-transform:uppercase;letter-spacing:0.06em;}
+    .row-value{color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:600;}
+    .badge{padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;}
+    .badge.active{background:rgba(38,162,105,0.15);color:var(--green);border:1px solid rgba(38,162,105,0.3);}
+    .badge.canceled{background:rgba(197,48,48,0.15);color:#ff8b8b;border:1px solid rgba(197,48,48,0.3);}
+    .badge.past_due{background:rgba(212,175,55,0.15);color:var(--gold);border:1px solid rgba(212,175,55,0.3);}
+    .badge.admin{background:rgba(212,175,55,0.2);color:var(--gold);border:1px solid var(--gold);}
+    .btn{
+      background:var(--gold);color:#0a0e1a;
+      border:none;
+      padding:12px 24px;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:16px;letter-spacing:0.06em;
+      border-radius:6px;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-block;
+      transition:all 0.15s ease;
+    }
+    .btn:hover:not(:disabled){background:#e6c454;}
+    .btn:disabled{opacity:0.5;cursor:not-allowed;}
+    .btn.outline{background:transparent;border:1px solid var(--border);color:var(--text);}
+    .btn.outline:hover{border-color:var(--gold);color:var(--gold);background:transparent;}
+    .btn.danger{background:transparent;border:1px solid var(--red);color:#ff8b8b;}
+    .btn.danger:hover{background:var(--red);color:#fff;}
+    .btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;}
+    .empty-state{
+      text-align:center;
+      padding:32px 16px;
+      color:var(--text2);
+    }
+    .empty-state p{margin-bottom:16px;}
+    .footer-links{text-align:center;margin-top:24px;color:var(--text3);font-size:13px;}
+    .footer-links a{color:var(--text2);text-decoration:none;margin:0 12px;}
+    .footer-links a:hover{color:var(--gold);}
+    .loading{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:8px;vertical-align:-2px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <a href="/" style="text-decoration:none;color:inherit;">
+        <div class="logo">ACTION'S<span>ODDS</span></div>
+      </a>
+    </div>
+
+    <h1>Your Account</h1>
+
+    <div id="content">
+      <div class="card">
+        <p style="text-align:center;color:var(--text2);"><span class="loading"></span>Loading...</p>
+      </div>
+    </div>
+
+    <div class="footer-links">
+      <a href="/">Dashboard</a>
+      <a href="/pricing.html">Add Subscriptions</a>
+      <a href="mailto:support@actionsodds.com">Support</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const supabase = createClient(
+      'https://xlfsaxfpdpxsdkovvhxs.supabase.co',
+      'sb_publishable_3L81CVKvE9w2agrz6yMe5g_BC4O0pws'
+    );
+
+    async function init(){
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = '/auth/login.html?next=/account.html';
+        return;
+      }
+
+      // Fetch /api/me for profile + admin flag + subscriptions
+      const res = await fetch('/api/me', {
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) {
+        document.getElementById('content').innerHTML = `<div class="card"><p style="text-align:center;color:#ff8b8b;">Failed to load account info. <a href="/auth/login.html" style="color:var(--gold);">Sign in again</a></p></div>`;
+        return;
+      }
+      const me = await res.json();
+      render(me, session);
+    }
+
+    function render(me, session){
+      const isAdmin = me.is_admin;
+      const subs = me.subscriptions || [];
+      const activeSubs = subs.filter(s => s.status === 'active');
+
+      let subsHtml = '';
+      if (isAdmin) {
+        subsHtml = `
+          <div class="row">
+            <span class="row-label">Access</span>
+            <span class="badge admin">Admin · All Sports</span>
+          </div>
+          <div class="row">
+            <span class="row-label">Bankroll</span>
+            <span class="row-value">$${(me.current_bankroll || 0).toLocaleString()}</span>
+          </div>
+        `;
+      } else if (subs.length === 0) {
+        subsHtml = `
+          <div class="empty-state">
+            <p>No subscriptions yet.</p>
+            <a href="/pricing.html" class="btn">Choose Your Sports</a>
+          </div>
+        `;
+      } else {
+        subsHtml = subs.map(s => {
+          const renew = s.current_period_end ? new Date(s.current_period_end).toLocaleDateString() : '—';
+          return `
+            <div class="row">
+              <div>
+                <div class="row-value" style="font-size:18px;font-family:'Bebas Neue',sans-serif;letter-spacing:0.04em;">
+                  ${s.sport_id.toUpperCase()}
+                  ${s.is_bundle ? '<span style="font-size:11px;color:var(--text3);margin-left:6px;">(part of bundle)</span>' : ''}
+                </div>
+                <div style="font-size:13px;color:var(--text3);">
+                  ${s.cadence} · ${s.cancel_at_period_end ? 'Ends' : 'Renews'} ${renew}
+                </div>
+              </div>
+              <span class="badge ${s.status}">${s.status.replace('_',' ')}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('content').innerHTML = `
+        <div class="card">
+          <h2>Profile</h2>
+          <div class="row">
+            <span class="row-label">Display Name</span>
+            <span class="row-value">${escapeHtml(me.display_name)}</span>
+          </div>
+          <div class="row">
+            <span class="row-label">Email</span>
+            <span class="row-value">${escapeHtml(me.email)}</span>
+          </div>
+          <div class="btn-row">
+            <button class="btn outline" id="reset-password-btn">Change Password</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Subscriptions</h2>
+          ${subsHtml}
+          ${activeSubs.length > 0 && !isAdmin ? `
+            <div class="btn-row">
+              <button class="btn outline" id="manage-billing-btn">Manage Billing</button>
+              <a href="/pricing.html" class="btn outline">Add More Sports</a>
+            </div>
+          ` : ''}
+        </div>
+
+        <div class="card">
+          <h2>Sign Out</h2>
+          <p style="color:var(--text2);font-size:14px;margin-bottom:16px;">Log out of this device. You'll need to sign in again next time.</p>
+          <button class="btn danger" id="signout-btn">Sign Out</button>
+        </div>
+      `;
+
+      bindActions(session);
+    }
+
+    function bindActions(session){
+      const resetBtn = document.getElementById('reset-password-btn');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', async () => {
+          resetBtn.disabled = true;
+          resetBtn.innerHTML = '<span class="loading"></span>Sending...';
+          const { error } = await supabase.auth.resetPasswordForEmail(session.user.email, {
+            redirectTo: 'https://www.actionsodds.com/auth/reset-password.html',
+          });
+          if (error) {
+            alert('Failed: ' + error.message);
+            resetBtn.disabled = false;
+            resetBtn.textContent = 'Change Password';
+          } else {
+            resetBtn.textContent = 'Email sent — check your inbox';
+            setTimeout(() => { resetBtn.disabled = false; resetBtn.textContent = 'Change Password'; }, 5000);
+          }
+        });
+      }
+
+      const billingBtn = document.getElementById('manage-billing-btn');
+      if (billingBtn) {
+        billingBtn.addEventListener('click', async () => {
+          billingBtn.disabled = true;
+          billingBtn.innerHTML = '<span class="loading"></span>Opening...';
+          try {
+            const res = await fetch('/api/stripe/billing-portal', {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${session.access_token}` },
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to open portal');
+            window.location.href = data.url;
+          } catch (err) {
+            alert('Failed: ' + err.message);
+            billingBtn.disabled = false;
+            billingBtn.textContent = 'Manage Billing';
+          }
+        });
+      }
+
+      const signoutBtn = document.getElementById('signout-btn');
+      if (signoutBtn) {
+        signoutBtn.addEventListener('click', () => {
+          window.location.href = '/auth/logout.html';
+        });
+      }
+    }
+
+    function escapeHtml(s){
+      return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    init();
+  </script>
+</body>
+</html>

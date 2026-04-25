@@ -62,13 +62,13 @@ async function createCheckoutSession(req, res) {
       }));
     }
 
-    const baseUrl = process.env.PUBLIC_URL || 'https://actionsodds.com';
+    const baseUrl = process.env.PUBLIC_URL || 'https://www.actionsodds.com';
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
       customer_email: userEmail,
       line_items: lineItems,
-      success_url: `${baseUrl}/dashboard.html?welcome=1`,
+      success_url: `${baseUrl}/?welcome=1`,
       cancel_url: `${baseUrl}/pricing.html?canceled=1`,
       metadata: {
         user_id: userId,
