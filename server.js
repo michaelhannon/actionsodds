@@ -56,6 +56,16 @@ app.use((req, res, next) => {
   next();
 });
 
+// Redirect bare apex (actionsodds.com) → canonical (www.actionsodds.com).
+// Preserves path + query. Skips local dev (host matches no apex).
+app.use((req, res, next) => {
+  const host = (req.headers.host || '').toLowerCase();
+  if (host === 'actionsodds.com') {
+    return res.redirect(301, `https://www.actionsodds.com${req.originalUrl}`);
+  }
+  next();
+});
+
 // IMPORTANT: Stripe webhook MUST receive the raw request body for signature
 // verification. This route is registered BEFORE express.json() so the body
 // stays as a Buffer here, then JSON parsing applies to all later routes.
