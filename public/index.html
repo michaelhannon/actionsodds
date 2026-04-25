@@ -204,6 +204,10 @@ body.mlb-theme .book-link{background:#ffffff;border:1px solid rgba(0,30,80,0.12)
 body.mlb-theme ::-webkit-scrollbar-track{background:#e3ebf7;}
 body.mlb-theme ::-webkit-scrollbar-thumb{background:rgba(0,30,80,0.2);}
 
+/* Book column header links - sportsbook deep links */
+.book-header-link{text-decoration:none;display:inline-block;cursor:pointer;transition:opacity 0.15s, transform 0.15s;}
+.book-header-link:hover{opacity:0.75;transform:translateY(-1px);}
+
 /* Team logo styles - shared across themes */
 .team-logo{display:inline-block;vertical-align:middle;flex-shrink:0;object-fit:contain;}
 .team-logo-sm{width:18px;height:18px;}
@@ -1001,7 +1005,7 @@ select.form-input{cursor:pointer;}
     </svg>
     <div>
       <div class="logo-action">Action's Odds<span class="cursor-blink"></span></div>
-      <div class="logo-odds">T1–T15 System · MLB · NHL · NBA</div>
+      <div class="logo-odds">MLB · NHL · NBA</div>
     </div>
   </div>
   <div class="header-right">
@@ -1230,7 +1234,7 @@ select.form-input{cursor:pointer;}
   <div class="ai-header">
     <div>
       <div class="ai-title">AI Brief — Today's Qualifying Plays</div>
-      <div class="ai-subtitle">T1–T15 engine · FIP-weighted · Collision + Regression adjusted</div>
+      <div class="ai-subtitle">Sharp two-sentence reads on each qualifying play</div>
     </div>
     <button class="refresh-btn" style="padding:6px 14px;font-size:11px;" onclick="generateAIBriefs()">Generate</button>
   </div>
@@ -1268,30 +1272,6 @@ select.form-input{cursor:pointer;}
       </div>
     </div>
 
-    <!-- Bloomberg Grid Link -->
-    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
-      <div class="section-title" style="margin-bottom:10px;">Tools</div>
-      <a href="/grid.html" style="display:flex;align-items:center;gap:12px;background:rgba(232,185,74,0.08);border:1px solid rgba(232,185,74,0.25);border-radius:10px;padding:12px 16px;text-decoration:none;transition:background 0.15s;margin-bottom:16px;" onmouseover="this.style.background='rgba(232,185,74,0.14)'" onmouseout="this.style.background='rgba(232,185,74,0.08)'">
-        <div style="font-size:22px;">📊</div>
-        <div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.06em;color:var(--gold);">MLB Bloomberg Grid</div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--text3);letter-spacing:0.05em;">T2 Collision · T3 Run Diff · T4 Regression · Play/Fade List</div>
-        </div>
-        <div style="margin-left:auto;color:var(--gold);font-size:18px;">→</div>
-      </a>
-    </div>
-
-    <!-- Sportsbook Links -->
-    <div style="padding-top:16px;border-top:1px solid var(--border);">
-      <div class="section-title" style="margin-bottom:10px;">Quick access — NJ books</div>
-      <div class="book-links">
-        <a class="book-link dk" href="https://sportsbook.draftkings.com" target="_blank">DraftKings</a>
-        <a class="book-link fd" href="https://www.fanduel.com/sportsbook" target="_blank">FanDuel</a>
-        <a class="book-link mgm" href="https://sports.nj.betmgm.com" target="_blank">BetMGM</a>
-        <a class="book-link czr" href="https://www.caesars.com/sportsbook-and-casino" target="_blank">Caesars</a>
-        <a class="book-link" href="https://www.hardrock.bet" target="_blank" style="background:rgba(220,20,60,0.1);color:#ff6b8a;border:1px solid rgba(220,20,60,0.25);">Hard Rock</a>
-      </div>
-    </div>
   </div>
 
 </div>
@@ -1505,11 +1485,11 @@ function setView(v){
 
 // Book config
 const BOOKS=[
-  {key:'fanduel',label:'FanDuel',cls:'bl-fd',thCls:'bg-fd'},
-  {key:'betmgm',label:'BetMGM',cls:'bl-mgm',thCls:'bg-mgm'},
-  {key:'caesars',label:'Caesars',cls:'bl-czr',thCls:'bg-czr'},
-  {key:'hard_rock_bet',label:'Hard Rock',cls:'bl-hr',thCls:'bg-hr'},
-  {key:'draftkings',label:'DraftKings',cls:'bl-fd',thCls:'bg-fd'},
+  {key:'fanduel',label:'FanDuel',cls:'bl-fd',thCls:'bg-fd',url:'https://www.fanduel.com/sportsbook'},
+  {key:'betmgm',label:'BetMGM',cls:'bl-mgm',thCls:'bg-mgm',url:'https://sports.nj.betmgm.com'},
+  {key:'caesars',label:'Caesars',cls:'bl-czr',thCls:'bg-czr',url:'https://www.caesars.com/sportsbook-and-casino'},
+  {key:'hard_rock_bet',label:'Hard Rock',cls:'bl-hr',thCls:'bg-hr',url:'https://www.hardrock.bet'},
+  {key:'draftkings',label:'DraftKings',cls:'bl-fd',thCls:'bg-fd',url:'https://sportsbook.draftkings.com'},
 ];
 
 function getBookOdds(g, bookKey){
@@ -1554,7 +1534,7 @@ function renderMultiBookGrid(games){
   html+=`<table class="book-grid"><thead><tr>
     <th style="text-align:left;color:var(--text3);border-color:var(--border2);">Game</th>
     <th style="color:var(--text3);border-color:var(--border2);">Time</th>
-    ${books.map(b=>`<th colspan="3" class="${b.thCls}"><span class="book-logo ${b.cls}">${b.label}</span></th>`).join('')}
+    ${books.map(b=>`<th colspan="3" class="${b.thCls}"><a href="${b.url}" target="_blank" rel="noopener" class="book-header-link"><span class="book-logo ${b.cls}">${b.label}</span></a></th>`).join('')}
     <th style="color:var(--text3);border-color:var(--border2);">System</th>
   </tr>
   <tr>
@@ -1610,7 +1590,7 @@ function renderMultiBookGrid(games){
     if(plays.length){
       const p=plays[0];
       const col=p.colorClass==='blue'?'var(--blue)':p.colorClass==='green'?'var(--green)':p.colorClass==='teal'?'var(--teal)':'var(--amber)';
-      playHtml=`<span style="color:${col};font-weight:700;font-size:11px;">${p.trigger} $${p.amt}</span>`;
+      playHtml=`<span style="color:${col};font-weight:700;font-size:11px;">$${p.amt}</span>`;
     }
     html+=`<td>${playHtml}</td></tr>`;
   }
@@ -1846,9 +1826,7 @@ Give a sharp 2-sentence analysis. Format: [TRIGGER COUNT fires/pass] [T6 FIP edg
       <div class="ai-card-game">${b.game}</div>
       <div class="ai-card-play">${b.play}</div>
       <div class="ai-stats">
-        <div class="ai-stat"><div class="ai-stat-lbl">Trigger</div><div class="ai-stat-val">${b.trigger}</div></div>
         <div class="ai-stat"><div class="ai-stat-lbl">Size</div><div class="ai-stat-val">$${b.amt}</div></div>
-        <div class="ai-stat"><div class="ai-stat-lbl">Conf</div><div class="ai-stat-val strength-badge sb-${b.colorClass}">${b.strengthBadge}</div></div>
       </div>
       <div class="ai-take">${b.text}</div>
     </div>
@@ -2362,7 +2340,7 @@ async function loadMorningScan(){
 
 
 async function triggerManualScan(){
-  document.getElementById('collision-table-container').innerHTML='<div class="empty" style="color:var(--amber);">Running full scan — T1-T15 + R1-R7 engine firing... (~30 seconds)</div>';
+  document.getElementById('collision-table-container').innerHTML='<div class="empty" style="color:var(--amber);">Running full scan... (~30 seconds)</div>';
   try{
     await fetch('/morning-scan/run',{method:'POST'});
     setTimeout(loadMorningScan,30000);
