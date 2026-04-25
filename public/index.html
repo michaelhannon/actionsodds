@@ -36,6 +36,172 @@ body.light .log-row{border-color:rgba(0,0,0,0.07);}
 body.light .panel-tabs{border-color:rgba(0,0,0,0.09);}
 body.light .collision-grid{background:#fff8e6;}
 body.light .reg-flag{background:#fff3e0;}
+
+/* ── MLB THEME (red/white/blue) ──────────────────────── */
+body.mlb-theme{
+  --black:#f5f7fb;--dark:#ffffff;--panel:#ffffff;--panel2:#f0f4fa;
+  --border:rgba(0,30,80,0.08);--border2:rgba(0,30,80,0.14);
+  --text:#0a1a3a;--text2:#3d4e6b;--text3:#7a8aa5;
+  --gold:#bf0d3e;       /* MLB red - replaces gold accent */
+  --gold2:#dc1f4f;      /* lighter red */
+  --blue:#002d72;       /* MLB blue */
+  --blue2:#1d4496;      /* lighter blue */
+  --green:#1a8a45;
+  --amber:#bf8500;
+  --red:#bf0d3e;
+  --orange:#e85d2c;
+  --teal:#0066b2;
+  background:#f5f7fb;color:#0a1a3a;
+}
+body.mlb-theme header{background:#ffffff;border-bottom:1px solid rgba(0,30,80,0.1);}
+body.mlb-theme header::after{background:linear-gradient(90deg,transparent,#bf0d3e 25%,#ffffff 50%,#002d72 75%,transparent);height:3px;}
+body.mlb-theme .logo-action{color:#002d72;}
+body.mlb-theme .logo-odds{color:#3d4e6b;}
+body.mlb-theme .logo-icon rect{fill:#ffffff;stroke:#002d72;stroke-width:1;}
+body.mlb-theme .logo-icon path{stroke:#bf0d3e;}
+body.mlb-theme .logo-icon circle{fill:#002d72;}
+body.mlb-theme .sport-badge{color:#bf0d3e;background:#fff5f7;border-color:rgba(191,13,62,0.3);}
+body.mlb-theme #theme-toggle{background:transparent;border-color:rgba(0,30,80,0.18);color:#3d4e6b;}
+body.mlb-theme #settings-gear{background:transparent;border-color:rgba(0,30,80,0.18);color:#3d4e6b;}
+body.mlb-theme #settings-gear:hover{color:#002d72;border-color:#002d72;}
+body.mlb-theme .refresh-btn{background:#002d72;color:#ffffff;}
+body.mlb-theme .refresh-btn:hover{background:#1d4496;}
+body.mlb-theme .last-update{color:#7a8aa5;}
+
+/* MLB ticker */
+body.mlb-theme .ticker-bar{background:linear-gradient(180deg,#002d72,#001f5a);border-bottom:1px solid rgba(255,255,255,0.15);}
+body.mlb-theme .ticker-bar::after{background:linear-gradient(90deg,transparent,#001f5a);}
+body.mlb-theme .ticker-label{background:linear-gradient(135deg,#bf0d3e,#8a0828);}
+body.mlb-theme .ticker-label::after{border-color:transparent transparent transparent #8a0828;}
+body.mlb-theme .tk-game{color:#e3ebf7;border-right-color:rgba(255,255,255,0.1);}
+body.mlb-theme .tk-time{color:#ffd166;}
+body.mlb-theme .tk-matchup{color:#ffffff;}
+body.mlb-theme .tk-pitchers{color:#a9bedb;}
+body.mlb-theme .tk-line .tk-fav{color:#46d490;}
+body.mlb-theme .tk-line .tk-dog{color:#ffb73a;}
+body.mlb-theme .tk-rl{color:#a9bedb;}
+
+/* MLB financial banner */
+body.mlb-theme .finstats-banner{background:linear-gradient(180deg,#ffffff,#f5f7fb);border-bottom:1px solid rgba(0,30,80,0.08);}
+body.mlb-theme .finstat-box{background:#ffffff;border:1px solid rgba(0,30,80,0.08);box-shadow:0 1px 3px rgba(0,30,80,0.04);}
+body.mlb-theme .finstat-box:hover{border-color:rgba(0,30,80,0.18);box-shadow:0 4px 12px rgba(0,30,80,0.1);}
+body.mlb-theme .finstat-label{color:#7a8aa5;}
+body.mlb-theme .finstat-val{color:#0a1a3a;}
+body.mlb-theme .finstat-val.green{color:#1a8a45;}
+body.mlb-theme .finstat-val.gold{color:#bf0d3e;}
+body.mlb-theme .finstat-val.amber{color:#bf8500;}
+body.mlb-theme .finstat-sub{color:#7a8aa5;}
+body.mlb-theme .finstat-box.green .finstat-glow{background:#1a8a45;box-shadow:0 0 10px #1a8a45;}
+body.mlb-theme .finstat-box.amber .finstat-glow{background:#bf0d3e;box-shadow:0 0 10px #bf0d3e;}
+body.mlb-theme .finstat-box.gold .finstat-glow{background:linear-gradient(90deg,#bf0d3e,#002d72);box-shadow:0 0 10px rgba(191,13,62,0.5);}
+body.mlb-theme .finstat-box.blue .finstat-glow{background:#002d72;box-shadow:0 0 10px #002d72;}
+
+/* MLB W/L banner */
+body.mlb-theme .top-banner{background:#ffffff;border-bottom:1px solid rgba(0,30,80,0.08);}
+body.mlb-theme .top-banner-box{background:#f5f7fb;border:1px solid rgba(0,30,80,0.08);}
+body.mlb-theme .top-banner-label{color:#7a8aa5;}
+body.mlb-theme .top-banner-val{color:#0a1a3a;}
+body.mlb-theme .top-banner-val.w{color:#1a8a45;}
+body.mlb-theme .top-banner-val.l{color:#bf0d3e;}
+body.mlb-theme .top-banner-val.pct{color:#002d72;}
+
+/* MLB log play strip */
+body.mlb-theme .logplay-strip{background:linear-gradient(180deg,#fff5f7,#ffffff);border-bottom:1px solid rgba(0,30,80,0.08);}
+body.mlb-theme .logplay-strip-title{color:#bf0d3e;}
+body.mlb-theme .logplay-fields .form-input{background:#ffffff;border:1px solid rgba(0,30,80,0.15);color:#0a1a3a;}
+body.mlb-theme .logplay-fields .form-input:focus{border-color:#002d72;}
+body.mlb-theme .logplay-fields .form-input.lp-autofilled{border-color:#1a8a45;background:#e8f5ee;}
+body.mlb-theme .logplay-fields select.form-input{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23002d72' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");}
+body.mlb-theme .logplay-btn{background:#bf0d3e;color:#ffffff;}
+body.mlb-theme .logplay-btn:hover{background:#dc1f4f;}
+body.mlb-theme .logplay-toggle-date{color:#7a8aa5;}
+body.mlb-theme .logplay-toggle-date:hover{color:#bf0d3e;}
+
+/* MLB hero plays */
+body.mlb-theme .hero-plays-section{background:linear-gradient(180deg,#fff5f7 0%,#ffffff 100%);border-bottom:1px solid rgba(0,30,80,0.08);}
+body.mlb-theme .hero-plays-bg-glow{background:radial-gradient(circle, rgba(191,13,62,0.08) 0%, transparent 70%);}
+body.mlb-theme .hero-plays-eyebrow{color:#bf0d3e;}
+body.mlb-theme .hero-plays-title{color:#0a1a3a;}
+body.mlb-theme .hero-plays-meta{background:#ffffff;border:1px solid rgba(0,30,80,0.1);color:#3d4e6b;}
+body.mlb-theme .hpm-pulse{background:#1a8a45;box-shadow:0 0 10px #1a8a45;}
+body.mlb-theme .hp-card{background:#ffffff;border:1px solid rgba(0,30,80,0.08);box-shadow:0 1px 4px rgba(0,30,80,0.05);}
+body.mlb-theme .hp-card:hover{border-color:rgba(0,45,114,0.25);box-shadow:0 8px 20px rgba(0,30,80,0.12);}
+body.mlb-theme .hp-trig{color:#7a8aa5;}
+body.mlb-theme .hp-rec{color:#0a1a3a;}
+body.mlb-theme .hp-game{color:#7a8aa5;}
+body.mlb-theme .hp-rl{background:#f5f7fb;border:1px solid rgba(0,30,80,0.08);}
+body.mlb-theme .hp-rl-label{color:#7a8aa5;}
+body.mlb-theme .hp-rl-bet{color:#bf0d3e;}
+body.mlb-theme .hero-no-plays{background:linear-gradient(135deg,#fff5f7,#ffeef2);border-color:rgba(191,13,62,0.2);color:#3d4e6b;}
+body.mlb-theme .hero-no-plays b{color:#bf0d3e;}
+
+/* MLB protocol/Bloomberg + heat map sections */
+body.mlb-theme .protocol-section{background:#ffffff;border-bottom:1px solid rgba(0,30,80,0.08);}
+body.mlb-theme .protocol-title{color:#bf0d3e;}
+body.mlb-theme .protocol-subtitle{color:#7a8aa5;}
+body.mlb-theme .heatmap-section.heatmap-modern{background:linear-gradient(180deg,#f5f7fb 0%,#ffffff 100%);border-bottom:1px solid rgba(0,30,80,0.08);}
+body.mlb-theme .heatmap-section-title{color:#bf0d3e;}
+body.mlb-theme .heatmap-section-subtitle{color:#7a8aa5;}
+body.mlb-theme .hm-grid-wrapper{background:#ffffff;border:1px solid rgba(0,30,80,0.08);box-shadow:0 1px 3px rgba(0,30,80,0.04);}
+body.mlb-theme .hm-grid-wrapper::before{background:linear-gradient(90deg,transparent,#bf0d3e,#002d72,transparent);}
+body.mlb-theme .hm-grid-title{color:#bf0d3e;}
+body.mlb-theme .hm-grid-meta{color:#7a8aa5;}
+body.mlb-theme .hm-table th{color:#7a8aa5;}
+body.mlb-theme .hm-table td.hm-row-label{background:#f5f7fb;color:#3d4e6b;}
+body.mlb-theme .hm-axis-corner{color:#7a8aa5;}
+body.mlb-theme .hm-cell.hm-empty{background:#f5f7fb;border:1px dashed rgba(0,30,80,0.08);color:#a9b3c5;}
+body.mlb-theme .hm-no-games{color:#7a8aa5;}
+
+/* MLB AI briefing */
+body.mlb-theme .ai-section{background:#ffffff;border-bottom:1px solid rgba(0,30,80,0.08);}
+body.mlb-theme .ai-title{color:#bf0d3e;}
+body.mlb-theme .ai-subtitle{color:#7a8aa5;}
+body.mlb-theme .ai-empty{color:#7a8aa5;}
+
+/* MLB main layout */
+body.mlb-theme .layout{background:#f5f7fb;}
+body.mlb-theme .odds-panel{background:#f5f7fb;}
+body.mlb-theme .game-card{background:#ffffff;border:1px solid rgba(0,30,80,0.08);box-shadow:0 1px 3px rgba(0,30,80,0.04);}
+body.mlb-theme .game-card-header{background:#f5f7fb;color:#0a1a3a;}
+body.mlb-theme .section-title{color:#3d4e6b;}
+body.mlb-theme .section-hdr{border-bottom-color:rgba(0,30,80,0.08);}
+
+/* MLB book tabs and view toggle */
+body.mlb-theme .view-btn{background:#ffffff;border:1px solid rgba(0,30,80,0.12);color:#3d4e6b;}
+body.mlb-theme .view-btn.active{background:#002d72;border-color:#002d72;color:#ffffff;}
+
+/* MLB settings modal */
+body.mlb-theme .settings-modal{background:rgba(10,26,58,0.6);}
+body.mlb-theme .settings-modal-inner{background:#ffffff;border:1px solid rgba(0,30,80,0.12);}
+body.mlb-theme .settings-modal-title{color:#bf0d3e;}
+body.mlb-theme .settings-modal-close{color:#7a8aa5;}
+body.mlb-theme .settings-modal-close:hover{color:#0a1a3a;background:rgba(0,30,80,0.05);}
+body.mlb-theme .cfg-section-title{color:#0a1a3a;}
+body.mlb-theme .cfg-lbl{color:#3d4e6b;}
+body.mlb-theme .toggle-lbl{color:#0a1a3a;}
+body.mlb-theme .toggle-sub{color:#7a8aa5;}
+body.mlb-theme .save-btn{background:#bf0d3e;color:#ffffff;}
+body.mlb-theme .save-btn:hover{background:#dc1f4f;}
+
+/* MLB book links */
+body.mlb-theme .book-link{background:#ffffff;border:1px solid rgba(0,30,80,0.12);}
+
+/* MLB scrollbar */
+body.mlb-theme ::-webkit-scrollbar-track{background:#e3ebf7;}
+body.mlb-theme ::-webkit-scrollbar-thumb{background:rgba(0,30,80,0.2);}
+
+/* Team logo styles - shared across themes */
+.team-logo{display:inline-block;vertical-align:middle;flex-shrink:0;object-fit:contain;}
+.team-logo-sm{width:18px;height:18px;}
+.team-logo-md{width:22px;height:22px;}
+.team-logo-lg{width:28px;height:28px;}
+.team-logo-fallback{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;
+  background:rgba(255,255,255,0.06);border-radius:50%;color:var(--text2);
+}
+body.mlb-theme .team-logo-fallback{background:rgba(0,30,80,0.08);color:#3d4e6b;}
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--black);color:var(--text);font-family:'Barlow',sans-serif;font-size:17px;min-height:100vh;overflow-x:hidden;}
 
@@ -131,6 +297,109 @@ select.lp-input{cursor:pointer;}
   .logplay-form-row{grid-template-columns:1fr 1fr;}
 }
 
+/* ── MARKET TICKER ───────────────────────────────────── */
+.ticker-bar{
+  display:flex;align-items:stretch;
+  background:linear-gradient(180deg,#0d0d14,#070710);
+  border-bottom:1px solid var(--border);
+  height:34px;overflow:hidden;
+  position:relative;
+}
+.ticker-bar::after{
+  content:'';position:absolute;top:0;right:0;width:80px;height:100%;
+  background:linear-gradient(90deg,transparent,#070710);pointer-events:none;z-index:2;
+}
+.ticker-label{
+  flex-shrink:0;display:flex;align-items:center;gap:6px;
+  padding:0 14px;
+  background:linear-gradient(135deg,#dc2626,#991b1b);
+  color:#fff;font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;
+  position:relative;z-index:3;
+  box-shadow:2px 0 8px rgba(220,38,38,0.3);
+}
+.ticker-label::after{
+  content:'';position:absolute;left:100%;top:0;
+  border-style:solid;border-width:17px 0 17px 8px;
+  border-color:transparent transparent transparent #991b1b;
+}
+.ticker-track{
+  flex:1;overflow:hidden;display:flex;align-items:center;
+  position:relative;min-width:0;
+}
+.ticker-content{
+  display:inline-flex;align-items:center;white-space:nowrap;
+  animation:tickerScroll 90s linear infinite;
+  padding-left:20px;
+  will-change:transform;
+}
+.ticker-content:hover{animation-play-state:paused;}
+@keyframes tickerScroll{
+  from{transform:translateX(0);}
+  to{transform:translateX(-50%);}
+}
+.tk-game{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:0 18px;font-family:var(--mono);font-size:11px;
+  border-right:1px solid rgba(255,255,255,0.06);
+  color:var(--text2);
+}
+.tk-time{color:var(--gold);font-weight:600;font-size:10px;letter-spacing:0.05em;}
+.tk-matchup{color:var(--text);font-weight:600;display:inline-flex;align-items:center;gap:5px;}
+.tk-pitchers{color:var(--text3);font-size:10px;font-style:italic;}
+.tk-line{color:var(--text2);}
+.tk-line .tk-fav{color:var(--green);font-weight:600;}
+.tk-line .tk-dog{color:var(--amber);font-weight:600;}
+.tk-rl{color:var(--text3);font-size:10px;}
+.ticker-empty{
+  padding:0 20px;font-family:var(--mono);font-size:11px;color:var(--text3);
+  font-style:italic;
+}
+
+/* ── FINANCIAL STATS BANNER ──────────────────────────── */
+.finstats-banner{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:10px;
+  padding:14px 24px;
+  background:linear-gradient(180deg, rgba(15,15,22,0.8) 0%, rgba(10,10,15,0) 100%);
+  border-bottom:1px solid var(--border);
+}
+.finstat-box{
+  position:relative;background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px 14px;
+  overflow:hidden;backdrop-filter:blur(10px);
+  transition:transform 0.15s, border-color 0.15s, box-shadow 0.2s;
+}
+.finstat-box:hover{transform:translateY(-1px);border-color:rgba(255,255,255,0.15);box-shadow:0 6px 16px rgba(0,0,0,0.35);}
+.finstat-glow{
+  position:absolute;top:0;left:0;right:0;height:2px;
+  border-radius:10px 10px 0 0;background:var(--gold);opacity:0.5;
+}
+.finstat-box.green .finstat-glow{background:var(--green);box-shadow:0 0 10px var(--green);opacity:0.65;}
+.finstat-box.amber .finstat-glow{background:var(--amber);box-shadow:0 0 10px var(--amber);opacity:0.55;}
+.finstat-box.gold .finstat-glow{background:var(--gold);box-shadow:0 0 10px var(--gold);opacity:0.6;}
+.finstat-box.blue .finstat-glow{background:var(--blue);box-shadow:0 0 10px var(--blue);opacity:0.55;}
+.finstat-label{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--text3);margin-bottom:6px;
+}
+.finstat-val{
+  font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:0.02em;
+  color:var(--text);line-height:1;margin-bottom:6px;
+}
+.finstat-val.green{color:var(--green);}
+.finstat-val.gold{color:var(--gold);}
+.finstat-val.amber{color:var(--amber);}
+.finstat-sub{
+  font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.04em;
+}
+@media (max-width:1100px){
+  .finstats-banner{grid-template-columns:repeat(3,1fr);}
+}
+@media (max-width:600px){
+  .finstats-banner{grid-template-columns:repeat(2,1fr);}
+  .finstat-val{font-size:22px;}
+}
+
 /* ── HEADER GEAR ICON ────────────────────────────────── */
 #settings-gear{
   background:transparent;border:1px solid var(--border2);color:var(--text2);
@@ -152,7 +421,7 @@ select.lp-input{cursor:pointer;}
 }
 .logplay-fields{
   display:grid;
-  grid-template-columns:minmax(200px,1.6fr) minmax(170px,1.2fr) minmax(80px,0.6fr) minmax(90px,0.6fr) minmax(130px,1fr) minmax(85px,0.6fr) auto;
+  grid-template-columns:minmax(220px,1.8fr) minmax(180px,1.3fr) minmax(95px,0.7fr) minmax(110px,0.7fr) minmax(95px,0.6fr) auto;
   gap:8px;flex:1;align-items:center;
 }
 .logplay-fields .form-input{
@@ -291,6 +560,20 @@ select.lp-input{cursor:pointer;}
   font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;
   color:var(--text);line-height:1.15;margin-bottom:4px;
 }
+.hp-matchup{
+  display:flex;align-items:center;gap:8px;margin-bottom:10px;
+  padding:8px 10px;background:rgba(255,255,255,0.03);
+  border-radius:8px;border:1px solid rgba(255,255,255,0.06);
+}
+body.mlb-theme .hp-matchup{background:#f5f7fb;border-color:rgba(0,30,80,0.08);}
+.hp-mc-team{
+  font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;
+  color:var(--text);letter-spacing:0.04em;
+}
+.hp-mc-at{color:var(--text3);font-size:13px;font-weight:400;margin:0 2px;}
+.hp-mc-time{
+  margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3);
+}
 .hp-game{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:10px;}
 .hp-rl{
   font-family:var(--mono);font-size:11px;padding:7px 10px;
@@ -369,6 +652,10 @@ select.lp-input{cursor:pointer;}
 }
 .hm-cell-label{font-size:8px;font-weight:700;line-height:1;letter-spacing:0.04em;}
 .hm-cell-game{font-size:8px;font-weight:700;color:#fff;line-height:1;text-shadow:0 1px 2px rgba(0,0,0,0.4);}
+.hm-cell-game-logos{display:flex;align-items:center;justify-content:center;gap:2px;}
+.hm-cell-game-logos .team-logo{width:13px;height:13px;}
+.hm-vs{font-size:7px;color:rgba(255,255,255,0.7);font-weight:700;}
+body.mlb-theme .hm-vs{color:rgba(0,30,80,0.5);}
 .hm-cell-game-time{font-size:7px;color:rgba(255,255,255,0.85);line-height:1;}
 .hm-axis-corner{font-size:8px;color:var(--text3);font-weight:600;text-align:center;padding:2px;}
 .hm-no-games{padding:14px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:10px;}
@@ -694,6 +981,50 @@ select.form-input{cursor:pointer;}
   </div>
 </header>
 
+<!-- ── MARKET TICKER ─────────────────────────────────── -->
+<div class="ticker-bar">
+  <div class="ticker-label">📡 LIVE</div>
+  <div class="ticker-track" id="ticker-track">
+    <div class="ticker-content" id="ticker-content">
+      <span class="ticker-empty">Loading today's slate…</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── FINANCIAL STATS BANNER ────────────────────────── -->
+<div class="finstats-banner">
+  <div class="finstat-box green">
+    <div class="finstat-glow"></div>
+    <div class="finstat-label">Core P&L</div>
+    <div class="finstat-val green" id="s-pnl">+$5,024</div>
+    <div class="finstat-sub" id="s-record">25W–9L · 74%</div>
+  </div>
+  <div class="finstat-box amber">
+    <div class="finstat-glow"></div>
+    <div class="finstat-label">Exotic P&L</div>
+    <div class="finstat-val gold" id="s-exotic">+$899</div>
+    <div class="finstat-sub">Parlays/live — not in W/L</div>
+  </div>
+  <div class="finstat-box gold">
+    <div class="finstat-glow"></div>
+    <div class="finstat-label">Combined</div>
+    <div class="finstat-val gold" id="s-combined">+$5,923</div>
+    <div class="finstat-sub">Core + exotic total</div>
+  </div>
+  <div class="finstat-box green">
+    <div class="finstat-glow"></div>
+    <div class="finstat-label">Live Plays</div>
+    <div class="finstat-val gold" id="s-real">—</div>
+    <div class="finstat-sub" id="s-stake">$0 at risk</div>
+  </div>
+  <div class="finstat-box blue">
+    <div class="finstat-glow"></div>
+    <div class="finstat-label">Bankroll</div>
+    <div class="finstat-val" id="s-bank">$3,400</div>
+    <div class="finstat-sub">Caesars + Hard Rock</div>
+  </div>
+</div>
+
 <!-- ── TOP STATS BANNER ─────────────────────────────── -->
 <div class="top-banner">
   <div class="top-banner-box">
@@ -726,7 +1057,6 @@ select.form-input{cursor:pointer;}
     </select>
     <input class="form-input" id="l-odds" placeholder="Odds (-120)">
     <input class="form-input" id="l-amt" placeholder="$ Amount">
-    <input class="form-input" id="l-trigger" placeholder="Triggers">
     <select class="form-input" id="l-type">
       <option value="core">Core</option>
       <option value="exotic">Exotic</option>
@@ -879,35 +1209,6 @@ select.form-input{cursor:pointer;}
 <div class="layout">
   <div class="odds-panel">
 
-    <!-- Summary Strip -->
-    <div class="summary-strip">
-      <div class="stat-box green">
-        <div class="stat-label">Core P&L</div>
-        <div class="stat-val green" id="s-pnl">+$4,486</div>
-        <div class="stat-sub" id="s-record">21W–9L · 70%</div>
-      </div>
-      <div class="stat-box amber">
-        <div class="stat-label">Exotic P&L</div>
-        <div class="stat-val gold" id="s-exotic">+$100</div>
-        <div class="stat-sub">Parlays/live — not in W/L</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">Combined</div>
-        <div class="stat-val gold" id="s-combined">+$4,586</div>
-        <div class="stat-sub">Core + exotic total</div>
-      </div>
-      <div class="stat-box green">
-        <div class="stat-label">Live plays</div>
-        <div class="stat-val gold" id="s-real">—</div>
-        <div class="stat-sub" id="s-stake">$0 at risk</div>
-      </div>
-      <div class="stat-box blue">
-        <div class="stat-label">Bankroll</div>
-        <div class="stat-val" id="s-bank">$3,400</div>
-        <div class="stat-sub">Caesars + BetMGM NJ</div>
-      </div>
-    </div>
-
     <div class="section-hdr">
       <div class="section-title">Book</div>
       <div style="font-size:11px;color:var(--text3);" id="game-count"></div>
@@ -960,6 +1261,42 @@ select.form-input{cursor:pointer;}
   </div>
 
 </div>
+
+<script>
+// ── MLB TEAM LOGOS ───────────────────────────────────────
+// Maps standard team abbreviations to MLB Stats API team IDs
+// Logos served from MLB's official static CDN
+const MLB_TEAM_IDS = {
+  // AL East
+  'BAL':110,'BOS':111,'NYY':147,'TB':139,'TOR':141,
+  // AL Central
+  'CWS':145,'CHW':145,'CLE':114,'DET':116,'KC':118,'MIN':142,
+  // AL West
+  'HOU':117,'LAA':108,'OAK':133,'ATH':133,'SEA':136,'TEX':140,
+  // NL East
+  'ATL':144,'MIA':146,'NYM':121,'PHI':143,'WSH':120,'WAS':120,
+  // NL Central
+  'CHC':112,'CIN':113,'MIL':158,'PIT':134,'STL':138,
+  // NL West
+  'ARI':109,'AZ':109,'COL':115,'LAD':119,'SD':135,'SF':137
+};
+function mlbLogoUrl(abbr){
+  if(!abbr) return null;
+  const id = MLB_TEAM_IDS[abbr.toUpperCase()];
+  return id ? `https://www.mlbstatic.com/team-logos/${id}.svg` : null;
+}
+function teamLogoHtml(abbr, size){
+  // Render an inline logo with abbreviation fallback
+  const cls = size === 'lg' ? 'team-logo-lg' : (size === 'md' ? 'team-logo-md' : 'team-logo-sm');
+  const url = mlbLogoUrl(abbr);
+  const safe = (abbr||'?').toString().replace(/[^A-Za-z0-9]/g,'').slice(0,3).toUpperCase();
+  if(!url){
+    return `<span class="team-logo-fallback ${cls}" title="${safe}">${safe}</span>`;
+  }
+  return `<img class="team-logo ${cls}" src="${url}" alt="${safe}" title="${safe}" onerror="this.outerHTML='<span class=\\'team-logo-fallback ${cls}\\' title=\\'${safe}\\'>${safe}</span>';" />`;
+}
+
+</script>
 
 <script>
 // ── STATE ────────────────────────────────────────────────
@@ -1529,16 +1866,76 @@ function populateLogPlayGames(scan){
   sel.innerHTML = opts;
 }
 
+// ── MARKET TICKER ─────────────────────────────────────────
+function populateTicker(scan){
+  const trackEl = document.getElementById('ticker-content');
+  if(!trackEl) return;
+  const games = (scan && scan.allGames) || [];
+  // Today only
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate()+1);
+  const todayGames = games.filter(g => {
+    if(!g.gameTime) return false;
+    const t = new Date(g.gameTime);
+    return t >= today && t < tomorrow;
+  }).sort((a,b) => new Date(a.gameTime) - new Date(b.gameTime));
+
+  if(!todayGames.length){
+    trackEl.innerHTML = '<span class="ticker-empty">No games on schedule today.</span>';
+    trackEl.style.animation = 'none';
+    return;
+  }
+
+  const buildItem = (g) => {
+    const a = (g.away && (g.away.abbr || g.away.name)) || '?';
+    const h = (g.home && (g.home.abbr || g.home.name)) || '?';
+    const t = g.gameTime ? new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : '';
+    const ap = g.away && g.away.pitcher && g.away.pitcher.fullName ? g.away.pitcher.fullName.split(' ').slice(-1)[0] : 'TBD';
+    const hp = g.home && g.home.pitcher && g.home.pitcher.fullName ? g.home.pitcher.fullName.split(' ').slice(-1)[0] : 'TBD';
+    const an = g.analysis || {};
+    const odds = an.odds || {};
+    const fmt = p => p == null ? '' : (p>0?'+':'')+p;
+    let lineStr = '';
+    if(odds.awayML != null && odds.homeML != null){
+      // Identify favorite
+      const awayFav = odds.awayML < odds.homeML;
+      const favTeam = awayFav ? a : h;
+      const dogTeam = awayFav ? h : a;
+      const favPrice = awayFav ? odds.awayML : odds.homeML;
+      const dogPrice = awayFav ? odds.homeML : odds.awayML;
+      lineStr = `<span class="tk-fav">${favTeam} ${fmt(favPrice)}</span> / <span class="tk-dog">${dogTeam} ${fmt(dogPrice)}</span>`;
+    }
+    const rl = an.rlDisplay || {};
+    let rlStr = '';
+    if(rl.homeLine && rl.homeLine.price != null){
+      rlStr = ` <span class="tk-rl">RL ${(rl.homeLine.point>0?'+':'')+rl.homeLine.point} ${fmt(rl.homeLine.price)}</span>`;
+    }
+    return `<span class="tk-game">
+      <span class="tk-time">${t}</span>
+      <span class="tk-matchup">${teamLogoHtml(a,'sm')} ${a} @ ${teamLogoHtml(h,'sm')} ${h}</span>
+      <span class="tk-pitchers">${ap} vs ${hp}</span>
+      ${lineStr ? '<span class="tk-line">'+lineStr+'</span>' : ''}
+      ${rlStr}
+    </span>`;
+  };
+
+  // Build content twice to make seamless infinite scroll
+  const items = todayGames.map(buildItem).join('');
+  trackEl.innerHTML = items + items;
+
+  // Adjust scroll speed by content length (more games = slower per item, but reasonable total)
+  const baseDuration = Math.max(40, todayGames.length * 6); // ~6s per game minimum 40s total
+  trackEl.style.animation = `tickerScroll ${baseDuration}s linear infinite`;
+}
+
 function onLogGameChange(){
   const sel = document.getElementById('l-game');
   const betSel = document.getElementById('l-bet');
   const oddsEl = document.getElementById('l-odds');
-  const trigEl = document.getElementById('l-trigger');
   if(!sel || !betSel) return;
   const idx = sel.value;
   // Reset downstream fields
   oddsEl.value = ''; oddsEl.classList.remove('lp-autofilled');
-  trigEl.value = ''; trigEl.classList.remove('lp-autofilled');
   if(idx === ''){
     betSel.innerHTML = '<option value="">Pick game first</option>';
     betSel.disabled = true;
@@ -1623,12 +2020,6 @@ function onLogGameChange(){
 
   betSel.innerHTML = opts.join('');
   betSel.disabled = false;
-
-  // Auto-fill triggers from analysis
-  if(an.triggered && an.triggered.length){
-    trigEl.value = an.triggered.join('+');
-    trigEl.classList.add('lp-autofilled');
-  }
 }
 
 function onLogBetChange(){
@@ -1676,11 +2067,19 @@ function addLog(){
     alert('Pick a game and a bet first.');
     return;
   }
+  // Look up triggers from cached game analysis (no longer a UI field)
+  let trigger = 'T1';
+  if(idx !== '' && _logGameCache[parseInt(idx,10)]){
+    const an = _logGameCache[parseInt(idx,10)].analysis || {};
+    if(an.triggered && an.triggered.length){
+      trigger = an.triggered.join('+');
+    }
+  }
   logPlays.push({
     game, bet,
     odds: document.getElementById('l-odds').value.trim(),
     amt: document.getElementById('l-amt').value.trim(),
-    trigger: document.getElementById('l-trigger').value.trim() || 'T1',
+    trigger,
     type: document.getElementById('l-type').value || 'core',
     date: document.getElementById('l-date').value.trim() || new Date().toLocaleDateString(),
     result: null
@@ -1690,7 +2089,7 @@ function addLog(){
   document.getElementById('l-game').value = '';
   document.getElementById('l-bet').innerHTML = '<option value="">Pick game first</option>';
   document.getElementById('l-bet').disabled = true;
-  ['l-odds','l-amt','l-trigger','l-date'].forEach(id => {
+  ['l-odds','l-amt','l-date'].forEach(id => {
     const el = document.getElementById(id);
     if(el){ el.value = ''; el.classList.remove('lp-autofilled'); }
   });
@@ -1921,6 +2320,7 @@ async function loadMorningScan(){
     renderRegressionFlags(scan.outliers||[]);
     renderStreakHeatmap(scan);
     populateLogPlayGames(scan);
+    populateTicker(scan);
   }catch(e){
     document.getElementById('collision-table-container').innerHTML='<div class="empty">Offline — scan loads on server boot</div>';
   }
@@ -2103,7 +2503,7 @@ function renderFullPlayCard(scan){
     const awayReg=awayT.regressionFlag?'<span style="color:var(--teal);font-size:8px;"> T4↑</span>':'';
     const homeReg=homeT.regressionFlag?'<span style="color:var(--teal);font-size:8px;"> T4↑</span>':'';
     html+=`<tr>
-      <td style="color:var(--text2);white-space:nowrap;">${awayT.abbr||'?'} @ ${homeT.abbr||'?'}</td>
+      <td style="color:var(--text2);white-space:nowrap;"><span style="display:inline-flex;align-items:center;gap:4px;vertical-align:middle;">${teamLogoHtml(awayT.abbr,'sm')}${awayT.abbr||'?'} <span style="opacity:0.6;">@</span> ${teamLogoHtml(homeT.abbr,'sm')}${homeT.abbr||'?'}</span></td>
       <td class="${awayS==='W'?'cg-streak-w':'cg-streak-l'}">${awayS}${awayL}${awayReg}</td>
       <td class="${awayD>0?'cg-diff-pos':awayD<0?'cg-diff-neg':'cg-diff-flat'}">${awayDStr}</td>
       <td class="${homeS==='W'?'cg-streak-w':'cg-streak-l'}">${homeS}${homeL}${homeReg}</td>
@@ -2187,6 +2587,12 @@ function renderHeroPlays(scan){
     const notes = (a.notes||[]).slice(0,5).join('<br>');
     const collDesc = a.collision ? `${a.collision.away||'?'} vs ${a.collision.home||'?'}` : '';
 
+    const awayAbbr = (g.away && (g.away.abbr || g.away.name)) || '';
+    const homeAbbr = (g.home && (g.home.abbr || g.home.name)) || '';
+    const matchupHtml = (awayAbbr && homeAbbr)
+      ? `<div class="hp-matchup">${teamLogoHtml(awayAbbr,'lg')}<span class="hp-mc-team">${awayAbbr}</span><span class="hp-mc-at">@</span>${teamLogoHtml(homeAbbr,'lg')}<span class="hp-mc-team">${homeAbbr}</span>${gameTime?'<span class="hp-mc-time">'+gameTime+'</span>':''}</div>`
+      : '';
+
     return `<div class="hp-card">
       <div class="hp-card-glow" style="background:${col};box-shadow:0 0 16px ${col}, 0 0 4px ${col};"></div>
       <div class="hp-card-top">
@@ -2196,8 +2602,8 @@ function renderHeroPlays(scan){
         </div>
         <span class="hp-stake" style="color:${col};">$${a.sizing||0}</span>
       </div>
+      ${matchupHtml}
       <div class="hp-rec">${a.recommendation||''}</div>
-      <div class="hp-game">${g.game||''}${gameTime?' · '+gameTime:''}</div>
       <div class="hp-rl">${rlInner}</div>
     </div>`;
   }).join('');
@@ -2329,8 +2735,11 @@ function renderStreakHeatmap(scan){
           const first = list[0];
           const more = list.length > 1 ? `+${list.length-1}` : '';
           const titleList = list.map(g=>`${g.away} @ ${g.home} ${g.time}`).join(' · ');
+          const cellInner = list.length === 1
+            ? `<div class="hm-cell-game-logos">${teamLogoHtml(first.away,'sm')}<span class="hm-vs">@</span>${teamLogoHtml(first.home,'sm')}</div>`
+            : `<div class="hm-cell-game">${first.away}@${first.home} ${more}</div>`;
           h += `<td class="hm-cell" style="background:${grade.bg};" title="${titleList} → ${grade.label}">
-            <div class="hm-cell-game">${first.away}@${first.home}${more?' '+more:''}</div>
+            ${cellInner}
           </td>`;
         } else {
           h += `<td class="hm-cell hm-empty"></td>`;
@@ -2355,6 +2764,8 @@ function renderStreakHeatmap(scan){
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
+  // Activate MLB theme by default (sport-specific theming)
+  document.body.classList.add('mlb-theme');
   updateSummary();
   renderLog();
   renderPaper();
