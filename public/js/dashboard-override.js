@@ -56,6 +56,13 @@
 
     // ─── 3. Initial render ──────────────────────────────────────────────────
     renderAll();
+    // Trigger legacy updateSummary so big top-row stats (tb-wins, etc) refresh with API data
+    if (typeof window.updateSummary_legacy === 'function') window.updateSummary_legacy();
+    else if (typeof updateSummary === 'function') {
+      try { updateSummary(); } catch(e){}
+    }
+    // Re-render after a short delay in case other scripts ran later
+    setTimeout(() => { try { renderAll(); if (typeof updateSummary === 'function') updateSummary(); } catch(e){} }, 500);
 
     // Expose for debugging
     window.aoUI = { renderAll, renderMyPlays, renderActionsPlays, renderSummaries };
