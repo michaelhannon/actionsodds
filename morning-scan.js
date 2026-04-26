@@ -398,14 +398,18 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   const failed = [];
   const notes = [];
 
-  // T2: Streak collision
+  // T2: Streak collision (REFINED Apr 26 2026)
+  // STRICT: W2+ vs L2+ on opposite sides
+  // SOFT:   W1 vs L1 — directional signal counts when other triggers justify
   const collisionActive = away.streak !== home.streak;
   const collisionMax = collisionActive && (away.streakLen >= 5 || home.streakLen >= 5);
+  const collisionStrict = collisionActive && away.streakLen >= 2 && home.streakLen >= 2;
   const fadeZone = away.streakLen >= 9 || home.streakLen >= 9;
   if (collisionActive) {
+    const mode = collisionStrict ? '' : ' [soft — W1 vs L1, directional]';
     const favSide = gateSide === 'home' ?
-      (home.streak === 'W' ? 'T2 ✓ Home W' + home.streakLen + ' vs Away L' + away.streakLen : 'T2 ✓ Away L' + away.streakLen + ' vs Home W' + home.streakLen) :
-      (away.streak === 'W' ? 'T2 ✓ Away W' + away.streakLen + ' vs Home L' + home.streakLen : null);
+      (home.streak === 'W' ? 'T2 ✓ Home W' + home.streakLen + ' vs Away L' + away.streakLen + mode : 'T2 ✓ Away L' + away.streakLen + ' vs Home W' + home.streakLen + mode) :
+      (away.streak === 'W' ? 'T2 ✓ Away W' + away.streakLen + ' vs Home L' + home.streakLen + mode : null);
     if (favSide) {
       triggered.push('T2');
       notes.push(favSide + (collisionMax ? ' — MAX COLLISION' : ''));
@@ -537,11 +541,11 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
     notes.push('T4-RS MAX bonus: +1 trigger added to sizing');
   }
 
-  // T10: Divisional familiarity
+  // T10: Divisional familiarity (counts as ONE confirming trigger, never 2x)
   const isDivisional = away.division === home.division; // approximate
   if (isDivisional) {
     triggered.push('T10');
-    notes.push('T10 ✓ Divisional matchup — counts as 2 triggers if T1 active');
+    notes.push('T10 ✓ Divisional matchup');
   }
 
   // T14: Power ratings — mandatory kill check
@@ -605,8 +609,8 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   // ── SIZING ───────────────────────────────────────────────
   let trigCount = triggered.length;
 
-  // T10 divisional doubles if T1
-  if (triggered.includes('T10') && gateType === 'T1') trigCount++;
+  // T10 divisional = ONE confirming trigger only (corrected Apr 26 2026, was incorrectly 2x for T1)
+  // No additional bump — already counted in triggered.length above
 
   // Collision max = gate alone sufficient
   const gateAlone = collisionMax && (away.streakLen >= 5 || home.streakLen >= 5);
