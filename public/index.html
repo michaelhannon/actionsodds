@@ -2569,6 +2569,8 @@ function toggleTheme(){
 // ── MORNING SCAN FETCH ────────────────────────────────────────
 
 // ── FULL PLAY CARD RENDER ─────────────────────────────────────
+let __lastScan = null;
+let __lastRenderBankroll = 0;
 async function loadMorningScan(){
   try{
     const res=await fetch('/morning-scan');
@@ -2577,6 +2579,8 @@ async function loadMorningScan(){
       document.getElementById('collision-table-container').innerHTML='<div class="empty" style="padding:16px;">No scan data yet<br><button onclick="triggerManualScan()" style="margin-top:8px;background:var(--gold);border:none;color:var(--black);cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:700;padding:6px 16px;border-radius:5px;">Run Now</button></div>';
       return;
     }
+    __lastScan = scan;
+    __lastRenderBankroll = userBankroll();
     renderHeroPlays(scan);
     renderBloombergGrid(scan);
     renderFullPlayCard(scan);
@@ -2588,6 +2592,19 @@ async function loadMorningScan(){
     document.getElementById('collision-table-container').innerHTML='<div class="empty">Offline — scan loads on server boot</div>';
   }
 }
+
+// Re-render plays when bankroll becomes available after initial render.
+// Race condition: window.ao.myBankroll() may not be ready when scan first renders.
+// This poll fires re-render once when bankroll is non-zero AND differs from prior render.
+setInterval(() => {
+  if(!__lastScan) return;
+  const bk = userBankroll();
+  if(bk > 0 && bk !== __lastRenderBankroll){
+    __lastRenderBankroll = bk;
+    try{ renderHeroPlays(__lastScan); }catch(e){}
+    try{ renderBloombergGrid(__lastScan); }catch(e){}
+  }
+}, 1000);
 
 
 async function triggerManualScan(){
