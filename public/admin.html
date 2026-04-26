@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Action's Odds</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0a0e1a;--panel:#121826;--panel2:#1a2234;--border:#2a3447;
+      --text:#e8ebf1;--text2:#a0a8b8;--text3:#6b7488;
+      --gold:#d4af37;--green:#26a269;--red:#c53030;--blue:#3b82f6;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:linear-gradient(180deg,#0a0e1a 0%,#0f1422 100%);
+      color:var(--text);font-family:'Barlow Condensed',sans-serif;
+      min-height:100vh;padding:24px 16px;
+    }
+    .container{max-width:1280px;margin:0 auto;}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+    .logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0.04em;text-decoration:none;color:var(--text);}
+    .logo span{color:var(--red);}
+    .nav-links a{color:var(--text2);text-decoration:none;margin-left:16px;font-size:13px;letter-spacing:0.06em;text-transform:uppercase;}
+    .nav-links a:hover{color:var(--gold);}
+    h1{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:0.02em;margin-bottom:8px;}
+    .subtitle{color:var(--text2);margin-bottom:24px;}
+
+    .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);}
+    .tab{
+      padding:10px 18px;background:transparent;border:none;border-bottom:2px solid transparent;
+      color:var(--text2);font-family:inherit;font-size:14px;font-weight:600;
+      letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;
+    }
+    .tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+    .tab:hover:not(.active){color:var(--text);}
+
+    .panel-card{
+      background:var(--panel);border:1px solid var(--border);border-radius:8px;
+      padding:16px;margin-bottom:16px;
+    }
+
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th{
+      text-align:left;padding:10px 12px;background:var(--panel2);
+      color:var(--text2);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;
+      font-size:11px;border-bottom:1px solid var(--border);
+    }
+    td{padding:10px 12px;border-bottom:1px solid rgba(42,52,71,0.5);vertical-align:middle;}
+    tr:hover{background:rgba(212,175,55,0.04);}
+    .badge{padding:2px 8px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;display:inline-block;}
+    .badge.admin{background:rgba(212,175,55,0.15);color:var(--gold);border:1px solid var(--gold);}
+    .badge.active{background:rgba(38,162,105,0.12);color:var(--green);border:1px solid rgba(38,162,105,0.3);}
+    .badge.none{background:transparent;color:var(--text3);border:1px solid var(--border);}
+    .badge.pos{color:var(--green);}
+    .badge.neg{color:var(--red);}
+
+    .btn{
+      background:var(--gold);color:#0a0e1a;border:none;padding:6px 12px;border-radius:4px;
+      cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;
+      letter-spacing:0.06em;text-transform:uppercase;
+    }
+    .btn:hover:not(:disabled){background:#e6c454;}
+    .btn:disabled{opacity:0.5;cursor:not-allowed;}
+    .btn.outline{background:transparent;color:var(--text);border:1px solid var(--border);}
+    .btn.outline:hover{border-color:var(--gold);color:var(--gold);}
+    .btn.danger{background:transparent;color:#ff8b8b;border:1px solid var(--red);}
+    .btn.danger:hover{background:var(--red);color:#fff;}
+    .btn-row{display:flex;gap:6px;flex-wrap:wrap;}
+
+    .actions-cell{white-space:nowrap;}
+    .row-actions{display:flex;gap:4px;}
+
+    input,select{
+      background:#0f1422;border:1px solid var(--border);color:var(--text);
+      padding:8px 10px;border-radius:4px;font-family:inherit;font-size:13px;
+    }
+    input:focus,select:focus{border-color:var(--gold);outline:none;}
+
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px;}
+    .modal{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:24px;max-width:480px;width:100%;}
+    .modal h3{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);margin-bottom:12px;}
+    .field{display:block;margin-bottom:12px;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;}
+    .field input,.field select{display:block;width:100%;margin-top:4px;}
+
+    .stat-row{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:24px;}
+    .stat{
+      background:var(--panel);border:1px solid var(--border);border-radius:8px;
+      padding:14px 18px;flex:1;min-width:140px;
+    }
+    .stat-label{font-size:11px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;}
+    .stat-val{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--text);}
+    .stat-val.green{color:var(--green);}
+    .stat-val.gold{color:var(--gold);}
+
+    .empty{padding:32px;text-align:center;color:var(--text3);font-size:14px;}
+    .loading{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .error{background:rgba(197,48,48,0.1);border:1px solid var(--red);color:#ffb4b4;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:13px;}
+    .toast{position:fixed;bottom:20px;right:20px;background:var(--green);color:#fff;padding:10px 18px;border-radius:5px;font-size:13px;z-index:9999;opacity:0;transition:opacity 0.2s;}
+    .toast.show{opacity:1;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <a href="/" class="logo">ACTION'S<span>ODDS</span></a>
+      <div class="nav-links">
+        <a href="/">Dashboard</a>
+        <a href="/account.html">Account</a>
+        <a href="/auth/logout.html">Sign Out</a>
+      </div>
+    </div>
+
+    <h1>Admin Panel</h1>
+    <div class="subtitle" id="subtitle">Loading...</div>
+
+    <div id="error-area"></div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="users">Users</button>
+      <button class="tab" data-tab="actions-plays">Action's Plays</button>
+      <button class="tab" data-tab="bankrolls">Bankrolls</button>
+    </div>
+
+    <!-- Users tab -->
+    <div id="tab-users" class="tab-panel">
+      <div class="stat-row" id="user-stats"></div>
+      <div class="panel-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:12px;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.04em;">All Users</div>
+          <button class="btn" id="btn-add-user">+ Invite User</button>
+        </div>
+        <div id="users-table"></div>
+      </div>
+    </div>
+
+    <!-- Action's Plays tab -->
+    <div id="tab-actions-plays" class="tab-panel" style="display:none;">
+      <div class="panel-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:12px;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.04em;">All Action's Plays</div>
+          <button class="btn" id="btn-add-actions-play">+ Add Play</button>
+        </div>
+        <div id="actions-plays-table"></div>
+      </div>
+    </div>
+
+    <!-- Bankrolls tab -->
+    <div id="tab-bankrolls" class="tab-panel" style="display:none;">
+      <div class="panel-card">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.04em;margin-bottom:12px;">Action's Bankrolls (per sport)</div>
+        <div id="bankrolls-table"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    const supabase = createClient(
+      'https://xlfsaxfpdpxsdkovvhxs.supabase.co',
+      'sb_publishable_3L81CVKvE9w2agrz6yMe5g_BC4O0pws'
+    );
+
+    let session = null;
+    let me = null;
+
+    async function authedFetch(url, opts = {}) {
+      const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+      if (session?.access_token) headers['Authorization'] = 'Bearer ' + session.access_token;
+      const res = await fetch(url, Object.assign({}, opts, { headers }));
+      if (!res.ok) {
+        const t = await res.text(); let p = null;
+        try { p = JSON.parse(t); } catch (e) {}
+        throw new Error(p?.error || t || 'HTTP ' + res.status);
+      }
+      return res.json();
+    }
+
+    function fmtMoney(n) {
+      const x = Number(n) || 0;
+      return (x >= 0 ? '+' : '-') + '$' + Math.abs(Math.round(x)).toLocaleString();
+    }
+    function fmtDate(d) {
+      if (!d) return '—';
+      const dt = new Date(d);
+      return dt.toLocaleDateString();
+    }
+    function fmtDateTime(d) {
+      if (!d) return '—';
+      const dt = new Date(d);
+      return dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    }
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function toast(msg, type = 'success') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.style.background = type === 'error' ? 'var(--red)' : 'var(--green)';
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2500);
+    }
+    function showError(msg) {
+      const el = document.getElementById('error-area');
+      el.innerHTML = `<div class="error">${escapeHtml(msg)}</div>`;
+    }
+
+    async function init() {
+      const { data } = await supabase.auth.getSession();
+      session = data?.session;
+      if (!session) { window.location.href = '/auth/login.html?next=/admin.html'; return; }
+
+      try { me = await authedFetch('/api/me'); }
+      catch (err) { showError('Failed to load profile: ' + err.message); return; }
+
+      if (!me.is_admin) {
+        document.getElementById('subtitle').textContent = '';
+        document.querySelector('.container').innerHTML = `<div class="error" style="margin-top:24px;">Access denied — admin only.</div><div style="text-align:center;margin-top:16px;"><a href="/" class="btn outline">← Dashboard</a></div>`;
+        return;
+      }
+      document.getElementById('subtitle').textContent = `Signed in as ${me.display_name} · ${me.email}`;
+
+      bindTabs();
+      await loadUsers();
+      bindUserActions();
+      bindActionsPlaysActions();
+    }
+
+    function bindTabs() {
+      document.querySelectorAll('.tab').forEach(t => {
+        t.addEventListener('click', async () => {
+          document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === t));
+          document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+          const panelId = 'tab-' + t.dataset.tab;
+          document.getElementById(panelId).style.display = '';
+          if (t.dataset.tab === 'actions-plays') await loadActionsPlays();
+          if (t.dataset.tab === 'bankrolls') await loadBankrolls();
+        });
+      });
+    }
+
+    // ─── USERS ────────────────────────────────────────────────────────────
+    let usersCache = [];
+    async function loadUsers() {
+      try {
+        const r = await authedFetch('/api/admin/users');
+        usersCache = r.users || [];
+        renderUserStats(usersCache);
+        renderUsersTable(usersCache);
+      } catch (err) { showError('Failed to load users: ' + err.message); }
+    }
+
+    function renderUserStats(users) {
+      const total = users.length;
+      const admins = users.filter(u => u.is_admin).length;
+      const subscribed = users.filter(u => u.active_sub_count > 0 && !u.is_admin).length;
+      const totalPnl = users.reduce((a, u) => a + (u.pnl || 0), 0);
+      document.getElementById('user-stats').innerHTML = `
+        <div class="stat"><div class="stat-label">Total Users</div><div class="stat-val">${total}</div></div>
+        <div class="stat"><div class="stat-label">Admins</div><div class="stat-val gold">${admins}</div></div>
+        <div class="stat"><div class="stat-label">Paying Subscribers</div><div class="stat-val green">${subscribed}</div></div>
+        <div class="stat"><div class="stat-label">Aggregate User P&L</div><div class="stat-val ${totalPnl>=0?'green':''}" style="${totalPnl<0?'color:var(--red);':''}">${fmtMoney(totalPnl)}</div></div>
+      `;
+    }
+
+    function renderUsersTable(users) {
+      const wrap = document.getElementById('users-table');
+      if (!users.length) { wrap.innerHTML = '<div class="empty">No users yet.</div>'; return; }
+      wrap.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Email</th><th>Name</th><th>Status</th><th>Subscriptions</th><th>Plays</th><th>P&L</th><th>Bankroll</th><th>Joined</th><th>Last In</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${users.map(u => `
+              <tr data-id="${u.id}">
+                <td style="word-break:break-all;max-width:200px;">${escapeHtml(u.email)}</td>
+                <td>${escapeHtml(u.display_name || '—')}</td>
+                <td>
+                  ${u.is_admin ? '<span class="badge admin">Admin</span>' : ''}
+                  ${u.active_sub_count > 0 ? '<span class="badge active">Active</span>' : (u.is_admin ? '' : '<span class="badge none">Free</span>')}
+                </td>
+                <td style="font-size:11px;color:var(--text2);">
+                  ${u.active_sports.length ? u.active_sports.join(', ').toUpperCase() : '—'}
+                </td>
+                <td>${u.plays} <span style="color:var(--text3);font-size:11px;">(${u.wins}W-${u.losses}L)</span></td>
+                <td><span class="badge ${u.pnl>=0?'pos':'neg'}">${fmtMoney(u.pnl)}</span></td>
+                <td>$${Math.round(u.current_bankroll).toLocaleString()}</td>
+                <td style="font-size:11px;color:var(--text3);">${fmtDate(u.created_at)}</td>
+                <td style="font-size:11px;color:var(--text3);">${fmtDate(u.last_sign_in_at)}</td>
+                <td class="actions-cell">
+                  <div class="row-actions">
+                    <button class="btn outline" data-action="edit">Edit</button>
+                    <button class="btn outline" data-action="comp">Comp</button>
+                    <button class="btn outline" data-action="reset">Reset PW</button>
+                    <button class="btn danger" data-action="delete" ${u.id === me.id ? 'disabled' : ''}>Delete</button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function bindUserActions() {
+      document.getElementById('btn-add-user').addEventListener('click', openInviteModal);
+
+      document.getElementById('users-table').addEventListener('click', async e => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const tr = btn.closest('tr');
+        const userId = tr.dataset.id;
+        const user = usersCache.find(u => u.id === userId);
+        if (!user) return;
+        const action = btn.dataset.action;
+
+        if (action === 'edit') openEditModal(user);
+        else if (action === 'comp') openCompModal(user);
+        else if (action === 'reset') {
+          if (!confirm(`Send password reset email to ${user.email}?`)) return;
+          btn.disabled = true; btn.innerHTML = '<span class="loading"></span>';
+          try {
+            await authedFetch(`/api/admin/users/${user.id}/reset-password`, { method: 'POST' });
+            toast('Reset email sent to ' + user.email);
+          } catch (err) { toast(err.message, 'error'); }
+          btn.disabled = false; btn.textContent = 'Reset PW';
+        } else if (action === 'delete') {
+          if (!confirm(`Delete ${user.email}? This cannot be undone.`)) return;
+          if (!confirm(`Really? All their plays and subscriptions will also be deleted.`)) return;
+          btn.disabled = true;
+          try {
+            await authedFetch(`/api/admin/users/${user.id}`, { method: 'DELETE' });
+            toast('User deleted');
+            await loadUsers();
+          } catch (err) { toast(err.message, 'error'); btn.disabled = false; }
+        }
+      });
+    }
+
+    // ─── modals ──────────────────────────────────────────────────────────
+    function openModal(html, onSave) {
+      const bg = document.createElement('div');
+      bg.className = 'modal-bg';
+      bg.innerHTML = `<div class="modal">${html}</div>`;
+      document.body.appendChild(bg);
+      bg.querySelector('[data-cancel]')?.addEventListener('click', () => bg.remove());
+      const saveBtn = bg.querySelector('[data-save]');
+      saveBtn?.addEventListener('click', async () => {
+        saveBtn.disabled = true; saveBtn.innerHTML = '<span class="loading"></span>';
+        try { await onSave(bg); bg.remove(); }
+        catch (err) { toast(err.message, 'error'); saveBtn.disabled = false; saveBtn.textContent = 'Save'; }
+      });
+      return bg;
+    }
+
+    function openInviteModal() {
+      openModal(`
+        <h3>Invite User</h3>
+        <label class="field">Email<input type="email" id="m-email" required></label>
+        <label class="field">Display Name (optional)<input type="text" id="m-name"></label>
+        <label class="field" style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:13px;color:var(--text);">
+          <input type="checkbox" id="m-admin" style="width:auto;"> Make Admin
+        </label>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+          <button class="btn outline" data-cancel>Cancel</button>
+          <button class="btn" data-save>Send Invite</button>
+        </div>
+      `, async (bg) => {
+        const email = bg.querySelector('#m-email').value.trim();
+        if (!email) throw new Error('Email required');
+        await authedFetch('/api/admin/users', {
+          method: 'POST', body: JSON.stringify({
+            email,
+            display_name: bg.querySelector('#m-name').value.trim(),
+            is_admin: bg.querySelector('#m-admin').checked,
+          }),
+        });
+        toast('Invite sent to ' + email);
+        await loadUsers();
+      });
+    }
+
+    function openEditModal(user) {
+      openModal(`
+        <h3>Edit User</h3>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">${escapeHtml(user.email)}</div>
+        <label class="field">Display Name<input type="text" id="m-name" value="${escapeHtml(user.display_name)}"></label>
+        <label class="field">Starting Bankroll<input type="number" step="0.01" id="m-start" value="${user.starting_bankroll}"></label>
+        <label class="field">Current Bankroll<input type="number" step="0.01" id="m-current" value="${user.current_bankroll}"></label>
+        <label class="field" style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:13px;color:var(--text);">
+          <input type="checkbox" id="m-admin" ${user.is_admin?'checked':''} style="width:auto;"> Admin (full access)
+        </label>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+          <button class="btn outline" data-cancel>Cancel</button>
+          <button class="btn" data-save>Save</button>
+        </div>
+      `, async (bg) => {
+        await authedFetch('/api/admin/users/' + user.id, {
+          method: 'PATCH', body: JSON.stringify({
+            display_name: bg.querySelector('#m-name').value.trim(),
+            starting_bankroll: parseFloat(bg.querySelector('#m-start').value),
+            current_bankroll: parseFloat(bg.querySelector('#m-current').value),
+            is_admin: bg.querySelector('#m-admin').checked,
+          }),
+        });
+        toast('User updated');
+        await loadUsers();
+      });
+    }
+
+    function openCompModal(user) {
+      openModal(`
+        <h3>Comp Sport</h3>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">Grant ${escapeHtml(user.email)} a free 1-year subscription to:</div>
+        <label class="field">Sport<select id="m-sport">
+          <option value="mlb">MLB</option><option value="nhl">NHL</option>
+          <option value="nba">NBA</option><option value="nfl">NFL</option>
+          <option value="golf">Golf</option>
+        </select></label>
+        <div style="font-size:11px;color:var(--text3);margin-top:8px;">Active sports: ${user.active_sports.length?user.active_sports.join(', ').toUpperCase():'none'}</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+          <button class="btn outline" data-cancel>Cancel</button>
+          <button class="btn" data-save>Comp It</button>
+        </div>
+      `, async (bg) => {
+        const sport = bg.querySelector('#m-sport').value;
+        await authedFetch(`/api/admin/users/${user.id}/comp`, {
+          method: 'POST', body: JSON.stringify({ sport_id: sport }),
+        });
+        toast(`Comped ${sport.toUpperCase()} for ${user.email}`);
+        await loadUsers();
+      });
+    }
+
+    // ─── ACTION'S PLAYS ──────────────────────────────────────────────────
+    let actionsPlaysCache = [];
+    async function loadActionsPlays() {
+      try {
+        const r = await authedFetch('/api/actions-plays');
+        actionsPlaysCache = r.plays || [];
+        renderActionsPlaysTable(actionsPlaysCache);
+      } catch (err) { showError('Failed to load Action\'s plays: ' + err.message); }
+    }
+
+    function renderActionsPlaysTable(plays) {
+      const wrap = document.getElementById('actions-plays-table');
+      if (!plays.length) { wrap.innerHTML = '<div class="empty">No Action\'s plays yet.</div>'; return; }
+      wrap.innerHTML = `
+        <table>
+          <thead><tr>
+            <th>Date</th><th>Sport</th><th>Game</th><th>Selection</th>
+            <th>Odds</th><th>Stake</th><th>Status</th><th>P&L</th><th>Cat</th><th>Actions</th>
+          </tr></thead>
+          <tbody>
+          ${plays.map(p => `
+            <tr data-id="${p.id}">
+              <td style="font-size:11px;color:var(--text3);">${fmtDate(p.play_date)}</td>
+              <td style="font-size:11px;text-transform:uppercase;">${p.sport_id}</td>
+              <td>${escapeHtml(p.game)}</td>
+              <td>${escapeHtml(p.selection)}</td>
+              <td>${p.odds > 0 ? '+' + p.odds : p.odds}</td>
+              <td>$${p.stake}</td>
+              <td>
+                <select data-action="grade" style="padding:4px 6px;font-size:11px;">
+                  <option value="pending" ${p.status==='pending'?'selected':''}>Pending</option>
+                  <option value="win" ${p.status==='win'?'selected':''}>Win</option>
+                  <option value="loss" ${p.status==='loss'?'selected':''}>Loss</option>
+                  <option value="push" ${p.status==='push'?'selected':''}>Push</option>
+                  <option value="void" ${p.status==='void'?'selected':''}>Void</option>
+                </select>
+              </td>
+              <td><span class="badge ${p.pnl>=0?'pos':'neg'}">${fmtMoney(p.pnl)}</span></td>
+              <td style="font-size:11px;text-transform:uppercase;color:var(--text3);">${p.bet_category}</td>
+              <td>
+                <button class="btn danger" data-action="delete">×</button>
+              </td>
+            </tr>
+          `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function bindActionsPlaysActions() {
+      document.getElementById('btn-add-actions-play').addEventListener('click', () => openActionsPlayModal(null));
+      document.getElementById('actions-plays-table').addEventListener('change', async e => {
+        if (e.target.matches('select[data-action="grade"]')) {
+          const tr = e.target.closest('tr');
+          const id = tr.dataset.id;
+          try {
+            await authedFetch('/api/admin/actions-plays/' + id, {
+              method: 'PATCH', body: JSON.stringify({ status: e.target.value }),
+            });
+            toast('Updated');
+            await loadActionsPlays();
+          } catch (err) { toast(err.message, 'error'); }
+        }
+      });
+      document.getElementById('actions-plays-table').addEventListener('click', async e => {
+        const btn = e.target.closest('button[data-action="delete"]');
+        if (!btn) return;
+        const id = btn.closest('tr').dataset.id;
+        if (!confirm('Delete this play?')) return;
+        try {
+          await authedFetch('/api/admin/actions-plays/' + id, { method: 'DELETE' });
+          toast('Deleted');
+          await loadActionsPlays();
+        } catch (err) { toast(err.message, 'error'); }
+      });
+    }
+
+    function openActionsPlayModal(existing) {
+      const e = existing || {};
+      openModal(`
+        <h3>${existing?'Edit':'Add'} Action's Play</h3>
+        <label class="field">Game<input type="text" id="m-game" value="${escapeHtml(e.game||'')}" placeholder="NYY @ HOU"></label>
+        <label class="field">Sport<select id="m-sport">
+          <option value="mlb">MLB</option><option value="nhl">NHL</option>
+          <option value="nba">NBA</option><option value="nfl">NFL</option><option value="golf">Golf</option>
+        </select></label>
+        <label class="field">Date<input type="date" id="m-date" value="${e.play_date||new Date().toISOString().slice(0,10)}"></label>
+        <label class="field">Bet Type<input type="text" id="m-type" value="${escapeHtml(e.bet_type||'ML')}" placeholder="ML / RL / Total"></label>
+        <label class="field">Selection<input type="text" id="m-sel" value="${escapeHtml(e.selection||'')}" placeholder="NYY ML"></label>
+        <label class="field">Odds<input type="number" id="m-odds" value="${e.odds||''}" placeholder="-150"></label>
+        <label class="field">Stake $<input type="number" step="0.01" id="m-stake" value="${e.stake||''}"></label>
+        <label class="field">Category<select id="m-cat">
+          <option value="core" ${e.bet_category==='core'?'selected':''}>Core</option>
+          <option value="exotic" ${e.bet_category==='exotic'?'selected':''}>Exotic</option>
+        </select></label>
+        <label class="field">Notes (optional)<input type="text" id="m-notes" value="${escapeHtml(e.notes||'')}"></label>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+          <button class="btn outline" data-cancel>Cancel</button>
+          <button class="btn" data-save>${existing?'Save':'Publish'}</button>
+        </div>
+      `, async (bg) => {
+        const payload = {
+          game: bg.querySelector('#m-game').value.trim(),
+          sport_id: bg.querySelector('#m-sport').value,
+          play_date: bg.querySelector('#m-date').value,
+          bet_type: bg.querySelector('#m-type').value.trim() || 'ML',
+          selection: bg.querySelector('#m-sel').value.trim(),
+          odds: parseInt(bg.querySelector('#m-odds').value, 10),
+          stake: parseFloat(bg.querySelector('#m-stake').value),
+          bet_category: bg.querySelector('#m-cat').value,
+          notes: bg.querySelector('#m-notes').value.trim() || null,
+        };
+        if (existing) {
+          await authedFetch('/api/admin/actions-plays/' + existing.id, {
+            method: 'PATCH', body: JSON.stringify(payload),
+          });
+        } else {
+          await authedFetch('/api/admin/actions-plays', {
+            method: 'POST', body: JSON.stringify(payload),
+          });
+        }
+        if (existing) bg.querySelector('#m-sport').value = e.sport_id;
+        toast(existing?'Updated':'Published');
+        await loadActionsPlays();
+      });
+      // Set sport correctly for existing
+      if (existing) {
+        setTimeout(() => {
+          const m = document.querySelector('.modal-bg #m-sport');
+          if (m && existing.sport_id) m.value = existing.sport_id;
+        }, 0);
+      }
+    }
+
+    // ─── BANKROLLS ───────────────────────────────────────────────────────
+    async function loadBankrolls() {
+      try {
+        const r = await authedFetch('/api/actions-bankroll');
+        renderBankrolls(r.bankrolls || []);
+      } catch (err) { showError('Failed to load bankrolls: ' + err.message); }
+    }
+
+    function renderBankrolls(bankrolls) {
+      const wrap = document.getElementById('bankrolls-table');
+      wrap.innerHTML = `
+        <table>
+          <thead><tr><th>Sport</th><th>Starting</th><th>Current</th><th>Δ</th><th>W</th><th>L</th><th>Push</th><th>Save</th></tr></thead>
+          <tbody>
+          ${bankrolls.map(b => {
+            const delta = (Number(b.current_bankroll) || 0) - (Number(b.starting_bankroll) || 0);
+            return `
+              <tr data-sport="${b.sport_id}">
+                <td style="font-family:'Bebas Neue',sans-serif;font-size:18px;text-transform:uppercase;">${b.sport_id}</td>
+                <td><input type="number" step="0.01" data-field="starting_bankroll" value="${b.starting_bankroll}" style="width:120px;"></td>
+                <td><input type="number" step="0.01" data-field="current_bankroll" value="${b.current_bankroll}" style="width:120px;"></td>
+                <td><span class="badge ${delta>=0?'pos':'neg'}">${fmtMoney(delta)}</span></td>
+                <td><input type="number" data-field="total_wins" value="${b.total_wins}" style="width:70px;"></td>
+                <td><input type="number" data-field="total_losses" value="${b.total_losses}" style="width:70px;"></td>
+                <td><input type="number" data-field="total_pushes" value="${b.total_pushes}" style="width:70px;"></td>
+                <td><button class="btn" data-action="save">Save</button></td>
+              </tr>
+            `;
+          }).join('')}
+          </tbody>
+        </table>
+      `;
+      wrap.addEventListener('click', async e => {
+        const btn = e.target.closest('button[data-action="save"]');
+        if (!btn) return;
+        const tr = btn.closest('tr');
+        const sport = tr.dataset.sport;
+        const payload = {};
+        tr.querySelectorAll('input[data-field]').forEach(i => {
+          const v = parseFloat(i.value);
+          if (!isNaN(v)) payload[i.dataset.field] = v;
+        });
+        btn.disabled = true; btn.innerHTML = '<span class="loading"></span>';
+        try {
+          await authedFetch('/api/admin/actions-bankroll/' + sport, {
+            method: 'PATCH', body: JSON.stringify(payload),
+          });
+          toast(sport.toUpperCase() + ' bankroll updated');
+          await loadBankrolls();
+        } catch (err) { toast(err.message, 'error'); }
+        btn.disabled = false; btn.textContent = 'Save';
+      }, { once: true });
+    }
+
+    init();
+  </script>
+</body>
+</html>
