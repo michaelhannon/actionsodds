@@ -1514,6 +1514,36 @@ function unitAmt(triggers){
   return cfg.unit*5; // 4+ = max
 }
 
+// ── UNIT-BASED BANKROLL SIZING (Apr 26 2026) ──────────────
+// Zen Poker 100-unit method: base unit = 1% of user bankroll.
+// Engine outputs `units` (1=ENTRY, 2=STRONG, 3=MAX). UI multiplies by user bankroll.
+function userBankroll(){
+  try{
+    if(window.ao && window.ao.myBankroll){
+      const bk = window.ao.myBankroll();
+      if(bk && bk.current > 0) return bk.current;
+    }
+  }catch(e){}
+  return cfg.bankroll || 0;
+}
+function userStakeForUnits(units){
+  if(!units || units <= 0) return 0;
+  const bk = userBankroll();
+  if(!bk) return 0;
+  // 1 unit = 1% of bankroll. Round to nearest $5 for clean slips.
+  const raw = bk * 0.01 * units;
+  return Math.max(5, Math.round(raw / 5) * 5);
+}
+function fmtUnitStake(a){
+  // Prefer unit-based display when engine provides units; fall back to legacy sizing
+  if(a && typeof a.units === 'number' && a.units > 0){
+    const $ = userStakeForUnits(a.units);
+    if($ > 0) return `${a.units}u · $${$.toLocaleString()}`;
+    return `${a.units}u`;
+  }
+  return '$' + (a && a.sizing ? a.sizing : 0);
+}
+
 // ── TRIGGER ENGINE ───────────────────────────────────────
 function gradeMLBGame(g, bk){
   const plays=[];
@@ -2006,7 +2036,7 @@ GAME: ${g.away_team} @ ${g.home_team}
 HOME ML: ${fmtOdds(homeML)} | AWAY ML: ${fmtOdds(awayML)}
 PLAY: ${p.desc} | TRIGGER: ${p.trigger} | SUGGESTED SIZE: $${p.amt}
 
-T1 System: Home dog +140 to +199 gate. Key triggers: T2=streak mismatch (W vs L streak = collision), T3=run differential (pos vs neg), T6=pitcher FIP (most important), T8=bullpen 48hr (mandatory), T14=power ratings (mandatory). Unit sizing: T1 alone=$200, +1=$400, +2=$600, +3=$800, +4=$1000 max.
+T1 System: Home dog +140 to +199 gate. Key triggers: T2=streak mismatch (W vs L streak = collision), T3=run differential (pos vs neg), T6=pitcher FIP (most important), T8=bullpen 48hr (mandatory), T14=power ratings (mandatory). Unit-based sizing (Zen Poker 100-unit method): base unit = 1% of bankroll. Tiers: ENTRY 1u (1%), STRONG 2u (2%), MAX 3u (3%). Path caps: T1/T1B/T11 up to 3u, T12 cap 2u, T13/T15 cap 1u. Recalibrate at ±25% bankroll movement.
 
 Regression flags: SEA 1 road win (4%), KC 2 road wins (11%), NYM 3 home wins (18%) — all due for regression, T4 boost when dog.
 Season record: 21W-9L 70%, +$4,486 core P&L.
@@ -2714,7 +2744,7 @@ function renderFullPlayCard(scan){
     else if(coll.active) collHtml='<span class="cg-collision">COLL</span>';
     let recHtml='<span class="cg-no-coll">PASS</span>';
     const colMap2={blue:'var(--blue)',green:'var(--green)',teal:'var(--teal)',amber:'var(--amber)',red:'var(--red)'};
-    if(a.sizing>0&&!a.t14Kill) recHtml=`<span style="color:${colMap2[a.color]||'var(--teal)'};font-weight:700;">${a.strength} $${a.sizing}</span>`;
+    if((a.units > 0 || a.sizing > 0) && !a.t14Kill) recHtml=`<span style="color:${colMap2[a.color]||'var(--teal)'};font-weight:700;">${a.strength} ${fmtUnitStake(a)}</span>`;
     else if(a.t14Kill) recHtml='<span style="color:var(--red);">KILL</span>';
     else if(a.t15Active) recHtml='<span style="color:var(--orange);">FADE</span>';
     const awayReg=awayT.regressionFlag?'<span class="cg-reg-flag" title="Regression flag">↑</span>':'';
@@ -2812,7 +2842,13 @@ function renderHeroPlays(scan){
       rlInner += ` <span style="color:var(--text2);">Away ${arl.point>0?'+':''}${arl.point} <b style="color:${cc}">${arl.price>0?'+':''}${arl.price}</b></span>`;
     }
     if(!hrl.price && !arl.price) rlInner += ` <span style="color:var(--text3);">Check book for run line</span>`;
-    if(a.rlAddon) rlInner += ` <span class="hp-rl-bet">→ BET: ${a.rlAddon.desc} · $${a.rlAddon.amt}${!a.rlAddon.qualifying?' (watch)':''}</span>`;
+    if(a.rlAddon){
+      // RL addon now expressed as unit fraction; compute $ from user bankroll
+      const rlUnits = (typeof a.rlAddon.units === 'number') ? a.rlAddon.units : null;
+      const rlAmt = rlUnits ? userStakeForUnits(rlUnits) : (a.rlAddon.amt || 0);
+      const rlDisplay = rlUnits ? `${rlUnits.toFixed(1)}u · $${rlAmt.toLocaleString()}` : `$${rlAmt}`;
+      rlInner += ` <span class="hp-rl-bet">→ BET: ${a.rlAddon.desc} · ${rlDisplay}${!a.rlAddon.qualifying?' (watch)':''}</span>`;
+    }
 
     const notes = (a.notes||[]).slice(0,5).join('<br>');
     const collDesc = a.collision ? `${a.collision.away||'?'} vs ${a.collision.home||'?'}` : '';
@@ -2829,7 +2865,7 @@ function renderHeroPlays(scan){
         <div class="hp-badges">
           <span class="strength-badge ${sbClass}">${a.strength||''}</span>
         </div>
-        <span class="hp-stake" style="color:${col};">$${a.sizing||0}</span>
+        <span class="hp-stake" style="color:${col};">${fmtUnitStake(a)}</span>
       </div>
       ${matchupHtml}
       <div class="hp-rec">${a.recommendation||''}</div>
