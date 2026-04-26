@@ -1543,6 +1543,16 @@ function fmtUnitStake(a){
   }
   return '$' + (a && a.sizing ? a.sizing : 0);
 }
+// Rewrite engine recommendation to include user's $ stake.
+// Engine outputs "X units (X% of bankroll)"; we expand to "X units · $YYY (X% of bankroll)".
+function rewriteRec(rec, a){
+  if(!rec || !a || typeof a.units !== 'number' || a.units <= 0) return rec || '';
+  const $ = userStakeForUnits(a.units);
+  if(!$) return rec;
+  const stakeFrag = ` · $${$.toLocaleString()}`;
+  // Insert stake right after the unit count, before the parenthetical
+  return rec.replace(/—\s*(\d+\s+units?)\s*\(/, `— $1${stakeFrag} (`);
+}
 
 // ── TRIGGER ENGINE ───────────────────────────────────────
 function gradeMLBGame(g, bk){
@@ -2868,7 +2878,7 @@ function renderHeroPlays(scan){
         <span class="hp-stake" style="color:${col};">${fmtUnitStake(a)}</span>
       </div>
       ${matchupHtml}
-      <div class="hp-rec">${a.recommendation||''}</div>
+      <div class="hp-rec">${rewriteRec(a.recommendation, a)}</div>
       <div class="hp-rl">${rlInner}</div>
     </div>`;
   }).join('');
