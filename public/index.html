@@ -1474,7 +1474,7 @@ let allGames=[];
 let paperPlays=[];
 let logPlays=[];
 const DEFAULT_CFG={
-  bankroll:3400,unit:200,
+  bankroll:0,unit:200,
   t1Min:140,t1Max:199,
   t11Min:115,t11Max:135,
   t12Min:110,t12Max:134,
@@ -2384,12 +2384,12 @@ function updateSummary(){
   const atRisk=core.filter(p=>!p.result).reduce((a,p)=>a+(parseFloat(p.amt)||0),0);
 
   // Use baseline + logged
-  const BASE_CORE=5024,BASE_EXOTIC=899;
+  const BASE_CORE=0,BASE_EXOTIC=0;
   const totalCore=BASE_CORE+Math.round(corePnl);
   const totalExotic=BASE_EXOTIC+Math.round(exoticPnl);
   const totalCombined=totalCore+totalExotic;
-  const totalWins=25+wins,totalLosses=9+losses;
-  const totalWinPct=totalWins+totalLosses>0?Math.round(totalWins/(totalWins+totalLosses)*100):70;
+  const totalWins=wins,totalLosses=losses;
+  const totalWinPct=totalWins+totalLosses>0?Math.round(totalWins/(totalWins+totalLosses)*100):0;
 
   const fmt=(n)=>(n>=0?'+':'-')+'$'+Math.abs(n).toLocaleString();
 
@@ -2404,7 +2404,7 @@ function updateSummary(){
   const stakeEl=document.getElementById('s-stake');
   if(stakeEl)stakeEl.textContent=atRisk>0?'$'+atRisk.toLocaleString()+' at risk':'$0 at risk';
   const bankEl=document.getElementById('s-bank');
-  if(bankEl)bankEl.textContent='$'+cfg.bankroll.toLocaleString();
+  if(bankEl){const _bk=(window.ao&&window.ao.myBankroll)?window.ao.myBankroll().current:cfg.bankroll;bankEl.textContent='$'+Math.round(_bk).toLocaleString();}
 
   // Tracker panel
   const lwW=document.getElementById('lw-w');if(lwW)lwW.textContent=totalWins;
