@@ -126,6 +126,53 @@
 
   // ─── override legacy globals ─────────────────────────────────────────────
   function overrideLegacy() {
+    // Full replacement of legacy updateSummary that reads from API
+    window.updateSummary = function() {
+      try {
+        const plays = window.ao.myPlays();
+        const settled = plays.filter(p => p.status === 'win' || p.status === 'loss');
+        const wins = settled.filter(p => p.status === 'win').length;
+        const losses = settled.filter(p => p.status === 'loss').length;
+        const pending = plays.filter(p => p.status === 'pending').length;
+        const winPct = settled.length ? Math.round(wins / settled.length * 100) : 0;
+        const corePnl = plays.filter(p => p.bet_category !== 'exotic').reduce((a,p) => a + (Number(p.pnl)||0), 0);
+        const exoticPnl = plays.filter(p => p.bet_category === 'exotic').reduce((a,p) => a + (Number(p.pnl)||0), 0);
+        const combinedPnl = corePnl + exoticPnl;
+        const atRisk = plays.filter(p => p.status === 'pending').reduce((a,p) => a + (Number(p.stake)||0), 0);
+        const fmtMoney = n => (n>=0?'+':'-') + '$' + Math.abs(Math.round(n)).toLocaleString();
+        const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+        const setHTML = (id, txt, klass) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.textContent = txt;
+          if (klass !== undefined) el.className = klass;
+        };
+        // Top stat cards
+        setHTML('s-pnl', fmtMoney(corePnl), 'stat-val ' + (corePnl>=0?'green':'red'));
+        setHTML('s-exotic', fmtMoney(exoticPnl), 'stat-val ' + (exoticPnl>=0?'gold':'red'));
+        setHTML('s-combined', fmtMoney(combinedPnl), 'stat-val ' + (combinedPnl>=0?'gold':'red'));
+        setText('s-record', `${wins}W–${losses}L · ${winPct}%`);
+        setText('s-stake', atRisk > 0 ? '$' + atRisk.toLocaleString() + ' at risk' : '$0 at risk');
+        // Bankroll
+        const bk = window.ao.myBankroll();
+        setText('s-bank', '$' + Math.round(bk.current||0).toLocaleString());
+        // Top banner big stats
+        setText('tb-wins', wins);
+        setText('tb-losses', losses);
+        setText('tb-pend', pending);
+        setText('tb-pct', winPct + '%');
+        // Tracker panel (lw-*)
+        setText('lw-w', wins);
+        setText('lw-l', losses);
+        setText('lw-pend', pending);
+        setText('lw-roi', winPct + '%');
+        const lwPnl = document.getElementById('lw-pnl');
+        if (lwPnl) { lwPnl.textContent = fmtMoney(corePnl); lwPnl.style.color = corePnl >= 0 ? '' : 'var(--red)'; }
+        const lwEx = document.getElementById('lw-exotic');
+        if (lwEx) { lwEx.textContent = fmtMoney(exoticPnl); lwEx.style.color = exoticPnl >= 0 ? '' : 'var(--red)'; }
+      } catch (err) { console.warn('[ao] updateSummary failed:', err.message); }
+    };
+
     // The legacy code reads logPlays array directly. Keep it in sync as a mirror.
     Object.defineProperty(window, 'logPlays', {
       configurable: true,
