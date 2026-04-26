@@ -9,3 +9,5 @@ skills-lock.json
 # Editor swap & backup files
 *.backup
 *.save
+.DS_Store
+main
