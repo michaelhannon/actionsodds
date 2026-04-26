@@ -44,6 +44,7 @@ const { stripeWebhookHandler } = require('./server/stripe-webhook');
 const { requireAuth, supabaseAdmin } = require('./server/auth');
 const { createCheckoutSession } = require('./server/stripe-checkout');
 const { createBillingPortalSession } = require('./server/stripe-billing-portal');
+const apiRoutes = require('./server/api-routes');
 
 // =============================================================================
 // MIDDLEWARE — order matters
@@ -528,6 +529,9 @@ app.get('/api/me', requireAuth, async (req, res) => {
 // /api/stripe/create-checkout — start a Stripe Checkout session (Phase 2 client)
 app.post('/api/stripe/create-checkout', requireAuth, createCheckoutSession);
 app.post('/api/stripe/billing-portal', requireAuth, createBillingPortalSession);
+
+// Phase 3 API routes
+app.use(apiRoutes);
 
 // =============================================================================
 // STATIC FILE SERVING
