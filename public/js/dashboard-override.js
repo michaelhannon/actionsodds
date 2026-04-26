@@ -231,10 +231,8 @@
       renderMyPlays(filter);
     };
 
-    // Override updateSummary — remove hardcoded baselines
-    window.updateSummary = function () {
-      renderSummaries();
-    };
+    // Override updateSummary — handled above with full implementation
+    // (this stub block intentionally removed)
 
     // Disable paperPlays-related globals that no longer apply
     window.paperPlays = [];
