@@ -294,7 +294,7 @@
        ======================================================================== */
     .strip{
       max-width:1280px;margin:0 auto;
-      padding:60px 32px;
+      padding:32px;
       display:grid;
       grid-template-columns:repeat(4,1fr);
       gap:0;
@@ -303,16 +303,16 @@
       position:relative;
     }
     .strip-cell{
-      padding:0 28px;
+      padding:24px 28px;
       border-right:1px solid var(--border);
       position:relative;
     }
     .strip-cell:last-child{border-right:none;}
     .strip-num{
       font-family:var(--display);
-      font-size:54px;line-height:1;
+      font-size:54px;line-height:1.05;
       letter-spacing:-0.005em;
-      margin-bottom:6px;
+      margin-bottom:10px;
       color:var(--gold);
     }
     .strip-num.subtle{color:var(--text);}
@@ -748,10 +748,11 @@
     }
     .letter-title{
       font-family:var(--display);
-      font-size:52px;line-height:1;
+      font-size:52px;line-height:1.05;
       letter-spacing:-0.005em;
       text-align:center;
       margin-bottom:48px;
+      padding:8px 0;
     }
     .letter p{
       font-family:var(--serif);
