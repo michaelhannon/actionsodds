@@ -36,193 +36,6 @@ body.light .log-row{border-color:rgba(0,0,0,0.07);}
 body.light .panel-tabs{border-color:rgba(0,0,0,0.09);}
 body.light .collision-grid{background:#fff8e6;}
 body.light .reg-flag{background:#fff3e0;}
-
-/* ── MLB THEME (red/white/blue) ──────────────────────── */
-body.mlb-theme{
-  --black:#f5f7fb;--dark:#ffffff;--panel:#ffffff;--panel2:#f0f4fa;
-  --border:rgba(0,30,80,0.08);--border2:rgba(0,30,80,0.14);
-  --text:#0a1a3a;--text2:#3d4e6b;--text3:#7a8aa5;
-  --gold:#bf0d3e;       /* MLB red - replaces gold accent */
-  --gold2:#dc1f4f;      /* lighter red */
-  --blue:#002d72;       /* MLB blue */
-  --blue2:#1d4496;      /* lighter blue */
-  --green:#1a8a45;
-  --amber:#bf8500;
-  --red:#bf0d3e;
-  --orange:#e85d2c;
-  --teal:#0066b2;
-  background:#f5f7fb;color:#0a1a3a;
-}
-body.mlb-theme header{background:#ffffff;border-bottom:1px solid rgba(0,30,80,0.1);}
-body.mlb-theme header::after{background:linear-gradient(90deg,transparent,#bf0d3e 25%,#ffffff 50%,#002d72 75%,transparent);height:3px;}
-body.mlb-theme .logo-action{color:#002d72;}
-body.mlb-theme .logo-odds{color:#3d4e6b;}
-body.mlb-theme .logo-icon rect{fill:#ffffff;stroke:#002d72;stroke-width:1;}
-body.mlb-theme .logo-icon path{stroke:#bf0d3e;}
-body.mlb-theme .logo-icon circle{fill:#002d72;}
-body.mlb-theme .sport-badge{color:#bf0d3e;background:#fff5f7;border-color:rgba(191,13,62,0.3);}
-body.mlb-theme #theme-toggle{background:transparent;border-color:rgba(0,30,80,0.18);color:#3d4e6b;}
-body.mlb-theme #settings-gear{background:transparent;border-color:rgba(0,30,80,0.18);color:#3d4e6b;}
-body.mlb-theme #settings-gear:hover{color:#002d72;border-color:#002d72;}
-body.mlb-theme .refresh-btn{background:#002d72;color:#ffffff;}
-body.mlb-theme .refresh-btn:hover{background:#1d4496;}
-body.mlb-theme .last-update{color:#7a8aa5;}
-
-/* MLB ticker */
-body.mlb-theme .ticker-bar{background:linear-gradient(180deg,#002d72,#001f5a);border-bottom:1px solid rgba(255,255,255,0.15);}
-body.mlb-theme .ticker-bar::after{background:linear-gradient(90deg,transparent,#001f5a);}
-body.mlb-theme .ticker-label{background:linear-gradient(135deg,#bf0d3e,#8a0828);}
-body.mlb-theme .ticker-label::after{border-color:transparent transparent transparent #8a0828;}
-body.mlb-theme .tk-game{color:#e3ebf7;border-right-color:rgba(255,255,255,0.1);}
-body.mlb-theme .tk-time{color:#ffd166;}
-body.mlb-theme .tk-matchup{color:#ffffff;}
-body.mlb-theme .tk-pitchers{color:#a9bedb;}
-body.mlb-theme .tk-line .tk-fav{color:#46d490;}
-body.mlb-theme .tk-line .tk-dog{color:#ffb73a;}
-body.mlb-theme .tk-rl{color:#a9bedb;}
-
-/* MLB financial banner */
-body.mlb-theme .finstats-banner{background:linear-gradient(180deg,#ffffff,#f5f7fb);border-bottom:1px solid rgba(0,30,80,0.08);}
-body.mlb-theme .finstat-box{background:#ffffff;border:1px solid rgba(0,30,80,0.08);box-shadow:0 1px 3px rgba(0,30,80,0.04);}
-body.mlb-theme .finstat-box:hover{border-color:rgba(0,30,80,0.18);box-shadow:0 4px 12px rgba(0,30,80,0.1);}
-body.mlb-theme .finstat-label{color:#7a8aa5;}
-body.mlb-theme .finstat-val{color:#0a1a3a;}
-body.mlb-theme .finstat-val.green{color:#1a8a45;}
-body.mlb-theme .finstat-val.gold{color:#bf0d3e;}
-body.mlb-theme .finstat-val.amber{color:#bf8500;}
-body.mlb-theme .finstat-sub{color:#7a8aa5;}
-body.mlb-theme .finstat-box.green .finstat-glow{background:#1a8a45;box-shadow:0 0 10px #1a8a45;}
-body.mlb-theme .finstat-box.amber .finstat-glow{background:#bf0d3e;box-shadow:0 0 10px #bf0d3e;}
-body.mlb-theme .finstat-box.gold .finstat-glow{background:linear-gradient(90deg,#bf0d3e,#002d72);box-shadow:0 0 10px rgba(191,13,62,0.5);}
-body.mlb-theme .finstat-box.blue .finstat-glow{background:#002d72;box-shadow:0 0 10px #002d72;}
-
-/* MLB W/L banner */
-body.mlb-theme .top-banner{background:#ffffff;border-bottom:1px solid rgba(0,30,80,0.08);}
-body.mlb-theme .top-banner-box{background:#f5f7fb;border:1px solid rgba(0,30,80,0.08);}
-body.mlb-theme .top-banner-label{color:#7a8aa5;}
-body.mlb-theme .top-banner-val{color:#0a1a3a;}
-body.mlb-theme .top-banner-val.w{color:#1a8a45;}
-body.mlb-theme .top-banner-val.l{color:#bf0d3e;}
-body.mlb-theme .top-banner-val.pct{color:#002d72;}
-
-/* MLB log play strip */
-body.mlb-theme .logplay-strip{background:linear-gradient(180deg,#fff5f7,#ffffff);border-bottom:1px solid rgba(0,30,80,0.08);}
-body.mlb-theme .logplay-strip-title{color:#bf0d3e;}
-body.mlb-theme .logplay-fields .form-input{background:#ffffff;border:1px solid rgba(0,30,80,0.15);color:#0a1a3a;}
-body.mlb-theme .logplay-fields .form-input:focus{border-color:#002d72;}
-body.mlb-theme .logplay-fields .form-input.lp-autofilled{border-color:#1a8a45;background:#e8f5ee;}
-body.mlb-theme .logplay-fields select.form-input{
-  background-color:#ffffff;
-  background-image:
-    linear-gradient(45deg, transparent 50%, #002d72 50%),
-    linear-gradient(135deg, #002d72 50%, transparent 50%);
-  background-position: calc(100% - 13px) calc(50% - 1px), calc(100% - 9px) calc(50% - 1px);
-  background-size: 5px 5px, 5px 5px;
-  background-repeat: no-repeat, no-repeat;
-  padding-right:26px;
-}
-body.mlb-theme .logplay-fields select.form-input:disabled{
-  background-color:#f5f7fb;
-  color:#7a8aa5;
-  opacity:1;
-}
-body.mlb-theme .logplay-btn{background:#bf0d3e;color:#ffffff;}
-body.mlb-theme .logplay-btn:hover{background:#dc1f4f;}
-body.mlb-theme .logplay-toggle-date{color:#7a8aa5;}
-body.mlb-theme .logplay-toggle-date:hover{color:#bf0d3e;}
-
-/* MLB hero plays */
-body.mlb-theme .hero-plays-section{background:linear-gradient(180deg,#fff5f7 0%,#ffffff 100%);border-bottom:1px solid rgba(0,30,80,0.08);}
-body.mlb-theme .hero-plays-bg-glow{background:radial-gradient(circle, rgba(191,13,62,0.08) 0%, transparent 70%);}
-body.mlb-theme .hero-plays-eyebrow{color:#bf0d3e;}
-body.mlb-theme .hero-plays-title{color:#0a1a3a;}
-body.mlb-theme .hero-plays-meta{background:#ffffff;border:1px solid rgba(0,30,80,0.1);color:#3d4e6b;}
-body.mlb-theme .hpm-pulse{background:#1a8a45;box-shadow:0 0 10px #1a8a45;}
-body.mlb-theme .hp-card{background:#ffffff;border:1px solid rgba(0,30,80,0.08);box-shadow:0 1px 4px rgba(0,30,80,0.05);}
-body.mlb-theme .hp-card:hover{border-color:rgba(0,45,114,0.25);box-shadow:0 8px 20px rgba(0,30,80,0.12);}
-body.mlb-theme .hp-trig{color:#7a8aa5;}
-body.mlb-theme .hp-rec{color:#0a1a3a;}
-body.mlb-theme .hp-game{color:#7a8aa5;}
-body.mlb-theme .hp-rl{background:#f5f7fb;border:1px solid rgba(0,30,80,0.08);}
-body.mlb-theme .hp-rl-label{color:#7a8aa5;}
-body.mlb-theme .hp-rl-bet{color:#bf0d3e;}
-body.mlb-theme .hero-no-plays{background:linear-gradient(135deg,#fff5f7,#ffeef2);border-color:rgba(191,13,62,0.2);color:#3d4e6b;}
-body.mlb-theme .hero-no-plays b{color:#bf0d3e;}
-
-/* MLB protocol/Bloomberg + heat map sections */
-body.mlb-theme .protocol-section{background:#ffffff;border-bottom:1px solid rgba(0,30,80,0.08);}
-body.mlb-theme .protocol-title{color:#bf0d3e;}
-body.mlb-theme .protocol-subtitle{color:#7a8aa5;}
-body.mlb-theme .heatmap-section.heatmap-modern{background:linear-gradient(180deg,#f5f7fb 0%,#ffffff 100%);border-bottom:1px solid rgba(0,30,80,0.08);}
-body.mlb-theme .heatmap-section-title{color:#bf0d3e;}
-body.mlb-theme .heatmap-section-subtitle{color:#7a8aa5;}
-body.mlb-theme .hm-grid-wrapper{background:#ffffff;border:1px solid rgba(0,30,80,0.08);box-shadow:0 1px 3px rgba(0,30,80,0.04);}
-body.mlb-theme .hm-grid-wrapper::before{background:linear-gradient(90deg,transparent,#bf0d3e,#002d72,transparent);}
-body.mlb-theme .hm-grid-title{color:#bf0d3e;}
-body.mlb-theme .hm-grid-meta{color:#7a8aa5;}
-body.mlb-theme .hm-table th{color:#7a8aa5;}
-body.mlb-theme .hm-table td.hm-row-label{background:#f5f7fb;color:#3d4e6b;}
-body.mlb-theme .hm-axis-corner{color:#7a8aa5;}
-body.mlb-theme .hm-cell.hm-empty{background:#f5f7fb;border:1px dashed rgba(0,30,80,0.08);color:#a9b3c5;}
-body.mlb-theme .hm-no-games{color:#7a8aa5;}
-
-/* MLB AI briefing */
-body.mlb-theme .ai-section{background:#ffffff;border-bottom:1px solid rgba(0,30,80,0.08);}
-body.mlb-theme .ai-title{color:#bf0d3e;}
-body.mlb-theme .ai-subtitle{color:#7a8aa5;}
-body.mlb-theme .ai-empty{color:#7a8aa5;}
-
-/* MLB main layout */
-body.mlb-theme .layout{background:#f5f7fb;}
-body.mlb-theme .odds-panel{background:#f5f7fb;}
-body.mlb-theme .game-card{background:#ffffff;border:1px solid rgba(0,30,80,0.08);box-shadow:0 1px 3px rgba(0,30,80,0.04);}
-body.mlb-theme .game-card-header{background:#f5f7fb;color:#0a1a3a;}
-body.mlb-theme .section-title{color:#3d4e6b;}
-body.mlb-theme .section-hdr{border-bottom-color:rgba(0,30,80,0.08);}
-
-/* MLB book tabs and view toggle */
-body.mlb-theme .view-btn{background:#ffffff;border:1px solid rgba(0,30,80,0.12);color:#3d4e6b;}
-body.mlb-theme .view-btn.active{background:#002d72;border-color:#002d72;color:#ffffff;}
-
-/* MLB settings modal */
-body.mlb-theme .settings-modal{background:rgba(10,26,58,0.6);}
-body.mlb-theme .settings-modal-inner{background:#ffffff;border:1px solid rgba(0,30,80,0.12);}
-body.mlb-theme .settings-modal-title{color:#bf0d3e;}
-body.mlb-theme .settings-modal-close{color:#7a8aa5;}
-body.mlb-theme .settings-modal-close:hover{color:#0a1a3a;background:rgba(0,30,80,0.05);}
-body.mlb-theme .cfg-section-title{color:#0a1a3a;}
-body.mlb-theme .cfg-lbl{color:#3d4e6b;}
-body.mlb-theme .toggle-lbl{color:#0a1a3a;}
-body.mlb-theme .toggle-sub{color:#7a8aa5;}
-body.mlb-theme .save-btn{background:#bf0d3e;color:#ffffff;}
-body.mlb-theme .save-btn:hover{background:#dc1f4f;}
-
-/* MLB book links */
-body.mlb-theme .book-link{background:#ffffff;border:1px solid rgba(0,30,80,0.12);}
-
-/* MLB scrollbar */
-body.mlb-theme ::-webkit-scrollbar-track{background:#e3ebf7;}
-body.mlb-theme ::-webkit-scrollbar-thumb{background:rgba(0,30,80,0.2);}
-
-/* Book column header links - sportsbook deep links */
-.book-header-link{text-decoration:none;display:inline-block;cursor:pointer;transition:opacity 0.15s, transform 0.15s;}
-.book-header-link:hover{opacity:0.75;transform:translateY(-1px);}
-
-/* Team logo styles - shared across themes */
-.team-logo{display:inline-block;vertical-align:middle;flex-shrink:0;object-fit:contain;}
-.team-logo-link{display:inline-flex;align-items:center;text-decoration:none;color:inherit;cursor:pointer;transition:transform 0.12s;line-height:0;}
-.team-logo-link:hover{transform:scale(1.15);}
-.bg-team-cell{display:inline-flex;align-items:center;gap:5px;}
-.team-logo-sm{width:18px;height:18px;}
-.team-logo-md{width:22px;height:22px;}
-.team-logo-lg{width:28px;height:28px;}
-.team-logo-fallback{
-  display:inline-flex;align-items:center;justify-content:center;
-  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;
-  background:rgba(255,255,255,0.06);border-radius:50%;color:var(--text2);
-}
-body.mlb-theme .team-logo-fallback{background:rgba(0,30,80,0.08);color:#3d4e6b;}
-
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--black);color:var(--text);font-family:'Barlow',sans-serif;font-size:17px;min-height:100vh;overflow-x:hidden;}
 
@@ -267,369 +80,6 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;ba
 .confidence-bar{height:3px;background:var(--border2);border-radius:99px;margin-top:8px;overflow:hidden;}
 .confidence-fill{height:100%;border-radius:99px;background:var(--green);transition:width 0.5s;}
 
-/* ── LOG PLAY STRIP ──────────────────────────────────── */
-.logplay-strip{
-  background:linear-gradient(180deg, rgba(232,185,74,0.03) 0%, rgba(10,10,15,0) 100%), var(--dark);
-  border-bottom:1px solid var(--border);
-  padding:14px 24px 16px;
-}
-.logplay-strip-header{
-  display:flex;align-items:flex-end;justify-content:space-between;
-  margin-bottom:10px;flex-wrap:wrap;gap:8px;
-}
-.logplay-eyebrow{
-  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.18em;
-  text-transform:uppercase;color:var(--gold);margin-bottom:2px;opacity:0.85;
-}
-.logplay-title{
-  font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.04em;
-  color:var(--text);line-height:1;
-}
-.logplay-meta{
-  font-family:var(--mono);font-size:10px;color:var(--text3);
-  letter-spacing:0.05em;
-}
-.logplay-form-row{
-  display:grid;
-  grid-template-columns: 1.5fr 1.5fr 0.9fr 0.9fr 1.6fr 0.9fr 0.9fr auto;
-  gap:8px;align-items:center;
-}
-.lp-input{
-  font-family:var(--mono);font-size:11px;background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);color:var(--text);
-  padding:8px 10px;border-radius:6px;outline:none;transition:border-color 0.12s, background 0.12s;
-  width:100%;
-}
-.lp-input:focus{border-color:var(--gold);background:rgba(255,255,255,0.06);}
-.lp-input::placeholder{color:var(--text3);opacity:0.6;}
-select.lp-input{cursor:pointer;}
-.lp-submit{
-  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
-  letter-spacing:0.12em;text-transform:uppercase;
-  background:var(--gold);color:#0a0a0f;border:none;
-  padding:9px 18px;border-radius:6px;cursor:pointer;
-  transition:transform 0.1s, box-shadow 0.15s;white-space:nowrap;
-}
-.lp-submit:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,185,74,0.3);}
-@media (max-width:1100px){
-  .logplay-form-row{grid-template-columns:1fr 1fr 1fr;}
-}
-@media (max-width:600px){
-  .logplay-form-row{grid-template-columns:1fr 1fr;}
-}
-
-/* ── MARKET TICKER ───────────────────────────────────── */
-.ticker-bar{
-  display:flex;align-items:stretch;
-  background:linear-gradient(180deg,#0d0d14,#070710);
-  border-bottom:1px solid var(--border);
-  height:34px;overflow:hidden;
-  position:relative;
-}
-.ticker-bar::after{
-  content:'';position:absolute;top:0;right:0;width:80px;height:100%;
-  background:linear-gradient(90deg,transparent,#070710);pointer-events:none;z-index:2;
-}
-.ticker-label{
-  flex-shrink:0;display:flex;align-items:center;gap:6px;
-  padding:0 14px;
-  background:linear-gradient(135deg,#dc2626,#991b1b);
-  color:#fff;font-family:'Barlow Condensed',sans-serif;
-  font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;
-  position:relative;z-index:3;
-  box-shadow:2px 0 8px rgba(220,38,38,0.3);
-}
-.ticker-label::after{
-  content:'';position:absolute;left:100%;top:0;
-  border-style:solid;border-width:17px 0 17px 8px;
-  border-color:transparent transparent transparent #991b1b;
-}
-.ticker-pulse-dot{
-  width:8px;height:8px;border-radius:50%;background:#ffffff;
-  box-shadow:0 0 0 0 rgba(255,255,255,0.7);
-  animation:tickerPulse 1.6s ease-in-out infinite;
-  flex-shrink:0;
-}
-@keyframes tickerPulse{
-  0%   {box-shadow:0 0 0 0 rgba(255,255,255,0.65);transform:scale(1);}
-  60%  {box-shadow:0 0 0 8px rgba(255,255,255,0);transform:scale(1.1);}
-  100% {box-shadow:0 0 0 0 rgba(255,255,255,0);transform:scale(1);}
-}
-.ticker-track{
-  flex:1;overflow:hidden;display:flex;align-items:center;
-  position:relative;min-width:0;
-}
-.ticker-content{
-  display:inline-flex;align-items:center;white-space:nowrap;
-  animation:tickerScroll 90s linear infinite;
-  padding-left:20px;
-  will-change:transform;
-}
-.ticker-content:hover{animation-play-state:paused;}
-@keyframes tickerScroll{
-  from{transform:translateX(0);}
-  to{transform:translateX(-50%);}
-}
-.tk-game{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:0 18px;font-family:var(--mono);font-size:11px;
-  border-right:1px solid rgba(255,255,255,0.06);
-  color:var(--text2);
-}
-.tk-time{color:var(--gold);font-weight:600;font-size:10px;letter-spacing:0.05em;}
-.tk-matchup{color:var(--text);font-weight:600;display:inline-flex;align-items:center;gap:5px;}
-.tk-pitchers{color:var(--text3);font-size:10px;font-style:italic;}
-.tk-line{color:var(--text2);}
-.tk-line .tk-fav{color:var(--green);font-weight:600;}
-.tk-line .tk-dog{color:var(--amber);font-weight:600;}
-.tk-rl{color:var(--text3);font-size:10px;}
-.ticker-empty{
-  padding:0 20px;font-family:var(--mono);font-size:11px;color:var(--text3);
-  font-style:italic;
-}
-
-/* ── FINANCIAL STATS BANNER ──────────────────────────── */
-.finstats-banner{
-  display:grid;grid-template-columns:repeat(5,1fr);gap:10px;
-  padding:14px 24px;
-  background:linear-gradient(180deg, rgba(15,15,22,0.8) 0%, rgba(10,10,15,0) 100%);
-  border-bottom:1px solid var(--border);
-}
-.finstat-box{
-  position:relative;background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));
-  border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px 14px;
-  overflow:hidden;backdrop-filter:blur(10px);
-  transition:transform 0.15s, border-color 0.15s, box-shadow 0.2s;
-}
-.finstat-box:hover{transform:translateY(-1px);border-color:rgba(255,255,255,0.15);box-shadow:0 6px 16px rgba(0,0,0,0.35);}
-.finstat-glow{
-  position:absolute;top:0;left:0;right:0;height:2px;
-  border-radius:10px 10px 0 0;background:var(--gold);opacity:0.5;
-}
-.finstat-box.green .finstat-glow{background:var(--green);box-shadow:0 0 10px var(--green);opacity:0.65;}
-.finstat-box.amber .finstat-glow{background:var(--amber);box-shadow:0 0 10px var(--amber);opacity:0.55;}
-.finstat-box.gold .finstat-glow{background:var(--gold);box-shadow:0 0 10px var(--gold);opacity:0.6;}
-.finstat-box.blue .finstat-glow{background:var(--blue);box-shadow:0 0 10px var(--blue);opacity:0.55;}
-.finstat-label{
-  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.18em;
-  text-transform:uppercase;color:var(--text3);margin-bottom:6px;
-}
-.finstat-val{
-  font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:0.02em;
-  color:var(--text);line-height:1;margin-bottom:6px;
-}
-.finstat-val.green{color:var(--green);}
-.finstat-val.gold{color:var(--gold);}
-.finstat-val.amber{color:var(--amber);}
-.finstat-sub{
-  font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.04em;
-}
-@media (max-width:1100px){
-  .finstats-banner{grid-template-columns:repeat(3,1fr);}
-}
-@media (max-width:600px){
-  .finstats-banner{grid-template-columns:repeat(2,1fr);}
-  .finstat-val{font-size:22px;}
-}
-
-/* ── HEADER GEAR ICON ────────────────────────────────── */
-#settings-gear{
-  background:transparent;border:1px solid var(--border2);color:var(--text2);
-  padding:6px 11px;border-radius:6px;cursor:pointer;font-size:15px;
-  transition:color 0.15s, border-color 0.15s, transform 0.3s;
-}
-#settings-gear:hover{color:var(--gold);border-color:var(--gold);transform:rotate(45deg);}
-
-/* ── LOG PLAY STRIP ──────────────────────────────────── */
-.logplay-strip{
-  background:linear-gradient(180deg, rgba(232,185,74,0.06), rgba(10,10,15,0));
-  border-bottom:1px solid var(--border);
-  padding:12px 24px;
-  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-}
-.logplay-strip-title{
-  font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:0.08em;
-  color:var(--gold);white-space:nowrap;
-}
-.logplay-fields{
-  display:grid;
-  grid-template-columns:minmax(220px,1.8fr) minmax(180px,1.3fr) minmax(95px,0.7fr) minmax(110px,0.7fr) minmax(95px,0.6fr) auto;
-  gap:8px;flex:1;align-items:center;
-}
-.logplay-fields .form-input{
-  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
-  color:var(--text);padding:8px 10px;border-radius:6px;
-  font-family:var(--mono);font-size:11px;width:100%;transition:border-color 0.15s;
-  appearance:none;-webkit-appearance:none;
-}
-.logplay-fields select.form-input{
-  /* CSS-only chevron drawn with two small angled triangles in a tiny background area */
-  background-image:
-    linear-gradient(45deg, transparent 50%, #999 50%),
-    linear-gradient(135deg, #999 50%, transparent 50%);
-  background-position:
-    calc(100% - 13px) calc(50% - 1px),
-    calc(100% - 9px) calc(50% - 1px);
-  background-size: 5px 5px, 5px 5px;
-  background-repeat: no-repeat;
-  padding-right: 26px;
-  cursor: pointer;
-}
-.logplay-fields select.form-input:disabled{opacity:0.5;cursor:not-allowed;}
-.logplay-fields .form-input::placeholder{color:var(--text3);opacity:0.7;}
-.logplay-fields .form-input:focus{outline:none;border-color:var(--gold);}
-.logplay-fields .form-input.lp-autofilled{border-color:rgba(46,204,113,0.4);background:rgba(46,204,113,0.04);}
-.logplay-btn{
-  background:var(--gold);color:var(--black);border:none;
-  padding:9px 16px;border-radius:6px;cursor:pointer;
-  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
-  letter-spacing:0.12em;text-transform:uppercase;
-  transition:background 0.15s;white-space:nowrap;
-}
-.logplay-btn:hover{background:var(--gold2);}
-.logplay-extra{
-  display:flex;align-items:center;gap:10px;width:100%;
-  font-family:var(--mono);font-size:10px;
-}
-.logplay-toggle-date{color:var(--text3);text-decoration:none;cursor:pointer;letter-spacing:0.05em;}
-.logplay-toggle-date:hover{color:var(--gold);}
-@media (max-width:1100px){
-  .logplay-fields{grid-template-columns:repeat(3,1fr);}
-  .logplay-fields .lp-game{grid-column:1/-1;}
-}
-@media (max-width:600px){
-  .logplay-fields{grid-template-columns:repeat(2,1fr);}
-}
-
-/* ── SETTINGS MODAL ──────────────────────────────────── */
-.settings-modal{
-  position:fixed;top:0;left:0;right:0;bottom:0;
-  background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);
-  z-index:1000;display:flex;align-items:flex-start;justify-content:center;
-  padding:60px 20px 20px;overflow-y:auto;
-  animation:settingsFadeIn 0.18s ease-out;
-}
-@keyframes settingsFadeIn{from{opacity:0;}to{opacity:1;}}
-.settings-modal-inner{
-  background:var(--dark);border:1px solid var(--border2);border-radius:12px;
-  width:100%;max-width:680px;
-  box-shadow:0 30px 80px rgba(0,0,0,0.6);
-  animation:settingsSlide 0.22s ease-out;
-}
-@keyframes settingsSlide{from{transform:translateY(-12px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.settings-modal-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 20px;border-bottom:1px solid var(--border);
-}
-.settings-modal-title{
-  font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.08em;color:var(--gold);
-}
-.settings-modal-close{
-  background:transparent;border:none;color:var(--text3);font-size:24px;
-  cursor:pointer;line-height:1;padding:4px 10px;border-radius:4px;
-  transition:color 0.15s, background 0.15s;
-}
-.settings-modal-close:hover{color:var(--text);background:rgba(255,255,255,0.05);}
-.settings-modal-body{padding:18px 20px 20px;}
-
-/* ── HERO PLAYS (top of page) ────────────────────────── */
-.hero-plays-section{
-  position:relative;
-  background:linear-gradient(180deg, rgba(232,185,74,0.04) 0%, rgba(10,10,15,0) 100%), var(--dark);
-  border-bottom:1px solid var(--border);
-  padding:18px 24px 22px;
-  overflow:hidden;
-}
-.hero-plays-bg-glow{
-  position:absolute;top:-100px;right:-100px;width:400px;height:400px;
-  background:radial-gradient(circle, rgba(232,185,74,0.08) 0%, transparent 70%);
-  pointer-events:none;
-}
-.hero-plays-header{
-  display:flex;align-items:flex-end;justify-content:space-between;
-  margin-bottom:14px;position:relative;z-index:1;flex-wrap:wrap;gap:10px;
-}
-.hero-plays-eyebrow{
-  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.18em;
-  text-transform:uppercase;color:var(--gold);margin-bottom:4px;opacity:0.85;
-}
-.hero-plays-title{
-  font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:0.04em;
-  color:var(--text);line-height:1;
-}
-.hero-plays-meta{
-  display:flex;align-items:center;gap:8px;
-  font-family:var(--mono);font-size:11px;color:var(--text3);
-  background:rgba(255,255,255,0.04);padding:6px 12px;border-radius:99px;
-  border:1px solid rgba(255,255,255,0.08);
-}
-.hpm-pulse{
-  display:inline-block;width:8px;height:8px;border-radius:50%;
-  background:var(--green);box-shadow:0 0 10px var(--green);
-  animation:hpmPulse 2s ease-in-out infinite;
-}
-@keyframes hpmPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.3);}}
-.hero-plays-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
-  gap:14px;position:relative;z-index:1;
-}
-.hero-plays-empty{
-  padding:30px;text-align:center;color:var(--text3);font-family:var(--mono);
-  font-size:12px;background:rgba(255,255,255,0.02);border-radius:8px;
-  border:1px dashed rgba(255,255,255,0.08);
-}
-.hero-no-plays{
-  padding:24px;text-align:center;font-family:var(--mono);font-size:13px;
-  color:var(--text3);background:linear-gradient(135deg,rgba(231,76,60,0.06),rgba(231,76,60,0.02));
-  border:1px solid rgba(231,76,60,0.18);border-radius:10px;
-}
-.hero-no-plays b{color:var(--red);letter-spacing:0.1em;}
-.hp-card{
-  position:relative;background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));
-  border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;
-  backdrop-filter:blur(10px);transition:transform 0.15s, border-color 0.15s, box-shadow 0.2s;
-  overflow:hidden;
-}
-.hp-card:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.18);box-shadow:0 8px 24px rgba(0,0,0,0.35);}
-.hp-card-glow{position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0;}
-.hp-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap;}
-.hp-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-.hp-trig{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.05em;}
-.hp-fail{color:var(--red);}
-.hp-stake{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:0.04em;}
-.hp-rec{
-  font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;
-  color:var(--text);line-height:1.15;margin-bottom:4px;
-}
-.hp-matchup{
-  display:flex;align-items:center;gap:8px;margin-bottom:10px;
-  padding:8px 10px;background:rgba(255,255,255,0.03);
-  border-radius:8px;border:1px solid rgba(255,255,255,0.06);
-}
-body.mlb-theme .hp-matchup{background:#f5f7fb;border-color:rgba(0,30,80,0.08);}
-.hp-mc-team{
-  font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;
-  color:var(--text);letter-spacing:0.04em;
-}
-.hp-mc-at{color:var(--text3);font-size:13px;font-weight:400;margin:0 2px;}
-.hp-mc-time{
-  margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3);
-}
-.hp-game{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:10px;}
-.hp-rl{
-  font-family:var(--mono);font-size:11px;padding:7px 10px;
-  background:rgba(255,255,255,0.03);border-radius:6px;
-  border:1px solid rgba(255,255,255,0.06);margin-bottom:8px;
-  display:flex;flex-wrap:wrap;align-items:center;gap:8px;
-}
-.hp-rl-label{color:var(--text3);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;}
-.hp-rl-bet{color:var(--amber);font-weight:700;margin-left:auto;}
-.hp-notes{
-  font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.65;
-  border-top:1px solid rgba(255,255,255,0.06);padding-top:8px;margin-top:6px;
-}
-.hp-pitcher{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px;opacity:0.8;}
-
 /* ── MORNING PROTOCOL GRID ───────────────────────────── */
 .protocol-section{background:var(--dark);border-bottom:1px solid var(--border);padding:14px 24px;}
 .protocol-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer;}
@@ -638,68 +88,30 @@ body.mlb-theme .hp-matchup{background:#f5f7fb;border-color:rgba(0,30,80,0.08);}
 .protocol-body{display:none;}
 .protocol-body.open{display:block;}
 
-/* ── STREAK HEAT MAP (compact + modern) ──────────────── */
-.heatmap-section.heatmap-modern{
-  position:relative;
-  background:linear-gradient(180deg, rgba(15,15,22,0.6) 0%, rgba(10,10,15,1) 100%);
-  border-bottom:1px solid var(--border);padding:14px 24px 18px;
-}
-.heatmap-section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:10px;}
+/* ── STREAK HEAT MAP ──────────────────────────────────── */
+.heatmap-section{background:var(--dark);border-bottom:1px solid var(--border);padding:14px 24px;}
+.heatmap-section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;}
 .heatmap-section-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.08em;color:var(--gold);}
-.heatmap-section-subtitle{font-size:11px;color:var(--text3);font-family:var(--mono);letter-spacing:0.04em;}
-.heatmap-legend{display:flex;gap:5px;flex-wrap:wrap;}
-.hm-legend-chip{
-  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:0.1em;
-  color:#fff;padding:3px 7px;border-radius:99px;
-  box-shadow:0 1px 3px rgba(0,0,0,0.3);
-}
-.hm-grids-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-@media (max-width:980px){.hm-grids-row{grid-template-columns:1fr;}}
-.hm-grid-wrapper{
-  background:linear-gradient(135deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.005) 100%);
-  border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px 10px 12px;
-  backdrop-filter:blur(8px);overflow-x:auto;position:relative;
-}
-.hm-grid-wrapper::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(232,185,74,0.4),transparent);
-}
-.hm-grid-title{
-  font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
-  letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);
-  margin-bottom:8px;display:flex;align-items:center;gap:6px;
-}
-.hm-grid-title .hm-grid-meta{color:var(--text3);font-weight:400;letter-spacing:0.05em;font-size:9px;}
-.hm-table{border-collapse:separate;border-spacing:2px;font-family:var(--mono);font-size:9px;margin:0 auto;width:100%;}
-.hm-table th{
-  font-size:8px;font-weight:700;color:var(--text3);letter-spacing:0.08em;
-  text-transform:uppercase;padding:2px 3px;text-align:center;
-}
-.hm-table th.hm-axis-label{color:var(--gold);}
-.hm-table td.hm-row-label{
-  font-size:8px;font-weight:700;color:var(--text2);padding:2px 5px;text-align:right;
-  background:rgba(255,255,255,0.025);border-radius:3px;letter-spacing:0.05em;
-}
-.hm-cell{
-  width:34px;height:24px;border-radius:4px;text-align:center;
-  font-size:8px;font-weight:700;color:#0a0a0f;cursor:default;
-  transition:transform 0.12s, box-shadow 0.12s;position:relative;padding:1px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.15);
-}
-.hm-cell:hover{transform:scale(1.18);z-index:5;box-shadow:0 4px 12px rgba(0,0,0,0.5), 0 0 0 1.5px #fff;}
-.hm-cell.hm-empty{
-  background:rgba(255,255,255,0.02);color:var(--text3);font-weight:400;
-  box-shadow:none;border:1px dashed rgba(255,255,255,0.05);
-}
-.hm-cell-label{font-size:8px;font-weight:700;line-height:1;letter-spacing:0.04em;}
-.hm-cell-game{font-size:8px;font-weight:700;color:#fff;line-height:1;text-shadow:0 1px 2px rgba(0,0,0,0.4);}
-.hm-cell-game-logos{display:flex;align-items:center;justify-content:center;gap:2px;}
-.hm-cell-game-logos .team-logo{width:13px;height:13px;}
-.hm-vs{font-size:7px;color:rgba(255,255,255,0.7);font-weight:700;}
-body.mlb-theme .hm-vs{color:rgba(0,30,80,0.5);}
-.hm-cell-game-time{font-size:7px;color:rgba(255,255,255,0.85);line-height:1;}
-.hm-axis-corner{font-size:8px;color:var(--text3);font-weight:600;text-align:center;padding:2px;}
-.hm-no-games{padding:14px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:10px;}
+.heatmap-section-subtitle{font-size:12px;color:var(--text3);font-family:var(--mono);letter-spacing:0.04em;}
+.heatmap-legend{display:flex;gap:6px;flex-wrap:wrap;}
+.hm-legend-chip{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.1em;color:#fff;padding:3px 8px;border-radius:3px;}
+.hm-grid-wrapper{background:rgba(20,20,28,0.8);border:1px solid var(--border2);border-radius:var(--radius);padding:14px;margin-bottom:12px;overflow-x:auto;}
+.hm-grid-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.hm-grid-title .hm-grid-meta{color:var(--text3);font-weight:400;letter-spacing:0.05em;}
+.hm-table{border-collapse:separate;border-spacing:3px;font-family:var(--mono);font-size:11px;margin:0 auto;}
+.hm-table th{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;padding:4px 6px;text-align:center;}
+.hm-table th.hm-axis-label{color:var(--gold);font-size:10px;}
+.hm-table td.hm-row-label{font-size:10px;font-weight:700;color:var(--text2);padding:4px 8px;text-align:right;background:rgba(255,255,255,0.02);border-radius:3px;}
+.hm-cell{width:74px;height:46px;border-radius:4px;text-align:center;font-size:10px;font-weight:600;color:#0a0a0f;cursor:default;transition:transform 0.1s;position:relative;padding:2px 4px;}
+.hm-cell:hover{transform:scale(1.05);z-index:2;outline:2px solid #fff;}
+.hm-cell.hm-empty{background:rgba(255,255,255,0.03);color:var(--text3);font-weight:400;}
+.hm-cell.hm-game-cell{cursor:pointer;}
+.hm-cell-label{font-size:10px;font-weight:700;line-height:1.1;}
+.hm-cell-sub{font-size:8px;font-weight:500;opacity:0.85;line-height:1.1;margin-top:2px;}
+.hm-cell-game{font-size:9px;font-weight:700;color:#fff;line-height:1.1;}
+.hm-cell-game-time{font-size:7px;color:rgba(255,255,255,0.85);margin-top:1px;}
+.hm-axis-corner{font-size:9px;color:var(--text3);font-weight:600;text-align:center;padding:4px;}
+.hm-no-games{padding:20px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:11px;}
 
 /* Collision grid */
 .collision-grid{background:rgba(20,20,28,0.8);border:1px solid var(--border2);border-radius:var(--radius);padding:12px;margin-bottom:10px;overflow-x:auto;}
@@ -719,57 +131,6 @@ body.mlb-theme .hm-vs{color:rgba(0,30,80,0.5);}
 .cg-gate-pass{color:var(--green);font-weight:700;}
 .cg-gate-fail{color:var(--text3);}
 .cg-gate-warn{color:var(--amber);font-weight:600;}
-
-/* Grouped game table — 2 rows per game */
-.cg-table-grouped td{vertical-align:middle;}
-.cg-table-grouped .cg-row-away td{
-  border-bottom:1px dashed rgba(255,255,255,0.04);
-  padding-top:8px;padding-bottom:3px;
-}
-.cg-table-grouped .cg-row-home td{
-  border-bottom:1px solid rgba(255,255,255,0.08);
-  padding-top:3px;padding-bottom:8px;
-}
-body.mlb-theme .cg-table-grouped .cg-row-away td{border-bottom:1px dashed rgba(0,30,80,0.06);}
-body.mlb-theme .cg-table-grouped .cg-row-home td{border-bottom:1px solid rgba(0,30,80,0.1);}
-.cg-table-grouped tr:hover td{background:rgba(255,255,255,0.02);}
-body.mlb-theme .cg-table-grouped .cg-row-away:hover td,
-body.mlb-theme .cg-table-grouped .cg-row-home:hover td{background:rgba(0,30,80,0.025);}
-
-.cg-game-cell{
-  vertical-align:middle;background:rgba(255,255,255,0.02);
-  font-family:var(--mono);font-size:10px;color:var(--text2);
-  border-right:1px solid rgba(255,255,255,0.06);
-  padding:6px 10px;line-height:1.3;
-}
-body.mlb-theme .cg-game-cell{
-  background:rgba(0,30,80,0.03);border-right:1px solid rgba(0,30,80,0.08);color:var(--text2);
-}
-.cg-game-time{font-size:10px;color:var(--gold);font-weight:600;letter-spacing:0.05em;}
-body.mlb-theme .cg-game-time{color:#bf0d3e;}
-.cg-game-vs{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.04em;color:var(--text);margin-top:1px;}
-
-.cg-team-cell{padding:4px 8px;}
-.cg-team-row{display:inline-flex;align-items:center;gap:6px;}
-.cg-team-name{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--text);letter-spacing:0.04em;}
-.cg-team-side{
-  font-family:var(--mono);font-size:8px;font-weight:600;
-  letter-spacing:0.1em;color:var(--text3);
-  background:rgba(255,255,255,0.04);padding:1px 5px;border-radius:3px;
-}
-body.mlb-theme .cg-team-side{background:rgba(0,30,80,0.06);color:#7a8aa5;}
-
-.cg-merged-cell{
-  vertical-align:middle;text-align:center;
-  border-left:1px solid rgba(255,255,255,0.04);
-}
-body.mlb-theme .cg-merged-cell{border-left:1px solid rgba(0,30,80,0.05);}
-
-.cg-reg-flag{
-  color:var(--teal);font-size:9px;font-weight:700;margin-left:3px;
-  background:rgba(20,184,166,0.12);padding:1px 4px;border-radius:3px;
-}
-body.mlb-theme .cg-reg-flag{color:#0066b2;background:rgba(0,102,178,0.1);}
 
 /* Regression flags */
 .reg-flags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
@@ -1049,72 +410,6 @@ select.form-input{cursor:pointer;}
 </style>
 </head>
 <body>
-<!--
-  Phase 2 Auth Gate — paste this block as the FIRST thing inside <body>
-  in public/index.html. It runs synchronously-ish and redirects:
-    - Not logged in → /landing.html
-    - Logged in + no active sub + not admin → /pricing.html
-    - Logged in + has access → continues to dashboard
-
-  The block hides the page (display:none on body) until the check finishes,
-  then reveals it. This prevents a flash of dashboard content before redirect.
--->
-<script type="module" id="auth-gate">
-  // Hide page until gate decision is made
-  document.documentElement.style.visibility = 'hidden';
-
-  import('https://esm.sh/@supabase/supabase-js@2').then(async ({ createClient }) => {
-    const supabase = createClient(
-      'https://xlfsaxfpdpxsdkovvhxs.supabase.co',
-      'sb_publishable_3L81CVKvE9w2agrz6yMe5g_BC4O0pws'
-    );
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      // 1. Not logged in → public landing page
-      if (!session) {
-        window.location.replace('/landing.html');
-        return;
-      }
-
-      // 2. Logged in — check for access (admin OR active subscription)
-      const res = await fetch('/api/me', {
-        headers: { 'Authorization': `Bearer ${session.access_token}` },
-      });
-
-      if (!res.ok) {
-        // Token invalid / expired — clear it and bounce to landing
-        await supabase.auth.signOut();
-        window.location.replace('/landing.html');
-        return;
-      }
-
-      const me = await res.json();
-      const hasActiveSub = (me.subscriptions || []).some(s => s.status === 'active');
-
-      if (!me.is_admin && !hasActiveSub) {
-        // Logged in but no access → pricing page
-        window.location.replace('/pricing.html?welcome=1');
-        return;
-      }
-
-      // 3. All clear — show the dashboard
-      // Stash user info on window for the dashboard to use
-      window.__currentUser = me;
-      document.documentElement.style.visibility = '';
-    } catch (err) {
-      console.error('Auth gate error:', err);
-      // On error, fall through and show the page — fail-open is safer than
-      // accidentally locking everyone out if Supabase is down.
-      document.documentElement.style.visibility = '';
-    }
-  }).catch(err => {
-    console.error('Auth gate import failed:', err);
-    document.documentElement.style.visibility = '';
-  });
-</script>
-
 
 <header>
   <div class="logo">
@@ -1125,74 +420,28 @@ select.form-input{cursor:pointer;}
     </svg>
     <div>
       <div class="logo-action">Action's Odds<span class="cursor-blink"></span></div>
-      <div class="logo-odds">MLB · NHL · NBA</div>
+      <div class="logo-odds">T1–T15 System · MLB · NHL · NBA</div>
     </div>
   </div>
   <div class="header-right">
     <span class="sport-badge" id="sport-badge">MLB</span>
     <span class="last-update" id="last-update-label">—</span>
     <button id="theme-toggle" onclick="toggleTheme()">☀</button>
-    <button id="settings-gear" onclick="openSettingsModal()" title="Settings" aria-label="Open settings">⚙</button>
-    <a href="/auth/logout.html" id="signout-link" style="background:transparent;border:1px solid var(--border2);color:var(--text2);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;text-decoration:none;font-family:inherit;display:inline-block;line-height:1.2;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)';" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)';">Sign Out</a>
     <button class="refresh-btn" id="refresh-btn" onclick="loadOdds()">
       <span id="refresh-icon">⟳</span> Refresh
     </button>
   </div>
 </header>
 
-<!-- ── MARKET TICKER ─────────────────────────────────── -->
-<div class="ticker-bar">
-  <div class="ticker-label"><span class="ticker-pulse-dot"></span>LIVE</div>
-  <div class="ticker-track" id="ticker-track">
-    <div class="ticker-content" id="ticker-content">
-      <span class="ticker-empty">Loading today's slate…</span>
-    </div>
-  </div>
-</div>
-
-<!-- ── FINANCIAL STATS BANNER ────────────────────────── -->
-<div class="finstats-banner">
-  <div class="finstat-box green">
-    <div class="finstat-glow"></div>
-    <div class="finstat-label">Core P&L</div>
-    <div class="finstat-val green" id="s-pnl">+$5,024</div>
-    <div class="finstat-sub" id="s-record">25W–9L · 74%</div>
-  </div>
-  <div class="finstat-box amber">
-    <div class="finstat-glow"></div>
-    <div class="finstat-label">Exotic P&L</div>
-    <div class="finstat-val gold" id="s-exotic">+$899</div>
-    <div class="finstat-sub">Parlays/live — not in W/L</div>
-  </div>
-  <div class="finstat-box gold">
-    <div class="finstat-glow"></div>
-    <div class="finstat-label">Combined</div>
-    <div class="finstat-val gold" id="s-combined">+$5,923</div>
-    <div class="finstat-sub">Core + exotic total</div>
-  </div>
-  <div class="finstat-box green">
-    <div class="finstat-glow"></div>
-    <div class="finstat-label">Live Plays</div>
-    <div class="finstat-val gold" id="s-real">—</div>
-    <div class="finstat-sub" id="s-stake">$0 at risk</div>
-  </div>
-  <div class="finstat-box blue">
-    <div class="finstat-glow"></div>
-    <div class="finstat-label">Bankroll</div>
-    <div class="finstat-val" id="s-bank">$0</div>
-    <div class="finstat-sub">Caesars + Hard Rock</div>
-  </div>
-</div>
-
 <!-- ── TOP STATS BANNER ─────────────────────────────── -->
 <div class="top-banner">
   <div class="top-banner-box">
     <div class="top-banner-label">Wins</div>
-    <div class="top-banner-val w" id="tb-wins">0</div>
+    <div class="top-banner-val w" id="tb-wins">25</div>
   </div>
   <div class="top-banner-box">
     <div class="top-banner-label">Losses</div>
-    <div class="top-banner-val l" id="tb-losses">0</div>
+    <div class="top-banner-val l" id="tb-losses">9</div>
   </div>
   <div class="top-banner-box">
     <div class="top-banner-label">Pending</div>
@@ -1204,38 +453,305 @@ select.form-input{cursor:pointer;}
   </div>
 </div>
 
-<!-- ── LOG PLAY (compact strip) ─────────────────────── -->
-<div class="logplay-strip">
-  <div class="logplay-strip-title">Log Play</div>
-  <div class="logplay-fields">
-    <select class="form-input lp-game" id="l-game" onchange="onLogGameChange()">
-      <option value="">Loading games…</option>
-    </select>
-    <select class="form-input" id="l-bet" onchange="onLogBetChange()" disabled>
-      <option value="">Pick game first</option>
-    </select>
-    <input class="form-input" id="l-odds" placeholder="Odds (-120)">
-    <input class="form-input" id="l-amt" placeholder="$ Amount">
-    <select class="form-input" id="l-type">
-      <option value="core">Core</option>
-      <option value="exotic">Exotic</option>
-    </select>
-    <button class="logplay-btn" onclick="addLog()">Log Play</button>
+<!-- ── STREAK HEAT MAP ──────────────────────────────────── -->
+<div class="heatmap-section">
+  <div class="heatmap-section-header">
+    <div>
+      <div class="heatmap-section-title">🔥 Streak Collision Heat Map</div>
+      <div class="heatmap-section-subtitle">Away streak × Home streak · Green=Play · Yellow=Caution · Red=Fade</div>
+    </div>
+    <div class="heatmap-legend">
+      <span class="hm-legend-chip" style="background:#16a34a;">MAX</span>
+      <span class="hm-legend-chip" style="background:#65a30d;">PLAY</span>
+      <span class="hm-legend-chip" style="background:#ca8a04;color:#0a0a0f;">CAUTION</span>
+      <span class="hm-legend-chip" style="background:#ea580c;">REDUCE</span>
+      <span class="hm-legend-chip" style="background:#dc2626;">FADE</span>
+    </div>
   </div>
-  <div class="logplay-extra">
-    <a href="#" class="logplay-toggle-date" id="logplay-toggle-date" onclick="toggleLogDate(event)">+ different date</a>
-    <input class="form-input" id="l-date" placeholder="Date (MM/DD/YYYY)" style="display:none;width:160px;">
+  <div id="streak-heatmap-container">
+    <div class="empty" style="padding:16px;">Heat map loads with morning scan…</div>
   </div>
 </div>
 
-<!-- ── SETTINGS MODAL ─────────────────────────────────── -->
-<div id="settings-modal" class="settings-modal" style="display:none;" onclick="if(event.target===this)closeSettingsModal()">
-  <div class="settings-modal-inner">
-    <div class="settings-modal-header">
-      <div class="settings-modal-title">⚙ Settings</div>
-      <button class="settings-modal-close" onclick="closeSettingsModal()" aria-label="Close">×</button>
+<!-- ── MORNING PROTOCOL SECTION ──────────────────────── -->
+<div class="protocol-section">
+  <div class="protocol-header" onclick="toggleProtocol()">
+    <div>
+      <div class="protocol-title">⚡ Bloomberg Collision Grid — Play List · Fade List · Parlay Targets</div>
+      <div class="protocol-subtitle">Auto-updates 9AM ET · W2+/L2+ minimum · Run diff filter · Streak depth color-coded</div>
     </div>
-    <div class="settings-modal-body">
+    <span id="protocol-arrow" style="color:var(--gold);font-size:18px;transition:transform 0.2s;transform:rotate(180deg);">▼</span>
+  </div>
+  <div class="protocol-body open" id="protocol-body">
+    <div id="collision-table-container">
+      <div class="empty" style="padding:16px;">No scan data yet — server auto-scans at 9AM ET<br>
+        <button onclick="triggerManualScan()" style="margin-top:8px;background:var(--gold);border:none;color:var(--black);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:6px 16px;border-radius:5px;letter-spacing:0.08em;text-transform:uppercase;">▶ Run Now</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── AI BRIEFING ────────────────────────────────────── -->
+<div class="ai-section">
+  <div class="ai-header">
+    <div>
+      <div class="ai-title">AI Brief — Today's Qualifying Plays</div>
+      <div class="ai-subtitle">T1–T15 engine · FIP-weighted · Collision + Regression adjusted</div>
+    </div>
+    <button class="refresh-btn" style="padding:6px 14px;font-size:11px;" onclick="generateAIBriefs()">Generate</button>
+  </div>
+  <div class="ai-cards" id="ai-cards">
+    <div class="ai-empty">Click Generate after loading odds to get today's AI play briefs.</div>
+  </div>
+</div>
+
+<!-- ── MAIN LAYOUT ─────────────────────────────────────── -->
+<div class="layout">
+  <div class="odds-panel">
+
+    <!-- Summary Strip -->
+    <div class="summary-strip" style="grid-template-columns:1fr 1fr;gap:14px;">
+
+      <!-- KENNY'S CARD -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:0.6;"></div>
+        <div style="grid-column:1 / -1;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.06em;color:var(--gold);">KENNY · ACTION'S PLAYS</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:0.15em;color:var(--text3);text-transform:uppercase;" id="s-k-record">— · —%</div>
+        </div>
+        <div class="stat-box green" style="border:none;background:transparent;padding:6px 0;">
+          <div class="stat-label">P&L</div>
+          <div class="stat-val green" id="s-k-pnl">—</div>
+          <div class="stat-sub" id="s-k-roi">ROI —</div>
+        </div>
+        <div class="stat-box" style="border:none;background:transparent;padding:6px 0;">
+          <div class="stat-label">Units</div>
+          <div class="stat-val gold" id="s-k-units">—</div>
+          <div class="stat-sub" id="s-k-bankroll">$10,000 base</div>
+        </div>
+        <div class="stat-box blue" style="border:none;background:transparent;padding:6px 0;">
+          <div class="stat-label">Pending</div>
+          <div class="stat-val" id="s-k-pending">—</div>
+          <div class="stat-sub" id="s-k-pending-stake">$0 at risk</div>
+        </div>
+      </div>
+
+      <!-- USER'S CARD -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);opacity:0.6;"></div>
+        <div style="grid-column:1 / -1;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.06em;color:var(--green);" id="s-u-name">YOU</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:0.15em;color:var(--text3);text-transform:uppercase;" id="s-u-record">— · —%</div>
+        </div>
+        <div class="stat-box green" style="border:none;background:transparent;padding:6px 0;">
+          <div class="stat-label">P&L</div>
+          <div class="stat-val green" id="s-u-pnl">—</div>
+          <div class="stat-sub" id="s-u-roi">ROI —</div>
+        </div>
+        <div class="stat-box" style="border:none;background:transparent;padding:6px 0;">
+          <div class="stat-label">Units</div>
+          <div class="stat-val gold" id="s-u-units">—</div>
+          <div class="stat-sub" id="s-u-bankroll">$0 base</div>
+        </div>
+        <div class="stat-box blue" style="border:none;background:transparent;padding:6px 0;">
+          <div class="stat-label">Pending</div>
+          <div class="stat-val" id="s-u-pending">—</div>
+          <div class="stat-sub" id="s-u-pending-stake">$0 at risk</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-hdr">
+      <div class="section-title">Book</div>
+      <div style="font-size:11px;color:var(--text3);" id="game-count"></div>
+    </div>
+    <div class="view-toggle">
+      <button class="view-btn active" id="view-btn-grid" onclick="setView('grid')">📊 Grid View</button>
+      <button class="view-btn" id="view-btn-cards" onclick="setView('cards')">🃏 Card View</button>
+    </div>
+    <div id="book-tabs-cards" style="display:none;" class="book-tabs"></div>
+
+    <div class="market-intel" id="market-intel" style="display:none;">
+      <div class="intel-item"><div class="intel-lbl">Avg home dog</div><div class="intel-val gold" id="mi-avgdog">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">Best dog</div><div class="intel-val green" id="mi-bestdog">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">Avg RL</div><div class="intel-val" id="mi-avgrl">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">Sharp alerts</div><div class="intel-val" id="mi-sharp">—</div></div>
+      <div class="intel-item"><div class="intel-lbl">Dynamic T1A</div><div class="intel-val amber" id="mi-threshold">—</div></div>
+    </div>
+
+    <div id="card-output">
+      <div class="status-box">
+        <div class="spinner" style="width:24px;height:24px;margin:0 auto 16px;display:block;"></div>
+        <div class="status-title">Loading today's card...</div>
+      </div>
+    </div>
+
+    <!-- Bloomberg Grid Link -->
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+      <div class="section-title" style="margin-bottom:10px;">Tools</div>
+      <a href="/grid.html" style="display:flex;align-items:center;gap:12px;background:rgba(232,185,74,0.08);border:1px solid rgba(232,185,74,0.25);border-radius:10px;padding:12px 16px;text-decoration:none;transition:background 0.15s;margin-bottom:16px;" onmouseover="this.style.background='rgba(232,185,74,0.14)'" onmouseout="this.style.background='rgba(232,185,74,0.08)'">
+        <div style="font-size:22px;">📊</div>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.06em;color:var(--gold);">MLB Bloomberg Grid</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--text3);letter-spacing:0.05em;">T2 Collision · T3 Run Diff · T4 Regression · Play/Fade List</div>
+        </div>
+        <div style="margin-left:auto;color:var(--gold);font-size:18px;">→</div>
+      </a>
+    </div>
+
+    <!-- Sportsbook Links -->
+    <div style="padding-top:16px;border-top:1px solid var(--border);">
+      <div class="section-title" style="margin-bottom:10px;">Quick access — NJ books</div>
+      <div class="book-links">
+        <a class="book-link dk" href="https://sportsbook.draftkings.com" target="_blank">DraftKings</a>
+        <a class="book-link fd" href="https://www.fanduel.com/sportsbook" target="_blank">FanDuel</a>
+        <a class="book-link mgm" href="https://sports.nj.betmgm.com" target="_blank">BetMGM</a>
+        <a class="book-link czr" href="https://www.caesars.com/sportsbook-and-casino" target="_blank">Caesars</a>
+        <a class="book-link" href="https://www.hardrock.bet" target="_blank" style="background:rgba(220,20,60,0.1);color:#ff6b8a;border:1px solid rgba(220,20,60,0.25);">Hard Rock</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TRACKER PANEL ──────────────────────────────── -->
+  <div class="tracker-panel">
+    <div class="panel-tabs">
+      <button class="panel-tab active" id="tab-btn-log" onclick="showTab('log')">Live Plays</button>
+      <button class="panel-tab" id="tab-btn-paper" onclick="showTab('paper')">Paper</button>
+      <button class="panel-tab" id="tab-btn-ledger" onclick="showTab('ledger')">Ledger</button>
+      <button class="panel-tab" id="tab-btn-settings" onclick="showTab('settings')">Settings</button>
+    </div>
+
+    <!-- LIVE PLAYS TAB -->
+    <div id="ptab-log">
+      <div style="display:none;" id="lw-w"></div>
+      <div style="display:none;" id="lw-l"></div>
+      <div style="display:none;" id="lw-pend"></div>
+      <div style="display:none;" id="lw-roi"></div>
+      <div style="display:none;" id="lw-pnl"></div>
+      <div style="display:none;" id="lw-exotic"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div class="section-title" style="font-size:11px;">Play history</div>
+        <select id="log-filter" onchange="renderLog()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;background:var(--panel2);border:1px solid var(--border2);color:var(--text2);padding:3px 8px;border-radius:4px;cursor:pointer;">
+          <option value="all">All plays</option>
+          <option value="core">Core only</option>
+          <option value="exotic">Exotic only</option>
+          <option value="pending">Pending</option>
+          <option value="W">Wins</option>
+          <option value="L">Losses</option>
+        </select>
+      </div>
+      <div id="log-list"><div class="empty">No plays logged yet.</div></div>
+      <div class="add-form">
+        <div class="add-form-title">Log play</div>
+        <div class="form-grid full"><input class="form-input" id="l-game" placeholder="Game (e.g. CHC vs PHI)"></div>
+        <div class="form-grid">
+          <input class="form-input" id="l-bet" placeholder="Bet (CHC ML)">
+          <input class="form-input" id="l-odds" placeholder="Odds (-120)">
+        </div>
+        <div class="form-grid">
+          <input class="form-input" id="l-amt" placeholder="$ Amount">
+          <input class="form-input" id="l-trigger" placeholder="Triggers (T1+T2+T3)">
+        </div>
+        <div class="form-grid">
+          <select class="form-input" id="l-type">
+            <option value="core">Core (straight bet)</option>
+            <option value="exotic">Exotic (parlay/live)</option>
+          </select>
+          <input class="form-input" id="l-date" placeholder="Date (blank=today)">
+        </div>
+        <button class="add-btn" onclick="addLog()">Log Play</button>
+      </div>
+    </div>
+
+    <!-- PAPER TAB -->
+    <div id="ptab-paper" style="display:none;">
+      <div class="wl-strip" id="paper-wl-strip">
+        <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">0</div></div>
+        <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">0</div></div>
+        <div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val">0</div></div>
+        <div class="wl-box"><div class="wl-label">Win%</div><div class="wl-val">—</div></div>
+      </div>
+      <div id="paper-list"><div class="empty">No paper trades yet.</div></div>
+      <div class="add-form">
+        <div class="add-form-title">Add paper trade</div>
+        <div class="form-grid full"><input class="form-input" id="p-game" placeholder="Game (e.g. NYY @ BOS)"></div>
+        <div class="form-grid">
+          <input class="form-input" id="p-bet" placeholder="Bet (O 8.5)">
+          <input class="form-input" id="p-odds" placeholder="Odds (+110)">
+        </div>
+        <div class="form-grid">
+          <input class="form-input" id="p-trigger" placeholder="Trigger (T2)">
+          <input class="form-input" id="p-note" placeholder="Note">
+        </div>
+        <button class="add-btn" onclick="addPaper()">Add Trade</button>
+      </div>
+    </div>
+
+    <!-- LEDGER TAB -->
+    <div id="ptab-ledger" style="display:none;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;">2026 Season Ledger</div>
+      <div class="ledger-grid">
+        <div class="ledger-box core">
+          <div class="ledger-lbl">Core Straight Bets</div>
+          <div class="ledger-val" style="color:var(--green);">+$4,486</div>
+          <div class="ledger-note">21W–9L · 70% win rate</div>
+        </div>
+        <div class="ledger-box exotic">
+          <div class="ledger-lbl">Exotic P&L</div>
+          <div class="ledger-val" style="color:var(--amber);">+$100</div>
+          <div class="ledger-note">Parlays / live bets</div>
+        </div>
+        <div class="ledger-box combined" style="grid-column:1/-1;">
+          <div class="ledger-lbl">Combined Total</div>
+          <div class="ledger-val" style="color:var(--gold);font-size:26px;">+$4,586</div>
+          <div class="ledger-note">Apr 11 – Apr 22, 2026</div>
+        </div>
+      </div>
+
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin:14px 0 8px;">Exotic Breakdown</div>
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--mono);font-size:10px;">
+        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);color:var(--text3);">
+          <span>ATL –1.5 + CHC parlay</span><span style="color:var(--red);">–$100</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);color:var(--text3);">
+          <span>STL+CHC+SD 3-team live parlay</span><span style="color:var(--green);">+$200</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-weight:600;">
+          <span style="color:var(--text);">Exotic running total</span><span style="color:var(--amber);">+$100</span>
+        </div>
+      </div>
+
+      <div style="background:rgba(231,76,60,0.06);border:1px solid rgba(231,76,60,0.15);border-radius:6px;padding:10px;margin-top:12px;font-family:var(--mono);font-size:9px;color:var(--text3);line-height:1.8;">
+        <span style="color:var(--red);font-weight:600;">ACCOUNTING RULES:</span><br>
+        W/L record = core straight bets ONLY<br>
+        Parlays + exotics → exotic bucket (never in win%)<br>
+        Cashouts logged at net loss (stake minus return)<br>
+        Combined total = core + exotic running sum
+      </div>
+
+      <div style="margin-top:14px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">NHL Active Positions</div>
+        <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--mono);font-size:10px;">
+          <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text3);">COL+TB 2-team series parlay</span>
+            <span style="color:var(--amber);">$500→$800</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text3);">5-team series RR (TB+COL+UTA+CAR+ANA)</span>
+            <span style="color:var(--amber);">$300→$1,800</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:4px 0;">
+            <span style="color:var(--text3);">MTL +1.5 series hedge</span>
+            <span style="color:var(--amber);">$127 active</span>
+          </div>
+          <div style="padding:6px 0 0;font-size:9px;color:var(--red);">NHL running P&L: –$291 through Apr 20</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="ptab-settings" style="display:none;">
       <div class="cfg-section">
         <div class="cfg-section-title">Bankroll & Units</div>
         <div class="cfg-grid">
@@ -1273,200 +789,11 @@ select.form-input{cursor:pointer;}
           <button class="toggle" id="tog-sharp" onclick="toggleSetting('sharp')"></button>
         </div>
       </div>
-      <button class="save-btn" onclick="saveCfg();closeSettingsModal();">Save Settings</button>
+      <button class="save-btn" onclick="saveCfg()">Save Settings</button>
     </div>
+
   </div>
 </div>
-
-<!-- Hidden stubs for JS state IDs (former tracker tabs - kept so existing functions don't break) -->
-<div style="display:none;" aria-hidden="true">
-  <div id="lw-w"></div><div id="lw-l"></div><div id="lw-pend"></div><div id="lw-roi"></div>
-  <div id="lw-pnl"></div><div id="lw-exotic"></div>
-  <select id="log-filter"><option value="all">All plays</option></select>
-  <div id="log-list"></div>
-  <div id="paper-wl-strip">
-    <div class="wl-box"><div class="wl-label">Wins</div><div class="wl-val w">0</div></div>
-    <div class="wl-box"><div class="wl-label">Losses</div><div class="wl-val l">0</div></div>
-    <div class="wl-box"><div class="wl-label">Pending</div><div class="wl-val">0</div></div>
-    <div class="wl-box"><div class="wl-label">Win%</div><div class="wl-val">—</div></div>
-  </div>
-  <div id="paper-list"></div>
-  <input id="p-game"><input id="p-bet"><input id="p-odds"><input id="p-trigger"><input id="p-note">
-</div>
-
-<!-- ── HERO: TODAY'S PLAYS ─────────────────────────────── -->
-<div class="hero-plays-section">
-  <div class="hero-plays-bg-glow"></div>
-  <div class="hero-plays-header">
-    <div>
-      <div class="hero-plays-eyebrow">Live Action</div>
-      <div class="hero-plays-title">Today's Plays</div>
-    </div>
-    <div class="hero-plays-meta" id="hero-plays-meta">
-      <span class="hpm-pulse"></span>
-      <span id="hpm-status">Loading…</span>
-    </div>
-  </div>
-  <div id="hero-plays-container">
-    <div class="hero-plays-empty">Loading today's qualifying plays…</div>
-  </div>
-</div>
-
-<!-- ── MORNING PROTOCOL SECTION ──────────────────────── -->
-<div class="protocol-section">
-  <div class="protocol-header" onclick="toggleProtocol()">
-    <div>
-      <div class="protocol-title">Today's Full Slate</div>
-      <div class="protocol-subtitle">Auto-updates 9AM ET · Streak depth color-coded</div>
-    </div>
-    <span id="protocol-arrow" style="color:var(--gold);font-size:18px;transition:transform 0.2s;transform:rotate(180deg);">▼</span>
-  </div>
-  <div class="protocol-body open" id="protocol-body">
-    <div id="collision-table-container">
-      <div class="empty" style="padding:16px;">No scan data yet — server auto-scans at 9AM ET<br>
-        <button onclick="triggerManualScan()" style="margin-top:8px;background:var(--gold);border:none;color:var(--black);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:6px 16px;border-radius:5px;letter-spacing:0.08em;text-transform:uppercase;">▶ Run Now</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── STREAK HEAT MAP ──────────────────────────────────── -->
-<div class="heatmap-section heatmap-modern">
-  <div class="heatmap-section-header">
-    <div>
-      <div class="heatmap-section-title">Streak Collision Heat Map</div>
-      <div class="heatmap-section-subtitle">Away ↓ × Home → · Streak collision logic · Hover for details</div>
-    </div>
-    <div class="heatmap-legend">
-      <span class="hm-legend-chip" style="background:linear-gradient(135deg,#16a34a,#22c55e);">MAX</span>
-      <span class="hm-legend-chip" style="background:linear-gradient(135deg,#65a30d,#84cc16);color:#0a0a0f;">PLAY</span>
-      <span class="hm-legend-chip" style="background:linear-gradient(135deg,#ca8a04,#eab308);color:#0a0a0f;">CAUTION</span>
-      <span class="hm-legend-chip" style="background:linear-gradient(135deg,#ea580c,#f97316);">REDUCE</span>
-      <span class="hm-legend-chip" style="background:linear-gradient(135deg,#dc2626,#ef4444);">FADE</span>
-    </div>
-  </div>
-  <div id="streak-heatmap-container">
-    <div class="empty" style="padding:16px;">Heat map loads with morning scan…</div>
-  </div>
-</div>
-
-<!-- ── AI BRIEFING ────────────────────────────────────── -->
-<div class="ai-section">
-  <div class="ai-header">
-    <div>
-      <div class="ai-title">AI Brief — Today's Qualifying Plays</div>
-      <div class="ai-subtitle">Sharp two-sentence reads on each qualifying play</div>
-    </div>
-    <button class="refresh-btn" style="padding:6px 14px;font-size:11px;" onclick="generateAIBriefs()">Generate</button>
-  </div>
-  <div class="ai-cards" id="ai-cards">
-    <div class="ai-empty">Click Generate after loading odds to get today's AI play briefs.</div>
-  </div>
-</div>
-
-<!-- ── MAIN LAYOUT ─────────────────────────────────────── -->
-<div class="layout">
-  <div class="odds-panel">
-
-    <div class="section-hdr">
-      <div class="section-title">Book</div>
-      <div style="font-size:11px;color:var(--text3);" id="game-count"></div>
-    </div>
-    <div class="view-toggle">
-      <button class="view-btn active" id="view-btn-grid" onclick="setView('grid')">Grid View</button>
-      <button class="view-btn" id="view-btn-cards" onclick="setView('cards')">Card View</button>
-    </div>
-    <div id="book-tabs-cards" style="display:none;" class="book-tabs"></div>
-
-    <div class="market-intel" id="market-intel" style="display:none;">
-      <div class="intel-item"><div class="intel-lbl">Avg home dog</div><div class="intel-val gold" id="mi-avgdog">—</div></div>
-      <div class="intel-item"><div class="intel-lbl">Best dog</div><div class="intel-val green" id="mi-bestdog">—</div></div>
-      <div class="intel-item"><div class="intel-lbl">Avg RL</div><div class="intel-val" id="mi-avgrl">—</div></div>
-      <div class="intel-item"><div class="intel-lbl">Sharp alerts</div><div class="intel-val" id="mi-sharp">—</div></div>
-      <div class="intel-item"><div class="intel-lbl">Dynamic T1A</div><div class="intel-val amber" id="mi-threshold">—</div></div>
-    </div>
-
-    <div id="card-output">
-      <div class="status-box">
-        <div class="spinner" style="width:24px;height:24px;margin:0 auto 16px;display:block;"></div>
-        <div class="status-title">Loading today's card...</div>
-      </div>
-    </div>
-
-  </div>
-
-</div>
-
-<script>
-// ── MLB TEAM LOGOS ───────────────────────────────────────
-// Maps standard team abbreviations to MLB Stats API team IDs
-// Logos served from MLB's official static CDN
-const MLB_TEAM_IDS = {
-  // AL East
-  'BAL':110,'BOS':111,'NYY':147,'TB':139,'TOR':141,
-  // AL Central
-  'CWS':145,'CHW':145,'CLE':114,'DET':116,'KC':118,'MIN':142,
-  // AL West
-  'HOU':117,'LAA':108,'OAK':133,'ATH':133,'SEA':136,'TEX':140,
-  // NL East
-  'ATL':144,'MIA':146,'NYM':121,'PHI':143,'WSH':120,'WAS':120,
-  // NL Central
-  'CHC':112,'CIN':113,'MIL':158,'PIT':134,'STL':138,
-  // NL West
-  'ARI':109,'AZ':109,'COL':115,'LAD':119,'SD':135,'SF':137
-};
-// ESPN team page slug map - clickable team logos link here
-const ESPN_TEAM_SLUGS = {
-  'BAL':'bal','BOS':'bos','NYY':'nyy','TB':'tb','TOR':'tor',
-  'CWS':'chw','CHW':'chw','CLE':'cle','DET':'det','KC':'kc','MIN':'min',
-  'HOU':'hou','LAA':'laa','OAK':'oak','ATH':'oak','SEA':'sea','TEX':'tex',
-  'ATL':'atl','MIA':'mia','NYM':'nym','PHI':'phi','WSH':'wsh','WAS':'wsh',
-  'CHC':'chc','CIN':'cin','MIL':'mil','PIT':'pit','STL':'stl',
-  'ARI':'ari','AZ':'ari','COL':'col','LAD':'lad','SD':'sd','SF':'sf'
-};
-// Reverse-map: full team name → abbreviation (used by BOOK grid where API returns full names)
-const MLB_NAME_TO_ABBR = {
-  'Baltimore Orioles':'BAL','Boston Red Sox':'BOS','New York Yankees':'NYY','Tampa Bay Rays':'TB','Toronto Blue Jays':'TOR',
-  'Chicago White Sox':'CWS','Cleveland Guardians':'CLE','Detroit Tigers':'DET','Kansas City Royals':'KC','Minnesota Twins':'MIN',
-  'Houston Astros':'HOU','Los Angeles Angels':'LAA','Oakland Athletics':'OAK','Athletics':'OAK','Seattle Mariners':'SEA','Texas Rangers':'TEX',
-  'Atlanta Braves':'ATL','Miami Marlins':'MIA','New York Mets':'NYM','Philadelphia Phillies':'PHI','Washington Nationals':'WSH',
-  'Chicago Cubs':'CHC','Cincinnati Reds':'CIN','Milwaukee Brewers':'MIL','Pittsburgh Pirates':'PIT','St. Louis Cardinals':'STL',
-  'Arizona Diamondbacks':'ARI','Colorado Rockies':'COL','Los Angeles Dodgers':'LAD','San Diego Padres':'SD','San Francisco Giants':'SF'
-};
-function nameToAbbr(name){
-  if(!name) return null;
-  return MLB_NAME_TO_ABBR[name] || null;
-}
-
-function mlbLogoUrl(abbr){
-  if(!abbr) return null;
-  const id = MLB_TEAM_IDS[abbr.toUpperCase()];
-  return id ? `https://www.mlbstatic.com/team-logos/${id}.svg` : null;
-}
-function espnTeamUrl(abbr){
-  if(!abbr) return null;
-  const slug = ESPN_TEAM_SLUGS[abbr.toUpperCase()];
-  return slug ? `https://www.espn.com/mlb/team/_/name/${slug}` : null;
-}
-function teamLogoHtml(abbr, size){
-  // Render an inline logo (clickable to ESPN team page) with abbreviation fallback
-  const cls = size === 'lg' ? 'team-logo-lg' : (size === 'md' ? 'team-logo-md' : 'team-logo-sm');
-  const url = mlbLogoUrl(abbr);
-  const espnUrl = espnTeamUrl(abbr);
-  const safe = (abbr||'?').toString().replace(/[^A-Za-z0-9]/g,'').slice(0,3).toUpperCase();
-  let inner;
-  if(!url){
-    inner = `<span class="team-logo-fallback ${cls}" title="${safe}">${safe}</span>`;
-  } else {
-    inner = `<img class="team-logo ${cls}" src="${url}" alt="${safe}" title="${safe}" onerror="this.outerHTML='<span class=\\'team-logo-fallback ${cls}\\' title=\\'${safe}\\'>${safe}</span>';" />`;
-  }
-  if(espnUrl){
-    return `<a href="${espnUrl}" target="_blank" rel="noopener" class="team-logo-link" title="${safe} on ESPN" onclick="event.stopPropagation();">${inner}</a>`;
-  }
-  return inner;
-}
-
-</script>
 
 <script>
 // ── STATE ────────────────────────────────────────────────
@@ -1474,7 +801,7 @@ let allGames=[];
 let paperPlays=[];
 let logPlays=[];
 const DEFAULT_CFG={
-  bankroll:0,unit:200,
+  bankroll:3400,unit:200,
   t1Min:140,t1Max:199,
   t11Min:115,t11Max:135,
   t12Min:110,t12Max:134,
@@ -1512,46 +839,6 @@ function unitAmt(triggers){
   if(triggers===2)return cfg.unit*3;
   if(triggers===3)return cfg.unit*4;
   return cfg.unit*5; // 4+ = max
-}
-
-// ── UNIT-BASED BANKROLL SIZING (Apr 26 2026) ──────────────
-// Zen Poker 100-unit method: base unit = 1% of user bankroll.
-// Engine outputs `units` (1=ENTRY, 2=STRONG, 3=MAX). UI multiplies by user bankroll.
-function userBankroll(){
-  try{
-    if(window.ao && window.ao.myBankroll){
-      const bk = window.ao.myBankroll();
-      if(bk && bk.current > 0) return bk.current;
-    }
-  }catch(e){}
-  return cfg.bankroll || 0;
-}
-function userStakeForUnits(units){
-  if(!units || units <= 0) return 0;
-  const bk = userBankroll();
-  if(!bk) return 0;
-  // 1 unit = 1% of bankroll. Round to nearest $5 for clean slips.
-  const raw = bk * 0.01 * units;
-  return Math.max(5, Math.round(raw / 5) * 5);
-}
-function fmtUnitStake(a){
-  // Prefer unit-based display when engine provides units; fall back to legacy sizing
-  if(a && typeof a.units === 'number' && a.units > 0){
-    const $ = userStakeForUnits(a.units);
-    if($ > 0) return `${a.units}u · $${$.toLocaleString()}`;
-    return `${a.units}u`;
-  }
-  return '$' + (a && a.sizing ? a.sizing : 0);
-}
-// Rewrite engine recommendation to include user's $ stake.
-// Engine outputs "X units (X% of bankroll)"; we expand to "X units · $YYY (X% of bankroll)".
-function rewriteRec(rec, a){
-  if(!rec || !a || typeof a.units !== 'number' || a.units <= 0) return rec || '';
-  const $ = userStakeForUnits(a.units);
-  if(!$) return rec;
-  const stakeFrag = ` · $${$.toLocaleString()}`;
-  // Insert stake right after the unit count, before the parenthetical
-  return rec.replace(/—\s*(\d+\s+units?)\s*\(/, `— $1${stakeFrag} (`);
 }
 
 // ── TRIGGER ENGINE ───────────────────────────────────────
@@ -1681,11 +968,11 @@ function setView(v){
 
 // Book config
 const BOOKS=[
-  {key:'fanduel',label:'FanDuel',cls:'bl-fd',thCls:'bg-fd',url:'https://www.fanduel.com/sportsbook'},
-  {key:'betmgm',label:'BetMGM',cls:'bl-mgm',thCls:'bg-mgm',url:'https://sports.nj.betmgm.com'},
-  {key:'caesars',label:'Caesars',cls:'bl-czr',thCls:'bg-czr',url:'https://www.caesars.com/sportsbook-and-casino'},
-  {key:'hard_rock_bet',label:'Hard Rock',cls:'bl-hr',thCls:'bg-hr',url:'https://www.hardrock.bet'},
-  {key:'draftkings',label:'DraftKings',cls:'bl-fd',thCls:'bg-fd',url:'https://sportsbook.draftkings.com'},
+  {key:'fanduel',label:'FanDuel',cls:'bl-fd',thCls:'bg-fd'},
+  {key:'betmgm',label:'BetMGM',cls:'bl-mgm',thCls:'bg-mgm'},
+  {key:'caesars',label:'Caesars',cls:'bl-czr',thCls:'bg-czr'},
+  {key:'hard_rock_bet',label:'Hard Rock',cls:'bl-hr',thCls:'bg-hr'},
+  {key:'draftkings',label:'DraftKings',cls:'bl-fd',thCls:'bg-fd'},
 ];
 
 function getBookOdds(g, bookKey){
@@ -1707,18 +994,6 @@ function getBookOdds(g, bookKey){
 function renderMultiBookGrid(games){
   const out=document.getElementById('card-output');
   if(!games.length){out.innerHTML='<div class="status-box"><div class="status-title">No games found</div></div>';return;}
-
-  // Filter to today only (Eastern Time)
-  const etDate = (iso) => {
-    if(!iso) return '';
-    return new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'America/New_York',
-      year: 'numeric', month: '2-digit', day: '2-digit'
-    }).format(new Date(iso));
-  };
-  const today = etDate(new Date().toISOString());
-  games = games.filter(g => etDate(g.commence_time) === today);
-  if(!games.length){out.innerHTML='<div class="status-box"><div class="status-title">No games today</div></div>';return;}
 
   // Find which books are available in this data
   const availBooks=new Set();
@@ -1742,7 +1017,7 @@ function renderMultiBookGrid(games){
   html+=`<table class="book-grid"><thead><tr>
     <th style="text-align:left;color:var(--text3);border-color:var(--border2);">Game</th>
     <th style="color:var(--text3);border-color:var(--border2);">Time</th>
-    ${books.map(b=>`<th colspan="3" class="${b.thCls}"><a href="${b.url}" target="_blank" rel="noopener" class="book-header-link"><span class="book-logo ${b.cls}">${b.label}</span></a></th>`).join('')}
+    ${books.map(b=>`<th colspan="3" class="${b.thCls}"><span class="book-logo ${b.cls}">${b.label}</span></th>`).join('')}
     <th style="color:var(--text3);border-color:var(--border2);">System</th>
   </tr>
   <tr>
@@ -1770,16 +1045,13 @@ function renderMultiBookGrid(games){
 
     const rowStyle=hasPlay?'background:rgba(46,204,113,0.05);':hasT11?'background:rgba(243,156,18,0.04);':'';
 
-    const awayAbbr = nameToAbbr(g.away_team) || away.toUpperCase().slice(0,3);
-    const homeAbbr = nameToAbbr(g.home_team) || home.toUpperCase().slice(0,3);
-
     html+=`<tr style="${rowStyle}">
       <td class="game-col">
         ${hasPlay?'<span style="color:var(--green);margin-right:4px;">●</span>':''}
         ${hasT11&&!hasPlay?'<span style="color:var(--amber);margin-right:4px;">●</span>':''}
-        <span class="bg-team-cell">${teamLogoHtml(awayAbbr,'sm')}<span style="color:var(--text3);">${away}</span></span>
+        <span style="color:var(--text3);">${away}</span>
         <span style="color:var(--text3);margin:0 4px;">@</span>
-        <span class="bg-team-cell">${teamLogoHtml(homeAbbr,'sm')}<span style="color:var(--text);">${home}</span></span>
+        <span style="color:var(--text);">${home}</span>
       </td>
       <td class="game-time-col">${timeStr}</td>`;
 
@@ -1801,28 +1073,18 @@ function renderMultiBookGrid(games){
     if(plays.length){
       const p=plays[0];
       const col=p.colorClass==='blue'?'var(--blue)':p.colorClass==='green'?'var(--green)':p.colorClass==='teal'?'var(--teal)':'var(--amber)';
-      playHtml=`<span style="color:${col};font-weight:700;font-size:11px;">$${p.amt}</span>`;
+      playHtml=`<span style="color:${col};font-weight:700;font-size:11px;">${p.trigger} $${p.amt}</span>`;
     }
     html+=`<td>${playHtml}</td></tr>`;
   }
 
   html+='</tbody></table>';
   out.innerHTML=html;
-  document.getElementById('s-real').textContent=playCount||'—';
+  var sRealEl1=document.getElementById('s-real');
+  if(sRealEl1) sRealEl1.textContent=playCount||'—';
 }
 
 function renderCards(games,bk){
-  // Filter to today only (Eastern Time)
-  const etDate = (iso) => {
-    if(!iso) return '';
-    return new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'America/New_York',
-      year: 'numeric', month: '2-digit', day: '2-digit'
-    }).format(new Date(iso));
-  };
-  const today = etDate(new Date().toISOString());
-  games = games.filter(g => etDate(g.commence_time) === today);
-
   const market=analyzeMarket(games,bk);
   const miEl=document.getElementById('market-intel');
   if(market.avgDog>0){
@@ -1870,6 +1132,8 @@ function renderCards(games,bk){
       <div class="game-card-header">
         <div class="game-time">${timeStr}</div>
         <div style="display:flex;align-items:center;gap:8px;">
+          ${isT1?'<span class="tbadge tbadge-real">T1 ✓</span>':''}
+          ${isT11?'<span class="tbadge tbadge-paper">T11</span>':''}
           <div class="game-sport">MLB</div>
         </div>
       </div>
@@ -1910,11 +1174,13 @@ function renderCards(games,bk){
           <div class="color-bar ${barColor}"></div>
           <div class="play-header">
             <div style="display:flex;align-items:center;gap:6px;">
+              <span class="tbadge ${p.type==='real'?'tbadge-real':'tbadge-paper'}">${p.trigger}</span>
               <span class="strength-badge ${sbClass}">${p.strengthBadge}</span>
             </div>
             <div class="play-unit">$${p.amt}</div>
           </div>
           <div class="play-desc">${p.desc}</div>
+          <div class="play-note">${p.note}</div>
         </div>`;
       }
       html+=`</div>`;
@@ -1924,7 +1190,8 @@ function renderCards(games,bk){
   }
 
   out.innerHTML=html;
-  document.getElementById('s-real').textContent=playCount||'—';
+  var sRealEl2=document.getElementById('s-real');
+  if(sRealEl2) sRealEl2.textContent=playCount||'—';
 }
 
 // ── LOAD ODDS ─────────────────────────────────────────────
@@ -1939,33 +1206,7 @@ async function loadOdds(){
     const url=`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars,hard_rock_bet`;
     const res=await fetch(url);
     if(!res.ok)throw new Error('API error '+res.status);
-    const raw = await res.json();
-    // Dedup games — Odds API sometimes returns the same matchup multiple times
-    // (rescheduled games, stale entries). Group by away+home+local date (ET) and
-    // keep the entry with the most bookmaker coverage.
-    // Using local-time date is critical: UTC date splits same-day evening games into "tomorrow".
-    const localDay = (iso) => {
-      if(!iso) return 'no-date';
-      const d = new Date(iso);
-      // Get YYYY-MM-DD in America/New_York
-      const parts = new Intl.DateTimeFormat('en-CA', {
-        timeZone: 'America/New_York',
-        year: 'numeric', month: '2-digit', day: '2-digit'
-      }).format(d);
-      return parts; // en-CA gives YYYY-MM-DD
-    };
-    const groups = new Map();
-    for(const g of raw){
-      const key = `${g.away_team}|${g.home_team}|${localDay(g.commence_time)}`;
-      const existing = groups.get(key);
-      const score = (g.bookmakers || []).length;
-      if(!existing || score > existing.score){
-        groups.set(key, { game: g, score });
-      }
-    }
-    allGames = Array.from(groups.values()).map(v => v.game);
-    // Sort chronologically
-    allGames.sort((a,b) => new Date(a.commence_time||0) - new Date(b.commence_time||0));
+    allGames=await res.json();
     document.getElementById('last-update-label').textContent='Updated '+new Date().toLocaleTimeString();
 
     // Build book tabs
@@ -1983,14 +1224,7 @@ async function loadOdds(){
       btn2.onclick=()=>{document.querySelectorAll('.book-tab').forEach(b=>b.classList.remove('active'));btn2.classList.add('active');renderCards(allGames,bk);};
       // tabs appended below
     }
-    // Count today's games only (matches the filtered grid/cards view)
-    const _etDate = (iso) => {
-      if(!iso) return '';
-      return new Intl.DateTimeFormat('en-CA', {timeZone:'America/New_York', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date(iso));
-    };
-    const _today = _etDate(new Date().toISOString());
-    const todayCount = allGames.filter(g => _etDate(g.commence_time) === _today).length;
-    document.getElementById('game-count').textContent = todayCount + ' games today';
+    document.getElementById('game-count').textContent=allGames.length+' games';
     // Build card view tabs too
     var tabsEl2=document.getElementById('book-tabs-cards');
     if(tabsEl2)tabsEl2.innerHTML='';
@@ -2015,69 +1249,109 @@ async function loadOdds(){
 // ── AI BRIEFS ────────────────────────────────────────────
 async function generateAIBriefs(){
   const container=document.getElementById('ai-cards');
-  container.innerHTML='<div style="color:var(--text3);font-size:12px;padding:8px;">Generating AI briefs for qualifying plays...</div>';
+  container.innerHTML='<div style="color:var(--text3);font-size:12px;padding:8px;">Loading morning scan…</div>';
 
-  const activePlays=[];
-  for(const g of allGames){
-    const bm=g.bookmakers[0];if(!bm)continue;
-    const plays=gradeMLBGame(g,bm.key);
-    const realPlays=plays.filter(p=>p.type==='real');
-    if(realPlays.length)activePlays.push({game:g,plays:realPlays});
+  // Pull the SAME scan data the rest of the dashboard uses
+  let scan;
+  try {
+    const res = await fetch('/morning-scan');
+    scan = await res.json();
+  } catch(e) {
+    container.innerHTML = '<div class="ai-empty">Could not reach /morning-scan. Trigger a manual scan first.</div>';
+    return;
   }
-
-  if(!activePlays.length){
-    container.innerHTML='<div class="ai-empty">No T1/T11 qualifying plays found on today\'s slate. Sit out — patience is the edge.</div>';
+  if (!scan || scan.error || !Array.isArray(scan.plays)) {
+    container.innerHTML = '<div class="ai-empty">No scan data yet. Run morning scan first.</div>';
     return;
   }
 
+  const playables = scan.plays.filter(g => {
+    const a = g.analysis || {};
+    return ['MAX','STRONG','ENTRY'].includes(a.strength) && a.units > 0
+           && !a.t14Kill && !a.t15Active && !a.t3Kill;
+  });
+
+  if (!playables.length) {
+    container.innerHTML = '<div class="ai-empty">No T1/T11/T12 qualifying plays on today\'s slate. Sit out — patience is the edge.</div>';
+    return;
+  }
+
+  container.innerHTML = `<div style="color:var(--text3);font-size:12px;padding:8px;">Generating AI briefs for ${playables.length} qualifying play${playables.length===1?'':'s'}…</div>`;
+
   const briefs=[];
-  for(const ap of activePlays.slice(0,4)){
-    const p=ap.plays[0];
-    const g=ap.game;
-    const bm=g.bookmakers[0];
-    const h2h=bm?.markets?.find(m=>m.key==='h2h');
-    const homeML=h2h?.outcomes?.find(o=>o.name===g.home_team)?.price;
-    const awayML=h2h?.outcomes?.find(o=>o.name===g.away_team)?.price;
+  for (const pl of playables.slice(0, 6)) {
+    const a = pl.analysis;
+    const sideTeam = a.gateSide === 'home' ? pl.home.name : pl.away.name;
+    const oddsStr  = a.gateML > 0 ? `+${a.gateML}` : `${a.gateML}`;
+    const triggers = (a.triggered || []).map(t => t.code || t.name || t).filter(Boolean);
+    const stake    = Math.round(a.units * 100);
 
-    try{
-      const prompt=`You are the Action's Odds MLB betting system AI. Grade this play using the T1-T15 trigger system.
+    const colorMap = { MAX:'blue', STRONG:'green', ENTRY:'teal' };
+    const colorClass = colorMap[a.strength] || 'amber';
 
-GAME: ${g.away_team} @ ${g.home_team}
-HOME ML: ${fmtOdds(homeML)} | AWAY ML: ${fmtOdds(awayML)}
-PLAY: ${p.desc} | TRIGGER: ${p.trigger} | SUGGESTED SIZE: $${p.amt}
+    const homeStreak = `${pl.home.streak||''}${pl.home.streakLen||0}`;
+    const awayStreak = `${pl.away.streak||''}${pl.away.streakLen||0}`;
+    const homeRD = pl.home.runDiff != null ? (pl.home.runDiff >= 0 ? '+' : '') + pl.home.runDiff : 'n/a';
+    const awayRD = pl.away.runDiff != null ? (pl.away.runDiff >= 0 ? '+' : '') + pl.away.runDiff : 'n/a';
 
-T1 System: Home dog +140 to +199 gate. Key triggers: T2=streak mismatch (W vs L streak = collision), T3=run differential (pos vs neg), T6=pitcher FIP (most important), T8=bullpen 48hr (mandatory), T14=power ratings (mandatory). Unit-based sizing (Zen Poker 100-unit method): base unit = 1% of bankroll. Tiers: ENTRY 1u (1%), STRONG 2u (2%), MAX 3u (3%). Path caps: T1/T1B/T11 up to 3u, T12 cap 2u, T13/T15 cap 1u. Recalibrate at ±25% bankroll movement.
+    const prompt =
+`You are the Action's Odds MLB system AI. Grade this qualifying play in 2 sentences.
 
-Regression flags: SEA 1 road win (4%), KC 2 road wins (11%), NYM 3 home wins (18%) — all due for regression, T4 boost when dog.
-Season record: 21W-9L 70%, +$4,486 core P&L.
+GAME: ${pl.away.name} (${awayStreak}, RD ${awayRD}) @ ${pl.home.name} (${homeStreak}, RD ${homeRD})
+PICK: ${sideTeam} ML ${oddsStr}  |  GATE: ${a.gateType}  |  STRENGTH: ${a.strength} (${a.units}u, ~$${stake} at $10K ref)
+TRIGGERS FIRED: ${triggers.join(', ') || '—'}
+NOTES: ${(a.notes || []).join(' | ') || '—'}
 
-Give a sharp 2-sentence analysis. Format: [TRIGGER COUNT fires/pass] [T6 FIP edge if known] [T8 note] [T14 note] [final recommendation with unit size]. Be direct. No fluff.`;
+System rules: T1=home dog +140-+199, T11=cheap home fav -115/-135 (3+ trig), T12=home dog +110-+134 (4+ trig), T13=road dog +120+ (5 required), T14=power ratings mandatory.
 
-      const res=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          model:'claude-sonnet-4-20250514',
-          max_tokens:1000,
-          messages:[{role:'user',content:prompt}]
+Give one sentence on the strongest signal, one on the recommendation. Be terse. No fluff. Work only from what's above.`;
+
+    try {
+      const res = await fetch('/ai-brief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 300,
+          messages: [{ role: 'user', content: prompt }]
         })
       });
-      const data=await res.json();
-      const text=data.content?.[0]?.text||'Analysis unavailable.';
-      briefs.push({game:`${g.away_team} @ ${g.home_team}`,play:p.desc,trigger:p.trigger,amt:p.amt,text,colorClass:p.colorClass,strengthBadge:p.strengthBadge});
-    }catch(e){
-      briefs.push({game:`${g.away_team} @ ${g.home_team}`,play:p.desc,trigger:p.trigger,amt:p.amt,text:'AI analysis unavailable. Check line manually.',colorClass:'amber',strengthBadge:'WATCH'});
+      const data = await res.json();
+      let text;
+      if (!res.ok) {
+        text = `AI proxy error (${data.status || res.status}): ${data.detail || data.error || 'unknown'}.`;
+      } else {
+        text = data.content?.[0]?.text || 'No content returned.';
+      }
+      briefs.push({
+        game: `${pl.away.name} @ ${pl.home.name}`,
+        play: `${sideTeam} ML ${oddsStr}`,
+        trigger: `${a.gateType} · ${a.trigCount || triggers.length}T`,
+        amt: stake,
+        text, colorClass, strengthBadge: a.strength
+      });
+    } catch(e) {
+      briefs.push({
+        game: `${pl.away.name} @ ${pl.home.name}`,
+        play: `${sideTeam} ML ${oddsStr}`,
+        trigger: `${a.gateType} · ${a.trigCount || triggers.length}T`,
+        amt: stake,
+        text: `Network error: ${e.message}. Check /ai-brief endpoint.`,
+        colorClass: 'amber', strengthBadge: 'WATCH'
+      });
     }
   }
 
-  if(!briefs.length){container.innerHTML='<div class="ai-empty">No briefs generated.</div>';return;}
+  if (!briefs.length) { container.innerHTML='<div class="ai-empty">No briefs generated.</div>'; return; }
 
-  container.innerHTML=briefs.map(b=>`
+  container.innerHTML = briefs.map(b => `
     <div class="ai-card">
       <div class="ai-card-game">${b.game}</div>
       <div class="ai-card-play">${b.play}</div>
       <div class="ai-stats">
-        <div class="ai-stat"><div class="ai-stat-lbl">Size</div><div class="ai-stat-val">$${b.amt}</div></div>
+        <div class="ai-stat"><div class="ai-stat-lbl">Trigger</div><div class="ai-stat-val">${b.trigger}</div></div>
+        <div class="ai-stat"><div class="ai-stat-lbl">Stake</div><div class="ai-stat-val">$${b.amt}</div></div>
+        <div class="ai-stat"><div class="ai-stat-lbl">Conf</div><div class="ai-stat-val strength-badge sb-${b.colorClass}">${b.strengthBadge}</div></div>
       </div>
       <div class="ai-take">${b.text}</div>
     </div>
@@ -2097,265 +1371,21 @@ function showTab(tab){
 }
 
 // ── LOG PLAYS ────────────────────────────────────────────
-// Cache today's games for the log play form
-let _logGameCache = [];
-
-function populateLogPlayGames(scan){
-  const sel = document.getElementById('l-game');
-  if(!sel) return;
-  const games = (scan && scan.allGames) || [];
-  // Filter to today only
-  const today = new Date(); today.setHours(0,0,0,0);
-  const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate()+1);
-  const todayGames = games.filter(g => {
-    if(!g.gameTime) return false;
-    const t = new Date(g.gameTime);
-    return t >= today && t < tomorrow;
-  });
-  _logGameCache = todayGames;
-  if(!todayGames.length){
-    sel.innerHTML = '<option value="">No games today</option>';
-    sel.disabled = true;
-    return;
-  }
-  sel.disabled = false;
-  let opts = '<option value="">Select game…</option>';
-  todayGames.forEach((g,i) => {
-    const a = (g.away && (g.away.abbr||g.away.name)) || '?';
-    const h = (g.home && (g.home.abbr||g.home.name)) || '?';
-    const t = g.gameTime ? new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : '';
-    opts += `<option value="${i}">${a} @ ${h}${t?' · '+t:''}</option>`;
-  });
-  sel.innerHTML = opts;
-}
-
-// ── MARKET TICKER ─────────────────────────────────────────
-function populateTicker(scan){
-  const trackEl = document.getElementById('ticker-content');
-  if(!trackEl) return;
-  const games = (scan && scan.allGames) || [];
-  // Today only
-  const today = new Date(); today.setHours(0,0,0,0);
-  const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate()+1);
-  const todayGames = games.filter(g => {
-    if(!g.gameTime) return false;
-    const t = new Date(g.gameTime);
-    return t >= today && t < tomorrow;
-  }).sort((a,b) => new Date(a.gameTime) - new Date(b.gameTime));
-
-  if(!todayGames.length){
-    trackEl.innerHTML = '<span class="ticker-empty">No games on schedule today.</span>';
-    trackEl.style.animation = 'none';
-    return;
-  }
-
-  const buildItem = (g) => {
-    const a = (g.away && (g.away.abbr || g.away.name)) || '?';
-    const h = (g.home && (g.home.abbr || g.home.name)) || '?';
-    const t = g.gameTime ? new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : '';
-    const ap = g.away && g.away.pitcher && g.away.pitcher.fullName ? g.away.pitcher.fullName.split(' ').slice(-1)[0] : 'TBD';
-    const hp = g.home && g.home.pitcher && g.home.pitcher.fullName ? g.home.pitcher.fullName.split(' ').slice(-1)[0] : 'TBD';
-    const an = g.analysis || {};
-    const odds = an.odds || {};
-    const fmt = p => p == null ? '' : (p>0?'+':'')+p;
-    let lineStr = '';
-    if(odds.awayML != null && odds.homeML != null){
-      // Identify favorite
-      const awayFav = odds.awayML < odds.homeML;
-      const favTeam = awayFav ? a : h;
-      const dogTeam = awayFav ? h : a;
-      const favPrice = awayFav ? odds.awayML : odds.homeML;
-      const dogPrice = awayFav ? odds.homeML : odds.awayML;
-      lineStr = `<span class="tk-fav">${favTeam} ${fmt(favPrice)}</span> / <span class="tk-dog">${dogTeam} ${fmt(dogPrice)}</span>`;
-    }
-    const rl = an.rlDisplay || {};
-    let rlStr = '';
-    if(rl.homeLine && rl.homeLine.price != null){
-      rlStr = ` <span class="tk-rl">RL ${(rl.homeLine.point>0?'+':'')+rl.homeLine.point} ${fmt(rl.homeLine.price)}</span>`;
-    }
-    return `<span class="tk-game">
-      <span class="tk-time">${t}</span>
-      <span class="tk-matchup">${teamLogoHtml(a,'sm')} ${a} @ ${teamLogoHtml(h,'sm')} ${h}</span>
-      <span class="tk-pitchers">${ap} vs ${hp}</span>
-      ${lineStr ? '<span class="tk-line">'+lineStr+'</span>' : ''}
-      ${rlStr}
-    </span>`;
-  };
-
-  // Build content twice to make seamless infinite scroll
-  const items = todayGames.map(buildItem).join('');
-  trackEl.innerHTML = items + items;
-
-  // Adjust scroll speed by content length (more games = slower per item, but reasonable total)
-  const baseDuration = Math.max(40, todayGames.length * 6); // ~6s per game minimum 40s total
-  trackEl.style.animation = `tickerScroll ${baseDuration}s linear infinite`;
-}
-
-function onLogGameChange(){
-  const sel = document.getElementById('l-game');
-  const betSel = document.getElementById('l-bet');
-  const oddsEl = document.getElementById('l-odds');
-  if(!sel || !betSel) return;
-  const idx = sel.value;
-  // Reset downstream fields
-  oddsEl.value = ''; oddsEl.classList.remove('lp-autofilled');
-  if(idx === ''){
-    betSel.innerHTML = '<option value="">Pick game first</option>';
-    betSel.disabled = true;
-    return;
-  }
-  const g = _logGameCache[parseInt(idx,10)];
-  if(!g){ betSel.disabled = true; return; }
-  const a = (g.away && (g.away.abbr||g.away.name)) || 'AWAY';
-  const h = (g.home && (g.home.abbr||g.home.name)) || 'HOME';
-  const an = g.analysis || {};
-  const odds = an.odds || {};
-  const rl = an.rlDisplay || {};
-  const homeRL = rl.homeLine || (odds.homeRL ? {price:odds.homeRL,point:-1.5} : null);
-  const awayRL = rl.awayLine || (odds.awayRL ? {price:odds.awayRL,point:1.5} : null);
-
-  const fmtPrice = p => p == null ? '' : (p>0?'+':'')+p;
-  const fmtPoint = p => p == null ? '' : (p>0?'+':'')+p;
-
-  // Build bet menu - data-odds attribute carries auto-fill price
-  const opts = [];
-  opts.push(`<option value="">Select bet…</option>`);
-  // Moneylines
-  opts.push('<optgroup label="Moneyline">');
-  opts.push(`<option value="${a} ML" data-odds="${fmtPrice(odds.awayML)}">${a} ML${odds.awayML!=null?' · '+fmtPrice(odds.awayML):''}</option>`);
-  opts.push(`<option value="${h} ML" data-odds="${fmtPrice(odds.homeML)}">${h} ML${odds.homeML!=null?' · '+fmtPrice(odds.homeML):''}</option>`);
-  opts.push('</optgroup>');
-  // Run lines
-  opts.push('<optgroup label="Run Line">');
-  if(awayRL){
-    opts.push(`<option value="${a} ${fmtPoint(awayRL.point)}" data-odds="${fmtPrice(awayRL.price)}">${a} ${fmtPoint(awayRL.point)}${awayRL.price!=null?' · '+fmtPrice(awayRL.price):''}</option>`);
-  } else {
-    opts.push(`<option value="${a} +1.5">${a} +1.5</option>`);
-    opts.push(`<option value="${a} -1.5">${a} -1.5</option>`);
-  }
-  if(homeRL){
-    opts.push(`<option value="${h} ${fmtPoint(homeRL.point)}" data-odds="${fmtPrice(homeRL.price)}">${h} ${fmtPoint(homeRL.point)}${homeRL.price!=null?' · '+fmtPrice(homeRL.price):''}</option>`);
-  } else {
-    opts.push(`<option value="${h} +1.5">${h} +1.5</option>`);
-    opts.push(`<option value="${h} -1.5">${h} -1.5</option>`);
-  }
-  opts.push('</optgroup>');
-  // Totals
-  const totals = an.totals || {};
-  const tLine = totals.line;
-  const tOver = totals.overPrice;
-  const tUnder = totals.underPrice;
-  opts.push('<optgroup label="Game Total">');
-  if(tLine != null){
-    const lineLabel = (Number.isInteger(tLine) ? tLine : tLine.toFixed(1));
-    opts.push(`<option value="Over ${lineLabel}" data-odds="${fmtPrice(tOver)}">Over ${lineLabel}${tOver!=null?' · '+fmtPrice(tOver):''}</option>`);
-    opts.push(`<option value="Under ${lineLabel}" data-odds="${fmtPrice(tUnder)}">Under ${lineLabel}${tUnder!=null?' · '+fmtPrice(tUnder):''}</option>`);
-  } else {
-    opts.push(`<option value="Over ${a}/${h}">Over (enter line + odds)</option>`);
-    opts.push(`<option value="Under ${a}/${h}">Under (enter line + odds)</option>`);
-  }
-  opts.push('</optgroup>');
-  // First 5 innings
-  opts.push('<optgroup label="First 5 Innings">');
-  opts.push(`<option value="${a} F5 ML">${a} F5 ML</option>`);
-  opts.push(`<option value="${h} F5 ML">${h} F5 ML</option>`);
-  opts.push(`<option value="${a} F5 -0.5">${a} F5 -0.5</option>`);
-  opts.push(`<option value="${a} F5 +0.5">${a} F5 +0.5</option>`);
-  opts.push(`<option value="${h} F5 -0.5">${h} F5 -0.5</option>`);
-  opts.push(`<option value="${h} F5 +0.5">${h} F5 +0.5</option>`);
-  opts.push(`<option value="F5 Over">F5 Over (enter line)</option>`);
-  opts.push(`<option value="F5 Under">F5 Under (enter line)</option>`);
-  opts.push('</optgroup>');
-  // Team totals
-  opts.push('<optgroup label="Team Totals">');
-  opts.push(`<option value="${a} TT Over">${a} Team Total Over</option>`);
-  opts.push(`<option value="${a} TT Under">${a} Team Total Under</option>`);
-  opts.push(`<option value="${h} TT Over">${h} Team Total Over</option>`);
-  opts.push(`<option value="${h} TT Under">${h} Team Total Under</option>`);
-  opts.push('</optgroup>');
-  // Props
-  opts.push('<optgroup label="Props">');
-  opts.push(`<option value="${a} Prop">${a} Player Prop (enter detail)</option>`);
-  opts.push(`<option value="${h} Prop">${h} Player Prop (enter detail)</option>`);
-  opts.push(`<option value="HR Prop">HR Prop</option>`);
-  opts.push(`<option value="K Prop">Strikeout Prop</option>`);
-  opts.push('</optgroup>');
-
-  betSel.innerHTML = opts.join('');
-  betSel.disabled = false;
-}
-
-function onLogBetChange(){
-  const betSel = document.getElementById('l-bet');
-  const oddsEl = document.getElementById('l-odds');
-  if(!betSel || !oddsEl) return;
-  const opt = betSel.options[betSel.selectedIndex];
-  const auto = opt && opt.getAttribute('data-odds');
-  if(auto){
-    oddsEl.value = auto;
-    oddsEl.classList.add('lp-autofilled');
-  } else {
-    oddsEl.value = '';
-    oddsEl.classList.remove('lp-autofilled');
-  }
-}
-
-function toggleLogDate(e){
-  if(e) e.preventDefault();
-  const dEl = document.getElementById('l-date');
-  const link = document.getElementById('logplay-toggle-date');
-  if(!dEl) return;
-  if(dEl.style.display === 'none' || !dEl.style.display){
-    dEl.style.display = 'inline-block';
-    if(link) link.textContent = '× use today';
-  } else {
-    dEl.style.display = 'none';
-    dEl.value = '';
-    if(link) link.textContent = '+ different date';
-  }
-}
-
 function addLog(){
-  const sel = document.getElementById('l-game');
-  const idx = sel ? sel.value : '';
-  let game = '';
-  if(idx !== '' && _logGameCache[parseInt(idx,10)]){
-    const g = _logGameCache[parseInt(idx,10)];
-    const a = (g.away && (g.away.abbr||g.away.name)) || '?';
-    const h = (g.home && (g.home.abbr||g.home.name)) || '?';
-    game = `${a} @ ${h}`;
-  }
-  const bet = document.getElementById('l-bet').value.trim();
-  if(!game || !bet){
-    alert('Pick a game and a bet first.');
-    return;
-  }
-  // Look up triggers from cached game analysis (no longer a UI field)
-  let trigger = 'T1';
-  if(idx !== '' && _logGameCache[parseInt(idx,10)]){
-    const an = _logGameCache[parseInt(idx,10)].analysis || {};
-    if(an.triggered && an.triggered.length){
-      trigger = an.triggered.join('+');
-    }
-  }
+  const game=document.getElementById('l-game').value.trim();
+  const bet=document.getElementById('l-bet').value.trim();
+  if(!game||!bet)return;
   logPlays.push({
-    game, bet,
-    odds: document.getElementById('l-odds').value.trim(),
-    amt: document.getElementById('l-amt').value.trim(),
-    trigger,
-    type: document.getElementById('l-type').value || 'core',
-    date: document.getElementById('l-date').value.trim() || new Date().toLocaleDateString(),
-    result: null
+    game,bet,
+    odds:document.getElementById('l-odds').value.trim(),
+    amt:document.getElementById('l-amt').value.trim(),
+    trigger:document.getElementById('l-trigger').value.trim()||'T1',
+    type:document.getElementById('l-type').value||'core',
+    date:document.getElementById('l-date').value.trim()||new Date().toLocaleDateString(),
+    result:null
   });
-  saveLog(); renderLog(); updateSummary();
-  // Reset form
-  document.getElementById('l-game').value = '';
-  document.getElementById('l-bet').innerHTML = '<option value="">Pick game first</option>';
-  document.getElementById('l-bet').disabled = true;
-  ['l-odds','l-amt','l-date'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el){ el.value = ''; el.classList.remove('lp-autofilled'); }
-  });
+  saveLog();renderLog();updateSummary();
+  ['l-game','l-bet','l-odds','l-amt','l-trigger','l-date'].forEach(id=>document.getElementById(id).value='');
 }
 
 function updateLogResult(idx,result){
@@ -2424,12 +1454,12 @@ function updateSummary(){
   const atRisk=core.filter(p=>!p.result).reduce((a,p)=>a+(parseFloat(p.amt)||0),0);
 
   // Use baseline + logged
-  const BASE_CORE=0,BASE_EXOTIC=0;
+  const BASE_CORE=5024,BASE_EXOTIC=899;
   const totalCore=BASE_CORE+Math.round(corePnl);
   const totalExotic=BASE_EXOTIC+Math.round(exoticPnl);
   const totalCombined=totalCore+totalExotic;
-  const totalWins=wins,totalLosses=losses;
-  const totalWinPct=totalWins+totalLosses>0?Math.round(totalWins/(totalWins+totalLosses)*100):0;
+  const totalWins=25+wins,totalLosses=9+losses;
+  const totalWinPct=totalWins+totalLosses>0?Math.round(totalWins/(totalWins+totalLosses)*100):70;
 
   const fmt=(n)=>(n>=0?'+':'-')+'$'+Math.abs(n).toLocaleString();
 
@@ -2444,7 +1474,7 @@ function updateSummary(){
   const stakeEl=document.getElementById('s-stake');
   if(stakeEl)stakeEl.textContent=atRisk>0?'$'+atRisk.toLocaleString()+' at risk':'$0 at risk';
   const bankEl=document.getElementById('s-bank');
-  if(bankEl){const _bk=(window.ao&&window.ao.myBankroll)?window.ao.myBankroll().current:cfg.bankroll;bankEl.textContent='$'+Math.round(_bk).toLocaleString();}
+  if(bankEl)bankEl.textContent='$'+cfg.bankroll.toLocaleString();
 
   // Tracker panel
   const lwW=document.getElementById('lw-w');if(lwW)lwW.textContent=totalWins;
@@ -2537,29 +1567,6 @@ function initToggles(){
 }
 
 // ── THEME ────────────────────────────────────────────────
-// ── SETTINGS MODAL ───────────────────────────────────────
-function openSettingsModal(){
-  const m = document.getElementById('settings-modal');
-  if(!m) return;
-  m.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  // Pre-fill current settings on open
-  if(typeof loadCfg === 'function'){ try{ loadCfg(); }catch(e){} }
-}
-function closeSettingsModal(){
-  const m = document.getElementById('settings-modal');
-  if(!m) return;
-  m.style.display = 'none';
-  document.body.style.overflow = '';
-}
-// Escape key closes the modal
-document.addEventListener('keydown', e => {
-  if(e.key === 'Escape'){
-    const m = document.getElementById('settings-modal');
-    if(m && m.style.display === 'flex') closeSettingsModal();
-  }
-});
-
 function toggleTheme(){
   document.body.classList.toggle('light');
   document.getElementById('theme-toggle').textContent=document.body.classList.contains('light')?'🌙':'☀';
@@ -2569,8 +1576,6 @@ function toggleTheme(){
 // ── MORNING SCAN FETCH ────────────────────────────────────────
 
 // ── FULL PLAY CARD RENDER ─────────────────────────────────────
-let __lastScan = null;
-let __lastRenderBankroll = 0;
 async function loadMorningScan(){
   try{
     const res=await fetch('/morning-scan');
@@ -2579,36 +1584,18 @@ async function loadMorningScan(){
       document.getElementById('collision-table-container').innerHTML='<div class="empty" style="padding:16px;">No scan data yet<br><button onclick="triggerManualScan()" style="margin-top:8px;background:var(--gold);border:none;color:var(--black);cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:700;padding:6px 16px;border-radius:5px;">Run Now</button></div>';
       return;
     }
-    __lastScan = scan;
-    __lastRenderBankroll = userBankroll();
-    renderHeroPlays(scan);
     renderBloombergGrid(scan);
     renderFullPlayCard(scan);
     renderRegressionFlags(scan.outliers||[]);
     renderStreakHeatmap(scan);
-    populateLogPlayGames(scan);
-    populateTicker(scan);
   }catch(e){
     document.getElementById('collision-table-container').innerHTML='<div class="empty">Offline — scan loads on server boot</div>';
   }
 }
 
-// Re-render plays when bankroll becomes available after initial render.
-// Race condition: window.ao.myBankroll() may not be ready when scan first renders.
-// This poll fires re-render once when bankroll is non-zero AND differs from prior render.
-setInterval(() => {
-  if(!__lastScan) return;
-  const bk = userBankroll();
-  if(bk > 0 && bk !== __lastRenderBankroll){
-    __lastRenderBankroll = bk;
-    try{ renderHeroPlays(__lastScan); }catch(e){}
-    try{ renderBloombergGrid(__lastScan); }catch(e){}
-  }
-}, 1000);
-
 
 async function triggerManualScan(){
-  document.getElementById('collision-table-container').innerHTML='<div class="empty" style="color:var(--amber);">Running full scan... (~30 seconds)</div>';
+  document.getElementById('collision-table-container').innerHTML='<div class="empty" style="color:var(--amber);">Running full scan — T1-T15 + R1-R7 engine firing... (~30 seconds)</div>';
   try{
     await fetch('/morning-scan/run',{method:'POST'});
     setTimeout(loadMorningScan,30000);
@@ -2723,26 +1710,69 @@ function renderFullPlayCard(scan){
 
   // Header bar
   let html=`<div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:10px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;">
-    <span style="color:var(--gold);">${ts.toLocaleTimeString()}</span>
+    <span style="color:var(--gold);">🕘 ${ts.toLocaleTimeString()}</span>
     <span>${s.gamesScanned||0} games scanned</span>
     <span style="color:var(--green);font-weight:600;">${s.plays||0} plays</span>
     <span style="color:var(--red);">${s.fades||0} fades</span>
-    <span style="color:var(--teal);">${s.outliers||0} regression flags</span>
+    <span style="color:var(--teal);">${s.outliers||0} T4 flags</span>
     <span style="color:var(--amber);">${Math.round((scan.runTime||0)/1000)}s scan time</span>
     <button onclick="triggerManualScan()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-family:var(--mono);font-size:9px;text-decoration:underline;padding:0;margin-left:auto;">↻ Rescan</button>
   </div>`;
 
-  // PLAY CARDS now render in the Hero Plays section above (renderHeroPlays).
-  // This Bloomberg block only covers scan metadata, T15 fades, and the full game table.
+  // PLAY CARDS
+  if(plays.length){
+    html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);margin-bottom:8px;">✅ TODAY'S PLAYS (${plays.length})</div>`;
+    for(const g of plays){
+      const a=g.analysis;
+      const colMap={blue:'var(--blue)',green:'var(--green)',teal:'var(--teal)',amber:'var(--amber)',red:'var(--red)',orange:'var(--orange)'};
+      const col=colMap[a.color]||'var(--teal)';
+      const sbMap={MAX:'sb-blue',STRONG:'sb-green',ENTRY:'sb-teal',WATCH:'sb-amber'};
+      const sbClass=sbMap[a.strength]||'sb-teal';
+      const pitNote=a.pitcherEdge?`${a.pitcherEdge.name||'SP'} ERA ${a.pitcherEdge.era} FIP ${a.pitcherEdge.fip}`:'SP data N/A';
+      const trigStr=a.triggered.join('+');
+      const failStr=a.failed.length?` | ✗ ${a.failed.join(',')}`:'';
+      html+=`<div class="play-box" style="margin-bottom:10px;">
+        <div class="color-bar" style="background:${col};height:3px;border-radius:99px;width:100%;margin-bottom:8px;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="tbadge tbadge-real">${a.gateType}</span>
+            <span class="strength-badge ${sbClass}">${a.strength}</span>
+            <span style="font-family:var(--mono);font-size:12px;color:var(--text3);">${trigStr}${failStr}</span>
+          </div>
+          <span style="font-family:var(--mono);font-size:12px;color:${col};font-weight:700;">$${a.sizing}</span>
+        </div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px;">${a.recommendation}</div>
+        <div style="font-size:13px;color:var(--text3);font-family:var(--mono);margin-bottom:6px;">${g.game} · ${new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div>
+        ${(()=>{
+          const hrl=a.rlDisplay&&a.rlDisplay.homeLine?a.rlDisplay.homeLine:{price:a.odds&&a.odds.homeRL?a.odds.homeRL:null,point:a.gateSide==='home'?1.5:-1.5};
+          const arl=a.rlDisplay&&a.rlDisplay.awayLine?a.rlDisplay.awayLine:{price:a.odds&&a.odds.awayRL?a.odds.awayRL:null,point:a.gateSide==='away'?1.5:-1.5};
+          let rlHtml='<div style="font-family:var(--mono);font-size:12px;margin-bottom:6px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:5px;border:1px solid rgba(255,255,255,0.06);">';
+          rlHtml+='<span style="color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;">Run Line · </span>';
+          if(hrl&&hrl.price!=null){const col=hrl.price>=115?'var(--green)':hrl.price<=-130?'var(--red)':'var(--text2)';rlHtml+=`<span style="color:var(--text2);">Home ${hrl.point>0?'+':''}${hrl.point} <b style="color:${col}">${hrl.price>0?'+':''}${hrl.price}</b></span>`;}
+          if(arl&&arl.price!=null){const col=arl.price>=115?'var(--green)':arl.price<=-130?'var(--red)':'var(--text2)';rlHtml+=`<span style="color:var(--text2);margin-left:12px;">Away ${arl.point>0?'+':''}${arl.point} <b style="color:${col}">${arl.price>0?'+':''}${arl.price}</b></span>`;}
+          if(!hrl.price&&!arl.price)rlHtml+='<span style="color:var(--text3);">Check book for run line</span>';
+          if(a.rlAddon)rlHtml+=`<span style="color:var(--amber);margin-left:12px;font-weight:700;">→ BET: ${a.rlAddon.desc} · $${a.rlAddon.amt}${!a.rlAddon.qualifying?' (watch)':''}</span>`;
+          rlHtml+='</div>';
+          return rlHtml;
+        })()}
+        <div style="font-size:12px;color:var(--text3);font-family:var(--mono);line-height:1.7;border-top:1px solid var(--border);padding-top:6px;margin-top:4px;">${a.notes.slice(0,5).join('<br>')}</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-top:4px;">${pitNote} · ${a.collision.away} vs ${a.collision.home}</div>
+      </div>`;
+    }
+  } else {
+    html+=`<div style="background:rgba(231,76,60,0.06);border:1px solid rgba(231,76,60,0.15);border-radius:8px;padding:12px;font-family:var(--mono);font-size:13px;color:var(--text3);margin-bottom:10px;">
+      <span style="color:var(--red);font-weight:700;">NO PLAYS TODAY</span> — No games cleared all required gates + triggers. Sit out. Season record protected.
+    </div>`;
+  }
 
   // FADE CARDS
   if(fades.length){
-    html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--red);margin:10px 0 8px;">FADES (${fades.length}) — exotic/parlay only</div>`;
+    html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--red);margin:10px 0 8px;">🔴 T15 FADES (${fades.length}) — exotic/parlay only</div>`;
     for(const g of fades){
       const a=g.analysis;
       html+=`<div class="play-box fade-play" style="margin-bottom:8px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-          <span class="tbadge tbadge-fade">FADE</span>
+          <span class="tbadge tbadge-fade">T15 FADE</span>
           <span style="font-family:var(--mono);font-size:10px;color:var(--red);">$50-100 parlay only</span>
         </div>
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--text);">${a.recommendation}</div>
@@ -2753,8 +1783,8 @@ function renderFullPlayCard(scan){
 
   // FULL GAME TABLE
   html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin:12px 0 6px;">ALL GAMES — Full Scan</div>`;
-  html+=`<table class="cg-table cg-table-grouped"><thead><tr>
-    <th>Game</th><th>Team</th><th>Streak</th><th>Run Diff</th><th>Collision</th><th>Result</th>
+  html+=`<table class="cg-table"><thead><tr>
+    <th>Matchup</th><th>Away</th><th>Diff</th><th>Home</th><th>Diff</th><th>Collision</th><th>Gate</th><th>Triggers</th><th>Result</th>
   </tr></thead><tbody>`;
 
   for(const g of allGames){
@@ -2767,38 +1797,31 @@ function renderFullPlayCard(scan){
     const homeDStr=(homeD>0?'+':'')+homeD;
     const coll=a.collision||{};
     let collHtml='<span class="cg-no-coll">—</span>';
-    if(coll.max) collHtml='<span class="cg-collision max">MAX</span>';
+    if(coll.max) collHtml='<span class="cg-collision max">⚡MAX</span>';
     else if(coll.active) collHtml='<span class="cg-collision">COLL</span>';
+    let gateHtml='<span class="cg-gate-fail">—</span>';
+    if(a.gateType==='T1') gateHtml=`<span class="cg-gate-pass">T1 +${a.gateML}</span>`;
+    else if(a.gateType==='T11') gateHtml=`<span class="cg-gate-warn">T11 ${a.gateML}</span>`;
+    else if(a.gateType==='T12') gateHtml=`<span class="cg-gate-warn">T12 +${a.gateML}</span>`;
+    else if(a.gateType==='T13') gateHtml=`<span style="color:var(--teal);">T13 +${a.gateML}</span>`;
+    const trigStr=(a.triggered||[]).join('+') || '—';
     let recHtml='<span class="cg-no-coll">PASS</span>';
     const colMap2={blue:'var(--blue)',green:'var(--green)',teal:'var(--teal)',amber:'var(--amber)',red:'var(--red)'};
-    if((a.units > 0 || a.sizing > 0) && !a.t14Kill) recHtml=`<span style="color:${colMap2[a.color]||'var(--teal)'};font-weight:700;">${a.strength} ${fmtUnitStake(a)}</span>`;
-    else if(a.t14Kill) recHtml='<span style="color:var(--red);">KILL</span>';
+    if(a.sizing>0&&!a.t14Kill) recHtml=`<span style="color:${colMap2[a.color]||'var(--teal)'};font-weight:700;">${a.strength} $${a.sizing}</span>`;
+    else if(a.t14Kill) recHtml='<span style="color:var(--red);">T14 KILL</span>';
     else if(a.t15Active) recHtml='<span style="color:var(--orange);">FADE</span>';
-    const awayReg=awayT.regressionFlag?'<span class="cg-reg-flag" title="Regression flag">↑</span>':'';
-    const homeReg=homeT.regressionFlag?'<span class="cg-reg-flag" title="Regression flag">↑</span>':'';
-    const gameTime = g.gameTime ? new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : '';
-
-    // Away row (first) — gets rowspan for Game / Collision / Result columns
-    html+=`<tr class="cg-game-row cg-row-away">
-      <td rowspan="2" class="cg-game-cell">
-        <div class="cg-game-time">${gameTime}</div>
-        <div class="cg-game-vs">${(awayT.abbr||'?')} @ ${(homeT.abbr||'?')}</div>
-      </td>
-      <td class="cg-team-cell">
-        <span class="cg-team-row">${teamLogoHtml(awayT.abbr,'sm')}<span class="cg-team-name">${awayT.abbr||'?'}</span><span class="cg-team-side">AWAY</span></span>
-      </td>
+    const awayReg=awayT.regressionFlag?'<span style="color:var(--teal);font-size:8px;"> T4↑</span>':'';
+    const homeReg=homeT.regressionFlag?'<span style="color:var(--teal);font-size:8px;"> T4↑</span>':'';
+    html+=`<tr>
+      <td style="color:var(--text2);white-space:nowrap;">${awayT.abbr||'?'} @ ${homeT.abbr||'?'}</td>
       <td class="${awayS==='W'?'cg-streak-w':'cg-streak-l'}">${awayS}${awayL}${awayReg}</td>
       <td class="${awayD>0?'cg-diff-pos':awayD<0?'cg-diff-neg':'cg-diff-flat'}">${awayDStr}</td>
-      <td rowspan="2" class="cg-merged-cell">${collHtml}</td>
-      <td rowspan="2" class="cg-merged-cell">${recHtml}</td>
-    </tr>`;
-    // Home row (second)
-    html+=`<tr class="cg-game-row cg-row-home">
-      <td class="cg-team-cell">
-        <span class="cg-team-row">${teamLogoHtml(homeT.abbr,'sm')}<span class="cg-team-name">${homeT.abbr||'?'}</span><span class="cg-team-side">HOME</span></span>
-      </td>
       <td class="${homeS==='W'?'cg-streak-w':'cg-streak-l'}">${homeS}${homeL}${homeReg}</td>
       <td class="${homeD>0?'cg-diff-pos':homeD<0?'cg-diff-neg':'cg-diff-flat'}">${homeDStr}</td>
+      <td>${collHtml}</td>
+      <td>${gateHtml}</td>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--text3);">${trigStr}</td>
+      <td>${recHtml}</td>
     </tr>`;
   }
   html+='</tbody></table>';
@@ -2822,85 +1845,6 @@ function renderRegressionFlags(outliers){
       <div class="reg-flag-boost">→ ${o.regressionFlag?.boost}</div>`;
     flagsEl.appendChild(div);
   }
-}
-
-// ── HERO PLAYS RENDER ──────────────────────────────────────────
-function renderHeroPlays(scan){
-  const container = document.getElementById('hero-plays-container');
-  const meta = document.getElementById('hpm-status');
-  if(!container) return;
-  const plays = scan.plays || [];
-  const ts = scan.timestamp ? new Date(scan.timestamp) : new Date();
-  if(meta){
-    if(plays.length){
-      meta.textContent = `${plays.length} qualifying ${plays.length===1?'play':'plays'} · ${ts.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}`;
-    } else {
-      meta.textContent = `Scanned ${(scan.summary&&scan.summary.gamesScanned)||0} games · ${ts.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}`;
-    }
-  }
-
-  if(!plays.length){
-    container.innerHTML = `<div class="hero-no-plays"><b>NO PLAYS TODAY</b> — no games cleared all required gates + triggers. Sit out. Season record protected.</div>`;
-    return;
-  }
-
-  const colMap = {blue:'var(--blue)', green:'var(--green)', teal:'var(--teal)', amber:'var(--amber)', red:'var(--red)', orange:'var(--orange)'};
-  const sbMap  = {MAX:'sb-blue', STRONG:'sb-green', ENTRY:'sb-teal', WATCH:'sb-amber'};
-
-  const cards = plays.map(g => {
-    const a = g.analysis;
-    const col = colMap[a.color] || 'var(--teal)';
-    const sbClass = sbMap[a.strength] || 'sb-teal';
-    const trigStr = (a.triggered||[]).join('+');
-    const failStr = a.failed && a.failed.length ? ` <span class="hp-fail">| ✗ ${a.failed.join(',')}</span>` : '';
-    const pitNote = a.pitcherEdge ? `${a.pitcherEdge.name||'SP'} ERA ${a.pitcherEdge.era} FIP ${a.pitcherEdge.fip}` : 'SP data N/A';
-    const gameTime = g.gameTime ? new Date(g.gameTime).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'}) : '';
-
-    // Run line block
-    const hrl = a.rlDisplay && a.rlDisplay.homeLine ? a.rlDisplay.homeLine : {price: a.odds && a.odds.homeRL ? a.odds.homeRL : null, point: a.gateSide==='home' ? 1.5 : -1.5};
-    const arl = a.rlDisplay && a.rlDisplay.awayLine ? a.rlDisplay.awayLine : {price: a.odds && a.odds.awayRL ? a.odds.awayRL : null, point: a.gateSide==='away' ? 1.5 : -1.5};
-    let rlInner = `<span class="hp-rl-label">Run Line</span>`;
-    if(hrl && hrl.price != null){
-      const cc = hrl.price>=115?'var(--green)':hrl.price<=-130?'var(--red)':'var(--text2)';
-      rlInner += ` <span style="color:var(--text2);">Home ${hrl.point>0?'+':''}${hrl.point} <b style="color:${cc}">${hrl.price>0?'+':''}${hrl.price}</b></span>`;
-    }
-    if(arl && arl.price != null){
-      const cc = arl.price>=115?'var(--green)':arl.price<=-130?'var(--red)':'var(--text2)';
-      rlInner += ` <span style="color:var(--text2);">Away ${arl.point>0?'+':''}${arl.point} <b style="color:${cc}">${arl.price>0?'+':''}${arl.price}</b></span>`;
-    }
-    if(!hrl.price && !arl.price) rlInner += ` <span style="color:var(--text3);">Check book for run line</span>`;
-    if(a.rlAddon){
-      // RL addon now expressed as unit fraction; compute $ from user bankroll
-      const rlUnits = (typeof a.rlAddon.units === 'number') ? a.rlAddon.units : null;
-      const rlAmt = rlUnits ? userStakeForUnits(rlUnits) : (a.rlAddon.amt || 0);
-      const rlDisplay = rlUnits ? `${rlUnits.toFixed(1)}u · $${rlAmt.toLocaleString()}` : `$${rlAmt}`;
-      rlInner += ` <span class="hp-rl-bet">→ BET: ${a.rlAddon.desc} · ${rlDisplay}${!a.rlAddon.qualifying?' (watch)':''}</span>`;
-    }
-
-    const notes = (a.notes||[]).slice(0,5).join('<br>');
-    const collDesc = a.collision ? `${a.collision.away||'?'} vs ${a.collision.home||'?'}` : '';
-
-    const awayAbbr = (g.away && (g.away.abbr || g.away.name)) || '';
-    const homeAbbr = (g.home && (g.home.abbr || g.home.name)) || '';
-    const matchupHtml = (awayAbbr && homeAbbr)
-      ? `<div class="hp-matchup">${teamLogoHtml(awayAbbr,'lg')}<span class="hp-mc-team">${awayAbbr}</span><span class="hp-mc-at">@</span>${teamLogoHtml(homeAbbr,'lg')}<span class="hp-mc-team">${homeAbbr}</span>${gameTime?'<span class="hp-mc-time">'+gameTime+'</span>':''}</div>`
-      : '';
-
-    return `<div class="hp-card">
-      <div class="hp-card-glow" style="background:${col};box-shadow:0 0 16px ${col}, 0 0 4px ${col};"></div>
-      <div class="hp-card-top">
-        <div class="hp-badges">
-          <span class="strength-badge ${sbClass}">${a.strength||''}</span>
-        </div>
-        <span class="hp-stake" style="color:${col};">${fmtUnitStake(a)}</span>
-      </div>
-      ${matchupHtml}
-      <div class="hp-rec">${rewriteRec(a.recommendation, a)}</div>
-      <div class="hp-rl">${rlInner}</div>
-    </div>`;
-  }).join('');
-
-  container.innerHTML = `<div class="hero-plays-grid">${cards}</div>`;
 }
 
 // ── STREAK HEAT MAP ───────────────────────────────────────────
@@ -2934,67 +1878,75 @@ function hmGradeCell(awayLabel, homeLabel){
 
   // Both flat — no signal
   if(a === 0 && h === 0){
-    return { bg:'rgba(255,255,255,0.03)', color:'#475569', label:'—' };
+    return { bg:'rgba(255,255,255,0.04)', color:'#64748b', label:'—', sub:'no edge' };
   }
 
   // Collision: opposite signs, both ≥2 magnitude
   if(a * h < 0 && aAbs >= 2 && hAbs >= 2){
     const total = aAbs + hAbs;
-    if(total >= 10) return { bg:'linear-gradient(135deg,#15803d,#22c55e)', color:'#fff', label:'MAX' };
-    if(total >= 7)  return { bg:'linear-gradient(135deg,#16a34a,#4ade80)', color:'#0a0a0f', label:'STRONG' };
-    if(total >= 5)  return { bg:'linear-gradient(135deg,#65a30d,#a3e635)', color:'#0a0a0f', label:'PLAY' };
-    return { bg:'linear-gradient(135deg,#84cc16,#bef264)', color:'#0a0a0f', label:'PLAY' };
+    // Home dog scenario: home losing, away winning → bet home dog
+    // Away dog scenario: away losing, home winning → bet away dog
+    if(total >= 10) return { bg:'#16a34a', color:'#fff', label:'MAX', sub:'collision · cap' };
+    if(total >= 7)  return { bg:'#22c55e', color:'#0a0a0f', label:'STRONG', sub:'collision' };
+    if(total >= 5)  return { bg:'#65a30d', color:'#0a0a0f', label:'PLAY', sub:'collision' };
+    return { bg:'#84cc16', color:'#0a0a0f', label:'PLAY', sub:'min collision' };
   }
 
-  // Same direction, both winning → caution
+  // Same direction, both winning → caution (no fade value, both hot)
   if(a > 0 && h > 0){
-    if(a >= 5 || h >= 5) return { bg:'linear-gradient(135deg,#a16207,#eab308)', color:'#0a0a0f', label:'CAUTION' };
-    return { bg:'linear-gradient(135deg,#ca8a04,#facc15)', color:'#0a0a0f', label:'CAUTION' };
+    if(a >= 5 || h >= 5) return { bg:'#ca8a04', color:'#0a0a0f', label:'CAUTION', sub:'both hot' };
+    return { bg:'#eab308', color:'#0a0a0f', label:'CAUTION', sub:'both up' };
   }
 
-  // Same direction, both losing → reduce
+  // Same direction, both losing → reduce/avoid (low info)
   if(a < 0 && h < 0){
-    if(aAbs >= 5 || hAbs >= 5) return { bg:'linear-gradient(135deg,#9a3412,#ea580c)', color:'#fff', label:'REDUCE' };
-    return { bg:'linear-gradient(135deg,#c2410c,#f97316)', color:'#fff', label:'REDUCE' };
+    if(aAbs >= 5 || hAbs >= 5) return { bg:'#ea580c', color:'#fff', label:'REDUCE', sub:'both cold' };
+    return { bg:'#f97316', color:'#0a0a0f', label:'REDUCE', sub:'both down' };
   }
 
   // One side flat — partial signal
   if(a === 0 || h === 0){
     const live = a === 0 ? h : a;
     const liveAbs = Math.abs(live);
-    if(liveAbs >= 5) return { bg:'linear-gradient(135deg,#854d0e,#eab308)', color:'#0a0a0f', label:'WATCH' };
-    if(liveAbs >= 3) return { bg:'linear-gradient(135deg,#a16207,#facc15)', color:'#0a0a0f', label:'WATCH' };
-    return { bg:'rgba(255,255,255,0.05)', color:'#64748b', label:'—' };
+    if(liveAbs >= 5) return { bg:'#ca8a04', color:'#0a0a0f', label:'WATCH', sub:'one extreme' };
+    if(liveAbs >= 3) return { bg:'#facc15', color:'#0a0a0f', label:'WATCH', sub:'one streak' };
+    return { bg:'rgba(255,255,255,0.06)', color:'#94a3b8', label:'—', sub:'thin' };
   }
 
-  return { bg:'rgba(255,255,255,0.03)', color:'#475569', label:'—' };
+  // Fade zone: extreme (9+ in real life) — return to standard
+  // Approximated here as W5+ vs flat or similar — already handled above
+
+  return { bg:'rgba(255,255,255,0.04)', color:'#64748b', label:'—', sub:'' };
 }
 
 function renderStreakHeatmap(scan){
   const container = document.getElementById('streak-heatmap-container');
   if(!container) return;
+  const teams = scan.teams || {};
   const games = scan.allGames || [];
 
-  // Build grid 1: framework reference
-  const buildFrameworkGrid = () => {
-    let h = `<table class="hm-table"><thead><tr><th class="hm-axis-corner">A↓ / H→</th>`;
-    for(const c of HM_COLS) h += `<th>${c}</th>`;
-    h += `</tr></thead><tbody>`;
-    for(const r of HM_ROWS){
-      h += `<tr><td class="hm-row-label">${r}</td>`;
-      for(const c of HM_COLS){
-        const grade = hmGradeCell(r, c);
-        h += `<td class="hm-cell" style="background:${grade.bg};color:${grade.color};" title="Away ${r} @ Home ${c} → ${grade.label}">
-          <div class="hm-cell-label">${grade.label}</div>
-        </td>`;
-      }
-      h += `</tr>`;
+  // ── Grid 1: Static framework reference ──
+  let g1 = `<div class="hm-grid-wrapper">
+    <div class="hm-grid-title">Framework Reference <span class="hm-grid-meta">· Signal strength by streak combination · T2 collision logic</span></div>
+    <table class="hm-table"><thead><tr>
+      <th class="hm-axis-corner">Away ↓ / Home →</th>`;
+  for(const c of HM_COLS) g1 += `<th>${c}</th>`;
+  g1 += `</tr></thead><tbody>`;
+  for(const r of HM_ROWS){
+    g1 += `<tr><td class="hm-row-label">${r}</td>`;
+    for(const c of HM_COLS){
+      const grade = hmGradeCell(r, c);
+      g1 += `<td class="hm-cell" style="background:${grade.bg};color:${grade.color};" title="Away ${r} @ Home ${c} → ${grade.label}">
+        <div class="hm-cell-label">${grade.label}</div>
+        <div class="hm-cell-sub">${grade.sub}</div>
+      </td>`;
     }
-    h += `</tbody></table>`;
-    return h;
-  };
+    g1 += `</tr>`;
+  }
+  g1 += `</tbody></table></div>`;
 
-  // Build grid 2: live games
+  // ── Grid 2: Live games positioned in their cells ──
+  // Build a map: "awayLabel|homeLabel" → array of {away, home, time}
   const cellGames = {};
   for(const g of games){
     if(!g.away || !g.home) continue;
@@ -3008,56 +1960,46 @@ function renderStreakHeatmap(scan){
       time: g.gameTime ? new Date(g.gameTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : ''
     });
   }
-  const totalGames = games.length;
 
-  const buildLiveGrid = () => {
-    if(totalGames === 0){
-      return `<div class="hm-no-games">No games on schedule.</div>`;
-    }
-    let h = `<table class="hm-table"><thead><tr><th class="hm-axis-corner">A↓ / H→</th>`;
-    for(const c of HM_COLS) h += `<th>${c}</th>`;
-    h += `</tr></thead><tbody>`;
+  const totalGames = games.length;
+  let g2 = `<div class="hm-grid-wrapper">
+    <div class="hm-grid-title">Today's Live Matchups <span class="hm-grid-meta">· ${totalGames} games positioned by actual streaks</span></div>`;
+
+  if(totalGames === 0){
+    g2 += `<div class="hm-no-games">No games on schedule.</div></div>`;
+  } else {
+    g2 += `<table class="hm-table"><thead><tr>
+      <th class="hm-axis-corner">Away ↓ / Home →</th>`;
+    for(const c of HM_COLS) g2 += `<th>${c}</th>`;
+    g2 += `</tr></thead><tbody>`;
     for(const r of HM_ROWS){
-      h += `<tr><td class="hm-row-label">${r}</td>`;
+      g2 += `<tr><td class="hm-row-label">${r}</td>`;
       for(const c of HM_COLS){
         const key = r + '|' + c;
         const list = cellGames[key];
         if(list && list.length){
           const grade = hmGradeCell(r, c);
+          // Show first game; if multiple, indicate
           const first = list[0];
-          const more = list.length > 1 ? `+${list.length-1}` : '';
-          const titleList = list.map(g=>`${g.away} @ ${g.home} ${g.time}`).join(' · ');
-          const cellInner = list.length === 1
-            ? `<div class="hm-cell-game-logos">${teamLogoHtml(first.away,'sm')}<span class="hm-vs">@</span>${teamLogoHtml(first.home,'sm')}</div>`
-            : `<div class="hm-cell-game">${first.away}@${first.home} ${more}</div>`;
-          h += `<td class="hm-cell" style="background:${grade.bg};" title="${titleList} → ${grade.label}">
-            ${cellInner}
+          const more = list.length > 1 ? ` <span style="opacity:0.7;">+${list.length-1}</span>` : '';
+          const titleList = list.map(g=>`${g.away} @ ${g.home} ${g.time}`).join(' / ');
+          g2 += `<td class="hm-cell hm-game-cell" style="background:${grade.bg};color:${grade.color};" title="${titleList} · ${grade.label}">
+            <div class="hm-cell-game">${first.away}@${first.home}${more}</div>
+            <div class="hm-cell-game-time">${first.time}</div>
           </td>`;
         } else {
-          h += `<td class="hm-cell hm-empty"></td>`;
+          g2 += `<td class="hm-cell hm-empty"></td>`;
         }
       }
-      h += `</tr>`;
+      g2 += `</tr>`;
     }
-    h += `</tbody></table>`;
-    return h;
-  };
+    g2 += `</tbody></table></div>`;
+  }
 
-  container.innerHTML = `<div class="hm-grids-row">
-    <div class="hm-grid-wrapper">
-      <div class="hm-grid-title">Framework <span class="hm-grid-meta">· signal by streak combo</span></div>
-      ${buildFrameworkGrid()}
-    </div>
-    <div class="hm-grid-wrapper">
-      <div class="hm-grid-title">Live <span class="hm-grid-meta">· ${totalGames} games today</span></div>
-      ${buildLiveGrid()}
-    </div>
-  </div>`;
+  container.innerHTML = g1 + g2;
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
-  // Activate MLB theme by default (sport-specific theming)
-  document.body.classList.add('mlb-theme');
   updateSummary();
   renderLog();
   renderPaper();
@@ -3068,8 +2010,153 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 
-    <!-- Phase 3: API-backed personal data + dashboard override -->
-    <script src="/js/personal-data.js"></script>
-    <script src="/js/dashboard-override.js"></script>
+<!-- ── HEAD-TO-HEAD LOADER (Kenny vs You) ─────────────────────── -->
+<script>
+async function loadHeadToHead() {
+  const authedFetch = (typeof window.authedFetch === 'function')
+    ? window.authedFetch
+    : async function(url, opts) {
+        let token = null;
+        for (const k of Object.keys(localStorage)) {
+          if (/^sb-.*-auth-token$/.test(k)) {
+            try {
+              const parsed = JSON.parse(localStorage.getItem(k));
+              token = parsed?.access_token || parsed?.currentSession?.access_token;
+              if (token) break;
+            } catch {}
+          }
+        }
+        const headers = Object.assign({}, opts?.headers || {});
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+        return fetch(url, Object.assign({}, opts, { headers }));
+      };
+
+  function fmtMoney(n) {
+    if (n == null || isNaN(n)) return '—';
+    const sign = n >= 0 ? '+' : '−';
+    return sign + '$' + Math.abs(Math.round(n)).toLocaleString();
+  }
+  function fmtUnits(u) {
+    if (u == null || isNaN(u)) return '—';
+    const sign = u >= 0 ? '+' : '−';
+    return sign + Math.abs(u).toFixed(1) + 'u';
+  }
+  function fmtPct(p) {
+    if (p == null || isNaN(p)) return '—';
+    const sign = p >= 0 ? '+' : '−';
+    return sign + Math.abs(p).toFixed(1) + '%';
+  }
+  function setColor(elId, n) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    if (n > 0) { el.classList.add('green'); el.classList.remove('red'); }
+    else if (n < 0) { el.classList.add('red'); el.classList.remove('green'); }
+    else { el.classList.remove('green', 'red'); }
+  }
+
+  function aggregate(plays, unitSize) {
+    let wins = 0, losses = 0, pushes = 0, pending = 0;
+    let pnl = 0, totalStake = 0, pendingStake = 0;
+    for (const p of plays) {
+      if (p.status === 'win')        wins++;
+      else if (p.status === 'loss')  losses++;
+      else if (p.status === 'push')  pushes++;
+      else if (p.status === 'pending') {
+        pending++;
+        pendingStake += Number(p.stake) || 0;
+        continue;
+      }
+      pnl += Number(p.pnl) || 0;
+      totalStake += Number(p.stake) || 0;
+    }
+    const winPct = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+    const roi = totalStake > 0 ? (pnl / totalStake) * 100 : null;
+    const units = unitSize > 0 ? pnl / unitSize : null;
+    return { wins, losses, pushes, pending, pnl: Number(pnl.toFixed(2)),
+             units, roi, winPct, pendingStake };
+  }
+
+  // Kenny side
+  try {
+    const [brRes, playsRes] = await Promise.all([
+      authedFetch('/api/actions-bankroll'),
+      authedFetch('/api/actions-plays'),
+    ]);
+    const bankrolls = (await brRes.json()).bankrolls || [];
+    const plays = (await playsRes.json()).plays || [];
+    const mlb = bankrolls.find(b => b.sport_id === 'mlb');
+    const startingBr = Number(mlb?.starting_bankroll) || 10000;
+    const unitSize = startingBr * 0.01;
+
+    const agg = aggregate(plays.filter(p => p.sport_id === 'mlb'), unitSize);
+    if (mlb) {
+      agg.wins   = mlb.total_wins   ?? agg.wins;
+      agg.losses = mlb.total_losses ?? agg.losses;
+      agg.pushes = mlb.total_pushes ?? agg.pushes;
+      const trackedPnl = Number(mlb.current_bankroll) - startingBr;
+      if (Number.isFinite(trackedPnl)) {
+        agg.pnl = Number(trackedPnl.toFixed(2));
+        agg.units = trackedPnl / unitSize;
+      }
+      const wlTotal = agg.wins + agg.losses;
+      agg.winPct = wlTotal > 0 ? (agg.wins / wlTotal) * 100 : null;
+    }
+
+    document.getElementById('s-k-record').textContent =
+      `${agg.wins}-${agg.losses}` + (agg.pushes ? `-${agg.pushes}` : '') +
+      ` · ${agg.winPct != null ? agg.winPct.toFixed(0) + '%' : '—'}`;
+    document.getElementById('s-k-pnl').textContent   = fmtMoney(agg.pnl);
+    document.getElementById('s-k-roi').textContent   = 'ROI ' + fmtPct(agg.roi);
+    document.getElementById('s-k-units').textContent = fmtUnits(agg.units);
+    document.getElementById('s-k-bankroll').textContent =
+      '$' + Math.round(startingBr).toLocaleString() + ' base';
+    document.getElementById('s-k-pending').textContent = String(agg.pending);
+    document.getElementById('s-k-pending-stake').textContent =
+      '$' + Math.round(agg.pendingStake).toLocaleString() + ' at risk';
+    setColor('s-k-pnl', agg.pnl);
+  } catch(e) {
+    console.error('[H2H] Kenny load failed:', e);
+  }
+
+  // User side
+  try {
+    const [meRes, playsRes] = await Promise.all([
+      authedFetch('/api/me'),
+      authedFetch('/api/me/plays'),
+    ]);
+    if (!meRes.ok) {
+      document.getElementById('s-u-name').textContent = 'YOU · LOG IN';
+      return;
+    }
+    const me = await meRes.json();
+    const plays = (await playsRes.json()).plays || [];
+    const startingBr = Number(me?.starting_bankroll) || 0;
+    const unitSize = startingBr * 0.01;
+
+    const agg = aggregate(plays.filter(p => p.sport_id === 'mlb'), unitSize);
+
+    if (me?.display_name) {
+      document.getElementById('s-u-name').textContent = (me.display_name || 'YOU').toUpperCase();
+    }
+    document.getElementById('s-u-record').textContent =
+      `${agg.wins}-${agg.losses}` + (agg.pushes ? `-${agg.pushes}` : '') +
+      ` · ${agg.winPct != null ? agg.winPct.toFixed(0) + '%' : '—'}`;
+    document.getElementById('s-u-pnl').textContent   = fmtMoney(agg.pnl);
+    document.getElementById('s-u-roi').textContent   = 'ROI ' + fmtPct(agg.roi);
+    document.getElementById('s-u-units').textContent = unitSize > 0 ? fmtUnits(agg.units) : 'set bankroll';
+    document.getElementById('s-u-bankroll').textContent =
+      startingBr > 0 ? '$' + Math.round(startingBr).toLocaleString() + ' base' : 'no bankroll set';
+    document.getElementById('s-u-pending').textContent = String(agg.pending);
+    document.getElementById('s-u-pending-stake').textContent =
+      '$' + Math.round(agg.pendingStake).toLocaleString() + ' at risk';
+    setColor('s-u-pnl', agg.pnl);
+  } catch(e) {
+    console.error('[H2H] User load failed:', e);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadHeadToHead);
+setInterval(loadHeadToHead, 60000);
+</script>
 </body>
 </html>
