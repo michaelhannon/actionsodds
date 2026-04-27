@@ -29,10 +29,43 @@ const path = require('path');
 const fs = require('fs');
 
 const morningScan = require('./morning-scan');
+
+// Auto-publish qualifying plays to actions_plays after every scan,
+// and run the result grader cron every 30 min. Both are additive — if
+// either module is missing the server still starts cleanly.
+let publishScanPlays = null;
+let startGraderCron = null;
+let gradePendingPlays = null;
+try {
+  ({ publishScanPlays } = require('./server/actions-publisher'));
+  ({ startGraderCron, gradePendingPlays } = require('./server/actions-grader'));
+} catch (e) {
+  console.warn('[Boot] actions-publisher or actions-grader not loaded:', e.message);
+}
+
+if (publishScanPlays) {
+  const _origRunMorningScan = morningScan.runMorningScan;
+  morningScan.runMorningScan = async function(...args) {
+    const scan = await _origRunMorningScan.apply(morningScan, args);
+    if (scan && Array.isArray(scan.plays) && scan.plays.length > 0) {
+      try {
+        const result = await publishScanPlays(scan);
+        console.log(`[Boot] Auto-publish: +${result.inserted} new, ${result.skipped} dupes`,
+          result.errors.length ? `(${result.errors.length} errors)` : '');
+      } catch (e) {
+        console.error('[Boot] Auto-publish failed:', e.message);
+      }
+    }
+    return scan;
+  };
+}
+
 morningScan.scheduleScan(
   process.env.ODDS_API_KEY || '4e4c9bc2ffc7311be69697d28952cf1a',
   { t1Min: 140, t1Max: 199, t11Min: 115, t11Max: 135, t12Min: 110 }
 );
+
+if (startGraderCron) startGraderCron();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -467,9 +500,45 @@ app.post('/morning-scan/run', (req, res) => {
   );
 });
 
+// ─── Manual grader trigger (admin only) ───
+app.post('/api/admin/grade-now', requireAuth, async (req, res) => {
+  if (!req.user?.is_admin) return res.status(403).json({ error: 'Admin only' });
+  if (!gradePendingPlays) return res.status(503).json({ error: 'Grader not loaded' });
+  try {
+    const result = await gradePendingPlays();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── /ai-brief (Anthropic proxy) ───
 app.post('/ai-brief', (req, res) => {
-  const body = JSON.stringify(req.body);
+  if (!ANTHROPIC_KEY) {
+    console.error('[AI-BRIEF] ANTHROPIC_API_KEY not set in env');
+    return res.status(503).json({ error: 'AI brief disabled — no API key configured' });
+  }
+  // Defensive model upgrade: front-end may still send retired strings.
+  const DEPRECATED_MAP = {
+    'claude-3-opus-20240229':       'claude-opus-4-7',
+    'claude-3-5-sonnet-20240620':   'claude-sonnet-4-6',
+    'claude-3-5-sonnet-20241022':   'claude-sonnet-4-6',
+    'claude-3-5-haiku-20241022':    'claude-haiku-4-5-20251001',
+    'claude-3-haiku-20240307':      'claude-haiku-4-5-20251001',
+    'claude-sonnet-4-0':            'claude-sonnet-4-6',
+    'claude-opus-4-0':              'claude-opus-4-7',
+    'claude-sonnet-4-20250514':     'claude-sonnet-4-6',
+    'claude-opus-4-20250514':       'claude-opus-4-7',
+  };
+  const incomingBody = req.body || {};
+  if (incomingBody.model && DEPRECATED_MAP[incomingBody.model]) {
+    console.warn(`[AI-BRIEF] Upgrading deprecated model ${incomingBody.model} → ${DEPRECATED_MAP[incomingBody.model]}`);
+    incomingBody.model = DEPRECATED_MAP[incomingBody.model];
+  }
+  if (!incomingBody.model) incomingBody.model = 'claude-sonnet-4-6';
+  if (!incomingBody.max_tokens) incomingBody.max_tokens = 1024;
+
+  const body = JSON.stringify(incomingBody);
   const options = {
     hostname: 'api.anthropic.com',
     path: '/v1/messages',
@@ -481,17 +550,28 @@ app.post('/ai-brief', (req, res) => {
       'Content-Length': Buffer.byteLength(body)
     }
   };
-  console.log('[AI-BRIEF] Sending to Anthropic, key present:', !!ANTHROPIC_KEY, 'key length:', ANTHROPIC_KEY.length);
+  console.log(`[AI-BRIEF] → model=${incomingBody.model} keyLen=${ANTHROPIC_KEY.length}`);
   const apiReq = https.request(options, apiRes => {
     let data = '';
     apiRes.on('data', chunk => data += chunk);
     apiRes.on('end', () => {
-      console.log('[AI-BRIEF] Anthropic response status:', apiRes.statusCode);
-      if (apiRes.statusCode !== 200) console.log('[AI-BRIEF] Error body:', data.slice(0, 500));
-      res.status(apiRes.statusCode).type('application/json').send(data);
+      if (apiRes.statusCode !== 200) {
+        console.error(`[AI-BRIEF] Anthropic ${apiRes.statusCode}: ${data.slice(0, 800)}`);
+        let parsed;
+        try { parsed = JSON.parse(data); } catch { parsed = { raw: data }; }
+        return res.status(apiRes.statusCode).json({
+          error: 'Anthropic API error',
+          status: apiRes.statusCode,
+          detail: parsed?.error?.message || parsed?.raw || 'Unknown',
+        });
+      }
+      res.status(200).type('application/json').send(data);
     });
   });
-  apiReq.on('error', err => res.status(500).json({ error: err.message }));
+  apiReq.on('error', err => {
+    console.error('[AI-BRIEF] Network error:', err.message);
+    res.status(502).json({ error: 'Upstream request failed', detail: err.message });
+  });
   apiReq.write(body);
   apiReq.end();
 });

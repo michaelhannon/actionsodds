@@ -2015,64 +2015,102 @@ async function loadOdds(){
 // ── AI BRIEFS ────────────────────────────────────────────
 async function generateAIBriefs(){
   const container=document.getElementById('ai-cards');
-  container.innerHTML='<div style="color:var(--text3);font-size:12px;padding:8px;">Generating AI briefs for qualifying plays...</div>';
+  container.innerHTML='<div style="color:var(--text3);font-size:12px;padding:8px;">Loading morning scan…</div>';
 
-  const activePlays=[];
-  for(const g of allGames){
-    const bm=g.bookmakers[0];if(!bm)continue;
-    const plays=gradeMLBGame(g,bm.key);
-    const realPlays=plays.filter(p=>p.type==='real');
-    if(realPlays.length)activePlays.push({game:g,plays:realPlays});
+  // Pull the SAME scan data the rest of the dashboard uses
+  let scan;
+  try {
+    const res = await fetch('/morning-scan');
+    scan = await res.json();
+  } catch(e) {
+    container.innerHTML = '<div class="ai-empty">Could not reach /morning-scan. Trigger a manual scan first.</div>';
+    return;
   }
-
-  if(!activePlays.length){
-    container.innerHTML='<div class="ai-empty">No T1/T11 qualifying plays found on today\'s slate. Sit out — patience is the edge.</div>';
+  if (!scan || scan.error || !Array.isArray(scan.plays)) {
+    container.innerHTML = '<div class="ai-empty">No scan data yet. Run morning scan first.</div>';
     return;
   }
 
+  const playables = scan.plays.filter(g => {
+    const a = g.analysis || {};
+    return ['MAX','STRONG','ENTRY'].includes(a.strength) && a.units > 0
+           && !a.t14Kill && !a.t15Active && !a.t3Kill;
+  });
+
+  if (!playables.length) {
+    container.innerHTML = '<div class="ai-empty">No T1/T11/T12 qualifying plays on today\'s slate. Sit out — patience is the edge.</div>';
+    return;
+  }
+
+  container.innerHTML = `<div style="color:var(--text3);font-size:12px;padding:8px;">Generating AI briefs for ${playables.length} qualifying play${playables.length===1?'':'s'}…</div>`;
+
   const briefs=[];
-  for(const ap of activePlays.slice(0,4)){
-    const p=ap.plays[0];
-    const g=ap.game;
-    const bm=g.bookmakers[0];
-    const h2h=bm?.markets?.find(m=>m.key==='h2h');
-    const homeML=h2h?.outcomes?.find(o=>o.name===g.home_team)?.price;
-    const awayML=h2h?.outcomes?.find(o=>o.name===g.away_team)?.price;
+  for (const pl of playables.slice(0, 6)) {
+    const a = pl.analysis;
+    const sideTeam = a.gateSide === 'home' ? pl.home.name : pl.away.name;
+    const oddsStr  = a.gateML > 0 ? `+${a.gateML}` : `${a.gateML}`;
+    const triggers = (a.triggered || []).map(t => t.code || t.name || t).filter(Boolean);
+    const stake    = Math.round(a.units * 100);
 
-    try{
-      const prompt=`You are the Action's Odds MLB betting system AI. Grade this play using the T1-T15 trigger system.
+    const colorMap = { MAX:'blue', STRONG:'green', ENTRY:'teal' };
+    const colorClass = colorMap[a.strength] || 'amber';
 
-GAME: ${g.away_team} @ ${g.home_team}
-HOME ML: ${fmtOdds(homeML)} | AWAY ML: ${fmtOdds(awayML)}
-PLAY: ${p.desc} | TRIGGER: ${p.trigger} | SUGGESTED SIZE: $${p.amt}
+    const homeStreak = `${pl.home.streak||''}${pl.home.streakLen||0}`;
+    const awayStreak = `${pl.away.streak||''}${pl.away.streakLen||0}`;
+    const homeRD = pl.home.runDiff != null ? (pl.home.runDiff >= 0 ? '+' : '') + pl.home.runDiff : 'n/a';
+    const awayRD = pl.away.runDiff != null ? (pl.away.runDiff >= 0 ? '+' : '') + pl.away.runDiff : 'n/a';
 
-T1 System: Home dog +140 to +199 gate. Key triggers: T2=streak mismatch (W vs L streak = collision), T3=run differential (pos vs neg), T6=pitcher FIP (most important), T8=bullpen 48hr (mandatory), T14=power ratings (mandatory). Unit-based sizing (Zen Poker 100-unit method): base unit = 1% of bankroll. Tiers: ENTRY 1u (1%), STRONG 2u (2%), MAX 3u (3%). Path caps: T1/T1B/T11 up to 3u, T12 cap 2u, T13/T15 cap 1u. Recalibrate at ±25% bankroll movement.
+    const prompt =
+`You are the Action's Odds MLB system AI. Grade this qualifying play in 2 sentences.
 
-Regression flags: SEA 1 road win (4%), KC 2 road wins (11%), NYM 3 home wins (18%) — all due for regression, T4 boost when dog.
-Season record: 21W-9L 70%, +$4,486 core P&L.
+GAME: ${pl.away.name} (${awayStreak}, RD ${awayRD}) @ ${pl.home.name} (${homeStreak}, RD ${homeRD})
+PICK: ${sideTeam} ML ${oddsStr}  |  GATE: ${a.gateType}  |  STRENGTH: ${a.strength} (${a.units}u, ~$${stake} at $10K ref)
+TRIGGERS FIRED: ${triggers.join(', ') || '—'}
+NOTES: ${(a.notes || []).join(' | ') || '—'}
 
-Give a sharp 2-sentence analysis. Format: [TRIGGER COUNT fires/pass] [T6 FIP edge if known] [T8 note] [T14 note] [final recommendation with unit size]. Be direct. No fluff.`;
+System rules: T1=home dog +140-+199, T11=cheap home fav -115/-135 (3+ trig), T12=home dog +110-+134 (4+ trig), T13=road dog +120+ (5 required), T14=power ratings mandatory.
 
-      const res=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          model:'claude-sonnet-4-20250514',
-          max_tokens:1000,
-          messages:[{role:'user',content:prompt}]
+Give one sentence on the strongest signal, one on the recommendation. Be terse. No fluff. Work only from what's above.`;
+
+    try {
+      const res = await fetch('/ai-brief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 300,
+          messages: [{ role: 'user', content: prompt }]
         })
       });
-      const data=await res.json();
-      const text=data.content?.[0]?.text||'Analysis unavailable.';
-      briefs.push({game:`${g.away_team} @ ${g.home_team}`,play:p.desc,trigger:p.trigger,amt:p.amt,text,colorClass:p.colorClass,strengthBadge:p.strengthBadge});
-    }catch(e){
-      briefs.push({game:`${g.away_team} @ ${g.home_team}`,play:p.desc,trigger:p.trigger,amt:p.amt,text:'AI analysis unavailable. Check line manually.',colorClass:'amber',strengthBadge:'WATCH'});
+      const data = await res.json();
+      let text;
+      if (!res.ok) {
+        text = `AI proxy error (${data.status || res.status}): ${data.detail || data.error || 'unknown'}.`;
+      } else {
+        text = data.content?.[0]?.text || 'No content returned.';
+      }
+      briefs.push({
+        game: `${pl.away.name} @ ${pl.home.name}`,
+        play: `${sideTeam} ML ${oddsStr}`,
+        trigger: `${a.gateType} · ${a.trigCount || triggers.length}T`,
+        amt: stake,
+        text, colorClass, strengthBadge: a.strength
+      });
+    } catch(e) {
+      briefs.push({
+        game: `${pl.away.name} @ ${pl.home.name}`,
+        play: `${sideTeam} ML ${oddsStr}`,
+        trigger: `${a.gateType} · ${a.trigCount || triggers.length}T`,
+        amt: stake,
+        text: `Network error: ${e.message}. Check /ai-brief endpoint.`,
+        colorClass: 'amber', strengthBadge: 'WATCH'
+      });
     }
   }
 
-  if(!briefs.length){container.innerHTML='<div class="ai-empty">No briefs generated.</div>';return;}
+  if (!briefs.length) { container.innerHTML='<div class="ai-empty">No briefs generated.</div>'; return; }
 
-  container.innerHTML=briefs.map(b=>`
+  container.innerHTML = briefs.map(b => `
     <div class="ai-card">
       <div class="ai-card-game">${b.game}</div>
       <div class="ai-card-play">${b.play}</div>
@@ -3066,6 +3104,124 @@ document.addEventListener('DOMContentLoaded',()=>{
   setTimeout(loadMorningScan, 500);
   // Protocol panel starts open by default (set in HTML)
 });
+</script>
+
+<!-- ── KENNY VS YOU H2H STRIP (additive — does not modify existing banner) ── -->
+<script>
+(function(){
+  // Inserts a compact comparison strip under the existing finstats-banner.
+  // Reads Kenny's track record from /api/actions-bankroll; user's data stays
+  // in the existing finstats boxes (already wired via /js/personal-data.js).
+  function fmtMoney(n){
+    if (n == null || isNaN(n)) return '—';
+    const sign = n >= 0 ? '+' : '−';
+    return sign + '$' + Math.abs(Math.round(n)).toLocaleString();
+  }
+  function fmtUnits(u){
+    if (u == null || isNaN(u)) return '—';
+    const sign = u >= 0 ? '+' : '−';
+    return sign + Math.abs(u).toFixed(1) + 'u';
+  }
+  function colorFor(n){ return n>0 ? 'var(--green)' : (n<0 ? 'var(--red)' : 'var(--text)'); }
+
+  function authedFetch(url){
+    let token = null;
+    try {
+      for (const k of Object.keys(localStorage)) {
+        if (/^sb-.*-auth-token$/.test(k)) {
+          const parsed = JSON.parse(localStorage.getItem(k));
+          token = parsed?.access_token || parsed?.currentSession?.access_token;
+          if (token) break;
+        }
+      }
+    } catch {}
+    return fetch(url, token ? { headers: { Authorization: 'Bearer ' + token } } : {});
+  }
+
+  // Build the strip ONCE and insert it after the finstats-banner.
+  function ensureStrip(){
+    if (document.getElementById('kenny-h2h-strip')) return document.getElementById('kenny-h2h-strip');
+    const banner = document.querySelector('.finstats-banner');
+    if (!banner) return null;
+    const strip = document.createElement('div');
+    strip.id = 'kenny-h2h-strip';
+    strip.style.cssText = 'display:flex;align-items:center;justify-content:flex-start;gap:18px;padding:8px 24px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(232,185,74,0.04),rgba(0,0,0,0));font-family:var(--mono);font-size:11px;letter-spacing:0.04em;flex-wrap:wrap;';
+    strip.innerHTML = `
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:0.1em;color:var(--gold);">KENNY · ACTION'S PLAYS</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--text3);text-transform:uppercase;font-size:9px;letter-spacing:0.18em;">Record</span>
+        <span id="kh-record" style="color:var(--text);font-weight:600;">—</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--text3);text-transform:uppercase;font-size:9px;letter-spacing:0.18em;">P&L</span>
+        <span id="kh-pnl" style="font-weight:600;">—</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--text3);text-transform:uppercase;font-size:9px;letter-spacing:0.18em;">Units</span>
+        <span id="kh-units" style="color:var(--gold);font-weight:600;">—</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--text3);text-transform:uppercase;font-size:9px;letter-spacing:0.18em;">Pending</span>
+        <span id="kh-pending" style="color:var(--text);font-weight:600;">—</span>
+      </div>
+      <div style="margin-left:auto;color:var(--text3);font-size:9px;text-transform:uppercase;letter-spacing:0.15em;">vs Your Record above ↑</div>
+    `;
+    banner.parentNode.insertBefore(strip, banner.nextSibling);
+    return strip;
+  }
+
+  async function loadKennyH2H(){
+    const strip = ensureStrip();
+    if (!strip) return;
+    try {
+      const [brRes, playsRes] = await Promise.all([
+        authedFetch('/api/actions-bankroll'),
+        authedFetch('/api/actions-plays')
+      ]);
+      if (!brRes.ok) {
+        document.getElementById('kh-record').textContent = '(login to view)';
+        return;
+      }
+      const bankrolls = (await brRes.json()).bankrolls || [];
+      const plays = (await playsRes.json()).plays || [];
+      const mlb = bankrolls.find(b => b.sport_id === 'mlb');
+      if (!mlb) {
+        document.getElementById('kh-record').textContent = 'no data';
+        return;
+      }
+      const startingBr = Number(mlb.starting_bankroll) || 10000;
+      const unitSize = startingBr * 0.01;
+      const trackedPnl = Number(mlb.current_bankroll) - startingBr;
+      const wins = mlb.total_wins ?? 0;
+      const losses = mlb.total_losses ?? 0;
+      const pushes = mlb.total_pushes ?? 0;
+      const wlTotal = wins + losses;
+      const winPct = wlTotal > 0 ? Math.round((wins / wlTotal) * 100) : null;
+      const pending = plays.filter(p => p.sport_id==='mlb' && p.status==='pending').length;
+
+      const recEl = document.getElementById('kh-record');
+      recEl.textContent = `${wins}-${losses}` + (pushes ? `-${pushes}` : '') +
+        (winPct != null ? ` · ${winPct}%` : '');
+
+      const pnlEl = document.getElementById('kh-pnl');
+      pnlEl.textContent = fmtMoney(trackedPnl);
+      pnlEl.style.color = colorFor(trackedPnl);
+
+      document.getElementById('kh-units').textContent = fmtUnits(trackedPnl / unitSize);
+      document.getElementById('kh-pending').textContent = String(pending);
+    } catch(e) {
+      console.error('[KennyH2H] load failed:', e);
+    }
+  }
+
+  // Wait for DOM, then load + refresh every 60s
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadKennyH2H);
+  } else {
+    loadKennyH2H();
+  }
+  setInterval(loadKennyH2H, 60000);
+})();
 </script>
 
     <!-- Phase 3: API-backed personal data + dashboard override -->
