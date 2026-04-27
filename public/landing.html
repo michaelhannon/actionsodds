@@ -941,9 +941,117 @@
       .pricing-toggle{font-size:12px;}
       .pt-btn{padding:9px 16px;font-size:12px;}
     }
+    /* ========================================================================
+       TICKER (top of page, ESPN-style, multi-league)
+       ======================================================================== */
+    .ticker-bar{
+      display:flex;align-items:stretch;
+      background:linear-gradient(180deg,#0d0d14,#070710);
+      border-bottom:1px solid var(--border);
+      height:34px;overflow:hidden;
+      position:relative;
+      z-index:101;
+    }
+    .ticker-bar::after{
+      content:'';position:absolute;top:0;right:0;width:80px;height:100%;
+      background:linear-gradient(90deg,transparent,#070710);
+      pointer-events:none;z-index:2;
+    }
+    .ticker-label{
+      flex-shrink:0;display:flex;align-items:center;gap:7px;
+      padding:0 16px;
+      background:linear-gradient(135deg,#dc2626,#991b1b);
+      color:#fff;font-family:var(--body);font-weight:700;
+      font-size:11px;letter-spacing:0.18em;text-transform:uppercase;
+      position:relative;z-index:3;
+      box-shadow:2px 0 8px rgba(220,38,38,0.3);
+    }
+    .ticker-label::after{
+      content:'';position:absolute;left:100%;top:0;
+      border-style:solid;border-width:17px 0 17px 8px;
+      border-color:transparent transparent transparent #991b1b;
+    }
+    .ticker-pulse-dot{
+      width:7px;height:7px;border-radius:50%;background:#fff;
+      box-shadow:0 0 0 0 rgba(255,255,255,0.7);
+      animation:tickerPulse 1.6s ease-in-out infinite;
+      flex-shrink:0;
+    }
+    @keyframes tickerPulse{
+      0%{box-shadow:0 0 0 0 rgba(255,255,255,0.65);transform:scale(1);}
+      60%{box-shadow:0 0 0 7px rgba(255,255,255,0);transform:scale(1.1);}
+      100%{box-shadow:0 0 0 0 rgba(255,255,255,0);transform:scale(1);}
+    }
+    .ticker-track{
+      flex:1;overflow:hidden;display:flex;align-items:center;
+      position:relative;min-width:0;
+    }
+    .ticker-content{
+      display:inline-flex;align-items:center;white-space:nowrap;
+      animation:tickerScroll 120s linear infinite;
+      padding-left:20px;
+      will-change:transform;
+    }
+    .ticker-content:hover{animation-play-state:paused;}
+    @keyframes tickerScroll{
+      from{transform:translateX(0);}
+      to{transform:translateX(-50%);}
+    }
+    /* Per-game cell */
+    .tk-game{
+      display:inline-flex;align-items:center;gap:10px;
+      padding:0 18px;
+      font-family:var(--mono);font-size:11px;
+      border-right:1px solid rgba(255,255,255,0.06);
+      color:var(--text2);
+    }
+    .tk-time{color:var(--gold);font-weight:600;font-size:10px;letter-spacing:0.05em;}
+    .tk-matchup{color:var(--text);font-weight:600;display:inline-flex;align-items:center;gap:6px;}
+    .tk-pitchers{color:var(--text3);font-size:10px;font-style:italic;}
+    .tk-line{color:var(--text2);}
+    .tk-line .tk-fav{color:var(--green);font-weight:600;}
+    .tk-line .tk-dog{color:var(--gold);font-weight:600;}
+    .tk-rl{color:var(--text3);font-size:10px;}
+    .tk-score{color:#fff;font-weight:700;font-size:12px;letter-spacing:0.04em;}
+    .tk-score-live{color:#ff6b6b;animation:pulse 2s ease-in-out infinite;}
+    .tk-score-final{color:var(--text3);font-weight:600;}
+    /* League badge inside the ticker — separates the streams visually */
+    .tk-league{
+      display:inline-block;
+      font-family:var(--body);font-weight:700;
+      font-size:9px;letter-spacing:0.18em;
+      padding:2px 7px;border-radius:3px;margin-right:2px;
+    }
+    .tk-league.mlb{background:rgba(220,38,38,0.18);color:#ff8585;border:1px solid rgba(220,38,38,0.3);}
+    .tk-league.nhl{background:rgba(91,159,184,0.18);color:#7dcce8;border:1px solid rgba(91,159,184,0.3);}
+    .tk-league.nba{background:rgba(238,123,17,0.18);color:#ffae5b;border:1px solid rgba(238,123,17,0.3);}
+    .ticker-empty{
+      padding:0 20px;font-family:var(--mono);font-size:11px;color:var(--text3);font-style:italic;
+    }
+
+    /* Hide on very small screens — too cramped */
+    @media (max-width:560px){
+      .ticker-bar{display:none;}
+    }
+
   </style>
 </head>
 <body>
+
+  <!-- ====================================================================
+       LIVE TICKER — MLB (with lines + pitchers) + NHL + NBA scoreboards
+       ==================================================================== -->
+  <div class="ticker-bar">
+    <div class="ticker-label">
+      <span class="ticker-pulse-dot"></span>
+      <span>Live</span>
+    </div>
+    <div class="ticker-track">
+      <div class="ticker-content" id="ticker-content">
+        <span class="ticker-empty">Loading today's slate across MLB · NHL · NBA…</span>
+      </div>
+    </div>
+  </div>
 
   <!-- ====================================================================
        NAV
@@ -1651,14 +1759,179 @@
     });
   }
 
+  // ── TICKER — MLB (rich) + NHL + NBA (ESPN scoreboard) ────────────────
+  // Pulls from /morning-scan for MLB (lines, pitchers from the betting engine)
+  // and ESPN's public scoreboard API for NHL + NBA (matchups, scores, status).
+  // Sorts all games by start time, renders into one continuous scrolling
+  // marquee with league-colored badges.
+
+  // Map full team names from ESPN scoreboard to the abbreviations our logo
+  // system already understands. ESPN returns team abbreviations directly so
+  // we can mostly use those, with a few aliases for cross-league overlap.
+  const ESPN_NHL_LOGOS = {
+    // ESPN uses 3-letter abbreviations for NHL — we render via ESPN's CDN since
+    // we don't have an MLB-style ID map for hockey
+  };
+
+  // ESPN logo URL helper (works for any sport)
+  function espnLogoUrl(sport, abbr){
+    if (!abbr) return null;
+    return `https://a.espncdn.com/i/teamlogos/${sport}/500/${abbr.toLowerCase()}.png`;
+  }
+  function genericTeamLogo(sport, abbr){
+    const url = espnLogoUrl(sport, abbr);
+    const safe = (abbr||'?').toString().replace(/[^A-Za-z0-9]/g,'').slice(0,3).toUpperCase();
+    if (!url) return `<span class="team-logo-fallback team-logo-sm" title="${safe}">${safe}</span>`;
+    return `<img class="team-logo team-logo-sm" src="${url}" alt="${safe}" title="${safe}" onerror="this.outerHTML='<span class=\\'team-logo-fallback team-logo-sm\\' title=\\'${safe}\\'>${safe}</span>';" />`;
+  }
+
+  // Format a game time (ISO) → "7:40 PM ET"
+  function fmtGameTime(iso){
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      return d.toLocaleTimeString('en-US', {
+        hour:'numeric', minute:'2-digit', hour12:true,
+        timeZone:'America/New_York'
+      });
+    } catch { return ''; }
+  }
+
+  // Build a single MLB game cell — rich format with lines + pitchers
+  function buildMLBCell(game){
+    const a = (game.away?.abbr) || (game.away?.name ? game.away.name.split(' ').pop().slice(0,3).toUpperCase() : '?');
+    const h = (game.home?.abbr) || (game.home?.name ? game.home.name.split(' ').pop().slice(0,3).toUpperCase() : '?');
+    const t = game.gameTime ? fmtGameTime(game.gameTime) : '';
+    const ap = game.away?.pitcher?.name || 'TBD';
+    const hp = game.home?.pitcher?.name || 'TBD';
+    const odds = game.odds || {};
+    const an = game.analysis || {};
+    const fmt = p => p == null ? '' : (p>0?'+':'')+p;
+    let lineStr = '';
+    if (odds.awayML != null && odds.homeML != null){
+      const awayFav = odds.awayML < odds.homeML;
+      const favTeam = awayFav ? a : h;
+      const dogTeam = awayFav ? h : a;
+      const favPrice = awayFav ? odds.awayML : odds.homeML;
+      const dogPrice = awayFav ? odds.homeML : odds.awayML;
+      lineStr = `<span class="tk-fav">${favTeam} ${fmt(favPrice)}</span> / <span class="tk-dog">${dogTeam} ${fmt(dogPrice)}</span>`;
+    }
+    const rl = an.rlDisplay || {};
+    let rlStr = '';
+    if (rl.homeLine && rl.homeLine.price != null){
+      rlStr = ` <span class="tk-rl">RL ${(rl.homeLine.point>0?'+':'')+rl.homeLine.point} ${fmt(rl.homeLine.price)}</span>`;
+    }
+    return `<span class="tk-game">
+      <span class="tk-league mlb">MLB</span>
+      <span class="tk-time">${t}</span>
+      <span class="tk-matchup">${teamLogoHtml(a,'sm')} ${a} @ ${teamLogoHtml(h,'sm')} ${h}</span>
+      <span class="tk-pitchers">${ap} vs ${hp}</span>
+      ${lineStr ? '<span class="tk-line">'+lineStr+'</span>' : ''}
+      ${rlStr}
+    </span>`;
+  }
+
+  // Build a single NHL or NBA cell from ESPN scoreboard event
+  function buildEspnCell(sport, event){
+    // sport = 'nhl' | 'nba'
+    const espnSportPath = sport === 'nhl' ? 'nhl' : 'nba';
+    const comp = event.competitions?.[0];
+    if (!comp) return '';
+    const teams = comp.competitors || [];
+    const away = teams.find(t => t.homeAway === 'away');
+    const home = teams.find(t => t.homeAway === 'home');
+    if (!away || !home) return '';
+    const aAbbr = away.team?.abbreviation || '?';
+    const hAbbr = home.team?.abbreviation || '?';
+    const aLogo = genericTeamLogo(espnSportPath, aAbbr);
+    const hLogo = genericTeamLogo(espnSportPath, hAbbr);
+    const status = event.status?.type || {};
+    const state = status.state; // 'pre' | 'in' | 'post'
+    const startTime = event.date ? fmtGameTime(event.date) : '';
+    const aScore = away.score;
+    const hScore = home.score;
+
+    let stateBlock = '';
+    if (state === 'in') {
+      // Live game — show period/time + score
+      const period = status.shortDetail || status.detail || 'LIVE';
+      stateBlock = `<span class="tk-score tk-score-live">${aScore}-${hScore}</span>
+                    <span class="tk-rl">${period}</span>`;
+    } else if (state === 'post') {
+      stateBlock = `<span class="tk-score tk-score-final">F ${aScore}-${hScore}</span>`;
+    } else {
+      // Scheduled
+      stateBlock = `<span class="tk-time">${startTime}</span>`;
+    }
+    const leagueClass = sport === 'nhl' ? 'nhl' : 'nba';
+    const leagueLabel = sport === 'nhl' ? 'NHL' : 'NBA';
+    return `<span class="tk-game">
+      <span class="tk-league ${leagueClass}">${leagueLabel}</span>
+      <span class="tk-matchup">${aLogo} ${aAbbr} @ ${hLogo} ${hAbbr}</span>
+      ${stateBlock}
+    </span>`;
+  }
+
+  async function loadTicker(){
+    const trackEl = document.getElementById('ticker-content');
+    if (!trackEl) return;
+
+    // Fire all three in parallel — fail individually
+    const [mlbRes, nhlRes, nbaRes] = await Promise.allSettled([
+      fetch('/morning-scan').then(r => r.ok ? r.json() : null),
+      fetch('https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard').then(r => r.ok ? r.json() : null),
+      fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard').then(r => r.ok ? r.json() : null),
+    ]);
+
+    const cells = [];
+
+    // MLB
+    if (mlbRes.status === 'fulfilled' && mlbRes.value?.games) {
+      const todayGames = mlbRes.value.games.filter(g => g.gameTime).sort((a,b) =>
+        new Date(a.gameTime) - new Date(b.gameTime)
+      );
+      for (const g of todayGames) cells.push({ time: new Date(g.gameTime).getTime(), html: buildMLBCell(g) });
+    }
+    // NHL
+    if (nhlRes.status === 'fulfilled' && nhlRes.value?.events) {
+      for (const ev of nhlRes.value.events) {
+        if (ev.date) cells.push({ time: new Date(ev.date).getTime(), html: buildEspnCell('nhl', ev) });
+      }
+    }
+    // NBA
+    if (nbaRes.status === 'fulfilled' && nbaRes.value?.events) {
+      for (const ev of nbaRes.value.events) {
+        if (ev.date) cells.push({ time: new Date(ev.date).getTime(), html: buildEspnCell('nba', ev) });
+      }
+    }
+
+    if (cells.length === 0) {
+      trackEl.innerHTML = '<span class="ticker-empty">No games on today\'s slate.</span>';
+      trackEl.style.animation = 'none';
+      return;
+    }
+
+    // Sort by start time so the ticker reads chronologically
+    cells.sort((a, b) => a.time - b.time);
+    const items = cells.map(c => c.html).join('');
+    // Build twice for seamless loop
+    trackEl.innerHTML = items + items;
+
+    // Speed: longer content = longer duration to keep readable pace
+    const baseDuration = Math.max(60, cells.length * 5);
+    trackEl.style.animation = `tickerScroll ${baseDuration}s linear infinite`;
+  }
+
   // ── Boot ─────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
     setupPricingToggle();
     setupFaq();
     loadTrackRecord();
     loadRecentResults();
-    // Refresh live data every 5 minutes
+    loadTicker();
+    // Refresh live data every 5 minutes; ticker every 90s for live scores
     setInterval(() => { loadTrackRecord(); loadRecentResults(); }, 300000);
+    setInterval(loadTicker, 90000);
   });
   </script>
 </body>
