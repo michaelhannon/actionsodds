@@ -36,11 +36,14 @@ const morningScan = require('./morning-scan');
 let publishScanPlays = null;
 let startGraderCron = null;
 let gradePendingPlays = null;
+let generateMissingBriefs = null;
+let regenerateBriefs = null;
 try {
   ({ publishScanPlays } = require('./server/actions-publisher'));
   ({ startGraderCron, gradePendingPlays } = require('./server/actions-grader'));
+  ({ generateMissingBriefs, regenerateBriefs } = require('./server/actions-briefer'));
 } catch (e) {
-  console.warn('[Boot] actions-publisher or actions-grader not loaded:', e.message);
+  console.warn('[Boot] actions-publisher/grader/briefer not loaded:', e.message);
 }
 
 if (publishScanPlays) {
@@ -52,6 +55,15 @@ if (publishScanPlays) {
         const result = await publishScanPlays(scan);
         console.log(`[Boot] Auto-publish: +${result.inserted} new, ${result.skipped} dupes`,
           result.errors.length ? `(${result.errors.length} errors)` : '');
+        // Generate briefs in the background — do NOT await, so the scan response
+        // returns immediately. Each scan adds at most a few new plays so this is
+        // bounded; cost ~$0.05-0.10/day total.
+        if (generateMissingBriefs && result.inserted > 0) {
+          generateMissingBriefs(scan)
+            .then(r => console.log(`[Boot] Briefs: ${r.generated} generated, ${r.skipped} skipped`,
+              r.errors.length ? `(${r.errors.length} errors)` : ''))
+            .catch(e => console.error('[Boot] Briefer failed:', e.message));
+        }
       } catch (e) {
         console.error('[Boot] Auto-publish failed:', e.message);
       }
@@ -506,6 +518,33 @@ app.post('/api/admin/grade-now', requireAuth, async (req, res) => {
   if (!gradePendingPlays) return res.status(503).json({ error: 'Grader not loaded' });
   try {
     const result = await gradePendingPlays();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Manual brief generation (admin only) ───
+// POST /api/admin/briefs/generate-missing — fills in any null briefs
+app.post('/api/admin/briefs/generate-missing', requireAuth, async (req, res) => {
+  if (!req.user?.is_admin) return res.status(403).json({ error: 'Admin only' });
+  if (!generateMissingBriefs) return res.status(503).json({ error: 'Briefer not loaded' });
+  try {
+    const result = await generateMissingBriefs();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/admin/briefs/regenerate — body: { ids: [...] } — overwrites
+app.post('/api/admin/briefs/regenerate', requireAuth, async (req, res) => {
+  if (!req.user?.is_admin) return res.status(403).json({ error: 'Admin only' });
+  if (!regenerateBriefs) return res.status(503).json({ error: 'Briefer not loaded' });
+  const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
+  if (!ids.length) return res.status(400).json({ error: 'ids array required' });
+  try {
+    const result = await regenerateBriefs(ids);
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });

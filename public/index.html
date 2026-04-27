@@ -1357,7 +1357,7 @@ select.form-input{cursor:pointer;}
       <div class="ai-title">AI Brief — Today's Qualifying Plays</div>
       <div class="ai-subtitle">Sharp two-sentence reads on each qualifying play</div>
     </div>
-    <button class="refresh-btn" style="padding:6px 14px;font-size:11px;" onclick="generateAIBriefs()">Generate</button>
+    <button class="refresh-btn" style="padding:6px 14px;font-size:11px;" onclick="generateAIBriefs(true)">Generate</button>
   </div>
   <div class="ai-cards" id="ai-cards">
     <div class="ai-empty">Click Generate after loading odds to get today's AI play briefs.</div>
@@ -2012,114 +2012,97 @@ async function loadOdds(){
   document.getElementById('refresh-icon').textContent='⟳';
 }
 
-// ── AI BRIEFS ────────────────────────────────────────────
-async function generateAIBriefs(){
-  const container=document.getElementById('ai-cards');
-  container.innerHTML='<div style="color:var(--text3);font-size:12px;padding:8px;">Loading morning scan…</div>';
+// ── AI BRIEFS (server-side cached) ──────────────────────
+// Briefs are generated server-side once per scan and cached in
+// actions_plays.brief. This function just reads them. Auto-runs on page
+// load (no button click needed). Manual "Generate" button now triggers
+// admin re-generation for plays missing a brief.
 
-  // Pull the SAME scan data the rest of the dashboard uses
-  let scan;
+async function authedFetchAI(url, opts){
+  let token = null;
   try {
-    const res = await fetch('/morning-scan');
-    scan = await res.json();
-  } catch(e) {
-    container.innerHTML = '<div class="ai-empty">Could not reach /morning-scan. Trigger a manual scan first.</div>';
-    return;
-  }
-  if (!scan || scan.error || !Array.isArray(scan.plays)) {
-    container.innerHTML = '<div class="ai-empty">No scan data yet. Run morning scan first.</div>';
-    return;
-  }
-
-  const playables = scan.plays.filter(g => {
-    const a = g.analysis || {};
-    return ['MAX','STRONG','ENTRY'].includes(a.strength) && a.units > 0
-           && !a.t14Kill && !a.t15Active && !a.t3Kill;
-  });
-
-  if (!playables.length) {
-    container.innerHTML = '<div class="ai-empty">No T1/T11/T12 qualifying plays on today\'s slate. Sit out — patience is the edge.</div>';
-    return;
-  }
-
-  container.innerHTML = `<div style="color:var(--text3);font-size:12px;padding:8px;">Generating AI briefs for ${playables.length} qualifying play${playables.length===1?'':'s'}…</div>`;
-
-  const briefs=[];
-  for (const pl of playables.slice(0, 6)) {
-    const a = pl.analysis;
-    const sideTeam = a.gateSide === 'home' ? pl.home.name : pl.away.name;
-    const oddsStr  = a.gateML > 0 ? `+${a.gateML}` : `${a.gateML}`;
-    const triggers = (a.triggered || []).map(t => t.code || t.name || t).filter(Boolean);
-    const stake    = Math.round(a.units * 100);
-
-    const colorMap = { MAX:'blue', STRONG:'green', ENTRY:'teal' };
-    const colorClass = colorMap[a.strength] || 'amber';
-
-    const homeStreak = `${pl.home.streak||''}${pl.home.streakLen||0}`;
-    const awayStreak = `${pl.away.streak||''}${pl.away.streakLen||0}`;
-    const homeRD = pl.home.runDiff != null ? (pl.home.runDiff >= 0 ? '+' : '') + pl.home.runDiff : 'n/a';
-    const awayRD = pl.away.runDiff != null ? (pl.away.runDiff >= 0 ? '+' : '') + pl.away.runDiff : 'n/a';
-
-    const prompt =
-`You are the Action's Odds MLB system AI. Grade this qualifying play in 2 sentences.
-
-GAME: ${pl.away.name} (${awayStreak}, RD ${awayRD}) @ ${pl.home.name} (${homeStreak}, RD ${homeRD})
-PICK: ${sideTeam} ML ${oddsStr}  |  GATE: ${a.gateType}  |  STRENGTH: ${a.strength} (${a.units}u, ~$${stake} at $10K ref)
-TRIGGERS FIRED: ${triggers.join(', ') || '—'}
-NOTES: ${(a.notes || []).join(' | ') || '—'}
-
-System rules: T1=home dog +140-+199, T11=cheap home fav -115/-135 (3+ trig), T12=home dog +110-+134 (4+ trig), T13=road dog +120+ (5 required), T14=power ratings mandatory.
-
-Give one sentence on the strongest signal, one on the recommendation. Be terse. No fluff. Work only from what's above.`;
-
-    try {
-      const res = await fetch('/ai-brief', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 300,
-          messages: [{ role: 'user', content: prompt }]
-        })
-      });
-      const data = await res.json();
-      let text;
-      if (!res.ok) {
-        text = `AI proxy error (${data.status || res.status}): ${data.detail || data.error || 'unknown'}.`;
-      } else {
-        text = data.content?.[0]?.text || 'No content returned.';
+    for (const k of Object.keys(localStorage)) {
+      if (/^sb-.*-auth-token$/.test(k)) {
+        const parsed = JSON.parse(localStorage.getItem(k));
+        token = parsed?.access_token || parsed?.currentSession?.access_token;
+        if (token) break;
       }
-      briefs.push({
-        game: `${pl.away.name} @ ${pl.home.name}`,
-        play: `${sideTeam} ML ${oddsStr}`,
-        trigger: `${a.gateType} · ${a.trigCount || triggers.length}T`,
-        amt: stake,
-        text, colorClass, strengthBadge: a.strength
-      });
-    } catch(e) {
-      briefs.push({
-        game: `${pl.away.name} @ ${pl.home.name}`,
-        play: `${sideTeam} ML ${oddsStr}`,
-        trigger: `${a.gateType} · ${a.trigCount || triggers.length}T`,
-        amt: stake,
-        text: `Network error: ${e.message}. Check /ai-brief endpoint.`,
-        colorClass: 'amber', strengthBadge: 'WATCH'
-      });
     }
+  } catch {}
+  const headers = Object.assign({}, opts?.headers || {});
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  return fetch(url, Object.assign({}, opts || {}, { headers }));
+}
+
+async function generateAIBriefs(forceRegenerate=false){
+  const container=document.getElementById('ai-cards');
+  container.innerHTML='<div style="color:var(--text3);font-size:12px;padding:8px;">Loading briefs…</div>';
+
+  // If user clicked "Generate" button explicitly, hit the admin endpoint
+  // to fill in any missing briefs first. Then load cached.
+  if (forceRegenerate) {
+    container.innerHTML='<div style="color:var(--text3);font-size:12px;padding:8px;">Generating new briefs (server-side)…</div>';
+    try {
+      await authedFetchAI('/api/admin/briefs/generate-missing', { method:'POST' });
+    } catch(e) { /* silent — we'll surface via cache load */ }
   }
 
-  if (!briefs.length) { container.innerHTML='<div class="ai-empty">No briefs generated.</div>'; return; }
+  // Load today's plays + briefs from the API
+  let plays = [];
+  try {
+    const res = await authedFetchAI('/api/actions-plays');
+    if (!res.ok) throw new Error('plays fetch ' + res.status);
+    const data = await res.json();
+    plays = (data.plays || []).filter(p => p.sport_id === 'mlb' && p.bet_type !== 'BACKFILL');
+  } catch(e) {
+    container.innerHTML = `<div class="ai-empty">Could not load plays: ${e.message}</div>`;
+    return;
+  }
 
-  container.innerHTML = briefs.map(b => `
-    <div class="ai-card">
-      <div class="ai-card-game">${b.game}</div>
-      <div class="ai-card-play">${b.play}</div>
-      <div class="ai-stats">
-        <div class="ai-stat"><div class="ai-stat-lbl">Size</div><div class="ai-stat-val">$${b.amt}</div></div>
+  // Filter to today's plays in ET
+  const todayET = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  const todays = plays.filter(p => p.play_date === todayET);
+
+  if (todays.length === 0) {
+    container.innerHTML = '<div class="ai-empty">No qualifying plays for today. Sit out — patience is the edge.</div>';
+    return;
+  }
+
+  // Strength → color class for badge
+  const colorMap = { MAX:'blue', STRONG:'green', ENTRY:'teal' };
+  function inferStrength(notes){
+    if (!notes) return 'WATCH';
+    if (notes.includes('MAX')) return 'MAX';
+    if (notes.includes('STRONG')) return 'STRONG';
+    if (notes.includes('ENTRY')) return 'ENTRY';
+    return 'WATCH';
+  }
+
+  container.innerHTML = todays.map(p => {
+    const strength = inferStrength(p.notes);
+    const colorClass = colorMap[strength] || 'amber';
+    const briefHtml = p.brief
+      ? p.brief.replace(/\n/g,'<br>')
+      : '<em style="color:var(--text3);">Brief generating server-side… refresh in 30 seconds.</em>';
+    return `
+      <div class="ai-card">
+        <div class="ai-card-game">${p.game}</div>
+        <div class="ai-card-play">${p.selection}</div>
+        <div class="ai-stats">
+          <div class="ai-stat"><div class="ai-stat-lbl">Size</div><div class="ai-stat-val">$${Math.round(p.stake)}</div></div>
+          <div class="ai-stat"><div class="ai-stat-lbl">Conf</div><div class="ai-stat-val strength-badge sb-${colorClass}">${strength}</div></div>
+        </div>
+        <div class="ai-take">${briefHtml}</div>
       </div>
-      <div class="ai-take">${b.text}</div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+}
+
+// Auto-load on page ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => generateAIBriefs(false));
+} else {
+  generateAIBriefs(false);
 }
 
 // ── TABS ──────────────────────────────────────────────────
