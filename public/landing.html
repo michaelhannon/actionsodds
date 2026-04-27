@@ -980,11 +980,11 @@
       </p>
       <div class="hero-ctas">
         <a href="/auth/signup.html" class="btn-primary">
-          Start Free Trial <span class="arrow">→</span>
+          Get Started <span class="arrow">→</span>
         </a>
         <a href="#how" class="btn-ghost">How It Works</a>
       </div>
-      <div class="hero-fineprint">7-day trial · No card required to view results</div>
+      <div class="hero-fineprint">Cancel anytime · Track record visible without an account</div>
     </div>
 
     <div class="hero-results">
@@ -1268,7 +1268,7 @@
           <div class="price-num" data-mlb-week="$10" data-mlb-month="$30" data-mlb-year="$281">$30</div>
           <div class="price-period" data-week="/ week" data-month="/ month" data-year="/ year">/ month</div>
         </div>
-        <a href="/auth/signup.html?plan=mlb" class="price-action">Start Free Trial</a>
+        <a href="/auth/signup.html?plan=mlb" class="price-action">Subscribe</a>
       </div>
 
       <!-- NHL -->
@@ -1300,7 +1300,7 @@
       </div>
     </div>
 
-    <p class="price-trial-note">7-day free trial · Cancel anytime · No card required to view results</p>
+    <p class="price-trial-note">Cancel anytime · Track record visible without an account</p>
   </section>
 
   <!-- ====================================================================
@@ -1399,11 +1399,11 @@
        ==================================================================== -->
   <section class="final">
     <h2>Tomorrow's scan goes out at 9 AM ET.</h2>
-    <p>Start your free trial now. See it run live.</p>
+    <p>Subscribe now and see it run live.</p>
     <a href="/auth/signup.html" class="btn-primary">
-      Start Free Trial <span class="arrow">→</span>
+      Subscribe Now <span class="arrow">→</span>
     </a>
-    <div class="final-meta">7 days free · No card required to view results</div>
+    <div class="final-meta">Cancel anytime · Track record visible without an account</div>
   </section>
 
   <!-- ====================================================================
@@ -1543,7 +1543,7 @@
       document.getElementById('strip-pnl').textContent = fmtMoney(d.pnl);
       document.getElementById('strip-record').textContent = fmtRecord(d.total_wins, d.total_losses, d.total_pushes);
       document.getElementById('strip-winrate').textContent = d.win_rate != null ? d.win_rate + '%' : '—';
-      document.getElementById('strip-units').textContent = d.units != null ? (d.units >= 0 ? '+' : '') + d.units.toFixed(1) + 'u' : '—';
+      document.getElementById('strip-units').textContent = d.units != null ? (d.units >= 0 ? '+' : '') + d.units.toFixed(1) : '—';
       // Nav + strip meta
       const updated = d.updated_at ? `Last graded ${timeAgo(d.updated_at)}` : 'System live';
       document.getElementById('nav-status-text').textContent = `Live · ${updated}`;
