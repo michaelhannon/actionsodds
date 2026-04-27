@@ -3,412 +3,1659 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Action's Odds — Trigger-Based Sports Betting System</title>
-  <meta name="description" content="40 years of betting research. T1–T15 trigger framework. Real P&amp;L. Action's Odds is a data-driven sports betting system for serious bettors.">
+  <title>Action's Odds — A Trigger-Based Sports Betting System</title>
+  <meta name="description" content="40 years of betting research distilled into the T1–T15 framework. Real P&amp;L. Real graded results. Action's Odds is built for serious bettors who want an edge, not picks.">
+
+  <!-- Open Graph / social -->
+  <meta property="og:title" content="Action's Odds — Bet Smarter. Built on 40 Years of Research.">
+  <meta property="og:description" content="The T1–T15 trigger framework. Real P&amp;L. No tipsters.">
+  <meta property="og:type" content="website">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://www.mlbstatic.com" crossorigin>
+  <!-- Display: Bebas Neue (kept, brand-locked). Body: Barlow Condensed.
+       Editorial / serif accent: Spectral for long-form copy in methodology
+       and founder sections — adds The Athletic's gravitas without breaking
+       the existing identity. -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
   <style>
     :root{
-      --bg:#0a0e1a;--panel:#121826;--panel2:#1a2234;--border:#2a3447;
-      --text:#e8ebf1;--text2:#a0a8b8;--text3:#6b7488;
-      --gold:#d4af37;--green:#26a269;--red:#c53030;
+      /* Brand tokens — same as dashboard so logged-in/logged-out feel consistent */
+      --bg:#0a0e1a;
+      --panel:#121826;
+      --panel2:#1a2234;
+      --border:rgba(255,255,255,0.08);
+      --border2:rgba(255,255,255,0.14);
+      --text:#e8ebf1;
+      --text2:#a0a8b8;
+      --text3:#6b7488;
+      --gold:#d4af37;
+      --gold-bright:#e6c454;
+      --green:#26a269;
+      --green-soft:#1d7a4d;
+      --red:#c53030;
+      --red-soft:#9a2424;
+
+      --display:'Bebas Neue',sans-serif;
+      --body:'Barlow Condensed',sans-serif;
+      --serif:'Spectral',Georgia,serif;
+      --mono:'JetBrains Mono',monospace;
     }
-    *{box-sizing:border-box;margin:0;padding:0;}
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html,body{background:var(--bg);}
     body{
-      background:#0a0e1a;
       color:var(--text);
-      font-family:'Barlow Condensed',sans-serif;
+      font-family:var(--body);
+      font-size:17px;
       line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow-x:hidden;
     }
+    a{color:inherit;text-decoration:none;}
+    img{max-width:100%;display:block;}
+
+    /* Subtle paper-grain texture across the whole page — kills the "flat AI dark theme" look */
+    body::before{
+      content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity:0.6;mix-blend-mode:overlay;
+    }
+
+    /* ========================================================================
+       NAV
+       ======================================================================== */
     .nav{
-      display:flex;justify-content:space-between;align-items:center;
-      padding:20px 32px;
-      max-width:1200px;margin:0 auto;
+      position:sticky;top:0;z-index:100;
+      backdrop-filter:blur(12px);
+      background:rgba(10,14,26,0.85);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-inner{
+      max-width:1280px;margin:0 auto;
+      padding:14px 32px;
+      display:flex;align-items:center;justify-content:space-between;gap:24px;
     }
     .nav-logo{
-      font-family:'Bebas Neue',sans-serif;
-      font-size:24px;letter-spacing:0.04em;
-      color:var(--text);
-      text-decoration:none;
+      font-family:var(--display);
+      font-size:26px;letter-spacing:0.06em;
+      display:flex;align-items:baseline;gap:1px;
     }
-    .nav-logo span{color:var(--red);}
-    .nav-links{display:flex;gap:8px;align-items:center;}
+    .nav-logo .a{color:var(--gold);}
+    .nav-logo .o{color:var(--text);}
+    .nav-status{
+      display:flex;align-items:center;gap:8px;
+      font-family:var(--mono);
+      font-size:11px;letter-spacing:0.04em;
+      color:var(--text3);
+      padding:5px 11px;
+      border:1px solid var(--border);
+      border-radius:99px;
+      background:rgba(255,255,255,0.02);
+    }
+    .nav-status-dot{
+      width:6px;height:6px;border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 8px var(--green);
+      animation:pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+    .nav-right{display:flex;align-items:center;gap:6px;}
     .nav-link{
+      padding:9px 16px;
+      font-family:var(--body);font-weight:500;
+      font-size:13px;letter-spacing:0.16em;text-transform:uppercase;
       color:var(--text2);
-      text-decoration:none;
-      padding:8px 16px;
-      font-size:14px;
-      letter-spacing:0.06em;
-      text-transform:uppercase;
       transition:color 0.15s ease;
     }
     .nav-link:hover{color:var(--text);}
     .nav-cta{
       background:var(--gold);color:#0a0e1a;
-      padding:10px 20px;
-      border-radius:6px;
-      text-decoration:none;
-      font-family:'Bebas Neue',sans-serif;
-      font-size:14px;letter-spacing:0.08em;
+      padding:11px 22px;
+      border-radius:5px;
+      font-family:var(--display);
+      font-size:15px;letter-spacing:0.08em;
       transition:all 0.15s ease;
     }
-    .nav-cta:hover{background:#e6c454;}
+    .nav-cta:hover{background:var(--gold-bright);}
 
-    /* Hero */
+    /* ========================================================================
+       HERO
+       ======================================================================== */
     .hero{
-      max-width:1100px;
-      margin:40px auto 80px;
-      padding:0 32px;
-      text-align:center;
+      max-width:1280px;margin:0 auto;
+      padding:80px 32px 60px;
+      display:grid;grid-template-columns:1.05fr 1fr;
+      gap:64px;
+      align-items:center;
       position:relative;
     }
-    .hero::before{
-      content:'';
-      position:absolute;
-      top:-100px;left:50%;transform:translateX(-50%);
-      width:80%;height:400px;
-      background:radial-gradient(ellipse at center, rgba(212,175,55,0.08) 0%, transparent 60%);
+    .hero::after{
+      content:'';position:absolute;
+      top:-50px;left:30%;
+      width:55%;height:500px;
+      background:radial-gradient(ellipse at center,rgba(212,175,55,0.07) 0%,transparent 65%);
       pointer-events:none;z-index:-1;
     }
-    .eyebrow{
-      display:inline-block;
-      padding:6px 14px;
-      background:rgba(212,175,55,0.1);
-      border:1px solid rgba(212,175,55,0.3);
+    .hero-eyebrow{
+      display:inline-flex;align-items:center;gap:8px;
+      font-family:var(--mono);
+      font-size:11px;letter-spacing:0.18em;text-transform:uppercase;
       color:var(--gold);
-      font-size:12px;
-      letter-spacing:0.16em;
-      text-transform:uppercase;
+      padding:6px 12px 6px 8px;
+      background:rgba(212,175,55,0.06);
+      border:1px solid rgba(212,175,55,0.25);
       border-radius:4px;
-      margin-bottom:24px;
+      margin-bottom:28px;
+    }
+    .hero-eyebrow::before{
+      content:'';display:inline-block;
+      width:5px;height:5px;border-radius:50%;
+      background:var(--gold);
     }
     .hero h1{
-      font-family:'Bebas Neue',sans-serif;
-      font-size:72px;
-      letter-spacing:0.01em;
-      line-height:1.05;
-      margin-bottom:24px;
+      font-family:var(--display);
+      font-size:88px;
+      line-height:0.92;
+      letter-spacing:-0.005em;
+      margin-bottom:28px;
     }
-    .hero h1 span{color:var(--gold);}
+    .hero h1 .accent{
+      display:block;
+      color:var(--gold);
+    }
     .hero-sub{
+      font-family:var(--serif);
+      font-style:italic;
       font-size:20px;
       color:var(--text2);
-      max-width:680px;
-      margin:0 auto 36px;
+      max-width:520px;
+      margin-bottom:36px;
+      line-height:1.5;
     }
-    .hero-ctas{
-      display:flex;justify-content:center;gap:12px;flex-wrap:wrap;
-    }
+    .hero-ctas{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
     .btn-primary{
       background:var(--gold);color:#0a0e1a;
-      padding:16px 32px;
-      border:none;
-      border-radius:8px;
-      font-family:'Bebas Neue',sans-serif;
-      font-size:18px;letter-spacing:0.08em;
-      text-decoration:none;
+      padding:16px 30px;
+      border:none;border-radius:6px;
+      font-family:var(--display);
+      font-size:18px;letter-spacing:0.1em;
       cursor:pointer;
-      transition:all 0.15s ease;
+      display:inline-flex;align-items:center;gap:10px;
+      transition:all 0.18s ease;
     }
-    .btn-primary:hover{background:#e6c454;transform:translateY(-2px);}
-    .btn-secondary{
+    .btn-primary:hover{background:var(--gold-bright);transform:translateY(-1px);box-shadow:0 8px 24px -8px rgba(212,175,55,0.4);}
+    .btn-primary .arrow{transition:transform 0.18s ease;}
+    .btn-primary:hover .arrow{transform:translateX(3px);}
+    .btn-ghost{
       background:transparent;
-      border:1px solid var(--border);
+      border:1px solid var(--border2);
       color:var(--text);
-      padding:16px 28px;
-      border-radius:8px;
-      font-family:'Bebas Neue',sans-serif;
-      font-size:18px;letter-spacing:0.08em;
-      text-decoration:none;
-      transition:all 0.15s ease;
+      padding:16px 26px;
+      border-radius:6px;
+      font-family:var(--display);
+      font-size:18px;letter-spacing:0.1em;
+      transition:all 0.18s ease;
     }
-    .btn-secondary:hover{border-color:var(--gold);color:var(--gold);}
+    .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+    .hero-fineprint{
+      margin-top:18px;
+      font-family:var(--mono);
+      font-size:11px;letter-spacing:0.1em;text-transform:uppercase;
+      color:var(--text3);
+    }
 
-    /* Stats strip */
-    .stats{
-      max-width:900px;
-      margin:0 auto 80px;
-      padding:0 32px;
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-      gap:24px;
-    }
-    .stat{
-      text-align:center;
-      padding:20px;
-      background:var(--panel);
+    /* Hero right — last night's results card stack */
+    .hero-results{
+      background:linear-gradient(180deg,rgba(255,255,255,0.025) 0%,rgba(255,255,255,0.01) 100%);
       border:1px solid var(--border);
-      border-radius:10px;
+      border-radius:14px;
+      padding:24px;
+      position:relative;
     }
-    .stat-num{
-      font-family:'Bebas Neue',sans-serif;
-      font-size:42px;
-      color:var(--gold);
-      line-height:1;
-      margin-bottom:6px;
+    .hero-results::before{
+      content:'LAST NIGHT';
+      position:absolute;top:-9px;left:24px;
+      background:var(--bg);
+      padding:0 10px;
+      font-family:var(--mono);
+      font-size:10px;letter-spacing:0.22em;
+      color:var(--text3);
     }
-    .stat-label{
-      color:var(--text2);
-      font-size:13px;
-      letter-spacing:0.1em;
-      text-transform:uppercase;
+    .hero-results-head{
+      display:flex;justify-content:space-between;align-items:baseline;
+      padding-bottom:14px;
+      border-bottom:1px solid var(--border);
+      margin-bottom:14px;
     }
-
-    /* Sections */
-    .section{
-      max-width:1100px;
-      margin:0 auto 80px;
-      padding:0 32px;
+    .hero-results-title{
+      font-family:var(--display);
+      font-size:22px;letter-spacing:0.04em;
     }
-    .section-title{
-      font-family:'Bebas Neue',sans-serif;
-      font-size:42px;
-      text-align:center;
-      margin-bottom:8px;
-      letter-spacing:0.02em;
+    .hero-results-meta{
+      font-family:var(--mono);
+      font-size:11px;letter-spacing:0.08em;
+      color:var(--text3);
     }
-    .section-sub{
-      text-align:center;
-      color:var(--text2);
-      font-size:17px;
-      max-width:600px;
-      margin:0 auto 48px;
-    }
-
-    /* Feature grid */
-    .features{
+    .result-card{
       display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-      gap:20px;
+      grid-template-columns:auto 1fr auto;
+      gap:14px;align-items:center;
+      padding:14px 4px;
+      border-bottom:1px solid var(--border);
     }
-    .feature{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:28px;
+    .result-card:last-child{border-bottom:none;padding-bottom:4px;}
+    .result-game{display:flex;align-items:center;gap:6px;}
+    .result-game .team-logo{width:22px;height:22px;}
+    .result-game .vs{color:var(--text3);font-size:13px;}
+    .result-body{}
+    .result-bet{
+      font-family:var(--display);
+      font-size:17px;letter-spacing:0.02em;
+      color:var(--text);
     }
-    .feature-icon{
-      width:42px;height:42px;
-      background:rgba(212,175,55,0.1);
-      border:1px solid rgba(212,175,55,0.3);
-      border-radius:8px;
-      display:flex;align-items:center;justify-content:center;
-      font-size:20px;
-      margin-bottom:16px;
+    .result-meta{
+      font-family:var(--mono);
+      font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;
+      color:var(--text3);
     }
-    .feature-title{
-      font-family:'Bebas Neue',sans-serif;
-      font-size:22px;
-      letter-spacing:0.03em;
-      margin-bottom:8px;
+    .result-grade{
+      display:flex;flex-direction:column;align-items:flex-end;gap:3px;
     }
-    .feature-desc{
-      color:var(--text2);
+    .grade-badge{
+      font-family:var(--display);
+      font-size:13px;letter-spacing:0.1em;
+      padding:3px 10px;
+      border-radius:3px;
+    }
+    .grade-w{background:rgba(38,162,105,0.15);color:#4ade80;border:1px solid rgba(38,162,105,0.3);}
+    .grade-l{background:rgba(197,48,48,0.15);color:#f87171;border:1px solid rgba(197,48,48,0.3);}
+    .grade-p{background:rgba(160,168,184,0.12);color:var(--text2);border:1px solid var(--border);}
+    .grade-pnl{
+      font-family:var(--mono);font-size:13px;font-weight:600;
+    }
+    .grade-pnl.win{color:#4ade80;}
+    .grade-pnl.loss{color:#f87171;}
+    .grade-pnl.push{color:var(--text3);}
+    .hero-results-empty{
+      padding:30px 8px;
+      text-align:center;
+      color:var(--text3);
+      font-style:italic;
+      font-family:var(--serif);
       font-size:15px;
     }
 
-    /* How it works */
-    .steps{
+    /* ========================================================================
+       TRACK RECORD STRIP
+       ======================================================================== */
+    .strip{
+      max-width:1280px;margin:0 auto;
+      padding:60px 32px;
       display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-      gap:20px;
+      grid-template-columns:repeat(4,1fr);
+      gap:0;
+      border-top:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+      position:relative;
     }
+    .strip-cell{
+      padding:0 28px;
+      border-right:1px solid var(--border);
+      position:relative;
+    }
+    .strip-cell:last-child{border-right:none;}
+    .strip-num{
+      font-family:var(--display);
+      font-size:54px;line-height:1;
+      letter-spacing:-0.005em;
+      margin-bottom:6px;
+      color:var(--gold);
+    }
+    .strip-num.subtle{color:var(--text);}
+    .strip-label{
+      font-family:var(--mono);
+      font-size:10px;letter-spacing:0.22em;text-transform:uppercase;
+      color:var(--text3);
+    }
+    .strip-meta{
+      max-width:1280px;margin:0 auto;
+      padding:14px 32px 0;
+      display:flex;align-items:center;gap:8px;
+      font-family:var(--mono);
+      font-size:10.5px;letter-spacing:0.16em;text-transform:uppercase;
+      color:var(--text3);
+    }
+    .strip-meta::before{
+      content:'';width:5px;height:5px;border-radius:50%;
+      background:var(--green);box-shadow:0 0 6px var(--green);
+      animation:pulse 2s ease-in-out infinite;
+    }
+
+    /* ========================================================================
+       SHARED — section heads
+       ======================================================================== */
+    .sec{
+      max-width:1280px;margin:0 auto;
+      padding:90px 32px;
+    }
+    .sec-narrow{max-width:980px;}
+    .sec-head{margin-bottom:48px;}
+    .sec-eyebrow{
+      font-family:var(--mono);
+      font-size:11px;letter-spacing:0.22em;text-transform:uppercase;
+      color:var(--gold);
+      margin-bottom:14px;
+    }
+    .sec-title{
+      font-family:var(--display);
+      font-size:54px;line-height:1.02;
+      letter-spacing:-0.005em;
+    }
+    .sec-sub{
+      font-family:var(--serif);
+      font-size:19px;font-style:italic;
+      color:var(--text2);
+      margin-top:14px;
+      max-width:640px;
+    }
+
+    /* ========================================================================
+       HOW IT WORKS — alternating left/right rows
+       ======================================================================== */
     .step{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:80px;align-items:center;
+      padding:54px 0;
+      border-bottom:1px solid var(--border);
+    }
+    .step:last-child{border-bottom:none;}
+    .step.flip .step-text{order:2;}
+    .step.flip .step-visual{order:1;}
+    .step-num{
+      font-family:var(--display);
+      font-size:74px;line-height:0.9;
+      color:var(--gold);
+      opacity:0.35;
+      margin-bottom:8px;
+    }
+    .step-title{
+      font-family:var(--display);
+      font-size:42px;line-height:1.04;
+      letter-spacing:-0.005em;
+      margin-bottom:18px;
+    }
+    .step-desc{
+      font-family:var(--serif);
+      font-size:18px;line-height:1.6;
+      color:var(--text2);
+    }
+    .step-visual{
       background:var(--panel);
       border:1px solid var(--border);
       border-radius:12px;
-      padding:28px;
+      padding:24px;
       position:relative;
+      overflow:hidden;
     }
-    .step-num{
-      position:absolute;top:-14px;left:24px;
-      background:var(--gold);
-      color:#0a0e1a;
-      width:32px;height:32px;
-      border-radius:50%;
-      display:flex;align-items:center;justify-content:center;
-      font-family:'Bebas Neue',sans-serif;
-      font-size:18px;
-    }
-    .step-title{
-      font-family:'Bebas Neue',sans-serif;
-      font-size:20px;
-      letter-spacing:0.03em;
-      margin:8px 0;
-    }
-    .step-desc{
-      color:var(--text2);
-      font-size:14px;
+    .step-visual::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,var(--gold),transparent);
+      opacity:0.6;
     }
 
-    /* Final CTA */
-    .final-cta{
-      max-width:800px;
-      margin:0 auto 60px;
-      padding:48px 32px;
-      background:linear-gradient(135deg, rgba(212,175,55,0.1) 0%, var(--panel) 100%);
-      border:1px solid var(--gold);
+    /* Step 1 — fake morning scan grid */
+    .scan-grid{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
+      font-family:var(--mono);
+      font-size:11px;letter-spacing:0.04em;
+    }
+    .scan-cell{
+      padding:8px 6px;
+      border-radius:4px;
+      text-align:center;
+      background:rgba(255,255,255,0.02);
+      border:1px solid var(--border);
+    }
+    .scan-cell.hit{
+      background:rgba(38,162,105,0.12);
+      border-color:rgba(38,162,105,0.3);
+      color:#4ade80;
+    }
+    .scan-cell.fade{
+      background:rgba(197,48,48,0.1);
+      border-color:rgba(197,48,48,0.25);
+      color:#f87171;
+    }
+    .scan-cell.warn{
+      background:rgba(212,175,55,0.1);
+      border-color:rgba(212,175,55,0.3);
+      color:var(--gold);
+    }
+    .scan-head{
+      grid-column:1/-1;
+      display:flex;justify-content:space-between;
+      padding:0 4px 12px;
+      font-family:var(--mono);
+      font-size:10.5px;letter-spacing:0.16em;text-transform:uppercase;
+      color:var(--text3);
+      border-bottom:1px solid var(--border);
+      margin-bottom:14px;
+    }
+
+    /* Step 2 — qualifying play card preview */
+    .play-card-mock{
+      background:linear-gradient(180deg,var(--panel2) 0%,var(--panel) 100%);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:18px;
+    }
+    .pcm-head{
+      display:flex;align-items:center;justify-content:space-between;
+      padding-bottom:12px;border-bottom:1px solid var(--border);
+      margin-bottom:14px;
+    }
+    .pcm-teams{display:flex;align-items:center;gap:8px;}
+    .pcm-teams .team-logo{width:26px;height:26px;}
+    .pcm-time{
+      font-family:var(--mono);font-size:11px;color:var(--text3);
+    }
+    .pcm-bet{
+      font-family:var(--display);
+      font-size:24px;letter-spacing:0.02em;
+      color:var(--green);
+      margin-bottom:8px;
+    }
+    .pcm-trigger{
+      display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;
+    }
+    .pcm-tag{
+      font-family:var(--mono);
+      font-size:10.5px;letter-spacing:0.1em;
+      padding:3px 8px;border-radius:3px;
+      background:rgba(212,175,55,0.1);
+      border:1px solid rgba(212,175,55,0.25);
+      color:var(--gold);
+    }
+    .pcm-tag.t-strong{background:rgba(38,162,105,0.12);border-color:rgba(38,162,105,0.3);color:#4ade80;}
+    .pcm-meta{
+      display:flex;justify-content:space-between;
+      font-family:var(--mono);font-size:11px;
+      color:var(--text3);padding-top:12px;
+      border-top:1px solid var(--border);
+    }
+    .pcm-meta strong{color:var(--text);font-weight:600;}
+
+    /* Step 3 — ledger preview */
+    .ledger-mock{
+      font-family:var(--mono);font-size:12px;
+    }
+    .lm-head{
+      display:grid;grid-template-columns:1fr auto auto auto;gap:12px;
+      padding-bottom:10px;
+      border-bottom:1px solid var(--border);
+      font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;
+      color:var(--text3);
+    }
+    .lm-row{
+      display:grid;grid-template-columns:1fr auto auto auto;gap:12px;
+      padding:11px 0;
+      border-bottom:1px solid var(--border);
+      align-items:center;
+    }
+    .lm-row:last-child{border-bottom:none;}
+    .lm-team{display:flex;align-items:center;gap:6px;color:var(--text);}
+    .lm-team .team-logo{width:18px;height:18px;}
+    .lm-stake{color:var(--text2);}
+    .lm-grade{
+      font-family:var(--display);
+      font-size:13px;letter-spacing:0.08em;
+      padding:2px 7px;border-radius:3px;
+    }
+    .lm-pnl{font-weight:600;font-size:12.5px;}
+    .lm-foot{
+      display:flex;justify-content:space-between;align-items:baseline;
+      padding-top:14px;
+      font-family:var(--mono);font-size:11px;
+      color:var(--text3);
+    }
+    .lm-foot strong{
+      font-family:var(--display);font-size:18px;letter-spacing:0.04em;
+      color:var(--green);
+    }
+
+    /* ========================================================================
+       TRIGGERS — partial reveal
+       ======================================================================== */
+    .triggers{
+      display:grid;grid-template-columns:1fr 1.1fr;gap:64px;align-items:start;
+    }
+    .triggers-text p{
+      font-family:var(--serif);font-size:18px;line-height:1.65;
+      color:var(--text2);margin-bottom:18px;
+    }
+    .triggers-text p:first-child{
+      font-size:22px;color:var(--text);
+      border-left:3px solid var(--gold);
+      padding-left:18px;
+      font-style:italic;
+    }
+    .triggers-table{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:10px;
+      overflow:hidden;
+    }
+    .tt-head{
+      display:grid;grid-template-columns:60px 1fr auto;
+      gap:14px;padding:14px 18px;
+      background:rgba(255,255,255,0.02);
+      border-bottom:1px solid var(--border);
+      font-family:var(--mono);
+      font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;
+      color:var(--text3);
+    }
+    .tt-row{
+      display:grid;grid-template-columns:60px 1fr auto;
+      gap:14px;padding:14px 18px;
+      border-bottom:1px solid var(--border);
+      align-items:center;
+    }
+    .tt-row:last-child{border-bottom:none;}
+    .tt-code{
+      font-family:var(--display);font-size:18px;letter-spacing:0.04em;
+      color:var(--gold);
+    }
+    .tt-name{
+      font-family:var(--body);font-weight:500;font-size:15px;color:var(--text);
+    }
+    .tt-cond{
+      font-family:var(--mono);font-size:11px;color:var(--text3);
+      margin-top:2px;
+    }
+    .tt-stat{
+      font-family:var(--mono);font-size:11px;color:var(--text2);
+      letter-spacing:0.04em;
+    }
+    .tt-row.locked{
+      opacity:0.4;
+      filter:blur(2px);
+      pointer-events:none;
+      user-select:none;
+    }
+    .tt-overlay{
+      padding:24px 18px;
+      text-align:center;
+      background:linear-gradient(180deg,transparent 0%,rgba(212,175,55,0.04) 100%);
+      border-top:1px solid rgba(212,175,55,0.2);
+    }
+    .tt-overlay-text{
+      font-family:var(--display);font-size:17px;letter-spacing:0.06em;
+      color:var(--gold);margin-bottom:10px;
+    }
+    .tt-overlay-sub{
+      font-family:var(--mono);font-size:11px;letter-spacing:0.1em;
+      color:var(--text3);
+    }
+
+    /* ========================================================================
+       PRICING
+       ======================================================================== */
+    .pricing-toggle{
+      display:inline-flex;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:99px;
+      padding:5px;
+      margin:0 auto 48px;
+      font-family:var(--display);
+    }
+    .pricing-toggle-wrap{display:flex;justify-content:center;}
+    .pt-btn{
+      padding:11px 26px;
+      border:none;background:transparent;
+      color:var(--text2);
+      font-family:inherit;font-size:14px;letter-spacing:0.1em;
+      cursor:pointer;border-radius:99px;
+      transition:all 0.18s ease;
+      display:inline-flex;align-items:center;gap:8px;
+    }
+    .pt-btn.active{
+      background:var(--gold);color:#0a0e1a;
+    }
+    .pt-save{
+      font-family:var(--mono);font-size:10px;letter-spacing:0.08em;
+      padding:2px 7px;border-radius:3px;
+      background:rgba(38,162,105,0.2);color:#4ade80;
+    }
+    .pt-btn.active .pt-save{background:rgba(0,0,0,0.18);color:#0a0e1a;}
+
+    .price-grid{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+    }
+    .price-card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:32px 28px;
+      position:relative;
+      transition:all 0.2s ease;
+    }
+    .price-card.active{
+      border-color:var(--gold);
+      box-shadow:0 0 0 1px var(--gold), 0 12px 40px -16px rgba(212,175,55,0.3);
+    }
+    .price-card.active::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:var(--gold);
+      border-radius:14px 14px 0 0;
+    }
+    .price-head{
+      display:flex;justify-content:space-between;align-items:baseline;
+      margin-bottom:18px;
+    }
+    .price-sport{
+      font-family:var(--display);
+      font-size:36px;letter-spacing:0.04em;
+    }
+    .price-card[data-sport="mlb"] .price-sport{color:var(--red);}
+    .price-card[data-sport="nhl"] .price-sport{color:#5b9fb8;}
+    .price-card[data-sport="nba"] .price-sport{color:var(--red);}
+    .price-card.locked .price-sport{opacity:0.5;}
+    .price-tag{
+      font-family:var(--mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;
+      padding:4px 10px;border-radius:3px;
+      background:rgba(212,175,55,0.1);
+      border:1px solid rgba(212,175,55,0.3);
+      color:var(--gold);
+    }
+    .price-tag.locked{
+      background:rgba(255,255,255,0.04);
+      border-color:var(--border);
+      color:var(--text3);
+    }
+    .price-desc{
+      font-family:var(--serif);font-size:15px;font-style:italic;
+      color:var(--text2);
+      min-height:48px;
+      margin-bottom:24px;
+      line-height:1.5;
+    }
+    .price-amount{
+      display:flex;align-items:baseline;gap:8px;margin-bottom:24px;
+    }
+    .price-num{
+      font-family:var(--display);
+      font-size:64px;line-height:0.9;
+      letter-spacing:-0.005em;
+      color:var(--text);
+    }
+    .price-card.locked .price-num{color:var(--text3);}
+    .price-period{
+      font-family:var(--body);font-size:15px;
+      color:var(--text2);
+    }
+    .price-action{
+      display:block;
+      width:100%;
+      padding:14px 18px;
+      text-align:center;
+      border-radius:6px;
+      font-family:var(--display);
+      font-size:15px;letter-spacing:0.1em;
+      transition:all 0.18s ease;
+      cursor:pointer;
+      background:transparent;
+      border:1px solid var(--border2);
+      color:var(--text);
+    }
+    .price-card.active .price-action{
+      background:var(--gold);color:#0a0e1a;border-color:var(--gold);
+    }
+    .price-card.active .price-action:hover{background:var(--gold-bright);}
+    .price-card:not(.active) .price-action:hover{
+      border-color:var(--gold);color:var(--gold);
+    }
+    .price-card.locked .price-action{
+      cursor:not-allowed;
+      opacity:0.5;
+    }
+    .price-trial-note{
+      text-align:center;
+      margin-top:32px;
+      font-family:var(--mono);
+      font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+      color:var(--text3);
+    }
+
+    /* ========================================================================
+       FOUNDER / METHODOLOGY LETTER
+       ======================================================================== */
+    .letter{
+      max-width:720px;margin:0 auto;
+      padding:90px 32px;
+    }
+    .letter-eyebrow{
+      font-family:var(--mono);
+      font-size:11px;letter-spacing:0.24em;text-transform:uppercase;
+      color:var(--gold);
+      text-align:center;
+      margin-bottom:18px;
+    }
+    .letter-title{
+      font-family:var(--display);
+      font-size:52px;line-height:1;
+      letter-spacing:-0.005em;
+      text-align:center;
+      margin-bottom:48px;
+    }
+    .letter p{
+      font-family:var(--serif);
+      font-size:18px;line-height:1.75;
+      color:var(--text);
+      margin-bottom:22px;
+    }
+    .letter p:first-of-type::first-letter{
+      font-family:var(--display);
+      font-size:60px;float:left;
+      line-height:0.95;margin:6px 10px 0 0;
+      color:var(--gold);
+    }
+    .letter-sig{
+      font-family:var(--display);
+      font-size:18px;letter-spacing:0.06em;
+      color:var(--gold);
+      margin-top:36px;
+      padding-top:24px;
+      border-top:1px solid var(--border);
+    }
+
+    /* ========================================================================
+       FAQ
+       ======================================================================== */
+    .faq-list{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--border);}
+    .faq-item{
+      border-bottom:1px solid var(--border);
+    }
+    .faq-q{
+      width:100%;
+      display:flex;justify-content:space-between;align-items:center;
+      padding:24px 4px;
+      background:transparent;border:none;
+      cursor:pointer;
+      text-align:left;
+      font-family:var(--display);
+      font-size:22px;letter-spacing:0.02em;
+      color:var(--text);
+      transition:color 0.18s ease;
+    }
+    .faq-q:hover{color:var(--gold);}
+    .faq-icon{
+      font-family:var(--display);
+      font-size:26px;color:var(--gold);
+      transition:transform 0.2s ease;
+    }
+    .faq-item.open .faq-icon{transform:rotate(45deg);}
+    .faq-a{
+      max-height:0;overflow:hidden;
+      transition:max-height 0.3s ease,padding 0.3s ease;
+      padding:0 4px;
+    }
+    .faq-item.open .faq-a{
+      max-height:500px;
+      padding:0 4px 24px;
+    }
+    .faq-a p{
+      font-family:var(--serif);
+      font-size:17px;line-height:1.65;
+      color:var(--text2);
+    }
+
+    /* ========================================================================
+       FINAL CTA
+       ======================================================================== */
+    .final{
+      max-width:980px;margin:60px auto;
+      padding:64px 40px;
+      background:
+        radial-gradient(ellipse at top right,rgba(212,175,55,0.08) 0%,transparent 60%),
+        linear-gradient(180deg,var(--panel2) 0%,var(--panel) 100%);
+      border:1px solid var(--border2);
       border-radius:16px;
       text-align:center;
+      position:relative;
+      overflow:hidden;
     }
-    .final-cta h2{
-      font-family:'Bebas Neue',sans-serif;
-      font-size:42px;
-      margin-bottom:12px;
+    .final::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,transparent,var(--gold),transparent);
     }
-    .final-cta p{
-      color:var(--text2);
-      font-size:17px;
-      margin-bottom:24px;
+    .final h2{
+      font-family:var(--display);
+      font-size:54px;line-height:1.02;
+      margin-bottom:16px;
+    }
+    .final p{
+      font-family:var(--serif);font-style:italic;
+      font-size:19px;color:var(--text2);
+      max-width:560px;margin:0 auto 28px;
+    }
+    .final-meta{
+      margin-top:18px;
+      font-family:var(--mono);
+      font-size:11px;letter-spacing:0.16em;text-transform:uppercase;
+      color:var(--text3);
     }
 
-    /* Footer */
+    /* ========================================================================
+       FOOTER
+       ======================================================================== */
     .footer{
-      max-width:1100px;
-      margin:0 auto;
-      padding:32px;
+      max-width:1280px;margin:0 auto;
+      padding:40px 32px;
       border-top:1px solid var(--border);
-      text-align:center;
-      color:var(--text3);
-      font-size:13px;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:32px;align-items:start;
     }
-    .footer a{color:var(--text2);text-decoration:none;margin:0 8px;}
-    .footer a:hover{color:var(--gold);}
-    .disclaimer{
-      max-width:700px;
-      margin:24px auto 0;
-      font-size:12px;
-      color:var(--text3);
-      line-height:1.6;
+    .footer-brand{
+      font-family:var(--display);
+      font-size:24px;letter-spacing:0.06em;
+    }
+    .footer-brand .a{color:var(--gold);}
+    .footer-tagline{
+      font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+      color:var(--text3);margin-top:4px;
+    }
+    .footer-links{
+      display:flex;gap:24px;
+      font-family:var(--body);font-size:13px;letter-spacing:0.16em;text-transform:uppercase;
+    }
+    .footer-links a{color:var(--text2);}
+    .footer-links a:hover{color:var(--gold);}
+    .footer-disc{
+      grid-column:1/-1;
+      padding-top:24px;
+      margin-top:8px;
+      border-top:1px solid var(--border);
+      font-family:var(--mono);
+      font-size:11px;line-height:1.7;color:var(--text3);
+      letter-spacing:0.02em;
     }
 
-    @media (max-width: 640px) {
+    /* ========================================================================
+       TEAM LOGOS — copied verbatim from dashboard so logos render identically
+       ======================================================================== */
+    .team-logo{display:inline-block;vertical-align:middle;flex-shrink:0;object-fit:contain;}
+    .team-logo-link{display:inline-flex;align-items:center;text-decoration:none;color:inherit;cursor:pointer;transition:transform 0.12s;line-height:0;}
+    .team-logo-link:hover{transform:scale(1.15);}
+    .team-logo-sm{width:18px;height:18px;}
+    .team-logo-md{width:22px;height:22px;}
+    .team-logo-lg{width:28px;height:28px;}
+    .team-logo-fallback{
+      display:inline-flex;align-items:center;justify-content:center;
+      font-family:var(--mono);font-weight:700;font-size:9px;
+      background:rgba(255,255,255,0.06);border-radius:50%;color:var(--text2);
+    }
+
+    /* ========================================================================
+       RESPONSIVE
+       ======================================================================== */
+    @media (max-width:980px){
+      .hero{grid-template-columns:1fr;gap:48px;padding:48px 24px;}
+      .hero h1{font-size:64px;}
+      .hero-sub{font-size:18px;}
+      .strip{grid-template-columns:repeat(2,1fr);}
+      .strip-cell{padding:18px 20px;border-right:none;border-bottom:1px solid var(--border);}
+      .strip-cell:nth-child(2n){border-right:none;}
+      .strip-cell:nth-last-child(-n+2){border-bottom:none;}
+      .strip-num{font-size:42px;}
+      .step{grid-template-columns:1fr;gap:32px;padding:40px 0;}
+      .step.flip .step-text{order:initial;}
+      .step.flip .step-visual{order:initial;}
+      .step-title{font-size:32px;}
+      .triggers{grid-template-columns:1fr;gap:36px;}
+      .price-grid{grid-template-columns:1fr;}
+      .sec{padding:60px 24px;}
+      .sec-title{font-size:36px;}
+      .letter{padding:60px 24px;}
+      .letter-title{font-size:38px;}
+      .final{padding:44px 24px;margin:40px 24px;}
+      .final h2{font-size:36px;}
+      .footer{grid-template-columns:1fr;gap:18px;}
+    }
+    @media (max-width:560px){
+      .nav-status{display:none;}
+      .nav-link{display:none;}
       .hero h1{font-size:48px;}
-      .hero-sub{font-size:17px;}
-      .section-title{font-size:32px;}
+      .strip{grid-template-columns:1fr;}
+      .strip-cell{border-right:none;}
+      .pricing-toggle{font-size:12px;}
+      .pt-btn{padding:9px 16px;font-size:12px;}
     }
   </style>
 </head>
 <body>
+
+  <!-- ====================================================================
+       NAV
+       ==================================================================== -->
   <nav class="nav">
-    <a href="/landing.html" class="nav-logo">ACTION'S<span>ODDS</span></a>
-    <div class="nav-links">
-      <a href="/auth/login.html" class="nav-link">Sign In</a>
-      <a href="/auth/signup.html" class="nav-cta">Get Started</a>
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <span class="a">ACTION'S</span><span class="o">ODDS</span>
+      </a>
+      <div class="nav-status" id="nav-status">
+        <span class="nav-status-dot"></span>
+        <span id="nav-status-text">Live · loading…</span>
+      </div>
+      <div class="nav-right">
+        <a href="/auth/login.html" class="nav-link">Sign In</a>
+        <a href="/auth/signup.html" class="nav-cta">Get Started</a>
+      </div>
     </div>
   </nav>
 
+  <!-- ====================================================================
+       HERO
+       ==================================================================== -->
   <section class="hero">
-    <div class="eyebrow">Trigger-Based Sports Betting System</div>
-    <h1>Bet smarter.<br><span>Built on 40 years of research.</span></h1>
-    <p class="hero-sub">
-      Action's Odds is a data-driven sports betting system. T1–T15 triggers. Power ratings. Bullpen depletion. Streak collisions. Real P&amp;L tracking. Built for bettors who want an edge — not picks.
+    <div class="hero-text">
+      <div class="hero-eyebrow">Trigger-based sports betting system</div>
+      <h1>
+        Bet smarter.
+        <span class="accent">Built on 40 years<br>of research.</span>
+      </h1>
+      <p class="hero-sub">
+        The T1–T15 framework. Real P&amp;L. No tipsters, no parlays of the day —
+        just a disciplined, repeatable edge.
+      </p>
+      <div class="hero-ctas">
+        <a href="/auth/signup.html" class="btn-primary">
+          Start Free Trial <span class="arrow">→</span>
+        </a>
+        <a href="#how" class="btn-ghost">How It Works</a>
+      </div>
+      <div class="hero-fineprint">7-day trial · No card required to view results</div>
+    </div>
+
+    <div class="hero-results">
+      <div class="hero-results-head">
+        <div class="hero-results-title">Recent Results</div>
+        <div class="hero-results-meta" id="hr-meta">Loading…</div>
+      </div>
+      <div id="hr-list">
+        <div class="hero-results-empty">Loading recent graded plays…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       TRACK RECORD STRIP
+       ==================================================================== -->
+  <div class="strip-meta">
+    <span id="strip-meta-text">Updated automatically · Live data</span>
+  </div>
+  <section class="strip" id="strip">
+    <div class="strip-cell">
+      <div class="strip-num" id="strip-pnl">—</div>
+      <div class="strip-label">2026 Season P&amp;L</div>
+    </div>
+    <div class="strip-cell">
+      <div class="strip-num subtle" id="strip-record">—</div>
+      <div class="strip-label">Win-Loss Record</div>
+    </div>
+    <div class="strip-cell">
+      <div class="strip-num" id="strip-winrate">—</div>
+      <div class="strip-label">Win Rate</div>
+    </div>
+    <div class="strip-cell">
+      <div class="strip-num subtle" id="strip-units">—</div>
+      <div class="strip-label">Units Up</div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       HOW IT WORKS
+       ==================================================================== -->
+  <section class="sec" id="how">
+    <div class="sec-head">
+      <div class="sec-eyebrow">The Process</div>
+      <h2 class="sec-title">A daily ritual,<br>not a hot take.</h2>
+      <p class="sec-sub">
+        The same scan runs every morning at 9 AM ET, against every game. Most days surface
+        zero qualifying plays. That's the point.
+      </p>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-text">
+        <div class="step-num">01</div>
+        <h3 class="step-title">Daily scan, every game.</h3>
+        <p class="step-desc">
+          At 9 AM ET, the system pulls live data on all 30 teams: standings, run differentials,
+          starting-pitcher FIP, bullpen depletion over the last 48 hours, weather, line moves.
+          Every game gets graded — not just the ones with a play.
+        </p>
+      </div>
+      <div class="step-visual">
+        <div class="scan-grid">
+          <div class="scan-head">
+            <span>9:14 AM ET</span><span>15 GAMES SCANNED</span>
+          </div>
+          <div class="scan-cell warn">SEA @ MIN<br>T2 · W4 vs L5</div>
+          <div class="scan-cell hit">STL @ PIT<br>T11 · 4T</div>
+          <div class="scan-cell">CHC @ MIA<br>—</div>
+          <div class="scan-cell hit">NYY @ TEX<br>T1 · 5T</div>
+          <div class="scan-cell">LAD @ COL<br>—</div>
+          <div class="scan-cell fade">BAL @ TB<br>T15 fade</div>
+          <div class="scan-cell">ATL @ WSH<br>—</div>
+          <div class="scan-cell">SF @ SD<br>watch</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step flip">
+      <div class="step-text">
+        <div class="step-num">02</div>
+        <h3 class="step-title">Triggers fire — or they don't.</h3>
+        <p class="step-desc">
+          Each game runs through the T1–T15 framework with R1–R8 root modifiers stacked on top.
+          Streak collisions, run-differential gaps, regression flags, divisional amplifiers.
+          Only qualifying plays surface. Most days produce one. Some produce none.
+        </p>
+      </div>
+      <div class="step-visual">
+        <div class="play-card-mock">
+          <div class="pcm-head">
+            <div class="pcm-teams">
+              <span data-logo="STL" class="lg-md"></span>
+              <span style="color:var(--text3);font-family:var(--mono);font-size:13px;">@</span>
+              <span data-logo="PIT" class="lg-md"></span>
+            </div>
+            <div class="pcm-time">6:40 PM ET</div>
+          </div>
+          <div class="pcm-bet">Pittsburgh Pirates ML −130</div>
+          <div class="pcm-trigger">
+            <span class="pcm-tag t-strong">MAX · 3u</span>
+            <span class="pcm-tag">T11 · 4T</span>
+            <span class="pcm-tag">T6 FIP +1.57</span>
+            <span class="pcm-tag">T8 BULLPEN</span>
+          </div>
+          <div class="pcm-meta">
+            <span>STAKE <strong>$300</strong></span>
+            <span>RL +1.5 −188</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-text">
+        <div class="step-num">03</div>
+        <h3 class="step-title">Sized, tracked, graded.</h3>
+        <p class="step-desc">
+          Bet sizing is mechanical. 1 unit on entry, 2 on strong, 3 on max — based on confidence
+          tier, not feel. Every play tracked in your private ledger. Every result auto-graded
+          against the box score the moment the game ends.
+        </p>
+      </div>
+      <div class="step-visual">
+        <div class="ledger-mock">
+          <div class="lm-head">
+            <span>Play</span><span>Stake</span><span>Grade</span><span>P&amp;L</span>
+          </div>
+          <div class="lm-row">
+            <span class="lm-team"><span data-logo="MIN" class="lg-sm"></span>MIN +114</span>
+            <span class="lm-stake">$200</span>
+            <span class="lm-grade grade-w">W</span>
+            <span class="lm-pnl" style="color:#4ade80;">+$228</span>
+          </div>
+          <div class="lm-row">
+            <span class="lm-team"><span data-logo="PIT" class="lg-sm"></span>PIT −130</span>
+            <span class="lm-stake">$300</span>
+            <span class="lm-grade grade-w">W</span>
+            <span class="lm-pnl" style="color:#4ade80;">+$231</span>
+          </div>
+          <div class="lm-row">
+            <span class="lm-team"><span data-logo="TEX" class="lg-sm"></span>TEX +144</span>
+            <span class="lm-stake">$300</span>
+            <span class="lm-grade grade-w">W</span>
+            <span class="lm-pnl" style="color:#4ade80;">+$432</span>
+          </div>
+          <div class="lm-foot">
+            <span>NIGHT TOTAL</span><strong>+$891 · 3-0</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       TRIGGERS
+       ==================================================================== -->
+  <section class="sec sec-narrow">
+    <div class="sec-head">
+      <div class="sec-eyebrow">The Framework</div>
+      <h2 class="sec-title">Fifteen triggers,<br>eight modifiers.</h2>
+      <p class="sec-sub">
+        The framework is the product. Picks are downstream of the system. Members see all of it.
+      </p>
+    </div>
+
+    <div class="triggers">
+      <div class="triggers-text">
+        <p>
+          Most pick services sell their picks. We sell the system that produces them.
+        </p>
+        <p>
+          T1 catches home dogs at +140 to +199 — the price band where public bias against home
+          underdogs creates the cleanest expected value. T2 fires on streak collisions: a winning
+          team meeting a losing team on opposite sides of a price.
+        </p>
+        <p>
+          T11 finds undervalued home favorites at −115 to −135 with three or more confirming
+          triggers. R1 through R8 are situational modifiers that stack on top — revenge spots,
+          letdown traps, must-win desperation, blowout regression.
+        </p>
+        <p>
+          Every trigger has a defined entry condition. Nothing fires on feel.
+        </p>
+      </div>
+
+      <div class="triggers-table">
+        <div class="tt-head">
+          <span>CODE</span><span>TRIGGER</span><span>WIN RATE</span>
+        </div>
+        <div class="tt-row">
+          <span class="tt-code">T1</span>
+          <div>
+            <div class="tt-name">Home Underdog</div>
+            <div class="tt-cond">Home dog priced +140 to +199</div>
+          </div>
+          <span class="tt-stat">68%</span>
+        </div>
+        <div class="tt-row">
+          <span class="tt-code">T2</span>
+          <div>
+            <div class="tt-name">Streak Collision</div>
+            <div class="tt-cond">W2+ vs L2+ on opposite sides</div>
+          </div>
+          <span class="tt-stat">71%</span>
+        </div>
+        <div class="tt-row">
+          <span class="tt-code">T11</span>
+          <div>
+            <div class="tt-name">Cheap Home Favorite</div>
+            <div class="tt-cond">Home fav −115 to −135, 3+ triggers</div>
+          </div>
+          <span class="tt-stat">65%</span>
+        </div>
+        <div class="tt-row locked">
+          <span class="tt-code">T3</span>
+          <div>
+            <div class="tt-name">Run Differential Gap</div>
+            <div class="tt-cond">Locked</div>
+          </div>
+          <span class="tt-stat">––</span>
+        </div>
+        <div class="tt-row locked">
+          <span class="tt-code">T6</span>
+          <div>
+            <div class="tt-name">FIP Edge</div>
+            <div class="tt-cond">Locked</div>
+          </div>
+          <span class="tt-stat">––</span>
+        </div>
+        <div class="tt-row locked">
+          <span class="tt-code">T8</span>
+          <div>
+            <div class="tt-name">Bullpen Depletion</div>
+            <div class="tt-cond">Locked</div>
+          </div>
+          <span class="tt-stat">––</span>
+        </div>
+        <div class="tt-overlay">
+          <div class="tt-overlay-text">+ 9 more triggers · 8 modifiers</div>
+          <div class="tt-overlay-sub">Unlocked with subscription</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       PRICING
+       ==================================================================== -->
+  <section class="sec" id="pricing">
+    <div class="sec-head" style="text-align:center;">
+      <div class="sec-eyebrow">Pricing</div>
+      <h2 class="sec-title">Pick your sport.</h2>
+      <p class="sec-sub" style="margin:14px auto 0;">
+        MLB is live now. NHL and NBA roll out as the playoff brackets unfold.
+      </p>
+    </div>
+
+    <div class="pricing-toggle-wrap">
+      <div class="pricing-toggle" role="tablist">
+        <button class="pt-btn" data-period="weekly">Weekly</button>
+        <button class="pt-btn active" data-period="monthly">Monthly</button>
+        <button class="pt-btn" data-period="yearly">
+          Yearly <span class="pt-save">Save 22%</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="price-grid">
+      <!-- MLB -->
+      <div class="price-card active" data-sport="mlb">
+        <div class="price-head">
+          <div class="price-sport">MLB</div>
+          <div class="price-tag">Live</div>
+        </div>
+        <p class="price-desc">T1–T15 trigger system, R1–R8 modifiers, daily morning scan, AI briefs.</p>
+        <div class="price-amount">
+          <div class="price-num" data-mlb-week="$10" data-mlb-month="$30" data-mlb-year="$281">$30</div>
+          <div class="price-period" data-week="/ week" data-month="/ month" data-year="/ year">/ month</div>
+        </div>
+        <a href="/auth/signup.html?plan=mlb" class="price-action">Start Free Trial</a>
+      </div>
+
+      <!-- NHL -->
+      <div class="price-card locked" data-sport="nhl">
+        <div class="price-head">
+          <div class="price-sport">NHL</div>
+          <div class="price-tag locked">Coming Soon</div>
+        </div>
+        <p class="price-desc">Playoffs totals model, structural UNDER edge, goalie-weighted scoring.</p>
+        <div class="price-amount">
+          <div class="price-num" data-nhl-week="$10" data-nhl-month="$30" data-nhl-year="$281">$30</div>
+          <div class="price-period">/ month</div>
+        </div>
+        <button class="price-action" disabled>Notify Me</button>
+      </div>
+
+      <!-- NBA -->
+      <div class="price-card locked" data-sport="nba">
+        <div class="price-head">
+          <div class="price-sport">NBA</div>
+          <div class="price-tag locked">Coming Soon</div>
+        </div>
+        <p class="price-desc">Playoffs framework, R6 shooting regression, R7 blowout recovery.</p>
+        <div class="price-amount">
+          <div class="price-num" data-nba-week="$10" data-nba-month="$30" data-nba-year="$281">$30</div>
+          <div class="price-period">/ month</div>
+        </div>
+        <button class="price-action" disabled>Notify Me</button>
+      </div>
+    </div>
+
+    <p class="price-trial-note">7-day free trial · Cancel anytime · No card required to view results</p>
+  </section>
+
+  <!-- ====================================================================
+       LETTER
+       ==================================================================== -->
+  <section class="letter">
+    <div class="letter-eyebrow">From the desk of Action's Odds</div>
+    <h2 class="letter-title">Why this isn't a pick service.</h2>
+    <p>
+      Forty years ago, before the books had algorithms and before "data-driven betting" was
+      a phrase, the work was reading box scores by hand and tracking patterns in notebooks.
+      What survived four decades of that work is simple: most days the market is right.
+      Some days it isn't. The job is to find those days, size correctly, and stay out of
+      the rest.
     </p>
-    <div class="hero-ctas">
-      <a href="/auth/signup.html" class="btn-primary">Start Free Trial →</a>
-      <a href="#how-it-works" class="btn-secondary">How It Works</a>
-    </div>
+    <p>
+      That's the entire system. Three to seven plays a week. No forced cards. No
+      Friday-night parlays of the day. The patience is the product.
+    </p>
+    <p>
+      What's published here is the same scan, the same triggers, the same sizing rules
+      that have run privately for years — now codified, automated, and grade-tracked in
+      public. Every play timestamped. Every result reconciled against the box score.
+      No edited record. No quietly forgotten losses.
+    </p>
+    <p>
+      If you want hot takes, parlays, and "lock of the day," there are louder places.
+      If you want a framework, an honest ledger, and the discipline to sit out
+      the wrong nights — this is built for you.
+    </p>
+    <div class="letter-sig">— Action's Odds</div>
   </section>
 
-  <section class="stats">
-    <div class="stat">
-      <div class="stat-num">+$5,587</div>
-      <div class="stat-label">2026 Season P&amp;L</div>
+  <!-- ====================================================================
+       FAQ
+       ==================================================================== -->
+  <section class="sec sec-narrow">
+    <div class="sec-head">
+      <div class="sec-eyebrow">Common Questions</div>
+      <h2 class="sec-title">Honest answers.</h2>
     </div>
-    <div class="stat">
-      <div class="stat-num">25-9</div>
-      <div class="stat-label">Win-Loss Record</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num">74%</div>
-      <div class="stat-label">Win Rate</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num">15+</div>
-      <div class="stat-label">Active Triggers</div>
-    </div>
-  </section>
 
-  <section class="section" id="how-it-works">
-    <h2 class="section-title">How It Works</h2>
-    <p class="section-sub">A disciplined, repeatable framework for finding edges. No hot takes. No tipsters.</p>
-
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-title">Daily Scan</div>
-        <p class="step-desc">Every morning at 9 AM ET, the system pulls standings, FIP, bullpen depletion, weather, and line moves across all 30 teams.</p>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q">How is this different from a pick service?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>
+          A pick service sells you tonight's plays. Action's Odds sells you the system that produces
+          them. The triggers are visible, the conditions are defined, the sizing is mechanical. Members
+          see why a play qualifies, not just what it is.
+        </p></div>
       </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-title">Trigger Match</div>
-        <p class="step-desc">Each game runs through the T1–T15 framework. Streak collisions, run differentials, regression flags. Only qualifying plays surface.</p>
+      <div class="faq-item">
+        <button class="faq-q">Will I make money?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>
+          We don't guarantee outcomes. Sports betting carries real risk and past performance doesn't
+          predict future results. What we publish is a transparent, time-stamped track record. You can
+          read it, judge it, and decide for yourself.
+        </p></div>
       </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-title">Sized &amp; Tracked</div>
-        <p class="step-desc">Bet sizing is mechanical — base unit scales with confidence tier. Every play tracked in your private ledger with live P&amp;L.</p>
+      <div class="faq-item">
+        <button class="faq-q">Which sportsbooks do I need?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>
+          The system tracks lines across Caesars, Hard Rock, DraftKings, FanDuel, and BetMGM. You don't
+          need accounts at all of them — one or two of the major books will get you most plays. Best
+          available line is auto-flagged in the dashboard.
+        </p></div>
       </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2 class="section-title">What's Inside</h2>
-    <p class="section-sub">Tools and data, not opinions.</p>
-
-    <div class="features">
-      <div class="feature">
-        <div class="feature-icon">📊</div>
-        <div class="feature-title">Live Slate Grid</div>
-        <p class="feature-desc">Multi-book odds across Caesars, Hard Rock, DraftKings, FanDuel, and BetMGM. Best line auto-highlighted per game.</p>
+      <div class="faq-item">
+        <button class="faq-q">Why so few plays per week?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>
+          Because patience is the edge. Forcing a card every night is what turns a positive expected-value
+          system into a losing one. Three to seven qualifying plays a week is the design, not a limitation.
+        </p></div>
       </div>
-      <div class="feature">
-        <div class="feature-icon">🎯</div>
-        <div class="feature-title">Trigger Framework</div>
-        <p class="feature-desc">T1–T15 entry gates with R1–R8 root modifiers. Power ratings, regression checks, divisional amplifiers. All transparent.</p>
+      <div class="faq-item">
+        <button class="faq-q">Can I cancel anytime?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>
+          Yes. Cancellation is one click in your account settings. No phone calls, no retention emails,
+          no fine print. Your plan ends at the close of the current billing cycle.
+        </p></div>
       </div>
-      <div class="feature">
-        <div class="feature-icon">📈</div>
-        <div class="feature-title">P&amp;L Ledger</div>
-        <p class="feature-desc">Track every play. Live W/L, ROI, sport-by-sport breakdown, exotics separated from core. Your numbers, not theirs.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">⚡</div>
-        <div class="feature-title">Line Move Alerts</div>
-        <p class="feature-desc">Sharp money signals. Significant movement in either direction flagged automatically. Re-evaluate triggers when lines shift.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">🔥</div>
-        <div class="feature-title">Streak Collision Engine</div>
-        <p class="feature-desc">Highest-value scenario in the system: any winning streak vs losing streak on opposite sides. Auto-detected, max-confidence sized.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">🤖</div>
-        <div class="feature-title">AI Brief</div>
-        <p class="feature-desc">Sharp two-sentence reads on each qualifying play. Context, not noise.</p>
+      <div class="faq-item">
+        <button class="faq-q">How is the data sourced?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>
+          Standings, schedules, and box scores come from the official MLB Stats API. Live odds come
+          from The Odds API across all five sportsbooks above. Team logos from MLB. Auto-grading runs
+          every 30 minutes against the box score the moment a game finalizes. Manual research overlays
+          the situational reads — revenge spots, must-win, divisional context.
+        </p></div>
       </div>
     </div>
   </section>
 
-  <section class="final-cta">
-    <h2>Ready to bet with an edge?</h2>
-    <p>Start with MLB. Add NHL playoffs as the system rolls out. Cancel anytime.</p>
-    <a href="/auth/signup.html" class="btn-primary">Create Account →</a>
+  <!-- ====================================================================
+       FINAL CTA
+       ==================================================================== -->
+  <section class="final">
+    <h2>Tomorrow's scan goes out at 9 AM ET.</h2>
+    <p>Start your free trial now. See it run live.</p>
+    <a href="/auth/signup.html" class="btn-primary">
+      Start Free Trial <span class="arrow">→</span>
+    </a>
+    <div class="final-meta">7 days free · No card required to view results</div>
   </section>
 
+  <!-- ====================================================================
+       FOOTER
+       ==================================================================== -->
   <footer class="footer">
     <div>
+      <div class="footer-brand">
+        <span class="a">ACTION'S</span>ODDS
+      </div>
+      <div class="footer-tagline">Trigger-based · Data-driven · 2026</div>
+    </div>
+    <div class="footer-links">
       <a href="/auth/login.html">Sign In</a>
       <a href="/auth/signup.html">Sign Up</a>
+      <a href="#pricing">Pricing</a>
       <a href="mailto:support@actionsodds.com">Support</a>
     </div>
-    <div style="margin-top:16px;">
-      © 2026 Action's Odds · All rights reserved
+    <div class="footer-disc">
+      Action's Odds is a sports betting research and analytics platform. We do not place wagers on behalf of users
+      and we do not guarantee outcomes. Past performance does not predict future results. Bet responsibly. If
+      gambling is causing you or someone you know problems, call 1-800-GAMBLER. Must be 21+ to bet (18+ in some
+      jurisdictions). Sports betting legality varies by state — check your local laws. © 2026 Action's Odds.
+      All rights reserved.
     </div>
-    <p class="disclaimer">
-      Action's Odds is a sports betting research and analytics platform. We do not place wagers on behalf of users and we do not guarantee outcomes. Past performance does not indicate future results. Bet responsibly. If gambling is causing problems, call 1-800-GAMBLER. Must be 21+ to bet (18+ in some jurisdictions). Check your local laws — sports betting legality varies by state.
-    </p>
   </footer>
+
+  <!-- ====================================================================
+       SCRIPTS
+       ==================================================================== -->
+  <script>
+  // ── Team logo system (verbatim from dashboard) ──────────────────────
+  const MLB_TEAM_IDS = {
+    'BAL':110,'BOS':111,'NYY':147,'TB':139,'TOR':141,
+    'CWS':145,'CHW':145,'CLE':114,'DET':116,'KC':118,'MIN':142,
+    'HOU':117,'LAA':108,'OAK':133,'ATH':133,'SEA':136,'TEX':140,
+    'ATL':144,'MIA':146,'NYM':121,'PHI':143,'WSH':120,'WAS':120,
+    'CHC':112,'CIN':113,'MIL':158,'PIT':134,'STL':138,
+    'ARI':109,'AZ':109,'COL':115,'LAD':119,'SD':135,'SF':137
+  };
+  const ESPN_TEAM_SLUGS = {
+    'BAL':'bal','BOS':'bos','NYY':'nyy','TB':'tb','TOR':'tor',
+    'CWS':'chw','CHW':'chw','CLE':'cle','DET':'det','KC':'kc','MIN':'min',
+    'HOU':'hou','LAA':'laa','OAK':'oak','ATH':'oak','SEA':'sea','TEX':'tex',
+    'ATL':'atl','MIA':'mia','NYM':'nym','PHI':'phi','WSH':'wsh','WAS':'wsh',
+    'CHC':'chc','CIN':'cin','MIL':'mil','PIT':'pit','STL':'stl',
+    'ARI':'ari','AZ':'ari','COL':'col','LAD':'lad','SD':'sd','SF':'sf'
+  };
+  const MLB_NAME_TO_ABBR = {
+    'Baltimore Orioles':'BAL','Boston Red Sox':'BOS','New York Yankees':'NYY','Tampa Bay Rays':'TB','Toronto Blue Jays':'TOR',
+    'Chicago White Sox':'CWS','Cleveland Guardians':'CLE','Detroit Tigers':'DET','Kansas City Royals':'KC','Minnesota Twins':'MIN',
+    'Houston Astros':'HOU','Los Angeles Angels':'LAA','Oakland Athletics':'OAK','Athletics':'OAK','Seattle Mariners':'SEA','Texas Rangers':'TEX',
+    'Atlanta Braves':'ATL','Miami Marlins':'MIA','New York Mets':'NYM','Philadelphia Phillies':'PHI','Washington Nationals':'WSH',
+    'Chicago Cubs':'CHC','Cincinnati Reds':'CIN','Milwaukee Brewers':'MIL','Pittsburgh Pirates':'PIT','St. Louis Cardinals':'STL',
+    'Arizona Diamondbacks':'ARI','Colorado Rockies':'COL','Los Angeles Dodgers':'LAD','San Diego Padres':'SD','San Francisco Giants':'SF'
+  };
+
+  function mlbLogoUrl(abbr){
+    if(!abbr) return null;
+    const id = MLB_TEAM_IDS[abbr.toUpperCase()];
+    return id ? `https://www.mlbstatic.com/team-logos/${id}.svg` : null;
+  }
+  function espnTeamUrl(abbr){
+    if(!abbr) return null;
+    const slug = ESPN_TEAM_SLUGS[abbr.toUpperCase()];
+    return slug ? `https://www.espn.com/mlb/team/_/name/${slug}` : null;
+  }
+  function teamLogoHtml(abbr, size){
+    const cls = size === 'lg' ? 'team-logo-lg' : (size === 'md' ? 'team-logo-md' : 'team-logo-sm');
+    const url = mlbLogoUrl(abbr);
+    const espnUrl = espnTeamUrl(abbr);
+    const safe = (abbr||'?').toString().replace(/[^A-Za-z0-9]/g,'').slice(0,3).toUpperCase();
+    let inner;
+    if(!url){
+      inner = `<span class="team-logo-fallback ${cls}" title="${safe}">${safe}</span>`;
+    } else {
+      inner = `<img class="team-logo ${cls}" src="${url}" alt="${safe}" title="${safe}" onerror="this.outerHTML='<span class=\\'team-logo-fallback ${cls}\\' title=\\'${safe}\\'>${safe}</span>';" />`;
+    }
+    if(espnUrl){
+      return `<a href="${espnUrl}" target="_blank" rel="noopener" class="team-logo-link" title="${safe} on ESPN">${inner}</a>`;
+    }
+    return inner;
+  }
+
+  // Hydrate inline data-logo placeholders (for the static mock cards in How It Works)
+  document.querySelectorAll('[data-logo]').forEach(el => {
+    const abbr = el.dataset.logo;
+    const size = el.classList.contains('lg-md') ? 'md' : (el.classList.contains('lg-lg') ? 'lg' : 'sm');
+    el.outerHTML = teamLogoHtml(abbr, size);
+  });
+
+  // ── Helpers ─────────────────────────────────────────────────────────
+  function fmtMoney(n){
+    if (n == null || isNaN(n)) return '—';
+    const sign = n >= 0 ? '+' : '−';
+    return sign + '$' + Math.abs(Math.round(n)).toLocaleString();
+  }
+  function fmtRecord(w, l, p){
+    return `${w}–${l}` + (p ? `–${p}` : '');
+  }
+  function timeAgo(iso){
+    if (!iso) return '';
+    const sec = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (sec < 60) return 'just now';
+    const min = Math.floor(sec/60);
+    if (min < 60) return `${min}m ago`;
+    const hr = Math.floor(min/60);
+    if (hr < 24) return `${hr}h ago`;
+    const d = Math.floor(hr/24);
+    return `${d}d ago`;
+  }
+
+  // Best-effort guess of team abbreviation from the game string
+  // ("Seattle Mariners @ Minnesota Twins" -> ['SEA','MIN'])
+  function abbreviationsFromGame(gameStr){
+    if (!gameStr) return [null,null];
+    const parts = gameStr.split('@').map(s => s.trim());
+    if (parts.length !== 2) return [null,null];
+    return [MLB_NAME_TO_ABBR[parts[0]] || null, MLB_NAME_TO_ABBR[parts[1]] || null];
+  }
+  // Pull abbreviation from selection ("Minnesota Twins +114" -> "MIN")
+  function abbrFromSelection(sel){
+    if (!sel) return null;
+    for (const [name, abbr] of Object.entries(MLB_NAME_TO_ABBR)) {
+      if (sel.startsWith(name)) return abbr;
+    }
+    return null;
+  }
+
+  // ── Load track record for nav status + strip ─────────────────────────
+  async function loadTrackRecord(){
+    try {
+      const res = await fetch('/api/public/track-record');
+      if (!res.ok) throw new Error('track record ' + res.status);
+      const d = await res.json();
+      // Strip
+      document.getElementById('strip-pnl').textContent = fmtMoney(d.pnl);
+      document.getElementById('strip-record').textContent = fmtRecord(d.total_wins, d.total_losses, d.total_pushes);
+      document.getElementById('strip-winrate').textContent = d.win_rate != null ? d.win_rate + '%' : '—';
+      document.getElementById('strip-units').textContent = d.units != null ? (d.units >= 0 ? '+' : '') + d.units.toFixed(1) + 'u' : '—';
+      // Nav + strip meta
+      const updated = d.updated_at ? `Last graded ${timeAgo(d.updated_at)}` : 'System live';
+      document.getElementById('nav-status-text').textContent = `Live · ${updated}`;
+      document.getElementById('strip-meta-text').textContent = `Updated automatically · ${updated}`;
+    } catch(e) {
+      console.warn('[Landing] track record load failed:', e.message);
+      document.getElementById('nav-status-text').textContent = 'Live';
+    }
+  }
+
+  // ── Load recent results into hero ────────────────────────────────────
+  async function loadRecentResults(){
+    const list = document.getElementById('hr-list');
+    const meta = document.getElementById('hr-meta');
+    try {
+      const res = await fetch('/api/public/recent-plays');
+      if (!res.ok) throw new Error('recent plays ' + res.status);
+      const data = await res.json();
+      const plays = (data.plays || []).slice(0, 4);
+
+      if (plays.length === 0) {
+        list.innerHTML = '<div class="hero-results-empty">No graded plays yet — system live, scan running.</div>';
+        meta.textContent = '';
+        return;
+      }
+
+      list.innerHTML = plays.map(p => {
+        const [awayAbbr, homeAbbr] = abbreviationsFromGame(p.game);
+        const pickedAbbr = abbrFromSelection(p.selection);
+        const oppAbbr = pickedAbbr === awayAbbr ? homeAbbr : awayAbbr;
+        const isPush = p.status === 'push';
+        const isWin = p.status === 'win';
+        const gradeClass = isWin ? 'grade-w' : (isPush ? 'grade-p' : 'grade-l');
+        const gradeLabel = isWin ? 'W' : (isPush ? 'P' : 'L');
+        const pnlNum = Number(p.pnl) || 0;
+        const pnlClass = isPush ? 'push' : (pnlNum >= 0 ? 'win' : 'loss');
+        const pnlStr = isPush ? '$0' : fmtMoney(pnlNum);
+        const dateStr = new Date(p.play_date + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric' });
+
+        return `
+          <div class="result-card">
+            <div class="result-game">
+              ${pickedAbbr ? teamLogoHtml(pickedAbbr,'md') : ''}
+              ${oppAbbr ? `<span class="vs">vs</span>${teamLogoHtml(oppAbbr,'sm')}` : ''}
+            </div>
+            <div class="result-body">
+              <div class="result-bet">${p.selection}</div>
+              <div class="result-meta">${dateStr} · $${Math.round(p.stake)}</div>
+            </div>
+            <div class="result-grade">
+              <span class="grade-badge ${gradeClass}">${gradeLabel}</span>
+              <span class="grade-pnl ${pnlClass}">${pnlStr}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Meta: "5 of 7 last 7d"
+      const wins = plays.filter(p => p.status === 'win').length;
+      const losses = plays.filter(p => p.status === 'loss').length;
+      meta.textContent = `${wins}–${losses} · last ${plays.length}`;
+    } catch(e) {
+      console.warn('[Landing] recent results load failed:', e.message);
+      list.innerHTML = '<div class="hero-results-empty">Results loading…</div>';
+    }
+  }
+
+  // ── Pricing toggle ───────────────────────────────────────────────────
+  function setupPricingToggle(){
+    const buttons = document.querySelectorAll('.pt-btn');
+    const cards = document.querySelectorAll('.price-card');
+    const periodMap = { weekly:'week', monthly:'month', yearly:'year' };
+    const labelMap  = { weekly:'/ week', monthly:'/ month', yearly:'/ year' };
+
+    function applyPeriod(period){
+      const key = periodMap[period];
+      cards.forEach(card => {
+        const sport = card.dataset.sport;
+        const numEl = card.querySelector('.price-num');
+        const periodEl = card.querySelector('.price-period');
+        const newPrice = numEl.dataset[`${sport}${capitalize(key)}`];
+        if (newPrice) numEl.textContent = newPrice;
+        periodEl.textContent = labelMap[period];
+      });
+    }
+    function capitalize(s){ return s[0].toUpperCase() + s.slice(1); }
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        applyPeriod(btn.dataset.period);
+      });
+    });
+  }
+
+  // ── FAQ accordion ────────────────────────────────────────────────────
+  function setupFaq(){
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        const wasOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item.open').forEach(o => o.classList.remove('open'));
+        if (!wasOpen) item.classList.add('open');
+      });
+    });
+  }
+
+  // ── Boot ─────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    setupPricingToggle();
+    setupFaq();
+    loadTrackRecord();
+    loadRecentResults();
+    // Refresh live data every 5 minutes
+    setInterval(() => { loadTrackRecord(); loadRecentResults(); }, 300000);
+  });
+  </script>
 </body>
 </html>

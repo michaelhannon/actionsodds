@@ -649,7 +649,17 @@ app.get('/api/me', requireAuth, async (req, res) => {
 app.post('/api/stripe/create-checkout', requireAuth, createCheckoutSession);
 app.post('/api/stripe/billing-portal', requireAuth, createBillingPortalSession);
 
-// Phase 3 API routes
+// Public read-only routes (no auth) — must be mounted BEFORE apiRoutes
+// so /api/public/* resolves before any auth middleware runs.
+try {
+  const publicRoutes = require('./server/public-routes');
+  app.use(publicRoutes);
+  console.log('[Boot] Public routes mounted (/api/public/*)');
+} catch (e) {
+  console.warn('[Boot] Public routes not loaded:', e.message);
+}
+
+// Phase 3 API routes (auth-gated)
 app.use(apiRoutes);
 
 // =============================================================================
