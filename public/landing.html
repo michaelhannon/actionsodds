@@ -303,16 +303,19 @@
       position:relative;
     }
     .strip-cell{
-      padding:24px 28px;
+      padding:48px 28px 40px;
       border-right:1px solid var(--border);
       position:relative;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
     }
     .strip-cell:last-child{border-right:none;}
     .strip-num{
       font-family:var(--display);
-      font-size:54px;line-height:1.05;
+      font-size:54px;line-height:1.1;
       letter-spacing:-0.005em;
-      margin-bottom:10px;
+      margin-bottom:12px;
       color:var(--gold);
     }
     .strip-num.subtle{color:var(--text);}
