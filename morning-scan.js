@@ -604,38 +604,71 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   // Kill if T14 fired
   if (t14Kill) trigCount = 0;
 
-  // T11/T12/T13 max size caps
+  // ── UNIT TABLE (Apr 28 2026) ───────────────────────────
+  // Fixed dollar units. Tiers: 1u ENTRY, 2u STRONG, 3u MAX, 5u SUPER MAX (reserved).
+  const UNIT_TABLE_MLB = {1:250, 2:500, 3:750, 5:1000};
+  const TIER_LABEL_MLB = {1:'ENTRY', 2:'STRONG', 3:'MAX', 5:'SUPER MAX'};
+
+  // Gate caps (dollar ceilings — units mapping respects these)
   let maxSize = 1000;
   if (gateType === 'T11') maxSize = 800;
   if (gateType === 'T12') maxSize = 600;
   if (gateType === 'T13') maxSize = 400;
-  if (t15Active) maxSize = 100; // exotic only
+  if (t15Active) maxSize = 100;
 
-  const unit = cfg.unit || 200;
-  let sizing = 0;
+  // Map (gate, trigCount) -> unit count
+  let units = 0;
   if (!t14Kill) {
-    if (trigCount === 0 || (gateType === 'T1' && trigCount < 1)) sizing = unit;
-    else if (trigCount === 1) sizing = unit * 2;
-    else if (trigCount === 2) sizing = unit * 3;
-    else if (trigCount === 3) sizing = unit * 4;
-    else sizing = unit * 5;
-    sizing = Math.min(sizing, maxSize);
+    if (gateType === 'T1' || gateType === 'T1B') {
+      // T1 alone is the gate, not a play. Need at least 1 stacking trigger.
+      if (trigCount >= 4) units = 5;          // SUPER MAX
+      else if (trigCount === 3) units = 3;    // MAX
+      else if (trigCount === 2) units = 2;    // STRONG
+      else if (trigCount === 1) units = 1;    // ENTRY
+      else units = 0;
+    } else if (gateType === 'T11') {
+      if (trigCount >= 4) units = 3;          // MAX (cap 3u/$750 < $800 ceiling)
+      else if (trigCount === 3) units = 2;    // STRONG (entry threshold)
+      else units = 0;
+    } else if (gateType === 'T12') {
+      if (trigCount >= 5) units = 2;          // STRONG (cap 2u/$500 < $600 ceiling)
+      else units = 0;
+    } else if (gateType === 'T13') {
+      units = 0; // set below if all 5 required triggers present
+    } else if (t15Active) {
+      units = 1; // restricted, parlay-only at $100
+    } else {
+      // Fallback ladder
+      if (trigCount >= 4) units = 5;
+      else if (trigCount === 3) units = 3;
+      else if (trigCount === 2) units = 2;
+      else if (trigCount === 1) units = 1;
+      else units = 0;
+    }
   }
 
   // T3 hard kill — negative run diff below -10 kills any play
   const t3Kill = gradeTeam.runDiff < -10;
-  if (t3Kill) { sizing = 0; }
+  if (t3Kill) { units = 0; }
 
   // T11 needs 3+ triggers minimum
-  if (gateType === 'T11' && trigCount < 3) sizing = 0;
+  if (gateType === 'T11' && trigCount < 3) units = 0;
   // T12 needs 5+ triggers minimum
-  if (gateType === 'T12' && trigCount < 5) sizing = 0;
+  if (gateType === 'T12' && trigCount < 5) units = 0;
   // T13 needs ALL 5 of: T2+T3+T6+T8+1 more
   if (gateType === 'T13') {
     const req = ['T2','T3','T6','T8'];
     const hasAll = req.every(t => triggered.includes(t));
-    if (!hasAll || trigCount < 5) sizing = 0;
+    if (!hasAll || trigCount < 5) units = 0;
+    else units = 1; // T13 always 1u/$250 when qualified (cap $400)
   }
+
+  // Resolve dollar amount from unit table (MLB default; sport hooks can override later)
+  let sizing = UNIT_TABLE_MLB[units] || 0;
+  // Enforce cap (defensive — table already respects it)
+  if (sizing > maxSize) sizing = maxSize;
+
+  const tier = TIER_LABEL_MLB[units] || '';
 
   // ── COLOR + STRENGTH ─────────────────────────────────────
   let color, strength, recommendation;
@@ -685,7 +718,9 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   return {
     gateType, gateML, gateSide,
     triggered, failed, notes,
-    trigCount, sizing, color, strength,
+    trigCount, sizing,
+    units,
+    tier, color, strength,
     recommendation, rlAddon, rlDisplay,
     t14Kill, t15Active, t3Kill,
     collision: buildCollisionData(away, home),
