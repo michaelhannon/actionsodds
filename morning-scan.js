@@ -613,7 +613,7 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   let maxSize = 1000;
   if (gateType === 'T11') maxSize = 800;
   if (gateType === 'T12') maxSize = 600;
-  if (gateType === 'T13') maxSize = 400;
+  if (gateType === 'T13') maxSize = 1000;
   if (t15Active) maxSize = 100;
 
   // Map (gate, trigCount) -> unit count
@@ -627,11 +627,15 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
       else if (trigCount === 1) units = 1;    // ENTRY
       else units = 0;
     } else if (gateType === 'T11') {
-      if (trigCount >= 4) units = 3;          // MAX (cap 3u/$750 < $800 ceiling)
-      else if (trigCount === 3) units = 2;    // STRONG (entry threshold)
+      if (trigCount >= 4) units = 3;          // MAX
+      else if (trigCount === 3) units = 2;    // STRONG
+      else if (trigCount === 2) units = 1;    // ENTRY
       else units = 0;
     } else if (gateType === 'T12') {
-      if (trigCount >= 5) units = 2;          // STRONG (cap 2u/$500 < $600 ceiling)
+      if (trigCount >= 5) units = 5;          // SUPER MAX
+      else if (trigCount === 4) units = 3;    // MAX
+      else if (trigCount === 3) units = 2;    // STRONG
+      else if (trigCount === 2) units = 1;    // ENTRY
       else units = 0;
     } else if (gateType === 'T13') {
       units = 0; // set below if all 5 required triggers present
@@ -657,10 +661,27 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   if (gateType === 'T12' && trigCount < 2) units = 0;
   // T13 needs ALL 5 of: T2+T3+T6+T8+1 more
   if (gateType === 'T13') {
+    // Unified road dog +125+ with 6 signals (C1-C6)
     const req = ['T2','T3','T6','T8'];
     const hasAll = req.every(t => triggered.includes(t));
-    if (!hasAll || trigCount < 5) units = 0;
-    else units = 1; // T13 always 1u/$250 when qualified (cap $400)
+    let signalCount = hasAll ? 4 : 0;
+    if (signalCount > 0) {
+      if (triggered.includes('F5')) signalCount++;
+      if (triggered.includes('F6')) signalCount++;
+    }
+    if (signalCount < 3) {
+      units = 0;
+    } else {
+      const t14Gap = Math.abs(powerGap || 0);
+      if (t14Gap >= 15 && favoredPower === 'home') {
+        units = (signalCount === 6) ? 1 : 0;
+      } else {
+        if (signalCount >= 6) units = 5;
+        else if (signalCount === 5) units = 3;
+        else if (signalCount === 4) units = 2;
+        else units = 1;
+      }
+    }
   }
 
   // Resolve dollar amount from unit table (MLB default; sport hooks can override later)
