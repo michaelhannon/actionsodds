@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signing you in… — Action's Odds</title>
+  <link rel="stylesheet" href="/auth/auth.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-logo">
+      <div class="auth-logo-mark">ACTION'S<span>ODDS</span></div>
+      <div class="auth-logo-sub">MLB · NHL · NBA · NFL · GOLF</div>
+    </div>
+
+    <div class="auth-card">
+      <h1 class="auth-title">Signing you in…</h1>
+      <p class="auth-subtitle" id="status-text">Just a moment.</p>
+
+      <div id="alert" style="display:none;"></div>
+
+      <div id="manual-link" style="display:none; margin-top:18px;">
+        <a href="/auth/login.html" class="btn-primary" style="display:block; text-align:center; text-decoration:none;">
+          Back to log in
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const SUPABASE_URL = window.SUPABASE_URL || 'https://xlfsaxfpdpxsdkovvhxs.supabase.co';
+    const SUPABASE_KEY = window.SUPABASE_ANON_KEY || 'sb_publishable_3L81CVKvE9w2agrz6yMe5g_BC4O0pws';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const statusText = document.getElementById('status-text');
+    const alertEl = document.getElementById('alert');
+    const manualLink = document.getElementById('manual-link');
+
+    function showAlert(type, message) {
+      alertEl.className = `alert alert-${type}`;
+      alertEl.textContent = message;
+      alertEl.style.display = 'block';
+    }
+
+    (async () => {
+      try {
+        // Supabase v2 auto-handles the magic-link tokens in the URL hash on page load.
+        // We just wait briefly then check getSession().
+        await new Promise(r => setTimeout(r, 200));
+
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+
+        if (!session) {
+          // Token might have expired or already been consumed.
+          throw new Error('Sign-in link is no longer valid. Please request a new one.');
+        }
+
+        // If MFA is required, send them through the MFA challenge on /login
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+          statusText.textContent = 'Two-factor authentication required.';
+          window.location.href = '/auth/login.html';
+          return;
+        }
+
+        statusText.textContent = 'Done. Taking you to your dashboard…';
+        // Clean the URL fragment
+        history.replaceState(null, '', window.location.pathname);
+        setTimeout(() => { window.location.href = '/'; }, 400);
+      } catch (err) {
+        statusText.textContent = '';
+        showAlert('error', err.message || 'Could not complete sign-in.');
+        manualLink.style.display = 'block';
+      }
+    })();
+  </script>
+</body>
+</html>

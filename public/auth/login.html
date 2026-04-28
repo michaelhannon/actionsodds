@@ -8,6 +8,76 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Phase 1 additions — magic link button + MFA challenge UI.
+       Inline so we don't have to touch /auth/auth.css yet. */
+    .btn-secondary{
+      width:100%;
+      padding:13px 16px;
+      background:transparent;
+      color:#0a2a5e;
+      border:1.5px solid #0a2a5e;
+      border-radius:6px;
+      font-family:'Barlow Condensed',sans-serif;
+      font-weight:700;
+      font-size:15px;
+      letter-spacing:0.04em;
+      text-transform:uppercase;
+      cursor:pointer;
+      margin-top:10px;
+      transition:all 0.15s;
+    }
+    .btn-secondary:hover:not(:disabled){
+      background:#0a2a5e;
+      color:#fff;
+    }
+    .btn-secondary:disabled{ opacity:0.6; cursor:not-allowed; }
+    .auth-or-row{
+      display:flex; align-items:center; gap:10px;
+      color:#6b7488; font-size:11px;
+      letter-spacing:0.16em; text-transform:uppercase;
+      margin:18px 0 4px;
+    }
+    .auth-or-row::before, .auth-or-row::after{
+      content:''; flex:1; height:1px;
+      background:rgba(0,0,0,0.08);
+    }
+    /* MFA challenge step — shown when user has TOTP enrolled */
+    .mfa-step{
+      display:flex; flex-direction:column; gap:8px;
+      padding:18px 0;
+    }
+    .mfa-input{
+      width:100%;
+      padding:14px 16px;
+      background:#f8f9fb;
+      border:1.5px solid rgba(10,14,26,0.12);
+      border-radius:6px;
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:24px;
+      font-weight:600;
+      text-align:center;
+      letter-spacing:0.4em;
+      color:#0a0e1a;
+    }
+    .mfa-input:focus{
+      outline:none;
+      border-color:#0a2a5e;
+    }
+    .mfa-hint{
+      font-size:13px;
+      color:#6b7488;
+      text-align:center;
+      margin-bottom:6px;
+    }
+    .mfa-back{
+      background:none; border:none; padding:0;
+      color:#c10b3f; font-size:13px;
+      font-family:'Barlow Condensed',sans-serif;
+      cursor:pointer; margin-top:8px;
+    }
+    .mfa-back:hover{ text-decoration:underline; }
+  </style>
 </head>
 <body>
   <div class="auth-container">
@@ -22,28 +92,55 @@
 
       <div id="alert" style="display:none;"></div>
 
-      <form id="login-form" autocomplete="on">
-        <div class="form-group">
-          <label class="form-label" for="email">Email</label>
-          <input class="form-input" type="email" id="email" name="email" required autocomplete="email" autofocus>
+      <!-- ============ STEP 1: Email + password OR magic link ============ -->
+      <div id="step-credentials">
+        <form id="login-form" autocomplete="on">
+          <div class="form-group">
+            <label class="form-label" for="email">Email</label>
+            <input class="form-input" type="email" id="email" name="email" required autocomplete="email" autofocus>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input class="form-input" type="password" id="password" name="password" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" class="btn-primary" id="submit-btn">Log in</button>
+        </form>
+
+        <div class="auth-or-row"><span>or</span></div>
+
+        <button type="button" class="btn-secondary" id="magic-link-btn">
+          Email me a sign-in link
+        </button>
+
+        <div class="auth-link-row" style="margin-top:18px;">
+          <a href="/auth/forgot-password.html">Forgot your password?</a>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="password">Password</label>
-          <input class="form-input" type="password" id="password" name="password" required autocomplete="current-password">
+        <div class="auth-divider">or</div>
+
+        <div class="auth-link-row" style="margin-top:0;">
+          New here? <a href="/auth/signup.html">Create an account</a>
         </div>
-
-        <button type="submit" class="btn-primary" id="submit-btn">Log in</button>
-      </form>
-
-      <div class="auth-link-row" style="margin-top:14px;">
-        <a href="/auth/forgot-password.html">Forgot your password?</a>
       </div>
 
-      <div class="auth-divider">or</div>
-
-      <div class="auth-link-row" style="margin-top:0;">
-        New here? <a href="/auth/signup.html">Create an account</a>
+      <!-- ============ STEP 2: MFA challenge (hidden by default) ============ -->
+      <div id="step-mfa" style="display:none;">
+        <div class="mfa-step">
+          <p class="mfa-hint">Enter the 6-digit code from your authenticator app.</p>
+          <input
+            class="mfa-input"
+            type="text"
+            id="mfa-code"
+            inputmode="numeric"
+            pattern="[0-9]{6}"
+            maxlength="6"
+            placeholder="000000"
+            autocomplete="one-time-code">
+          <button type="button" class="btn-primary" id="mfa-submit-btn">Verify</button>
+          <button type="button" class="mfa-back" id="mfa-back-btn">← Use a different account</button>
+        </div>
       </div>
     </div>
 
@@ -59,25 +156,44 @@
     const SUPABASE_KEY = window.SUPABASE_ANON_KEY || 'sb_publishable_3L81CVKvE9w2agrz6yMe5g_BC4O0pws';
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const form = document.getElementById('login-form');
-    const submitBtn = document.getElementById('submit-btn');
-    const alertEl = document.getElementById('alert');
+    const form          = document.getElementById('login-form');
+    const submitBtn     = document.getElementById('submit-btn');
+    const magicBtn      = document.getElementById('magic-link-btn');
+    const alertEl       = document.getElementById('alert');
+    const stepCreds     = document.getElementById('step-credentials');
+    const stepMfa       = document.getElementById('step-mfa');
+    const mfaCodeInput  = document.getElementById('mfa-code');
+    const mfaSubmitBtn  = document.getElementById('mfa-submit-btn');
+    const mfaBackBtn    = document.getElementById('mfa-back-btn');
 
     function showAlert(type, message) {
       alertEl.className = `alert alert-${type}`;
       alertEl.textContent = message;
       alertEl.style.display = 'block';
     }
+    function clearAlert() {
+      alertEl.style.display = 'none';
+    }
 
     // If already logged in, redirect to dashboard
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) window.location.href = '/';
+      if (session) {
+        // Need to check if MFA is required-but-not-completed for this session
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+          // User has MFA but hasn't completed it this session — show MFA step
+          showMfaStep();
+          return;
+        }
+        window.location.href = '/';
+      }
     })();
 
+    // ─── Password login ─────────────────────────────────────────────────
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      alertEl.style.display = 'none';
+      clearAlert();
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<span class="spinner"></span>Logging in...';
 
@@ -88,13 +204,118 @@
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
 
-        // Successful login → redirect to dashboard
+        // Check whether this user needs to complete an MFA challenge
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+          showMfaStep();
+          return;
+        }
+
+        // No MFA required → straight to dashboard
         window.location.href = '/';
       } catch (err) {
         showAlert('error', err.message || 'Login failed. Please check your credentials.');
         submitBtn.disabled = false;
         submitBtn.textContent = 'Log in';
       }
+    });
+
+    // ─── Magic link ─────────────────────────────────────────────────────
+    magicBtn.addEventListener('click', async () => {
+      clearAlert();
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      if (!email) {
+        showAlert('error', 'Enter your email first, then click the magic-link button.');
+        document.getElementById('email').focus();
+        return;
+      }
+
+      magicBtn.disabled = true;
+      magicBtn.innerHTML = '<span class="spinner"></span>Sending link...';
+
+      try {
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback.html`,
+            shouldCreateUser: false   // don't accidentally create new accounts here
+          }
+        });
+        if (error) throw error;
+        showAlert('success', `We've emailed a sign-in link to ${email}. Open it on this device to log in.`);
+        magicBtn.textContent = 'Email me a sign-in link';
+      } catch (err) {
+        showAlert('error', err.message || 'Could not send sign-in link.');
+        magicBtn.disabled = false;
+        magicBtn.textContent = 'Email me a sign-in link';
+      }
+    });
+
+    // ─── MFA challenge ──────────────────────────────────────────────────
+    function showMfaStep() {
+      stepCreds.style.display = 'none';
+      stepMfa.style.display = 'block';
+      clearAlert();
+      setTimeout(() => mfaCodeInput.focus(), 50);
+    }
+
+    function showCredentialsStep() {
+      stepCreds.style.display = 'block';
+      stepMfa.style.display = 'none';
+      mfaCodeInput.value = '';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Log in';
+    }
+
+    mfaBackBtn.addEventListener('click', async () => {
+      // Sign them out so they can try a different account
+      await supabase.auth.signOut();
+      showCredentialsStep();
+    });
+
+    mfaSubmitBtn.addEventListener('click', async () => {
+      clearAlert();
+      const code = mfaCodeInput.value.trim();
+      if (!/^[0-9]{6}$/.test(code)) {
+        showAlert('error', 'Enter the 6-digit code from your authenticator app.');
+        return;
+      }
+
+      mfaSubmitBtn.disabled = true;
+      mfaSubmitBtn.innerHTML = '<span class="spinner"></span>Verifying...';
+
+      try {
+        // Find the verified TOTP factor
+        const { data: factors, error: lf } = await supabase.auth.mfa.listFactors();
+        if (lf) throw lf;
+        const totp = factors.totp.find(f => f.status === 'verified');
+        if (!totp) throw new Error('No 2FA factor found on this account');
+
+        // Issue a challenge for it
+        const { data: ch, error: ce } = await supabase.auth.mfa.challenge({ factorId: totp.id });
+        if (ce) throw ce;
+
+        // Verify the code
+        const { error: ve } = await supabase.auth.mfa.verify({
+          factorId: totp.id,
+          challengeId: ch.id,
+          code
+        });
+        if (ve) throw ve;
+
+        // MFA complete — go to dashboard
+        window.location.href = '/';
+      } catch (err) {
+        showAlert('error', err.message || 'Invalid code. Try again.');
+        mfaSubmitBtn.disabled = false;
+        mfaSubmitBtn.textContent = 'Verify';
+        mfaCodeInput.select();
+      }
+    });
+
+    // Allow Enter to submit the MFA code
+    mfaCodeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') mfaSubmitBtn.click();
     });
   </script>
 </body>
