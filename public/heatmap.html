@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Action's Odds — Streak Heat Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #09090c;
+  --panel: #111116;
+  --border: rgba(255,255,255,0.07);
+  --gold: #e8b94a;
+  --green: #2ecc71;
+  --red: #e74c3c;
+  --blue: #3b82f6;
+  --teal: #14b8a6;
+  --amber: #f59e0b;
+  --orange: #f97316;
+  --text: #f0eff5;
+  --text2: #9896a8;
+  --text3: #44424f;
+  --mono: 'IBM Plex Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Barlow Condensed', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+.hm-header {
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+.hm-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.hm-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+}
+.hm-subtitle {
+  font-size: 11px;
+  color: var(--text2);
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+}
+.back-link {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--gold);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+.back-link:hover { opacity: 1; }
+
+/* ── LEGEND ── */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text2);
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+}
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 2px;
+}
+
+/* ── MAIN GRID ── */
+.hm-wrap {
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.hm-section-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hm-section-title span {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── HEAT MAP GRID ── */
+.heat-grid {
+  display: grid;
+  grid-template-columns: 110px repeat(30, 1fr);
+  gap: 2px;
+  min-width: 900px;
+  margin-bottom: 28px;
+}
+
+.heat-col-header {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--text3);
+  text-align: center;
+  padding: 2px 0;
+  letter-spacing: 0.05em;
+}
+
+.heat-row-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 8px;
+}
+.heat-row-abbr {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: var(--mono);
+}
+
+.heat-cell {
+  height: 28px;
+  border-radius: 3px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.heat-cell:hover {
+  transform: scale(1.15);
+  z-index: 10;
+  box-shadow: 0 0 8px rgba(255,255,255,0.15);
+}
+
+/* Win streak colors — intensity by length */
+.w1  { background: rgba(46,204,113,0.15); }
+.w2  { background: rgba(46,204,113,0.28); }
+.w3  { background: rgba(46,204,113,0.42); }
+.w4  { background: rgba(46,204,113,0.56); }
+.w5  { background: rgba(46,204,113,0.70); }
+.w6  { background: rgba(46,204,113,0.82); }
+.w7  { background: rgba(46,204,113,0.90); }
+.w8  { background: rgba(46,204,113,1.00); box-shadow: 0 0 6px rgba(46,204,113,0.4); }
+.w9  { background: #2ecc71; box-shadow: 0 0 8px rgba(46,204,113,0.5); }
+.w10 { background: #2ecc71; box-shadow: 0 0 12px rgba(46,204,113,0.7); outline: 1px solid rgba(46,204,113,0.8); }
+
+/* Loss streak colors */
+.l1  { background: rgba(231,76,60,0.15); }
+.l2  { background: rgba(231,76,60,0.28); }
+.l3  { background: rgba(231,76,60,0.42); }
+.l4  { background: rgba(231,76,60,0.56); }
+.l5  { background: rgba(231,76,60,0.70); }
+.l6  { background: rgba(231,76,60,0.82); }
+.l7  { background: rgba(231,76,60,0.90); }
+.l8  { background: rgba(231,76,60,1.00); box-shadow: 0 0 6px rgba(231,76,60,0.4); }
+.l9  { background: #e74c3c; box-shadow: 0 0 8px rgba(231,76,60,0.5); }
+.l10 { background: #e74c3c; box-shadow: 0 0 12px rgba(231,76,60,0.7); outline: 1px solid rgba(231,76,60,0.8); }
+.l11 { background: #c0392b; box-shadow: 0 0 14px rgba(231,76,60,0.8); outline: 1px solid #e74c3c; }
+
+/* Neutral / no game */
+.ng  { background: rgba(255,255,255,0.04); }
+
+/* Collision highlight */
+.collision-badge {
+  position: absolute;
+  top: -1px; right: -1px;
+  width: 6px; height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  box-shadow: 0 0 4px var(--gold);
+}
+
+/* ── COLLISION MATRIX ── */
+.collision-matrix {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+.cm-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cm-grid {
+  display: grid;
+  gap: 6px;
+}
+.cm-row {
+  display: grid;
+  grid-template-columns: 100px 100px 80px 80px 80px 1fr 80px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  font-family: var(--mono);
+  font-size: 11px;
+  transition: background 0.15s;
+}
+.cm-row:hover { background: rgba(255,255,255,0.05); }
+.cm-row.max-collision {
+  background: rgba(232,185,74,0.08);
+  border-color: rgba(232,185,74,0.3);
+}
+.cm-row.collision {
+  background: rgba(46,204,113,0.06);
+  border-color: rgba(46,204,113,0.2);
+}
+.cm-row.header {
+  background: transparent;
+  border-color: transparent;
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+}
+.cm-team-w { color: var(--green); font-weight: 600; }
+.cm-team-l { color: var(--red); font-weight: 600; }
+.cm-diff-pos { color: var(--green); }
+.cm-diff-neg { color: var(--red); }
+.cm-diff-neu { color: var(--text3); }
+.cm-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'Barlow Condensed', sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.cm-badge-max { background: rgba(232,185,74,0.15); color: var(--gold); border: 1px solid rgba(232,185,74,0.4); }
+.cm-badge-strong { background: rgba(46,204,113,0.12); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
+.cm-badge-entry { background: rgba(20,184,166,0.12); color: var(--teal); border: 1px solid rgba(20,184,166,0.3); }
+.cm-badge-none { background: rgba(255,255,255,0.05); color: var(--text3); border: 1px solid var(--border); }
+
+.cm-rec { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); }
+.cm-rec.play { color: var(--green); }
+.cm-rec.fade { color: var(--red); }
+.cm-rec.watch { color: var(--amber); }
+
+/* Tooltip */
+.tooltip {
+  position: fixed;
+  background: #1a1a22;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text);
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.1s;
+  max-width: 180px;
+  line-height: 1.6;
+}
+.tooltip.visible { opacity: 1; }
+
+/* Rescan button */
+.rescan-btn {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(232,185,74,0.12);
+  border: 1px solid rgba(232,185,74,0.3);
+  color: var(--gold);
+  padding: 6px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.rescan-btn:hover { background: rgba(232,185,74,0.2); }
+
+.ts-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+}
+</style>
+</head>
+<body>
+
+<div class="hm-header">
+  <div>
+    <div class="hm-title">⚡ Streak Heat Map</div>
+    <div class="hm-subtitle">Last 30 games · Collision detection · Run diff filter · W2+/L2+ minimum</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="ts-label" id="ts-label">Loading...</span>
+    <button class="rescan-btn" onclick="loadData()">↻ Rescan</button>
+    <a class="back-link" href="/">← Action's Odds</a>
+  </div>
+</div>
+
+<div class="legend">
+  <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-right:4px;">Legend</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(46,204,113,0.25);"></div>W1–3</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(46,204,113,0.6);"></div>W4–6</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#2ecc71;box-shadow:0 0 6px rgba(46,204,113,0.5);"></div>W7+ MAX</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(231,76,60,0.25);"></div>L1–3</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(231,76,60,0.6);"></div>L4–6</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#e74c3c;box-shadow:0 0 6px rgba(231,76,60,0.5);"></div>L7+ FADE</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.04);"></div>No game</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--gold);border-radius:50%;"></div>Collision</div>
+</div>
+
+<div class="hm-wrap">
+
+  <!-- COLLISION MATRIX -->
+  <div class="cm-title">⚡ Today's Collision Matrix <span style="font-size:12px;color:var(--text3);font-family:var(--mono);font-weight:400;margin-left:4px;">W2+ vs L2+ only</span></div>
+  <div class="collision-matrix">
+    <div class="cm-grid" id="collision-grid">
+      <div class="cm-row header">
+        <div>Home</div><div>Away</div><div>Home Strk</div><div>Away Strk</div><div>Diff Gap</div><div>Signal</div><div>Action</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEAT MAP -->
+  <div class="hm-section-title">All 30 Teams — Streak Depth <span></span></div>
+  <div class="heat-grid" id="heat-grid"></div>
+
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────
+// This page fetches from the /morning-scan endpoint
+// Falls back to static demo data if offline
+
+const DEMO_TEAMS = [
+  // [abbr, name, currentStreak, streakLen, runDiff, last30]
+  // last30: array of 'W','L','N' (N=no game)
+  ['CHC','Cubs','W',10,38,['L','W','W','L','W','W','W','L','W','W','W','W','W','W','W','W','W','W','W','W','L','W','W','W','W','W','W','W','W','W']],
+  ['ATL','Braves','W',4,65,['W','L','W','W','L','W','L','W','W','W','L','W','W','W','L','W','W','L','W','W','W','L','W','W','W','W','W','W','W','W']],
+  ['NYY','Yankees','W',4,35,['L','W','W','L','W','L','W','L','W','W','L','W','W','L','W','L','W','W','L','W','W','L','W','L','W','W','W','W','W','W']],
+  ['LAD','Dodgers','W',3,60,['W','L','W','W','L','W','L','W','W','W','L','W','L','W','W','L','W','W','L','W','L','W','W','L','W','W','L','W','W','W']],
+  ['SD','Padres','W',2,20,['L','W','L','W','W','L','W','L','W','W','W','L','W','L','W','W','L','W','W','L','W','L','W','W','L','W','L','W','W','W']],
+  ['CIN','Reds','W',4,22,['W','L','W','L','W','L','W','W','L','W','W','L','W','W','L','W','L','W','W','L','W','W','L','W','W','L','W','W','W','W']],
+  ['PIT','Pirates','W',3,28,['L','W','L','W','L','W','W','L','W','L','W','W','L','W','W','L','W','L','W','W','L','W','L','W','W','W','L','W','W','W']],
+  ['CLE','Guardians','W',2,8,['W','L','W','L','W','W','L','W','L','W','L','W','W','L','W','L','W','W','L','W','W','L','W','L','W','W','L','W','L','W']],
+  ['AZ','D-backs','W',1,8,['L','W','W','L','W','L','W','L','W','W','L','W','L','W','W','L','W','L','W','L','W','W','L','W','L','W','W','L','W','W']],
+  ['STL','Cardinals','W',1,15,['W','L','W','L','W','L','W','W','L','W','L','W','W','L','W','W','L','W','L','W','L','W','W','L','W','W','L','W','L','W']],
+  ['MIL','Brewers','W',1,10,['L','W','L','W','L','W','L','W','W','L','W','L','W','W','L','W','W','L','W','L','W','L','W','W','L','W','W','L','W','W']],
+  ['DET','Tigers','W',1,17,['W','W','L','W','L','W','W','L','W','L','W','L','W','W','L','W','L','W','W','L','W','L','W','W','L','W','W','L','W','W']],
+  ['TB','Rays','W',2,-8,['L','W','L','W','W','L','W','L','W','L','W','W','L','W','L','W','W','L','W','W','L','W','L','W','W','L','W','L','W','W']],
+  ['MIA','Marlins','W',2,3,['W','L','W','L','W','L','W','L','W','W','L','W','L','W','W','L','W','L','W','L','W','W','L','W','L','W','L','W','W','W']],
+  ['BAL','Orioles','L',1,-5,['W','L','W','W','L','W','L','W','W','L','W','W','L','W','L','W','W','L','W','W','L','W','L','W','W','L','W','W','L','W']],
+  ['LAA','Angels','L',1,5,['W','L','W','L','W','W','L','W','L','W','W','L','W','L','W','L','W','W','L','W','W','L','W','L','W','W','L','W','W','L']],
+  ['COL','Rockies','L',2,-20,['W','L','W','L','W','L','W','W','L','W','L','W','L','W','L','W','W','L','W','L','W','L','W','W','L','W','L','W','L','L']],
+  ['SEA','Mariners','L',2,2,['W','L','W','W','L','W','L','W','L','W','W','L','W','L','W','W','L','W','L','W','L','W','W','L','W','L','W','W','L','L']],
+  ['SF','Giants','L',2,-18,['W','W','L','W','L','W','L','W','W','L','W','L','W','L','W','L','W','W','L','W','L','W','L','W','W','L','W','L','W','L']],
+  ['WSH','Nationals','L',2,-15,['L','W','L','W','W','L','W','L','W','L','W','W','L','W','L','W','L','W','W','L','W','L','W','L','W','W','L','W','L','L']],
+  ['TEX','Rangers','L',1,12,['W','L','W','L','W','W','L','W','L','W','L','W','W','L','W','L','W','L','W','W','L','W','L','W','L','W','W','L','W','L']],
+  ['ATH','Athletics','L',1,-14,['L','W','L','W','W','L','W','L','W','W','L','W','L','W','L','W','L','W','W','L','W','L','W','W','L','W','L','W','W','L']],
+  ['TOR','Blue Jays','L',3,-20,['W','L','W','L','W','L','W','L','W','W','L','W','L','W','L','W','L','W','L','W','L','W','W','L','W','L','W','L','L','L']],
+  ['HOU','Astros','L',4,-18,['W','L','W','W','L','W','L','W','L','W','L','W','L','W','L','W','L','W','L','W','L','W','L','W','W','L','L','L','L','W']],
+  ['BOS','Red Sox','L',5,-22,['W','L','W','L','W','W','L','W','L','W','L','W','L','W','L','W','W','L','W','L','W','L','W','L','W','L','L','L','L','L']],
+  ['MIN','Twins','L',5,10,['L','W','L','W','W','L','W','W','L','W','L','W','W','L','W','L','W','L','W','L','W','W','L','W','L','L','L','L','L','W']],
+  ['NYM','Mets','L',2,-22,['W','L','W','L','W','L','W','W','L','W','L','W','L','W','W','L','W','L','W','L','W','L','W','L','W','L','W','W','L','L']],
+  ['CWS','White Sox','L',2,-28,['L','W','L','W','L','W','L','W','L','W','L','W','L','W','L','W','L','W','L','W','L','W','L','W','L','W','L','W','L','L']],
+  ['PHI','Phillies','L',10,-45,['W','L','W','L','W','L','W','L','W','L','W','L','W','L','W','L','W','L','L','L','L','L','L','L','L','L','L','L','L','L']],
+  ['KC','Royals','L',11,-36,['W','L','W','L','W','L','W','L','W','L','W','L','W','L','W','L','L','L','L','L','L','L','L','L','L','L','L','L','L','L']],
+];
+
+const TODAY_GAMES = [
+  { home:'ATL', away:'PHI', homeML:-182, awayML:150 },
+  { home:'NYY', away:'BOS', homeML:-138, awayML:118 },
+  { home:'TB',  away:'MIN', homeML:-134, awayML:114 },
+  { home:'CLE', away:'TOR', homeML:-122, awayML:104 },
+  { home:'PIT', away:'MIL', homeML:-138, awayML:118 },
+  { home:'AZ',  away:'SD',  homeML:-116, awayML:98  },
+  { home:'COL', away:'LAD', homeML:182,  awayML:-215},
+];
+
+// ── RENDER HEAT MAP ──────────────────────────────────────────
+function cellClass(val) {
+  if (val === 'N') return 'ng';
+  if (val === 'W') return 'w1'; // simplified for historical — current streak shown differently
+  if (val === 'L') return 'l1';
+  return 'ng';
+}
+
+function currentStreakClass(streak, len) {
+  const type = streak === 'W' ? 'w' : 'l';
+  const capped = Math.min(len, 11);
+  return type + capped;
+}
+
+function renderHeatMap(teams) {
+  const grid = document.getElementById('heat-grid');
+  grid.innerHTML = '';
+
+  // Column headers
+  const emptyLabel = document.createElement('div');
+  grid.appendChild(emptyLabel);
+  for (let i = 30; i >= 1; i--) {
+    const hdr = document.createElement('div');
+    hdr.className = 'heat-col-header';
+    hdr.textContent = i === 1 ? 'NOW' : i === 30 ? 'G-30' : '';
+    grid.appendChild(hdr);
+  }
+
+  // Sort: W streaks desc first, then L streaks desc
+  const sorted = [...teams].sort((a, b) => {
+    if (a[2] === 'W' && b[2] === 'L') return -1;
+    if (a[2] === 'L' && b[2] === 'W') return 1;
+    if (a[2] === 'W') return b[3] - a[3];
+    return b[3] - a[3];
+  });
+
+  const tooltip = document.getElementById('tooltip');
+
+  for (const team of sorted) {
+    const [abbr, name, streak, len, diff, history] = team;
+
+    // Row label
+    const label = document.createElement('div');
+    label.className = 'heat-row-label';
+    label.innerHTML = `${name.split(' ').pop()} <span class="heat-row-abbr">${abbr}</span>`;
+    grid.appendChild(label);
+
+    // History cells (G-30 to G-1)
+    for (let i = 0; i < 30; i++) {
+      const val = history[i] || 'N';
+      const cell = document.createElement('div');
+      const isCurrentStreak = i >= (30 - len);
+      
+      if (isCurrentStreak) {
+        cell.className = `heat-cell ${currentStreakClass(streak, 30 - i)}`;
+      } else {
+        cell.className = `heat-cell ${val === 'W' ? 'w1' : val === 'L' ? 'l1' : 'ng'}`;
+        cell.style.opacity = '0.5';
+      }
+
+      // Check if this game creates a collision
+      const gameDay = 30 - i;
+      const isCollision = checkCollisionOnDay(abbr, gameDay, teams);
+      if (isCollision) {
+        const badge = document.createElement('div');
+        badge.className = 'collision-badge';
+        cell.appendChild(badge);
+      }
+
+      // Tooltip
+      cell.addEventListener('mousemove', (e) => {
+        const gameNum = 30 - i;
+        const diffStr = diff >= 0 ? `+${diff}` : `${diff}`;
+        tooltip.innerHTML = `<b style="color:var(--gold)">${name}</b><br>Game -${gameNum}<br>Result: ${val === 'N' ? 'No game' : val}<br>Run diff: ${diffStr}<br>Current: ${streak}${len}`;
+        tooltip.style.left = (e.clientX + 12) + 'px';
+        tooltip.style.top = (e.clientY - 10) + 'px';
+        tooltip.classList.add('visible');
+      });
+      cell.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function checkCollisionOnDay(abbr, gameDay, teams) {
+  // Simplified: flag if team is on W streak and has a game vs a L streak team
+  return false; // collision shown in matrix below
+}
+
+// ── RENDER COLLISION MATRIX ──────────────────────────────────
+function renderCollisionMatrix(teams, games) {
+  const grid = document.getElementById('collision-grid');
+  // Keep header row
+  const header = grid.querySelector('.header');
+  grid.innerHTML = '';
+  grid.appendChild(header);
+
+  const teamMap = {};
+  for (const t of teams) teamMap[t[0]] = t;
+
+  let hasAny = false;
+
+  for (const g of games) {
+    const home = teamMap[g.home];
+    const away = teamMap[g.away];
+    if (!home || !away) continue;
+
+    const [,homeName,homeStreak,homeLen,homeDiff] = home;
+    const [,awayName,awayStreak,awayLen,awayDiff] = away;
+
+    // Check collision: opposite streaks, both W2+/L2+
+    const collisionActive = homeStreak !== awayStreak && homeLen >= 2 && awayLen >= 2;
+    if (!collisionActive) continue;
+    hasAny = true;
+
+    const maxColl = homeLen >= 5 || awayLen >= 5;
+    const diffGap = Math.abs(homeDiff - awayDiff);
+
+    // Determine which side to bet
+    let signal = 'ENTRY', badgeCls = 'cm-badge-entry', rec = '—', recCls = '';
+    if (maxColl) { signal = 'MAX'; badgeCls = 'cm-badge-max'; }
+    else if (homeLen >= 3 || awayLen >= 3) { signal = 'STRONG'; badgeCls = 'cm-badge-strong'; }
+
+    // Home dog check
+    let action = '—', actionCls = '';
+    if (homeStreak === 'L' && awayStreak === 'W') {
+      // Home team losing, away team winning = back away dog if T1 gate
+      if (g.awayML >= 140 && g.awayML <= 199) {
+        action = `${g.away} +${g.awayML} T1`; actionCls = 'play';
+      } else if (g.homeML >= -135 && g.homeML <= -115) {
+        action = `${g.home} ${g.homeML} T11`; actionCls = 'watch';
+      } else {
+        action = 'Check gate'; actionCls = '';
+      }
+    } else if (homeStreak === 'W' && awayStreak === 'L') {
+      if (g.homeML >= -135 && g.homeML <= -115) {
+        action = `${g.home} ${g.homeML} T11`; actionCls = 'play';
+      } else if (g.homeML >= 140) {
+        action = `${g.home} +${g.homeML} T1`; actionCls = 'play';
+      } else {
+        action = 'Parlay only'; actionCls = 'watch';
+      }
+    }
+
+    const row = document.createElement('div');
+    row.className = `cm-row ${maxColl ? 'max-collision' : 'collision'}`;
+
+    const homeDiffStr = homeDiff >= 0 ? `+${homeDiff}` : `${homeDiff}`;
+    const awayDiffStr = awayDiff >= 0 ? `+${awayDiff}` : `${awayDiff}`;
+
+    row.innerHTML = `
+      <div class="cm-team-${homeStreak.toLowerCase()}">${homeName.split(' ').pop()} <span style="font-size:9px;color:var(--text3)">${homeStreak}${homeLen}</span></div>
+      <div class="cm-team-${awayStreak.toLowerCase()}">${awayName.split(' ').pop()} <span style="font-size:9px;color:var(--text3)">${awayStreak}${awayLen}</span></div>
+      <div class="cm-diff-${homeDiff>0?'pos':homeDiff<0?'neg':'neu'}">${homeDiffStr}</div>
+      <div class="cm-diff-${awayDiff>0?'pos':awayDiff<0?'neg':'neu'}">${awayDiffStr}</div>
+      <div style="color:var(--text2);font-size:10px;">${diffGap} pts</div>
+      <div><span class="cm-badge ${badgeCls}">${signal}</span></div>
+      <div class="cm-rec ${actionCls}">${action}</div>
+    `;
+    grid.appendChild(row);
+  }
+
+  if (!hasAny) {
+    const empty = document.createElement('div');
+    empty.style = 'padding:12px;color:var(--text3);font-family:var(--mono);font-size:11px;';
+    empty.textContent = 'No W2+/L2+ collisions on today\'s slate';
+    grid.appendChild(empty);
+  }
+}
+
+// ── LOAD DATA ────────────────────────────────────────────────
+async function loadData() {
+  document.getElementById('ts-label').textContent = 'Loading...';
+  try {
+    const res = await fetch('/morning-scan');
+    const scan = await res.json();
+    if (scan && scan.teams && !scan.error) {
+      // Convert server scan data to our format
+      const teams = Object.entries(scan.teams).map(([abbr, t]) => {
+        return [abbr, t.name, t.streak, t.streakLen, t.runDiff, []];
+      });
+      const games = (scan.allGames || []).map(g => ({
+        home: g.home?.abbr, away: g.away?.abbr,
+        homeML: g.analysis?.odds?.homeML,
+        awayML: g.analysis?.odds?.awayML,
+      }));
+      renderHeatMap(teams.length > 0 ? teams : DEMO_TEAMS);
+      renderCollisionMatrix(teams.length > 0 ? teams : DEMO_TEAMS, games.length > 0 ? games : TODAY_GAMES);
+      document.getElementById('ts-label').textContent = 'Updated ' + new Date(scan.timestamp).toLocaleTimeString();
+      return;
+    }
+  } catch(e) {}
+  // Fall back to demo data
+  renderHeatMap(DEMO_TEAMS);
+  renderCollisionMatrix(DEMO_TEAMS, TODAY_GAMES);
+  document.getElementById('ts-label').textContent = 'Demo data (offline)';
+}
+
+loadData();
+</script>
+</body>
+</html>
