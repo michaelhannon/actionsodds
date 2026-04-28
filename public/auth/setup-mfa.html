@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Set Up Two-Factor — Action's Odds</title>
+  <link rel="stylesheet" href="/auth/auth.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    .mfa-setup-card{
+      max-width:480px; margin:0 auto;
+    }
+    .mfa-step-header{
+      display:flex; align-items:center; gap:12px;
+      margin-bottom:20px;
+      padding-bottom:14px;
+      border-bottom:1px solid rgba(0,0,0,0.08);
+    }
+    .mfa-step-num{
+      width:28px; height:28px; border-radius:50%;
+      background:#0a2a5e; color:#fff;
+      display:grid; place-items:center;
+      font-family:'Bebas Neue',sans-serif; font-size:14px;
+      flex-shrink:0;
+    }
+    .mfa-step-text strong{
+      display:block;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:18px; letter-spacing:0.04em;
+    }
+    .mfa-step-text span{
+      font-size:13px; color:#6b7488;
+    }
+    .mfa-app-list{
+      list-style:none; padding:0; margin:14px 0 24px;
+      font-size:14px; color:#0a0e1a; line-height:1.7;
+    }
+    .mfa-app-list li{
+      padding-left:24px; position:relative;
+    }
+    .mfa-app-list li::before{
+      content:'•';
+      position:absolute; left:8px;
+      color:#0a2a5e; font-weight:700;
+    }
+    .mfa-qr-card{
+      background:#fff;
+      padding:18px;
+      border:1.5px solid rgba(0,0,0,0.08);
+      border-radius:8px;
+      text-align:center;
+      margin:16px 0;
+    }
+    .mfa-qr-card img{
+      width:200px; height:200px;
+      display:block; margin:0 auto;
+    }
+    .mfa-secret-card{
+      background:#f8f9fb;
+      border:1px solid rgba(0,0,0,0.06);
+      border-radius:6px;
+      padding:12px 14px;
+      margin-bottom:18px;
+    }
+    .mfa-secret-label{
+      font-size:11px;
+      color:#6b7488;
+      letter-spacing:0.1em;
+      text-transform:uppercase;
+      margin-bottom:6px;
+    }
+    .mfa-secret-code{
+      font-family:'JetBrains Mono','Courier New',monospace;
+      font-size:13px;
+      color:#0a2a5e;
+      word-break:break-all;
+      display:block;
+      font-weight:600;
+    }
+    .mfa-copy-btn{
+      margin-top:8px;
+      background:none;
+      border:1px solid rgba(0,0,0,0.12);
+      color:#0a0e1a;
+      padding:4px 12px;
+      border-radius:4px;
+      font-size:11px;
+      letter-spacing:0.04em;
+      text-transform:uppercase;
+      cursor:pointer;
+      font-family:'Barlow Condensed',sans-serif;
+      font-weight:600;
+    }
+    .mfa-input{
+      width:100%;
+      padding:14px 16px;
+      background:#f8f9fb;
+      border:1.5px solid rgba(10,14,26,0.12);
+      border-radius:6px;
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:24px;
+      font-weight:600;
+      text-align:center;
+      letter-spacing:0.4em;
+      color:#0a0e1a;
+      margin-bottom:14px;
+    }
+    .mfa-input:focus{
+      outline:none;
+      border-color:#0a2a5e;
+    }
+    .mfa-locked-note{
+      font-size:13px;
+      color:#6b7488;
+      margin-top:18px;
+      text-align:center;
+      padding:12px;
+      background:#f8f9fb;
+      border-radius:6px;
+      line-height:1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-logo">
+      <div class="auth-logo-mark">ACTION'S<span>ODDS</span></div>
+      <div class="auth-logo-sub">MLB · NHL · NBA · NFL · GOLF</div>
+    </div>
+
+    <div class="auth-card mfa-setup-card">
+      <h1 class="auth-title">Set Up Two-Factor</h1>
+      <p class="auth-subtitle">Required to keep your account secure.</p>
+
+      <div id="alert" style="display:none;"></div>
+
+      <div id="step-instructions">
+        <div class="mfa-step-header">
+          <div class="mfa-step-num">1</div>
+          <div class="mfa-step-text">
+            <strong>Install an Authenticator App</strong>
+            <span>Free, takes 30 seconds. Any of these work:</span>
+          </div>
+        </div>
+        <ul class="mfa-app-list">
+          <li><strong>Google Authenticator</strong> — App Store / Play Store</li>
+          <li><strong>Microsoft Authenticator</strong> — App Store / Play Store</li>
+          <li><strong>Authy</strong>, <strong>1Password</strong>, <strong>Bitwarden</strong> — also work fine</li>
+        </ul>
+
+        <div class="mfa-step-header">
+          <div class="mfa-step-num">2</div>
+          <div class="mfa-step-text">
+            <strong>Scan This QR Code</strong>
+            <span>Or enter the secret manually if you can't scan.</span>
+          </div>
+        </div>
+
+        <div class="mfa-qr-card">
+          <img id="mfa-qr-img" alt="2FA QR code">
+        </div>
+
+        <div class="mfa-secret-card">
+          <div class="mfa-secret-label">Manual entry secret</div>
+          <code id="mfa-secret" class="mfa-secret-code">Loading…</code>
+          <button id="mfa-copy-secret" class="mfa-copy-btn">Copy</button>
+        </div>
+
+        <div class="mfa-step-header">
+          <div class="mfa-step-num">3</div>
+          <div class="mfa-step-text">
+            <strong>Enter the 6-Digit Code</strong>
+            <span>Your app is now showing one — type it below.</span>
+          </div>
+        </div>
+
+        <input
+          class="mfa-input"
+          type="text"
+          id="mfa-code"
+          inputmode="numeric"
+          pattern="[0-9]{6}"
+          maxlength="6"
+          placeholder="000000"
+          autocomplete="one-time-code">
+
+        <button type="button" class="btn-primary" id="confirm-btn">Confirm and continue</button>
+
+        <p class="mfa-locked-note">
+          You can't access the dashboard until two-factor is set up.<br>
+          Need help? Email <a href="mailto:support@actionsodds.com" style="color:#0a2a5e;">support@actionsodds.com</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const SUPABASE_URL = window.SUPABASE_URL || 'https://xlfsaxfpdpxsdkovvhxs.supabase.co';
+    const SUPABASE_KEY = window.SUPABASE_ANON_KEY || 'sb_publishable_3L81CVKvE9w2agrz6yMe5g_BC4O0pws';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const alertEl = document.getElementById('alert');
+    const qrImg = document.getElementById('mfa-qr-img');
+    const secretEl = document.getElementById('mfa-secret');
+    const codeInput = document.getElementById('mfa-code');
+    const confirmBtn = document.getElementById('confirm-btn');
+    const copyBtn = document.getElementById('mfa-copy-secret');
+
+    let pendingFactorId = null;
+
+    function showAlert(type, message) {
+      alertEl.className = `alert alert-${type}`;
+      alertEl.textContent = message;
+      alertEl.style.display = 'block';
+    }
+    function clearAlert() { alertEl.style.display = 'none'; }
+
+    // ─── Bootstrapping: confirm session, start enrollment ──────────────
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = '/auth/login.html?next=/auth/setup-mfa.html';
+        return;
+      }
+
+      // If already enrolled, skip to dashboard
+      const { data: factors } = await supabase.auth.mfa.listFactors();
+      const verified = (factors?.totp || []).find(f => f.status === 'verified');
+      if (verified) {
+        window.location.href = '/';
+        return;
+      }
+
+      // Clear any stale unverified factors before starting fresh
+      for (const f of (factors?.totp || [])) {
+        if (f.status !== 'verified') {
+          try { await supabase.auth.mfa.unenroll({ factorId: f.id }); } catch {}
+        }
+      }
+
+      // Start enrollment
+      try {
+        const { data, error } = await supabase.auth.mfa.enroll({
+          factorType: 'totp',
+          friendlyName: "Action's Odds",
+        });
+        if (error) throw error;
+
+        pendingFactorId = data.id;
+        qrImg.src = data.totp.qr_code;
+        secretEl.textContent = data.totp.secret;
+        codeInput.focus();
+      } catch (err) {
+        showAlert('error', err.message || 'Could not start 2FA setup. Reload the page to try again.');
+      }
+    })();
+
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(secretEl.textContent);
+        copyBtn.textContent = 'Copied';
+        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+      } catch {}
+    });
+
+    async function handleConfirm() {
+      clearAlert();
+      const code = codeInput.value.trim();
+      if (!/^[0-9]{6}$/.test(code)) {
+        showAlert('error', 'Enter the 6-digit code from your authenticator app.');
+        return;
+      }
+      if (!pendingFactorId) {
+        showAlert('error', 'Setup expired. Reload the page to start over.');
+        return;
+      }
+
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<span class="spinner"></span>Verifying…';
+
+      try {
+        const { data: ch, error: ce } = await supabase.auth.mfa.challenge({ factorId: pendingFactorId });
+        if (ce) throw ce;
+
+        const { error: ve } = await supabase.auth.mfa.verify({
+          factorId: pendingFactorId,
+          challengeId: ch.id,
+          code,
+        });
+        if (ve) throw ve;
+
+        confirmBtn.textContent = 'Done — taking you to dashboard…';
+        setTimeout(() => { window.location.href = '/'; }, 600);
+      } catch (err) {
+        showAlert('error', err.message || 'Invalid code. Check the app and try again.');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Confirm and continue';
+        codeInput.select();
+      }
+    }
+
+    confirmBtn.addEventListener('click', handleConfirm);
+    codeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleConfirm();
+    });
+  </script>
+</body>
+</html>

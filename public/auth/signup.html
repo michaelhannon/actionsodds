@@ -8,6 +8,32 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Phase 2c — security notice on signup */
+    .signup-security-notice{
+      background:linear-gradient(135deg, rgba(10,42,94,0.06), rgba(10,42,94,0.02));
+      border:1px solid rgba(10,42,94,0.18);
+      border-radius:8px;
+      padding:14px 16px;
+      margin-bottom:20px;
+      display:flex; align-items:flex-start; gap:12px;
+    }
+    .signup-security-icon{
+      flex-shrink:0; width:28px; height:28px;
+      background:#0a2a5e; color:#fff;
+      border-radius:50%; display:grid; place-items:center;
+      font-family:'Bebas Neue',sans-serif; font-size:15px;
+    }
+    .signup-security-text strong{
+      display:block;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:15px; letter-spacing:0.04em;
+      color:#0a2a5e; margin-bottom:3px;
+    }
+    .signup-security-text span{
+      color:#0a0e1a; font-size:13px; line-height:1.5;
+    }
+  </style>
 </head>
 <body>
   <div class="auth-container">
@@ -19,6 +45,14 @@
     <div class="auth-card">
       <h1 class="auth-title">Create your account</h1>
       <p class="auth-subtitle">Sign up to start tracking plays. You'll choose your sports on the next step.</p>
+
+      <div class="signup-security-notice">
+        <div class="signup-security-icon">!</div>
+        <div class="signup-security-text">
+          <strong>Two-Factor Required</strong>
+          <span>For your account's security, you'll be asked to set up two-factor authentication right after signup. We suggest a free authenticator app like <strong>Google Authenticator</strong> or <strong>Microsoft Authenticator</strong> from your app store.</span>
+        </div>
+      </div>
 
       <div id="alert" style="display:none;"></div>
 
@@ -85,14 +119,25 @@
           password,
           options: {
             data: { display_name },
-            emailRedirectTo: `${window.location.origin}/auth/login.html`,
+            // Phase 2c: after email verification, send users straight to MFA setup
+            emailRedirectTo: `${window.location.origin}/auth/setup-mfa.html`,
           },
         });
 
         if (error) throw error;
 
-        showAlert('success', `✓ Account created! Check your email (${email}) to verify, then log in.`);
-        form.reset();
+        // Two paths possible from Supabase here:
+        //   - Email confirmation REQUIRED: data.session is null. User must
+        //     verify email first; the verification link drops them at setup-mfa.
+        //   - Email confirmation DISABLED: data.session is set. They're already
+        //     logged in — send them straight to setup-mfa.
+        if (data.session) {
+          // Already logged in — go straight to MFA setup
+          window.location.href = '/auth/setup-mfa.html';
+        } else {
+          showAlert('success', `✓ Account created! Check your email (${email}) to verify. The verification link will take you to set up two-factor authentication.`);
+          form.reset();
+        }
       } catch (err) {
         showAlert('error', err.message || 'Something went wrong. Please try again.');
       } finally {

@@ -1099,14 +1099,21 @@ select.form-input{cursor:pointer;}
         return;
       }
 
-      // 2b. Admin? Require MFA. Skip the check on /account.html itself
-      //     so admins can actually get there to enroll without being looped.
-      if (me.is_admin && window.location.pathname !== '/account.html') {
+      // 2b. Phase 2c — universal MFA gate. EVERY user must have MFA enabled.
+      //     Skip on /account.html and /auth/setup-mfa.html so users can actually
+      //     get there to enroll without being looped.
+      const mfaSkipPaths = ['/account.html', '/auth/setup-mfa.html'];
+      if (!mfaSkipPaths.includes(window.location.pathname)) {
         try {
           const { data: factors } = await supabase.auth.mfa.listFactors();
           const hasMfa = (factors?.totp || []).some(f => f.status === 'verified');
           if (!hasMfa) {
-            window.location.replace('/account.html?require=mfa');
+            // Admins go to account.html with the require=mfa banner.
+            // Regular users get the dedicated setup-mfa flow.
+            const dest = me.is_admin
+              ? '/account.html?require=mfa'
+              : '/auth/setup-mfa.html';
+            window.location.replace(dest);
             return;
           }
         } catch (e) {

@@ -79,6 +79,14 @@ morningScan.scheduleScan(
 
 if (startGraderCron) startGraderCron();
 
+// Phase 2c — start the background sharing-detection cron (every 30 min).
+// Additive — if the module is missing the server still boots cleanly.
+try {
+  require('./server/sharing-cron').start();
+} catch (e) {
+  console.warn('[Boot] sharing-cron not loaded:', e.message);
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.ODDS_API_KEY || '';
@@ -664,6 +672,9 @@ app.use(apiRoutes);
 
 // Phase 2b — auth tracking, sessions, login history, device verification
 app.use(require('./server/auth-track'));
+
+// Phase 2c — admin sharing-flag review endpoints
+app.use(require('./server/admin-flags'));
 
 // =============================================================================
 // STATIC FILE SERVING

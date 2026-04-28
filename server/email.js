@@ -1,12 +1,17 @@
 /**
- * Action's Odds — Transactional Email (Phase 2b)
+ * Action's Odds — Transactional Email
  *
  * All emails go through Resend. Templates are HTML-only with table-based
- * layouts (max compatibility with Gmail / iOS Mail / Outlook).
+ * layouts (max compatibility with Gmail / iOS Mail / Outlook / AOL).
  *
  * If RESEND_API_KEY is missing, all functions log a warning and no-op
- * instead of crashing — so you can still test other parts of Phase 2b
- * locally without email.
+ * instead of crashing — so you can still test other parts locally without email.
+ *
+ * Templates:
+ *   sendNewDeviceAlert         — Phase 2b — "New device signed in"
+ *   sendVelocityAlert          — Phase 2b — "Suspicious sign-in detected"
+ *   sendSubscriptionEndedAlert — Phase 2b — "Your subscription has ended"
+ *   sendAdminFlagDigest        — Phase 2c — Admin-only digest of new sharing flags
  */
 
 const { Resend } = require('resend');
@@ -135,8 +140,62 @@ async function sendSubscriptionEndedAlert({ to, sport }) {
   return send({ to, subject: `Your Action's Odds subscription has ended`, html });
 }
 
+// ─── Template: admin digest of new sharing flags (Phase 2c) ─────────────
+async function sendAdminFlagDigest({ to, flags }) {
+  // Group flags by user for cleaner reading
+  const byUser = new Map();
+  for (const f of flags) {
+    const key = f.userId;
+    if (!byUser.has(key)) byUser.set(key, { email: f.userEmail, flags: [] });
+    byUser.get(key).flags.push(f);
+  }
+
+  const userBlocks = Array.from(byUser.values()).map(u => {
+    const flagRows = u.flags.map(f => {
+      const sevColor = f.severity === 'high' ? '#ff8b8b' : f.severity === 'medium' ? '#d4af37' : '#a0a8b8';
+      const evidenceJson = JSON.stringify(f.evidence, null, 2);
+      return `
+        <div style="background:#0a0e1a; border:1px solid #2a3447; border-radius:6px; padding:12px; margin-bottom:10px;">
+          <div style="margin-bottom:6px;">
+            <span style="color:${sevColor}; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; font-weight:600;">${f.severity}</span>
+            <span style="color:#e8ebf1; font-size:13px; margin-left:10px;">${f.flag_type.replace(/_/g, ' ')}</span>
+          </div>
+          <pre style="color:#a0a8b8; font-size:11px; font-family:monospace; margin:0; white-space:pre-wrap; word-break:break-all;">${escapeHtml(evidenceJson)}</pre>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div style="margin-bottom:24px;">
+        <div style="color:#d4af37; font-family:Georgia,serif; font-size:16px; margin-bottom:10px;">${escapeHtml(u.email)}</div>
+        ${flagRows}
+      </div>
+    `;
+  }).join('');
+
+  const html = shell(
+    'New sharing flags',
+    `
+    <h2 style="margin:0 0 16px;color:#fff;font-size:20px;font-weight:600;">${flags.length} new sharing flag${flags.length === 1 ? '' : 's'}</h2>
+    <p style="color:#a0a8b8;">${byUser.size} user${byUser.size === 1 ? '' : 's'} flagged in this 30-min window. Review:</p>
+    <p style="margin:14px 0 24px;">
+      ${btnPrimary(`${APP_URL}/admin.html`, 'Open admin')}
+      &nbsp; or query <code style="background:#0a0e1a;color:#d4af37;padding:2px 6px;border-radius:3px;font-size:12px;">unreviewed_sharing_flags</code> in Supabase.
+    </p>
+    ${userBlocks}
+    `
+  );
+
+  return send({ to, subject: `[Action's Odds] ${flags.length} new sharing flag${flags.length === 1 ? '' : 's'}`, html });
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 module.exports = {
   sendNewDeviceAlert,
   sendVelocityAlert,
   sendSubscriptionEndedAlert,
+  sendAdminFlagDigest,
 };
