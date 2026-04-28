@@ -1114,7 +1114,7 @@ async function loadOdds(){
   document.getElementById('card-output').innerHTML='<div class="status-box"><div class="spinner" style="width:24px;height:24px;margin:0 auto 16px;display:block;"></div><div class="status-title">Fetching live lines...</div></div>';
 
   try{
-    const API_KEY='75d619683f0d4cf8366179321ee08cc7';
+    const API_KEY='0d5909c1b14d690f7f04c032df0123d9';
     const url=`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars,hard_rock_bet`;
     const res=await fetch(url);
     if(!res.ok)throw new Error('API error '+res.status);
