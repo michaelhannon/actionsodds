@@ -78,6 +78,81 @@
     .footer-links a:hover{color:var(--gold);}
     .loading{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:8px;vertical-align:-2px;}
     @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* ─── MFA enrollment modal ─────────────────────────────────────── */
+    .mfa-link-btn{
+      margin-left:12px; background:none; border:none;
+      color:var(--gold);
+      font-family:'Barlow Condensed',sans-serif; font-size:14px;
+      cursor:pointer; text-transform:uppercase; letter-spacing:0.06em;
+    }
+    .mfa-link-btn:hover{ text-decoration:underline; }
+    .mfa-modal-overlay{
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.85); z-index:1000;
+      align-items:center; justify-content:center; padding:20px;
+    }
+    .mfa-modal-overlay.open{ display:flex; }
+    .mfa-modal{
+      background:var(--panel); border:1px solid var(--border);
+      border-radius:12px; padding:32px;
+      max-width:480px; width:100%;
+      max-height:90vh; overflow-y:auto;
+    }
+    .mfa-modal h2{
+      font-family:'Bebas Neue',sans-serif;
+      font-size:24px; letter-spacing:0.04em;
+      color:var(--gold); margin-bottom:8px;
+    }
+    .mfa-modal p.muted{ color:var(--text2); font-size:14px; margin-bottom:20px; }
+    .mfa-modal ol{
+      color:var(--text2); font-size:14px;
+      padding-left:20px; margin-bottom:20px; line-height:1.8;
+    }
+    .mfa-qr-wrap{
+      background:#fff; padding:14px; border-radius:8px;
+      text-align:center; margin-bottom:16px;
+    }
+    .mfa-qr-wrap img{ display:block; width:200px; height:200px; margin:0 auto; }
+    .mfa-secret-wrap{
+      background:var(--panel2); border:1px solid var(--border);
+      border-radius:6px; padding:12px; margin-bottom:20px;
+    }
+    .mfa-secret-label{
+      color:var(--text3); font-size:11px;
+      letter-spacing:0.1em; text-transform:uppercase; margin-bottom:6px;
+    }
+    .mfa-secret-code{
+      font-family:'JetBrains Mono', 'Courier New', monospace; font-size:13px;
+      color:var(--gold); word-break:break-all; display:block;
+    }
+    .mfa-copy-btn{
+      margin-top:8px; background:none; border:1px solid var(--border);
+      color:var(--text2); padding:4px 10px; border-radius:4px;
+      font-size:11px; cursor:pointer;
+    }
+    .mfa-code-input{
+      width:100%; padding:14px;
+      background:var(--panel2); border:1px solid var(--border); border-radius:6px;
+      font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:600;
+      text-align:center; letter-spacing:0.4em; color:var(--text);
+    }
+    .mfa-code-input:focus{ outline:none; border-color:var(--gold); }
+    .mfa-error{ color:#ff8b8b; font-size:13px; margin-bottom:12px; display:none; }
+    .mfa-modal-actions{ display:flex; gap:10px; justify-content:flex-end; }
+    .mfa-btn-cancel{
+      padding:11px 18px; background:transparent; color:var(--text2);
+      border:1px solid var(--border); border-radius:6px;
+      font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:14px;
+      letter-spacing:0.04em; text-transform:uppercase; cursor:pointer;
+    }
+    .mfa-btn-confirm{
+      padding:11px 18px; background:var(--gold); color:#0a0e1a;
+      border:none; border-radius:6px;
+      font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14px;
+      letter-spacing:0.04em; text-transform:uppercase; cursor:pointer;
+    }
+    .mfa-btn-confirm:disabled{ opacity:0.6; cursor:not-allowed; }
   </style>
 </head>
 <body>
@@ -100,6 +175,41 @@
       <a href="/">Dashboard</a>
       <a href="/pricing.html">Add Subscriptions</a>
       <a href="mailto:support@actionsodds.com">Support</a>
+    </div>
+  </div>
+
+  <!-- ─── MFA enrollment modal ─────────────────────────────────────── -->
+  <div class="mfa-modal-overlay" id="mfa-modal">
+    <div class="mfa-modal">
+      <h2>Enable two-factor</h2>
+      <p class="muted">Use any authenticator app (Google Authenticator, Authy, 1Password, etc).</p>
+      <ol>
+        <li>Open your authenticator app</li>
+        <li>Scan this QR code (or enter the secret manually)</li>
+        <li>Enter the 6-digit code below to confirm</li>
+      </ol>
+
+      <div class="mfa-qr-wrap">
+        <img id="mfa-qr-img" alt="2FA QR code">
+      </div>
+
+      <div class="mfa-secret-wrap">
+        <div class="mfa-secret-label">Manual entry secret</div>
+        <code id="mfa-secret" class="mfa-secret-code">—</code>
+        <button id="mfa-copy-secret" class="mfa-copy-btn">Copy</button>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="display:block; color:var(--text2); font-size:12px; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:6px;">6-digit code from your app</label>
+        <input id="mfa-confirm-code" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000" class="mfa-code-input" autocomplete="one-time-code">
+      </div>
+
+      <div id="mfa-modal-error" class="mfa-error"></div>
+
+      <div class="mfa-modal-actions">
+        <button id="mfa-cancel-btn" class="mfa-btn-cancel">Cancel</button>
+        <button id="mfa-confirm-btn" class="mfa-btn-confirm">Confirm and enable</button>
+      </div>
     </div>
   </div>
 
@@ -201,6 +311,21 @@
           ` : ''}
         </div>
 
+        <div class="card" id="security-card">
+          <h2>Security</h2>
+          <div class="row">
+            <span class="row-label">Two-factor authentication</span>
+            <span class="row-value">
+              <span class="badge" id="mfa-badge">Loading…</span>
+              <button id="mfa-action-btn" class="mfa-link-btn" hidden>Enable</button>
+            </span>
+          </div>
+          <div class="row">
+            <span class="row-label">Password</span>
+            <span class="row-value"><a href="/auth/forgot-password.html" style="color:var(--gold); text-decoration:none;">Change password →</a></span>
+          </div>
+        </div>
+
         <div class="card">
           <h2>Sign Out</h2>
           <p style="color:var(--text2);font-size:14px;margin-bottom:16px;">Log out of this device. You'll need to sign in again next time.</p>
@@ -209,6 +334,7 @@
       `;
 
       bindActions(session);
+      initSecuritySection();
     }
 
     function bindActions(session){
@@ -258,6 +384,174 @@
           window.location.href = '/auth/logout.html';
         });
       }
+    }
+
+    /* ───────────────────────────────────────────────────────────────
+       SECURITY SECTION — MFA enrollment
+       ─────────────────────────────────────────────────────────────── */
+    let pendingFactorId = null;
+
+    function setMfaBadge(state) {
+      const badge = document.getElementById('mfa-badge');
+      const actionBtn = document.getElementById('mfa-action-btn');
+      if (!badge || !actionBtn) return;
+      badge.classList.remove('active', 'canceled');
+      if (state === 'active') {
+        badge.classList.add('active');
+        badge.textContent = 'Enabled';
+        actionBtn.textContent = 'Disable';
+        actionBtn.hidden = false;
+        actionBtn.dataset.action = 'disable';
+      } else if (state === 'inactive') {
+        badge.classList.add('canceled');
+        badge.textContent = 'Off';
+        actionBtn.textContent = 'Enable';
+        actionBtn.hidden = false;
+        actionBtn.dataset.action = 'enable';
+      } else {
+        badge.textContent = 'Loading…';
+        actionBtn.hidden = true;
+      }
+    }
+
+    async function refreshMfaStatus() {
+      setMfaBadge('loading');
+      try {
+        const { data, error } = await supabase.auth.mfa.listFactors();
+        if (error) throw error;
+        const verified = (data.totp || []).find(f => f.status === 'verified');
+        setMfaBadge(verified ? 'active' : 'inactive');
+      } catch (err) {
+        console.error('mfa status:', err);
+        const badge = document.getElementById('mfa-badge');
+        if (badge) badge.textContent = 'Unavailable';
+      }
+    }
+
+    async function startMfaEnrollment() {
+      const errEl = document.getElementById('mfa-modal-error');
+      const codeInput = document.getElementById('mfa-confirm-code');
+      errEl.style.display = 'none';
+      codeInput.value = '';
+
+      try {
+        // Clean up any partially-enrolled factors first
+        const { data: existing } = await supabase.auth.mfa.listFactors();
+        for (const f of (existing?.totp || [])) {
+          if (f.status !== 'verified') {
+            try { await supabase.auth.mfa.unenroll({ factorId: f.id }); } catch {}
+          }
+        }
+
+        const { data, error } = await supabase.auth.mfa.enroll({
+          factorType: 'totp',
+          friendlyName: "Action's Odds"
+        });
+        if (error) throw error;
+
+        pendingFactorId = data.id;
+        document.getElementById('mfa-qr-img').src = data.totp.qr_code;
+        document.getElementById('mfa-secret').textContent = data.totp.secret;
+        document.getElementById('mfa-modal').classList.add('open');
+        setTimeout(() => codeInput.focus(), 100);
+      } catch (err) {
+        alert(err.message || 'Could not start 2FA enrollment');
+      }
+    }
+
+    async function confirmMfaEnrollment() {
+      const errEl = document.getElementById('mfa-modal-error');
+      const codeInput = document.getElementById('mfa-confirm-code');
+      const confirmBtn = document.getElementById('mfa-confirm-btn');
+
+      const code = codeInput.value.trim();
+      if (!/^[0-9]{6}$/.test(code)) {
+        errEl.textContent = 'Enter the 6-digit code from your app.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Verifying…';
+
+      try {
+        const { data: ch, error: ce } = await supabase.auth.mfa.challenge({ factorId: pendingFactorId });
+        if (ce) throw ce;
+        const { error: ve } = await supabase.auth.mfa.verify({
+          factorId: pendingFactorId,
+          challengeId: ch.id,
+          code
+        });
+        if (ve) throw ve;
+
+        document.getElementById('mfa-modal').classList.remove('open');
+        pendingFactorId = null;
+        await refreshMfaStatus();
+      } catch (err) {
+        errEl.textContent = err.message || 'Invalid code. Check your app and try again.';
+        errEl.style.display = 'block';
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Confirm and enable';
+      }
+    }
+
+    async function disableMfa() {
+      if (!confirm('Turn off two-factor authentication? Your account will be less secure.')) return;
+      try {
+        const { data } = await supabase.auth.mfa.listFactors();
+        for (const f of (data.totp || [])) {
+          await supabase.auth.mfa.unenroll({ factorId: f.id });
+        }
+        await refreshMfaStatus();
+      } catch (err) {
+        alert(err.message || 'Could not disable 2FA');
+      }
+    }
+
+    function initSecuritySection() {
+      const actionBtn = document.getElementById('mfa-action-btn');
+      const cancelBtn = document.getElementById('mfa-cancel-btn');
+      const confirmBtn = document.getElementById('mfa-confirm-btn');
+      const codeInput = document.getElementById('mfa-confirm-code');
+      const copyBtn = document.getElementById('mfa-copy-secret');
+
+      if (actionBtn) {
+        actionBtn.addEventListener('click', () => {
+          if (actionBtn.dataset.action === 'enable') startMfaEnrollment();
+          else disableMfa();
+        });
+      }
+
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', async () => {
+          if (pendingFactorId) {
+            try { await supabase.auth.mfa.unenroll({ factorId: pendingFactorId }); } catch {}
+            pendingFactorId = null;
+          }
+          document.getElementById('mfa-modal').classList.remove('open');
+        });
+      }
+
+      if (confirmBtn) confirmBtn.addEventListener('click', confirmMfaEnrollment);
+
+      if (codeInput) {
+        codeInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') confirmMfaEnrollment();
+        });
+      }
+
+      if (copyBtn) {
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(document.getElementById('mfa-secret').textContent);
+            copyBtn.textContent = 'Copied';
+            setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+          } catch {}
+        });
+      }
+
+      refreshMfaStatus();
     }
 
     function escapeHtml(s){
