@@ -652,9 +652,9 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   if (t3Kill) { units = 0; }
 
   // T11 needs 3+ triggers minimum
-  if (gateType === 'T11' && trigCount < 3) units = 0;
+  if (gateType === 'T11' && trigCount < 2) units = 0;
   // T12 needs 5+ triggers minimum
-  if (gateType === 'T12' && trigCount < 5) units = 0;
+  if (gateType === 'T12' && trigCount < 2) units = 0;
   // T13 needs ALL 5 of: T2+T3+T6+T8+1 more
   if (gateType === 'T13') {
     const req = ['T2','T3','T6','T8'];
