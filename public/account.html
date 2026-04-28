@@ -79,6 +79,31 @@
     .loading{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:8px;vertical-align:-2px;}
     @keyframes spin{to{transform:rotate(360deg);}}
 
+    /* ─── Required-MFA banner ──────────────────────────────────────── */
+    .mfa-required-banner{
+      background:linear-gradient(135deg, rgba(212,175,55,0.18), rgba(212,175,55,0.06));
+      border:1px solid rgba(212,175,55,0.4);
+      border-radius:10px;
+      padding:18px 20px;
+      margin-bottom:24px;
+      display:flex; align-items:flex-start; gap:14px;
+    }
+    .mfa-required-icon{
+      flex-shrink:0; width:32px; height:32px;
+      background:var(--gold); color:#0a0e1a;
+      border-radius:50%; display:grid; place-items:center;
+      font-family:'Bebas Neue',sans-serif; font-size:18px;
+    }
+    .mfa-required-text strong{
+      display:block;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:18px; letter-spacing:0.06em;
+      color:var(--gold); margin-bottom:4px;
+    }
+    .mfa-required-text span{
+      color:var(--text2); font-size:14px; line-height:1.5;
+    }
+
     /* ─── MFA enrollment modal ─────────────────────────────────────── */
     .mfa-link-btn{
       margin-left:12px; background:none; border:none;
@@ -165,6 +190,15 @@
 
     <h1>Your Account</h1>
 
+    <!-- Banner shown when admin lands here with ?require=mfa -->
+    <div class="mfa-required-banner" id="mfa-required-banner" style="display:none;">
+      <div class="mfa-required-icon">!</div>
+      <div class="mfa-required-text">
+        <strong>Two-Factor Required</strong>
+        <span>Admin accounts must enable two-factor authentication before accessing the dashboard. Scroll down to the Security card and click <b style="color:var(--gold);">Enable</b>.</span>
+      </div>
+    </div>
+
     <div id="content">
       <div class="card">
         <p style="text-align:center;color:var(--text2);"><span class="loading"></span>Loading...</p>
@@ -220,6 +254,12 @@
       'https://xlfsaxfpdpxsdkovvhxs.supabase.co',
       'sb_publishable_3L81CVKvE9w2agrz6yMe5g_BC4O0pws'
     );
+
+    // Show "MFA required" banner if redirected here with ?require=mfa
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('require') === 'mfa') {
+      document.getElementById('mfa-required-banner').style.display = 'flex';
+    }
 
     async function init(){
       const { data: { session } } = await supabase.auth.getSession();
@@ -314,7 +354,7 @@
         <div class="card" id="security-card">
           <h2>Security</h2>
           <div class="row">
-            <span class="row-label">Two-factor authentication</span>
+            <span class="row-label">Two-factor authentication ${isAdmin ? '<span style="color:var(--gold); font-size:10px; margin-left:4px;">(REQUIRED)</span>' : ''}</span>
             <span class="row-value">
               <span class="badge" id="mfa-badge">Loading…</span>
               <button id="mfa-action-btn" class="mfa-link-btn" hidden>Enable</button>
@@ -334,7 +374,7 @@
       `;
 
       bindActions(session);
-      initSecuritySection();
+      initSecuritySection(isAdmin);
     }
 
     function bindActions(session){
@@ -390,6 +430,7 @@
        SECURITY SECTION — MFA enrollment
        ─────────────────────────────────────────────────────────────── */
     let pendingFactorId = null;
+    let isAdminUser = false;
 
     function setMfaBadge(state) {
       const badge = document.getElementById('mfa-badge');
@@ -399,9 +440,14 @@
       if (state === 'active') {
         badge.classList.add('active');
         badge.textContent = 'Enabled';
-        actionBtn.textContent = 'Disable';
-        actionBtn.hidden = false;
-        actionBtn.dataset.action = 'disable';
+        // Admins can't disable MFA — it's required
+        if (isAdminUser) {
+          actionBtn.hidden = true;
+        } else {
+          actionBtn.textContent = 'Disable';
+          actionBtn.hidden = false;
+          actionBtn.dataset.action = 'disable';
+        }
       } else if (state === 'inactive') {
         badge.classList.add('canceled');
         badge.textContent = 'Off';
@@ -421,6 +467,17 @@
         if (error) throw error;
         const verified = (data.totp || []).find(f => f.status === 'verified');
         setMfaBadge(verified ? 'active' : 'inactive');
+
+        // If admin just enrolled, hide the required banner and offer to go back
+        if (verified && document.getElementById('mfa-required-banner').style.display === 'flex') {
+          const banner = document.getElementById('mfa-required-banner');
+          banner.innerHTML = `
+            <div class="mfa-required-icon" style="background:var(--green); color:#fff;">✓</div>
+            <div class="mfa-required-text">
+              <strong style="color:var(--green);">Two-Factor Enabled</strong>
+              <span>You're all set. <a href="/" style="color:var(--gold);">Go to dashboard →</a></span>
+            </div>`;
+        }
       } catch (err) {
         console.error('mfa status:', err);
         const badge = document.getElementById('mfa-badge');
@@ -497,6 +554,10 @@
     }
 
     async function disableMfa() {
+      if (isAdminUser) {
+        alert('Admin accounts cannot disable two-factor authentication.');
+        return;
+      }
       if (!confirm('Turn off two-factor authentication? Your account will be less secure.')) return;
       try {
         const { data } = await supabase.auth.mfa.listFactors();
@@ -509,7 +570,8 @@
       }
     }
 
-    function initSecuritySection() {
+    function initSecuritySection(isAdmin) {
+      isAdminUser = !!isAdmin;
       const actionBtn = document.getElementById('mfa-action-btn');
       const cancelBtn = document.getElementById('mfa-cancel-btn');
       const confirmBtn = document.getElementById('mfa-confirm-btn');

@@ -11,3 +11,5 @@ skills-lock.json
 *.save
 .DS_Store
 main
+*.pre-followup-backup
+*.backup
