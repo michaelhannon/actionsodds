@@ -611,8 +611,8 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
 
   // Gate caps (dollar ceilings — units mapping respects these)
   let maxSize = 1000;
-  if (gateType === 'T11') maxSize = 800;
-  if (gateType === 'T12') maxSize = 600;
+  if (gateType === 'T11') maxSize = 750;
+  if (gateType === 'T12') maxSize = 1000;
   if (gateType === 'T13') maxSize = 1000;
   if (t15Active) maxSize = 100;
 
