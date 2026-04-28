@@ -299,7 +299,7 @@ async function fetchBullpenStatus(teamId) {
 async function fetchOdds(apiKey) {
   if (!apiKey) return [];
   try {
-    const url = `https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${apiKey}&regions=us&markets=h2h,spreads,totals&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars,hard_rock_bet`;
+    const url = `https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?apiKey=${apiKey}&regions=us&markets=h2h,spreads&oddsFormat=american&bookmakers=draftkings,fanduel,betmgm,caesars,hard_rock_bet`;
     return await fetchJSON(url);
   } catch(e) {
     console.error('[Scan] Odds error:', e.message);
@@ -339,24 +339,14 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   });
 
   let homeML = null, awayML = null, homeRL = null, awayRL = null;
-  let totalsLine = null, overPrice = null, underPrice = null, totalsBook = null;
   if (gameOdds) {
     const bm = gameOdds.bookmakers?.find(b => ['draftkings','fanduel','betmgm','caesars','hard_rock_bet'].includes(b.key)) || gameOdds.bookmakers?.[0];
     const h2h = bm?.markets?.find(m => m.key === 'h2h');
     const spreads = bm?.markets?.find(m => m.key === 'spreads');
-    const totals = bm?.markets?.find(m => m.key === 'totals');
     homeML = h2h?.outcomes?.find(o => o.name === gameOdds.home_team)?.price;
     awayML = h2h?.outcomes?.find(o => o.name === gameOdds.away_team)?.price;
     homeRL = spreads?.outcomes?.find(o => o.name === gameOdds.home_team);
     awayRL = spreads?.outcomes?.find(o => o.name === gameOdds.away_team);
-    const overOutcome  = totals?.outcomes?.find(o => o.name === 'Over');
-    const underOutcome = totals?.outcomes?.find(o => o.name === 'Under');
-    if (overOutcome || underOutcome) {
-      totalsLine  = overOutcome?.point ?? underOutcome?.point ?? null;
-      overPrice   = overOutcome?.price ?? null;
-      underPrice  = underOutcome?.price ?? null;
-      totalsBook  = bm?.key || null;
-    }
   }
 
   // ── GATE CHECK ───────────────────────────────────────────
@@ -390,7 +380,7 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   }
 
   if (!gateType && !t15Active) {
-    return { gateType: null, plays: [], t15: false, collision: buildCollisionData(away, home), odds: { homeML, awayML }, totals: { line: totalsLine, overPrice, underPrice, book: totalsBook } };
+    return { gateType: null, plays: [], t15: false, collision: buildCollisionData(away, home), odds: { homeML, awayML } };
   }
 
   // ── TRIGGER COUNTING ─────────────────────────────────────
@@ -398,18 +388,14 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   const failed = [];
   const notes = [];
 
-  // T2: Streak collision (REFINED Apr 26 2026)
-  // STRICT: W2+ vs L2+ on opposite sides
-  // SOFT:   W1 vs L1 — directional signal counts when other triggers justify
+  // T2: Streak collision
   const collisionActive = away.streak !== home.streak;
   const collisionMax = collisionActive && (away.streakLen >= 5 || home.streakLen >= 5);
-  const collisionStrict = collisionActive && away.streakLen >= 2 && home.streakLen >= 2;
   const fadeZone = away.streakLen >= 9 || home.streakLen >= 9;
   if (collisionActive) {
-    const mode = collisionStrict ? '' : ' [soft — W1 vs L1, directional]';
     const favSide = gateSide === 'home' ?
-      (home.streak === 'W' ? 'T2 ✓ Home W' + home.streakLen + ' vs Away L' + away.streakLen + mode : 'T2 ✓ Away L' + away.streakLen + ' vs Home W' + home.streakLen + mode) :
-      (away.streak === 'W' ? 'T2 ✓ Away W' + away.streakLen + ' vs Home L' + home.streakLen + mode : null);
+      (home.streak === 'W' ? 'T2 ✓ Home W' + home.streakLen + ' vs Away L' + away.streakLen : 'T2 ✓ Away L' + away.streakLen + ' vs Home W' + home.streakLen) :
+      (away.streak === 'W' ? 'T2 ✓ Away W' + away.streakLen + ' vs Home L' + home.streakLen : null);
     if (favSide) {
       triggered.push('T2');
       notes.push(favSide + (collisionMax ? ' — MAX COLLISION' : ''));
@@ -541,11 +527,11 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
     notes.push('T4-RS MAX bonus: +1 trigger added to sizing');
   }
 
-  // T10: Divisional familiarity (counts as ONE confirming trigger, never 2x)
+  // T10: Divisional familiarity
   const isDivisional = away.division === home.division; // approximate
   if (isDivisional) {
     triggered.push('T10');
-    notes.push('T10 ✓ Divisional matchup');
+    notes.push('T10 ✓ Divisional matchup — counts as 2 triggers if T1 active');
   }
 
   // T14: Power ratings — mandatory kill check
@@ -609,8 +595,8 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   // ── SIZING ───────────────────────────────────────────────
   let trigCount = triggered.length;
 
-  // T10 divisional = ONE confirming trigger only (corrected Apr 26 2026, was incorrectly 2x for T1)
-  // No additional bump — already counted in triggered.length above
+  // T10 divisional doubles if T1
+  if (triggered.includes('T10') && gateType === 'T1') trigCount++;
 
   // Collision max = gate alone sufficient
   const gateAlone = collisionMax && (away.streakLen >= 5 || home.streakLen >= 5);
@@ -618,68 +604,59 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   // Kill if T14 fired
   if (t14Kill) trigCount = 0;
 
-  // ── UNIT-BASED SIZING (Zen Poker 100-unit method, Apr 26 2026) ──────────
-  // Base unit = 1% of user bankroll. Tiers: ENTRY 1×, STRONG 2×, MAX 3×.
-  // Engine outputs unit count; frontend multiplies by user's bankroll for $ display.
-  // Path caps: T1/T1B/T11 up to 3×, T12 cap 2×, T13/T15 cap 1×.
+  // T11/T12/T13 max size caps
+  let maxSize = 1000;
+  if (gateType === 'T11') maxSize = 800;
+  if (gateType === 'T12') maxSize = 600;
+  if (gateType === 'T13') maxSize = 400;
+  if (t15Active) maxSize = 100; // exotic only
 
-  let maxUnits = 3;
-  if (gateType === 'T12') maxUnits = 2;
-  if (gateType === 'T13') maxUnits = 1;
-  if (t15Active) maxUnits = 1; // exotic only — capped at ENTRY tier
-
-  let units = 0;
+  const unit = cfg.unit || 200;
+  let sizing = 0;
   if (!t14Kill) {
-    // Trigger count → unit tier (path-cap applied after)
-    if (trigCount <= 1) units = 1;        // ENTRY
-    else if (trigCount <= 3) units = 2;   // STRONG
-    else units = 3;                       // MAX (4+ triggers OR collisionMax handled below)
-    units = Math.min(units, maxUnits);
+    if (trigCount === 0 || (gateType === 'T1' && trigCount < 1)) sizing = unit;
+    else if (trigCount === 1) sizing = unit * 2;
+    else if (trigCount === 2) sizing = unit * 3;
+    else if (trigCount === 3) sizing = unit * 4;
+    else sizing = unit * 5;
+    sizing = Math.min(sizing, maxSize);
   }
-
-  // Collision MAX = gate alone sufficient → bump to MAX tier (subject to path cap)
-  if (collisionMax && !t14Kill) units = Math.min(3, maxUnits);
 
   // T3 hard kill — negative run diff below -10 kills any play
   const t3Kill = gradeTeam.runDiff < -10;
-  if (t3Kill) units = 0;
+  if (t3Kill) { sizing = 0; }
 
   // T11 needs 3+ triggers minimum
-  if (gateType === 'T11' && trigCount < 3) units = 0;
-  // T12 needs 4+ triggers minimum (was 5 — corrected to match Path B spec)
-  if (gateType === 'T12' && trigCount < 4) units = 0;
-  // T13 needs ALL of T2+T3+T6+T8 + 1 more
+  if (gateType === 'T11' && trigCount < 3) sizing = 0;
+  // T12 needs 5+ triggers minimum
+  if (gateType === 'T12' && trigCount < 5) sizing = 0;
+  // T13 needs ALL 5 of: T2+T3+T6+T8+1 more
   if (gateType === 'T13') {
     const req = ['T2','T3','T6','T8'];
     const hasAll = req.every(t => triggered.includes(t));
-    if (!hasAll || trigCount < 5) units = 0;
+    if (!hasAll || trigCount < 5) sizing = 0;
   }
 
-  const bankrollPct = units * 1.0; // 1% per unit
-  // Legacy field for any frontend still reading "sizing" — computed at $10K reference
-  // Real $ is computed client-side from user bankroll
-  const sizing = units * 100; // reference value at $10K bankroll; UI overrides per user
-
-  // ── COLOR + STRENGTH (driven by unit tier, not raw trigger count) ─────
+  // ── COLOR + STRENGTH ─────────────────────────────────────
   let color, strength, recommendation;
-  if (t14Kill || units === 0) {
+  if (t14Kill || sizing === 0) {
     color = 'red'; strength = 'PASS';
     recommendation = 'PASS — ' + (t14Kill ? 'T14 power ratings kill this play' : 'Insufficient triggers');
   } else if (t15Active) {
     color = 'orange'; strength = 'FADE';
-    recommendation = `T15 FADE — ${game.away.name} (exotic/parlay only, 0.25-0.5 unit)`;
-  } else if (units >= 3) {
+    recommendation = `T15 FADE — ${game.away.name} (exotic/parlay only, $50-100)`;
+  } else if (trigCount >= 4 || collisionMax) {
     color = 'blue'; strength = 'MAX';
-    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — 3 units (3% of bankroll)`;
-  } else if (units === 2) {
+    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing}`;
+  } else if (trigCount === 3) {
     color = 'green'; strength = 'STRONG';
-    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — 2 units (2% of bankroll)`;
-  } else if (units === 1) {
+    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing}`;
+  } else if (trigCount === 2) {
     color = 'teal'; strength = 'ENTRY';
-    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — 1 unit (1% of bankroll)`;
+    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing}`;
   } else {
     color = 'amber'; strength = 'WATCH';
-    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — borderline`;
+    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing} (borderline)`;
   }
 
   // Run line — always display both sides, flag qualifying add-on separately
@@ -693,28 +670,27 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   if (!t14Kill && !t15Active && trigCount >= 3) {
     // Fav -1.5 at plus money (best value)
     if (gateSide === 'home' && awayRL?.point <= -1 && awayRL?.price >= 115) {
-      rlAddon = { desc: `${game.away.name} -1.5 ${awayRL.price > 0 ? '+' : ''}${awayRL.price}`, units: units * 0.5, qualifying: true };
+      rlAddon = { desc: `${game.away.name} -1.5 ${awayRL.price > 0 ? '+' : ''}${awayRL.price}`, amt: Math.round((sizing||200) * 0.5), qualifying: true };
     } else if (gateSide === 'away' && homeRL?.point <= -1 && homeRL?.price >= 115) {
-      rlAddon = { desc: `${game.home.name} -1.5 ${homeRL.price > 0 ? '+' : ''}${homeRL.price}`, units: units * 0.5, qualifying: true };
+      rlAddon = { desc: `${game.home.name} -1.5 ${homeRL.price > 0 ? '+' : ''}${homeRL.price}`, amt: Math.round((sizing||200) * 0.5), qualifying: true };
     }
     // Dog +1.5 at +100 or better
     else if (gateSide === 'home' && homeRL?.point >= 1 && homeRL?.price >= 100) {
-      rlAddon = { desc: `${game.home.name} +1.5 ${homeRL.price > 0 ? '+' : ''}${homeRL.price}`, units: units * 0.5, qualifying: trigCount >= 4 };
+      rlAddon = { desc: `${game.home.name} +1.5 ${homeRL.price > 0 ? '+' : ''}${homeRL.price}`, amt: Math.round((sizing||200) * 0.5), qualifying: trigCount >= 4 };
     } else if (gateSide === 'away' && awayRL?.point >= 1 && awayRL?.price >= 100) {
-      rlAddon = { desc: `${game.away.name} +1.5 ${awayRL.price > 0 ? '+' : ''}${awayRL.price}`, units: units * 0.5, qualifying: trigCount >= 4 };
+      rlAddon = { desc: `${game.away.name} +1.5 ${awayRL.price > 0 ? '+' : ''}${awayRL.price}`, amt: Math.round((sizing||200) * 0.5), qualifying: trigCount >= 4 };
     }
   }
 
   return {
     gateType, gateML, gateSide,
     triggered, failed, notes,
-    trigCount, sizing, units, bankrollPct, color, strength,
+    trigCount, sizing, color, strength,
     recommendation, rlAddon, rlDisplay,
     t14Kill, t15Active, t3Kill,
     collision: buildCollisionData(away, home),
     pitcherEdge: pitSide ? { name: pitName, era: pitSide.era, fip: pitSide.fip, whip: pitSide.whip } : null,
-    odds: { homeML, awayML, homeRL: homeRL?.price, awayRL: awayRL?.price },
-    totals: { line: totalsLine, overPrice, underPrice, book: totalsBook }
+    odds: { homeML, awayML, homeRL: homeRL?.price, awayRL: awayRL?.price }
   };
 }
 
