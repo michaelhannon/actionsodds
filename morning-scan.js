@@ -363,12 +363,12 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
       gateType = 'T12'; gateML = homeML; gateSide = 'home';
     }
   }
-  if (!gateType && awayML != null && awayML >= 120) {
+  if (!gateType && awayML != null && awayML >= 125) {
     gateType = 'T13'; gateML = awayML; gateSide = 'away';
   }
   // T15: Home fade — road dog backing
   let t15Active = false;
-  if (awayML != null && awayML >= 120) {
+  if (awayML != null && awayML >= 125) {
     const f1 = home.streakLen >= 2 && home.streak === 'L'; // home L2+
     const f2 = home.runDiff < 0;                            // home neg diff
     const f3 = away.runDiff > 0;                            // road pos diff
@@ -659,27 +659,35 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   if (gateType === 'T11' && trigCount < 2) units = 0;
   // T12 needs 5+ triggers minimum
   if (gateType === 'T12' && trigCount < 2) units = 0;
-  // T13 needs ALL 5 of: T2+T3+T6+T8+1 more
+  // T13: unified road dog +125+ with 6 confirming signals (C1-C6)
+  // C1=T2, C2=T3, C3=T6, C4=T8, C5=F5 (home BP explicit), C6=F6 (road T14 superior)
   if (gateType === 'T13') {
-    // Unified road dog +125+ with 6 signals (C1-C6)
     const req = ['T2','T3','T6','T8'];
     const hasAll = req.every(t => triggered.includes(t));
     let signalCount = hasAll ? 4 : 0;
-    if (signalCount > 0) {
-      if (triggered.includes('F5')) signalCount++;
-      if (triggered.includes('F6')) signalCount++;
-    }
+    if (a.f5) signalCount++;
+    if (a.f6) signalCount++;
+    
     if (signalCount < 3) {
       units = 0;
     } else {
-      const t14Gap = Math.abs(powerGap || 0);
-      if (t14Gap >= 15 && favoredPower === 'home') {
-        units = (signalCount === 6) ? 1 : 0;
+      // T14 bidirectional check (15+ point gap)
+      const t14HomeVal = (typeof a.t14Home === 'number') ? a.t14Home : 0;
+      const t14RoadVal = (typeof a.t14Road === 'number') ? a.t14Road : 0;
+      const t14Gap = Math.abs(t14HomeVal - t14RoadVal);
+      
+      if (t14Gap >= 15) {
+        if (signalCount === 6) {
+          units = 1;
+        } else {
+          units = 0;
+        }
       } else {
         if (signalCount >= 6) units = 5;
         else if (signalCount === 5) units = 3;
         else if (signalCount === 4) units = 2;
-        else units = 1;
+        else if (signalCount === 3) units = 1;
+        else units = 0;
       }
     }
   }
