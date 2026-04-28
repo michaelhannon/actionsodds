@@ -14,3 +14,4 @@ main
 *.pre-followup-backup
 *.backup
 data/
+*.pre-phase2b

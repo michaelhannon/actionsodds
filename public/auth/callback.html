@@ -47,21 +47,58 @@
       alertEl.style.display = 'block';
     }
 
+    function getDeviceFingerprint() {
+      const parts = [
+        navigator.userAgent, navigator.language,
+        screen.width + 'x' + screen.height, screen.colorDepth,
+        new Date().getTimezoneOffset(),
+        navigator.hardwareConcurrency || 'na',
+        navigator.platform || 'na',
+      ];
+      const str = parts.join('|');
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return String(Math.abs(hash));
+    }
+
+    async function trackLogin(session) {
+      try {
+        const res = await fetch('/api/auth/track-login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ fingerprint: getDeviceFingerprint() }),
+        });
+        if (res.status === 423) {
+          const data = await res.json().catch(() => ({}));
+          await supabase.auth.signOut();
+          throw Object.assign(new Error(data.message || 'Suspicious activity detected.'), {
+            geoLock: true,
+          });
+        }
+      } catch (err) {
+        if (err.geoLock) throw err;
+        console.warn('[track-login] failed:', err.message);
+      }
+    }
+
     (async () => {
       try {
-        // Supabase v2 auto-handles the magic-link tokens in the URL hash on page load.
-        // We just wait briefly then check getSession().
         await new Promise(r => setTimeout(r, 200));
 
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
 
         if (!session) {
-          // Token might have expired or already been consumed.
           throw new Error('Sign-in link is no longer valid. Please request a new one.');
         }
 
-        // If MFA is required, send them through the MFA challenge on /login
+        // If MFA required, send to login page to complete it
         const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
         if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
           statusText.textContent = 'Two-factor authentication required.';
@@ -69,8 +106,10 @@
           return;
         }
 
+        // Phase 2b: track the login server-side
+        await trackLogin(session);
+
         statusText.textContent = 'Done. Taking you to your dashboard…';
-        // Clean the URL fragment
         history.replaceState(null, '', window.location.pathname);
         setTimeout(() => { window.location.href = '/'; }, 400);
       } catch (err) {

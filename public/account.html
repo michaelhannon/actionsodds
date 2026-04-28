@@ -39,6 +39,15 @@
       margin-bottom:16px;
       color:var(--gold);
     }
+    .card-section-row{
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:12px;
+    }
+    .card-section-row h3{
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:14px; letter-spacing:0.12em; text-transform:uppercase;
+      color:var(--text2); font-weight:600;
+    }
     .row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(42,52,71,0.5);}
     .row:last-child{border-bottom:none;}
     .row-label{color:var(--text2);font-size:14px;text-transform:uppercase;letter-spacing:0.06em;}
@@ -67,11 +76,7 @@
     .btn.danger{background:transparent;border:1px solid var(--red);color:#ff8b8b;}
     .btn.danger:hover{background:var(--red);color:#fff;}
     .btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;}
-    .empty-state{
-      text-align:center;
-      padding:32px 16px;
-      color:var(--text2);
-    }
+    .empty-state{text-align:center;padding:32px 16px;color:var(--text2);}
     .empty-state p{margin-bottom:16px;}
     .footer-links{text-align:center;margin-top:24px;color:var(--text3);font-size:13px;}
     .footer-links a{color:var(--text2);text-decoration:none;margin:0 12px;}
@@ -79,7 +84,6 @@
     .loading{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:8px;vertical-align:-2px;}
     @keyframes spin{to{transform:rotate(360deg);}}
 
-    /* ─── Required-MFA banner ──────────────────────────────────────── */
     .mfa-required-banner{
       background:linear-gradient(135deg, rgba(212,175,55,0.18), rgba(212,175,55,0.06));
       border:1px solid rgba(212,175,55,0.4);
@@ -104,7 +108,6 @@
       color:var(--text2); font-size:14px; line-height:1.5;
     }
 
-    /* ─── MFA enrollment modal ─────────────────────────────────────── */
     .mfa-link-btn{
       margin-left:12px; background:none; border:none;
       color:var(--gold);
@@ -178,6 +181,77 @@
       letter-spacing:0.04em; text-transform:uppercase; cursor:pointer;
     }
     .mfa-btn-confirm:disabled{ opacity:0.6; cursor:not-allowed; }
+
+    /* ─── Active sessions list (Phase 2b) ──────────────────────────── */
+    .session-item{
+      display:flex; align-items:flex-start; justify-content:space-between;
+      padding:12px 0;
+      border-bottom:1px solid rgba(42,52,71,0.5);
+      gap:14px;
+    }
+    .session-item:last-child{ border-bottom:none; }
+    .session-info{ flex:1; min-width:0; }
+    .session-device{
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:15px; font-weight:600;
+      color:var(--text); margin-bottom:2px;
+    }
+    .session-this{
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:10px; letter-spacing:0.1em; text-transform:uppercase;
+      color:var(--green);
+      background:rgba(38,162,105,0.15);
+      border:1px solid rgba(38,162,105,0.3);
+      padding:1px 7px; border-radius:3px;
+      margin-left:8px; vertical-align:middle;
+    }
+    .session-meta{
+      font-family:'JetBrains Mono', 'Courier New', monospace;
+      font-size:11px; color:var(--text3);
+      letter-spacing:0.02em;
+    }
+    .session-revoke{
+      flex-shrink:0;
+      background:transparent; color:#ff8b8b;
+      border:1px solid rgba(197,48,48,0.4);
+      padding:5px 12px; border-radius:5px;
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:11px; font-weight:600;
+      letter-spacing:0.08em; text-transform:uppercase;
+      cursor:pointer; transition:all 0.15s;
+    }
+    .session-revoke:hover{ background:var(--red); color:#fff; border-color:var(--red); }
+    .session-trusted{
+      display:inline-block;
+      font-size:10px; color:var(--text3);
+      letter-spacing:0.08em; text-transform:uppercase;
+      margin-left:8px; vertical-align:middle;
+    }
+    .session-trusted.yes{ color:var(--green); }
+
+    /* ─── Login history (Phase 2b) ─────────────────────────────────── */
+    .history-item{
+      display:grid;
+      grid-template-columns:120px 1fr auto;
+      gap:14px; align-items:baseline;
+      padding:8px 0;
+      border-bottom:1px solid rgba(42,52,71,0.4);
+      font-size:13px;
+    }
+    .history-item:last-child{ border-bottom:none; }
+    .history-event{
+      font-family:'JetBrains Mono', 'Courier New', monospace;
+      font-size:10px; letter-spacing:0.06em; text-transform:uppercase;
+      color:var(--text2);
+    }
+    .history-event.success{ color:var(--green); }
+    .history-event.warn{ color:var(--gold); }
+    .history-event.danger{ color:#ff8b8b; }
+    .history-loc{ color:var(--text); }
+    .history-time{
+      font-family:'JetBrains Mono', 'Courier New', monospace;
+      font-size:11px; color:var(--text3); text-align:right;
+    }
   </style>
 </head>
 <body>
@@ -190,7 +264,6 @@
 
     <h1>Your Account</h1>
 
-    <!-- Banner shown when admin lands here with ?require=mfa -->
     <div class="mfa-required-banner" id="mfa-required-banner" style="display:none;">
       <div class="mfa-required-icon">!</div>
       <div class="mfa-required-text">
@@ -212,7 +285,6 @@
     </div>
   </div>
 
-  <!-- ─── MFA enrollment modal ─────────────────────────────────────── -->
   <div class="mfa-modal-overlay" id="mfa-modal">
     <div class="mfa-modal">
       <h2>Enable two-factor</h2>
@@ -255,11 +327,30 @@
       'sb_publishable_3L81CVKvE9w2agrz6yMe5g_BC4O0pws'
     );
 
-    // Show "MFA required" banner if redirected here with ?require=mfa
     const params = new URLSearchParams(window.location.search);
     if (params.get('require') === 'mfa') {
       document.getElementById('mfa-required-banner').style.display = 'flex';
     }
+
+    // ─── Phase 2b: device fingerprint (matches login.html / callback.html) ─
+    function getDeviceFingerprint() {
+      const parts = [
+        navigator.userAgent, navigator.language,
+        screen.width + 'x' + screen.height, screen.colorDepth,
+        new Date().getTimezoneOffset(),
+        navigator.hardwareConcurrency || 'na',
+        navigator.platform || 'na',
+      ];
+      const str = parts.join('|');
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return String(Math.abs(hash));
+    }
+
+    let currentSession = null;
 
     async function init(){
       const { data: { session } } = await supabase.auth.getSession();
@@ -267,8 +358,8 @@
         window.location.href = '/auth/login.html?next=/account.html';
         return;
       }
+      currentSession = session;
 
-      // Fetch /api/me for profile + admin flag + subscriptions
       const res = await fetch('/api/me', {
         headers: { 'Authorization': `Bearer ${session.access_token}` },
       });
@@ -298,12 +389,7 @@
           </div>
         `;
       } else if (subs.length === 0) {
-        subsHtml = `
-          <div class="empty-state">
-            <p>No subscriptions yet.</p>
-            <a href="/pricing.html" class="btn">Choose Your Sports</a>
-          </div>
-        `;
+        subsHtml = `<div class="empty-state"><p>No subscriptions yet.</p><a href="/pricing.html" class="btn">Choose Your Sports</a></div>`;
       } else {
         subsHtml = subs.map(s => {
           const renew = s.current_period_end ? new Date(s.current_period_end).toLocaleDateString() : '—';
@@ -366,6 +452,23 @@
           </div>
         </div>
 
+        <div class="card" id="sessions-card">
+          <div class="card-section-row">
+            <h2 style="margin-bottom:0;">Active Devices</h2>
+            <button class="btn outline" id="revoke-others-btn" style="font-size:12px;padding:6px 12px;">Sign out everywhere else</button>
+          </div>
+          <div id="sessions-list">
+            <p style="color:var(--text2);font-size:14px;"><span class="loading"></span>Loading sessions…</p>
+          </div>
+        </div>
+
+        <div class="card" id="history-card">
+          <h2>Recent Sign-In History</h2>
+          <div id="history-list">
+            <p style="color:var(--text2);font-size:14px;"><span class="loading"></span>Loading history…</p>
+          </div>
+        </div>
+
         <div class="card">
           <h2>Sign Out</h2>
           <p style="color:var(--text2);font-size:14px;margin-bottom:16px;">Log out of this device. You'll need to sign in again next time.</p>
@@ -375,6 +478,130 @@
 
       bindActions(session);
       initSecuritySection(isAdmin);
+      loadSessions();
+      loadHistory();
+    }
+
+    // ─── Phase 2b: active sessions list ─────────────────────────────────
+    async function loadSessions() {
+      try {
+        const res = await fetch('/api/auth/sessions', {
+          headers: { 'Authorization': `Bearer ${currentSession.access_token}` },
+        });
+        if (!res.ok) throw new Error('list failed');
+        const data = await res.json();
+        const list = data.sessions || [];
+        const max = data.max || 3;
+        const myFp = getDeviceFingerprint();
+
+        const container = document.getElementById('sessions-list');
+        if (!container) return;
+
+        if (list.length === 0) {
+          container.innerHTML = `<p style="color:var(--text2);font-size:14px;">No active sessions.</p>`;
+          return;
+        }
+
+        container.innerHTML = `
+          <p style="color:var(--text3);font-size:12px;margin-bottom:14px;letter-spacing:0.04em;">
+            Up to ${max} devices can be signed in at once. ${list.length} of ${max} in use.
+          </p>
+          ${list.map(s => {
+            const loc = [s.ip_city, s.ip_region, s.ip_country].filter(Boolean).join(', ') || 'Unknown location';
+            const lastSeen = relativeTime(s.last_seen_at);
+            const created = new Date(s.created_at).toLocaleDateString();
+            const trusted = s.is_trusted
+              ? '<span class="session-trusted yes">✓ trusted</span>'
+              : '<span class="session-trusted">unverified</span>';
+            return `
+              <div class="session-item">
+                <div class="session-info">
+                  <div class="session-device">
+                    ${escapeHtml(s.device_name || 'Unknown device')}${trusted}
+                  </div>
+                  <div class="session-meta">
+                    ${escapeHtml(loc)} · last active ${lastSeen} · added ${created}
+                  </div>
+                </div>
+                <button class="session-revoke" data-id="${s.id}">Sign Out</button>
+              </div>
+            `;
+          }).join('')}
+        `;
+
+        // Wire up the revoke buttons
+        container.querySelectorAll('.session-revoke').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (!confirm('Sign this device out?')) return;
+            btn.disabled = true;
+            btn.textContent = '…';
+            try {
+              const r = await fetch(`/api/auth/sessions/${btn.dataset.id}/revoke`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${currentSession.access_token}` },
+              });
+              if (!r.ok) throw new Error('revoke failed');
+              await loadSessions();
+            } catch (err) {
+              alert('Could not sign out: ' + err.message);
+              btn.disabled = false;
+              btn.textContent = 'Sign Out';
+            }
+          });
+        });
+      } catch (err) {
+        const container = document.getElementById('sessions-list');
+        if (container) container.innerHTML = `<p style="color:#ff8b8b;font-size:14px;">Could not load sessions.</p>`;
+      }
+    }
+
+    async function loadHistory() {
+      try {
+        const res = await fetch('/api/auth/login-history', {
+          headers: { 'Authorization': `Bearer ${currentSession.access_token}` },
+        });
+        if (!res.ok) throw new Error('history failed');
+        const data = await res.json();
+        const events = data.events || [];
+
+        const container = document.getElementById('history-list');
+        if (!container) return;
+
+        if (events.length === 0) {
+          container.innerHTML = `<p style="color:var(--text2);font-size:14px;">No history yet.</p>`;
+          return;
+        }
+
+        container.innerHTML = events.slice(0, 15).map(e => {
+          const cls = e.event_type.includes('fail') || e.event_type.includes('suspicious')
+            ? 'danger'
+            : e.event_type === 'new_device'
+            ? 'warn'
+            : 'success';
+          const loc = [e.ip_city, e.ip_country].filter(Boolean).join(', ') || '—';
+          const time = new Date(e.created_at).toLocaleString();
+          const label = e.event_type.replace(/_/g, ' ');
+          return `
+            <div class="history-item">
+              <span class="history-event ${cls}">${label}</span>
+              <span class="history-loc">${escapeHtml(loc)}</span>
+              <span class="history-time">${time}</span>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        const container = document.getElementById('history-list');
+        if (container) container.innerHTML = `<p style="color:#ff8b8b;font-size:14px;">Could not load history.</p>`;
+      }
+    }
+
+    function relativeTime(iso) {
+      const sec = (Date.now() - new Date(iso).getTime()) / 1000;
+      if (sec < 60) return 'just now';
+      if (sec < 3600) return `${Math.floor(sec / 60)}m ago`;
+      if (sec < 86400) return `${Math.floor(sec / 3600)}h ago`;
+      if (sec < 604800) return `${Math.floor(sec / 86400)}d ago`;
+      return new Date(iso).toLocaleDateString();
     }
 
     function bindActions(session){
@@ -424,11 +651,35 @@
           window.location.href = '/auth/logout.html';
         });
       }
+
+      const revokeOthersBtn = document.getElementById('revoke-others-btn');
+      if (revokeOthersBtn) {
+        revokeOthersBtn.addEventListener('click', async () => {
+          if (!confirm('Sign out all other devices? This cannot be undone.')) return;
+          revokeOthersBtn.disabled = true;
+          revokeOthersBtn.innerHTML = '<span class="loading"></span>…';
+          try {
+            const res = await fetch('/api/auth/sessions/revoke-others', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentSession.access_token}`,
+              },
+              body: JSON.stringify({ fingerprint: getDeviceFingerprint() }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'failed');
+            await loadSessions();
+          } catch (err) {
+            alert('Failed: ' + err.message);
+          } finally {
+            revokeOthersBtn.disabled = false;
+            revokeOthersBtn.textContent = 'Sign out everywhere else';
+          }
+        });
+      }
     }
 
-    /* ───────────────────────────────────────────────────────────────
-       SECURITY SECTION — MFA enrollment
-       ─────────────────────────────────────────────────────────────── */
     let pendingFactorId = null;
     let isAdminUser = false;
 
@@ -440,7 +691,6 @@
       if (state === 'active') {
         badge.classList.add('active');
         badge.textContent = 'Enabled';
-        // Admins can't disable MFA — it's required
         if (isAdminUser) {
           actionBtn.hidden = true;
         } else {
@@ -468,7 +718,6 @@
         const verified = (data.totp || []).find(f => f.status === 'verified');
         setMfaBadge(verified ? 'active' : 'inactive');
 
-        // If admin just enrolled, hide the required banner and offer to go back
         if (verified && document.getElementById('mfa-required-banner').style.display === 'flex') {
           const banner = document.getElementById('mfa-required-banner');
           banner.innerHTML = `
@@ -492,7 +741,6 @@
       codeInput.value = '';
 
       try {
-        // Clean up any partially-enrolled factors first
         const { data: existing } = await supabase.auth.mfa.listFactors();
         for (const f of (existing?.totp || [])) {
           if (f.status !== 'verified') {

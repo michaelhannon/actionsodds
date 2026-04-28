@@ -662,6 +662,9 @@ try {
 // Phase 3 API routes (auth-gated)
 app.use(apiRoutes);
 
+// Phase 2b — auth tracking, sessions, login history, device verification
+app.use(require('./server/auth-track'));
+
 // =============================================================================
 // STATIC FILE SERVING
 // =============================================================================
