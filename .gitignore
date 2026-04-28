@@ -13,3 +13,4 @@ skills-lock.json
 main
 *.pre-followup-backup
 *.backup
+data/
