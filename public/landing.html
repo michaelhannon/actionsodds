@@ -858,6 +858,90 @@
     /* ========================================================================
        FOOTER
        ======================================================================== */
+    /* ========================================================================
+       CONTACT SECTION
+       ======================================================================== */
+    .contact{
+      max-width:1280px;margin:0 auto;
+      padding:80px 32px;
+      border-top:1px solid var(--border);
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:64px;
+      align-items:start;
+    }
+    .contact-eyebrow{
+      font-family:var(--mono);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;
+      color:var(--gold);margin-bottom:16px;
+    }
+    .contact-heading{
+      font-family:var(--display);font-size:48px;letter-spacing:0.04em;line-height:1;
+      color:var(--text);margin-bottom:16px;
+    }
+    .contact-heading .a{color:var(--gold);}
+    .contact-sub{
+      font-family:var(--body);font-size:16px;color:var(--text2);line-height:1.7;
+      margin-bottom:32px;
+    }
+    .contact-features{list-style:none;display:flex;flex-direction:column;gap:10px;}
+    .contact-features li{
+      font-family:var(--mono);font-size:12px;letter-spacing:0.1em;color:var(--text3);
+      display:flex;align-items:center;gap:10px;
+    }
+    .contact-features li::before{content:'◆';color:var(--gold);font-size:8px;}
+    .contact-form-wrap{
+      background:var(--panel);
+      border:1px solid var(--border2);
+      border-radius:4px;
+      padding:36px;
+    }
+    .contact-form-title{
+      font-family:var(--display);font-size:22px;letter-spacing:0.08em;
+      color:var(--gold);margin-bottom:6px;
+    }
+    .contact-form-sub{
+      font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;
+      color:var(--text3);margin-bottom:28px;
+    }
+    .cf-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+    .cf-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+    .cf-label{
+      font-family:var(--mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;
+      color:var(--text3);
+    }
+    .cf-input,.cf-select,.cf-textarea{
+      background:var(--bg);border:1px solid var(--border2);
+      color:var(--text);font-family:var(--body);font-size:15px;
+      padding:10px 14px;border-radius:3px;outline:none;width:100%;
+      transition:border-color .2s;
+    }
+    .cf-input:focus,.cf-select:focus,.cf-textarea:focus{border-color:var(--gold);}
+    .cf-select{appearance:none;cursor:pointer;}
+    .cf-textarea{resize:vertical;min-height:110px;line-height:1.5;}
+    .cf-submit{
+      width:100%;
+      background:var(--gold);color:#0a0e1a;
+      font-family:var(--display);font-size:18px;letter-spacing:0.1em;
+      border:none;border-radius:3px;padding:13px;cursor:pointer;
+      transition:background .2s,transform .1s;
+      margin-top:6px;
+    }
+    .cf-submit:hover{background:var(--gold-bright);transform:translateY(-1px);}
+    .cf-submit:active{transform:translateY(0);}
+    .cf-success{
+      display:none;text-align:center;padding:28px 0;
+    }
+    .cf-success-icon{font-size:36px;margin-bottom:12px;}
+    .cf-success-msg{
+      font-family:var(--display);font-size:22px;color:var(--gold);letter-spacing:0.08em;
+    }
+    .cf-success-sub{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.1em;margin-top:6px;}
+    @media(max-width:768px){
+      .contact{grid-template-columns:1fr;gap:40px;padding:48px 20px;}
+      .contact-heading{font-size:36px;}
+      .cf-row{grid-template-columns:1fr;}
+    }
+
     .footer{
       max-width:1280px;margin:0 auto;
       padding:40px 32px;
@@ -1515,6 +1599,63 @@
   </section>
 
   <!-- ====================================================================
+       CONTACT
+       ==================================================================== -->
+  <section class="contact" id="contact">
+    <div class="contact-intro">
+      <div class="contact-eyebrow">◆ Get In Touch</div>
+      <h2 class="contact-heading"><span class="a">REACH</span> THE DESK</h2>
+      <p class="contact-sub">
+        Questions about the system, subscription issues, or want to know more about how the triggers work?
+        We respond to every message — usually within a few hours.
+      </p>
+      <ul class="contact-features">
+        <li>Subscription &amp; billing questions</li>
+        <li>System methodology &amp; trigger explanations</li>
+        <li>Technical issues with the dashboard</li>
+        <li>Partnership &amp; press inquiries</li>
+      </ul>
+    </div>
+    <div class="contact-form-wrap">
+      <div class="contact-form-title">SEND A MESSAGE</div>
+      <div class="contact-form-sub">Response within 24 hrs · No spam · Ever</div>
+      <div id="cf-success-landing" class="cf-success">
+        <div class="cf-success-icon">✔</div>
+        <div class="cf-success-msg">MESSAGE SENT</div>
+        <div class="cf-success-sub">We'll be in touch shortly</div>
+      </div>
+      <form id="contact-form-landing" action="https://formspree.io/f/mwvyenda" method="POST">
+        <div class="cf-row">
+          <div class="cf-group">
+            <label class="cf-label" for="cf-name-l">Name</label>
+            <input class="cf-input" id="cf-name-l" type="text" name="name" placeholder="Your name" required>
+          </div>
+          <div class="cf-group">
+            <label class="cf-label" for="cf-email-l">Email</label>
+            <input class="cf-input" id="cf-email-l" type="email" name="email" placeholder="you@example.com" required>
+          </div>
+        </div>
+        <div class="cf-group">
+          <label class="cf-label" for="cf-topic-l">Topic</label>
+          <select class="cf-select" id="cf-topic-l" name="topic">
+            <option value="">Select a topic…</option>
+            <option value="subscription">Subscription / Billing</option>
+            <option value="system">System / Triggers</option>
+            <option value="technical">Technical Issue</option>
+            <option value="partnership">Partnership / Press</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="cf-group">
+          <label class="cf-label" for="cf-msg-l">Message</label>
+          <textarea class="cf-textarea" id="cf-msg-l" name="message" placeholder="What's on your mind?" required></textarea>
+        </div>
+        <button class="cf-submit" type="submit">SEND IT →</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ====================================================================
        FOOTER
        ==================================================================== -->
   <footer class="footer">
@@ -1528,7 +1669,6 @@
       <a href="/auth/login.html">Sign In</a>
       <a href="/auth/signup.html">Sign Up</a>
       <a href="#pricing">Pricing</a>
-      <a href="mailto:support@actionsodds.com">Support</a>
     </div>
     <div class="footer-disc">
       Action's Odds is a sports betting research and analytics platform. We do not place wagers on behalf of users
@@ -1932,6 +2072,34 @@
     // Refresh live data every 5 minutes; ticker every 90s for live scores
     setInterval(() => { loadTrackRecord(); loadRecentResults(); }, 300000);
     setInterval(loadTicker, 90000);
+  });
+  </script>
+
+  <script>
+  // ── Formspree contact form handler (landing page) ──────────────────────
+  document.getElementById('contact-form-landing').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn = form.querySelector('.cf-submit');
+    btn.textContent = 'SENDING…';
+    btn.disabled = true;
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        form.style.display = 'none';
+        document.getElementById('cf-success-landing').style.display = 'block';
+      } else {
+        btn.textContent = 'FAILED — TRY AGAIN';
+        btn.disabled = false;
+      }
+    } catch {
+      btn.textContent = 'FAILED — TRY AGAIN';
+      btn.disabled = false;
+    }
   });
   </script>
 </body>
