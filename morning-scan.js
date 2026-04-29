@@ -423,6 +423,15 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
     notes.push('T2 ✗ No streak data available');
   }
 
+  // ── HARD KILL: never back a losing-streak team (memory rule, no exceptions)
+  const _bet = gateSide === 'home' ? home : away;
+  let betTeamLossKill = false;
+  if (_bet.streak === 'L' && _bet.streakLen >= 1) {
+    betTeamLossKill = true;
+    failed.push('STREAK_KILL');
+    notes.push(`✗ HARD KILL — bet team ${_bet.abbr} on L${_bet.streakLen}; never back a losing-streak team`);
+  }
+
   // T3: Run differential
   const gradeTeam = gateSide === 'home' ? home : away;
   const oppTeam = gateSide === 'home' ? away : home;
@@ -621,8 +630,9 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   // Collision max = gate alone sufficient
   const gateAlone = collisionMax && (away.streakLen >= 5 || home.streakLen >= 5);
 
-  // Kill if T14 fired
+  // Kill if T14 fired or bet team on losing streak
   if (t14Kill) trigCount = 0;
+  if (betTeamLossKill) trigCount = 0;
 
   // ── UNIT TABLE (Apr 28 2026) ───────────────────────────
   // Fixed dollar units. Tiers: 1u ENTRY, 2u STRONG, 3u MAX, 5u SUPER MAX (reserved).
@@ -637,7 +647,7 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
 
   // Map (gate, trigCount) -> unit count
   let units = 0;
-  if (!t14Kill) {
+  if (!t14Kill && !betTeamLossKill) {
     if (gateType === 'T1' || gateType === 'T1B') {
       // T1 alone is the gate, not a play. Need at least 1 stacking trigger.
       if (trigCount >= 4) units = 5;          // SUPER MAX
@@ -724,7 +734,7 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   let color, strength, recommendation;
   if (t14Kill || sizing === 0) {
     color = 'red'; strength = 'PASS';
-    recommendation = 'PASS — ' + (t14Kill ? 'T14 power ratings kill this play' : 'Insufficient triggers');
+    recommendation = 'PASS — ' + (t14Kill ? 'T14 power ratings kill this play' : (betTeamLossKill ? `${_bet.abbr} on L${_bet.streakLen} — never back a losing-streak team` : 'Insufficient triggers'));
   } else if (t15Active) {
     color = 'orange'; strength = 'FADE';
     recommendation = `T15 FADE — ${game.away.name} (exotic/parlay only, $50-100)`;
