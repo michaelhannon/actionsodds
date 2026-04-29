@@ -662,34 +662,35 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   // C1=T2, C2=T3, C3=T6, C4=T8, C5=F5 (home BP explicit), C6=F6 (road T14 superior)
   if (gateType === 'T13') {
     // Unified road dog gate at +125+ with 6 confirming signals (C1-C6)
-    // C1: T2 (streak collision)
-    // C2: T3 (run differential)  
-    // C3: T6 (pitcher FIP edge)
-    // C4: T8 (bullpen depletion)
-    // C5: F5 (home BP explicit deeper depletion)
-    // C6: F6 (road T14 power rating superior)
-    const req = ['T2','T3','T6','T8'];
-    const hasAll = req.every(t => triggered.includes(t));
-    let signalCount = hasAll ? 4 : 0;
-    if (a && a.f5) signalCount++;
-    if (a && a.f6) signalCount++;
+    // C1=T2, C2=T3, C3=T6, C4=T8, C5=F5 (home BP deeper depletion), C6=F6 (road T14 superior)
+    const c1 = triggered.includes('T2') ? 1 : 0;
+    const c2 = triggered.includes('T3') ? 1 : 0;
+    const c3 = triggered.includes('T6') ? 1 : 0;
+    const c4 = triggered.includes('T8') ? 1 : 0;
+    // C5 (F5): home BP "depleted" beyond T8 — both flags fire when usage is heavy
+    const c5 = (homeBullpen && homeBullpen.depleted === true) ? 1 : 0;
+    // C6 (F6): road team power rating clearly superior (5+ pts in road's favor)
+    const c6 = (favoredPower === 'away' && powerGap >= 5) ? 1 : 0;
+    const signalCount = c1 + c2 + c3 + c4 + c5 + c6;
 
     if (signalCount < 3) {
       units = 0;
     } else {
-      // T14 bidirectional: 15+ pt gap kills, unless all 6 fire (downgrade to 1u)
-      const t14Home = (a && typeof a.t14Home === 'number') ? a.t14Home : 0;
-      const t14Road = (a && typeof a.t14Road === 'number') ? a.t14Road : 0;
-      const t14Gap = Math.abs(t14Home - t14Road);
-      if (t14Gap >= 15) {
+      // T14 bidirectional: 15+ pt gap toward EITHER side
+      // Toward home (against road dog) = kill, unless all 6 fire (downgrade to 1u)
+      // Toward road (favoring road dog) = no penalty, scale normally
+      if (favoredPower === 'home' && powerGap >= 15) {
         units = (signalCount === 6) ? 1 : 0;
       } else {
-        if (signalCount >= 6) units = 5;
-        else if (signalCount === 5) units = 3;
-        else if (signalCount === 4) units = 2;
-        else units = 1;
+        if (signalCount >= 6) units = 5;       // SUPER MAX
+        else if (signalCount === 5) units = 3; // MAX
+        else if (signalCount === 4) units = 2; // STRONG
+        else units = 1;                         // ENTRY (signalCount === 3)
       }
     }
+
+    // Audit note
+    notes.push(`T13 signals: C1${c1?'✓':'✗'} C2${c2?'✓':'✗'} C3${c3?'✓':'✗'} C4${c4?'✓':'✗'} C5${c5?'✓':'✗'} C6${c6?'✓':'✗'} = ${signalCount}/6 → ${units}u`);
   }
 
   // Resolve dollar amount from unit table (MLB default; sport hooks can override later)
