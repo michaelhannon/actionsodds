@@ -614,7 +614,6 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   if (gateType === 'T11') maxSize = 750;
   if (gateType === 'T12') maxSize = 1000;
   if (gateType === 'T13') maxSize = 1000;
-  if (t15Active) maxSize = 100;
 
   // Map (gate, trigCount) -> unit count
   let units = 0;
@@ -638,7 +637,7 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
       else if (trigCount === 2) units = 1;    // ENTRY
       else units = 0;
     } else if (gateType === 'T13') {
-      units = 0; // set below if all 5 required triggers present
+      units = 0; // computed below from C1-C6 signals
     } else if (t15Active) {
       units = 1; // restricted, parlay-only at $100
     } else {
@@ -662,32 +661,33 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   // T13: unified road dog +125+ with 6 confirming signals (C1-C6)
   // C1=T2, C2=T3, C3=T6, C4=T8, C5=F5 (home BP explicit), C6=F6 (road T14 superior)
   if (gateType === 'T13') {
+    // Unified road dog gate at +125+ with 6 confirming signals (C1-C6)
+    // C1: T2 (streak collision)
+    // C2: T3 (run differential)  
+    // C3: T6 (pitcher FIP edge)
+    // C4: T8 (bullpen depletion)
+    // C5: F5 (home BP explicit deeper depletion)
+    // C6: F6 (road T14 power rating superior)
     const req = ['T2','T3','T6','T8'];
     const hasAll = req.every(t => triggered.includes(t));
     let signalCount = hasAll ? 4 : 0;
-    if (a.f5) signalCount++;
-    if (a.f6) signalCount++;
-    
+    if (a && a.f5) signalCount++;
+    if (a && a.f6) signalCount++;
+
     if (signalCount < 3) {
       units = 0;
     } else {
-      // T14 bidirectional check (15+ point gap)
-      const t14HomeVal = (typeof a.t14Home === 'number') ? a.t14Home : 0;
-      const t14RoadVal = (typeof a.t14Road === 'number') ? a.t14Road : 0;
-      const t14Gap = Math.abs(t14HomeVal - t14RoadVal);
-      
+      // T14 bidirectional: 15+ pt gap kills, unless all 6 fire (downgrade to 1u)
+      const t14Home = (a && typeof a.t14Home === 'number') ? a.t14Home : 0;
+      const t14Road = (a && typeof a.t14Road === 'number') ? a.t14Road : 0;
+      const t14Gap = Math.abs(t14Home - t14Road);
       if (t14Gap >= 15) {
-        if (signalCount === 6) {
-          units = 1;
-        } else {
-          units = 0;
-        }
+        units = (signalCount === 6) ? 1 : 0;
       } else {
         if (signalCount >= 6) units = 5;
         else if (signalCount === 5) units = 3;
         else if (signalCount === 4) units = 2;
-        else if (signalCount === 3) units = 1;
-        else units = 0;
+        else units = 1;
       }
     }
   }
