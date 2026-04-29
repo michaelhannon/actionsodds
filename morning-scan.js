@@ -393,19 +393,34 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   const collisionMax = collisionActive && (away.streakLen >= 5 || home.streakLen >= 5);
   const fadeZone = away.streakLen >= 9 || home.streakLen >= 9;
   if (collisionActive) {
-    const favSide = gateSide === 'home' ?
-      (home.streak === 'W' ? 'T2 ✓ Home W' + home.streakLen + ' vs Away L' + away.streakLen : 'T2 ✓ Away L' + away.streakLen + ' vs Home W' + home.streakLen) :
-      (away.streak === 'W' ? 'T2 ✓ Away W' + away.streakLen + ' vs Home L' + home.streakLen : null);
-    if (favSide) {
+    // Apr 29 2026: T2 collision rule — bet side must be W2+, fade side must be L2+
+    // Rule: never back a losing-streak team; never fade a non-losing-streak team
+    const betSide = gateSide;
+    const betTeam = betSide === 'home' ? home : away;
+    const fadeTeam = betSide === 'home' ? away : home;
+    const betOnWinStreak = betTeam.streak === 'W' && betTeam.streakLen >= 2;
+    const fadeOnLossStreak = fadeTeam.streak === 'L' && fadeTeam.streakLen >= 2;
+    // W10/L10 cap: streak length 10+ = fade zone, T2 fails
+    const betCapped = betTeam.streakLen >= 10;
+    const fadeCapped = fadeTeam.streakLen >= 10;
+    if (betOnWinStreak && fadeOnLossStreak && !betCapped && !fadeCapped) {
       triggered.push('T2');
-      notes.push(favSide + (collisionMax ? ' — MAX COLLISION' : ''));
+      const sideLbl = betSide === 'home'
+        ? `Home ${betTeam.abbr} W${betTeam.streakLen} vs Away ${fadeTeam.abbr} L${fadeTeam.streakLen}`
+        : `Away ${betTeam.abbr} W${betTeam.streakLen} vs Home ${fadeTeam.abbr} L${fadeTeam.streakLen}`;
+      notes.push(`T2 ✓ ${sideLbl}` + (collisionMax ? ' — MAX COLLISION' : ''));
     } else {
       failed.push('T2');
-      notes.push('T2 ✗ Collision favors wrong side');
+      let why;
+      if (betCapped) why = `bet team ${betTeam.abbr} W${betTeam.streakLen} CAPPED (W10+ fade zone)`;
+      else if (fadeCapped) why = `fade team ${fadeTeam.abbr} L${fadeTeam.streakLen} CAPPED (L10+ fade zone)`;
+      else if (!betOnWinStreak) why = `bet team ${betTeam.abbr} not on W2+ (${betTeam.streak}${betTeam.streakLen})`;
+      else why = `fade team ${fadeTeam.abbr} not on L2+ (${fadeTeam.streak}${fadeTeam.streakLen})`;
+      notes.push(`T2 ✗ Collision fails — ${why}`);
     }
   } else {
     failed.push('T2');
-    notes.push('T2 ✗ No streak mismatch');
+    notes.push('T2 ✗ No streak data available');
   }
 
   // T3: Run differential
@@ -527,11 +542,16 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
     notes.push('T4-RS MAX bonus: +1 trigger added to sizing');
   }
 
-  // T10: Divisional familiarity
-  const isDivisional = away.division === home.division; // approximate
+  // T10: Divisional familiarity (one confirming trigger; does not apply if opponent on hot streak)
+  const isDivisional = away.division === home.division;
   if (isDivisional) {
-    triggered.push('T10');
-    notes.push('T10 ✓ Divisional matchup — counts as 2 triggers if T1 active');
+    const oppHotStreak = oppTeam.streak === 'W' && oppTeam.streakLen >= 3;
+    if (oppHotStreak) {
+      notes.push(`T10 ~ Divisional matchup but opp ${oppTeam.abbr} on W${oppTeam.streakLen} hot streak — T10 does not apply`);
+    } else {
+      triggered.push('T10');
+      notes.push('T10 ✓ Divisional matchup — confirming trigger');
+    }
   }
 
   // T14: Power ratings — mandatory kill check
@@ -595,8 +615,8 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   // ── SIZING ───────────────────────────────────────────────
   let trigCount = triggered.length;
 
-  // T10 divisional doubles if T1
-  if (triggered.includes('T10') && gateType === 'T1') trigCount++;
+  // Apr 29 2026: T10 is ONE confirming trigger only (corrected — old "counts as 2" rule was wrong)
+  // No double-counting; T10 is already in triggered[] from above.
 
   // Collision max = gate alone sufficient
   const gateAlone = collisionMax && (away.streakLen >= 5 || home.streakLen >= 5);
