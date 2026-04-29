@@ -24,8 +24,18 @@ const { supabaseAdmin } = require('./auth');
 
 // $ value of one unit at the reference $10K bankroll.
 // engine outputs `analysis.sizing = units * 100`, which equals stake at $10K.
-const REFERENCE_BANKROLL = 10000;
-const STAKE_PER_UNIT = REFERENCE_BANKROLL * 0.01; // 1% per unit = $100
+// Apr 29 2026: Locked unit table per system spec.
+// MLB/NBA: 1u=$250 ENTRY, 2u=$500 STRONG, 3u=$750 MAX, 5u=$1000 SUPER MAX
+// NHL:     1u=$200 ENTRY, 2u=$300 STRONG, 3u=$400 MAX, 4u=$500 SUPER MAX
+const UNIT_TABLE = {
+  mlb: { 1: 250, 2: 500, 3: 750, 5: 1000 },
+  nba: { 1: 250, 2: 500, 3: 750, 5: 1000 },
+  nhl: { 1: 200, 2: 300, 3: 400, 4: 500 },
+};
+function unitsToDollars(units, sport) {
+  const tbl = UNIT_TABLE[(sport || 'mlb').toLowerCase()] || UNIT_TABLE.mlb;
+  return tbl[units] || 0;
+}
 
 const PUBLISHABLE_STRENGTHS = new Set(['MAX', 'STRONG', 'ENTRY']);
 
@@ -55,7 +65,9 @@ function playToRow(scanPlay) {
   const betCategory = exoticGates.has(a.gateType) ? 'exotic' : 'core';
 
   const oddsStr = a.gateML > 0 ? `+${a.gateML}` : `${a.gateML}`;
-  const stake = Number((a.units * STAKE_PER_UNIT).toFixed(2));
+  // Stake from locked unit table (sport-aware)
+  const stake = unitsToDollars(a.units, scanPlay.sport || 'mlb');
+  if (!stake) return null; // unknown unit value, skip
 
   // Notes: capture trigger info so it's auditable later
   const triggers = (a.triggered || []).map(t => t.code || t.name || t).filter(Boolean);
