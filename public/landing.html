@@ -1810,10 +1810,17 @@
       const res = await fetch('/api/public/recent-plays');
       if (!res.ok) throw new Error('recent plays ' + res.status);
       const data = await res.json();
-      const plays = (data.plays || []).slice(0, 4);
+      const allPlays = data.plays || [];
+      // Show only "last night" — i.e., the most recent play_date present in graded results.
+      // This collapses to a single date instead of a mixed multi-day list.
+      let plays = [];
+      if (allPlays.length > 0) {
+        const lastDate = allPlays[0].play_date;
+        plays = allPlays.filter(p => p.play_date === lastDate);
+      }
 
       if (plays.length === 0) {
-        list.innerHTML = '<div class="hero-results-empty">No graded plays yet — system live, scan running.</div>';
+        list.innerHTML = '<div class="hero-results-empty">No graded plays last night — system live, scan running.</div>';
         meta.textContent = '';
         return;
       }
@@ -1852,7 +1859,7 @@
       // Meta: "5 of 7 last 7d"
       const wins = plays.filter(p => p.status === 'win').length;
       const losses = plays.filter(p => p.status === 'loss').length;
-      meta.textContent = `${wins}–${losses} · last ${plays.length}`;
+      meta.textContent = `${wins}–${losses} · last night`;
     } catch(e) {
       console.warn('[Landing] recent results load failed:', e.message);
       list.innerHTML = '<div class="hero-results-empty">Results loading…</div>';
