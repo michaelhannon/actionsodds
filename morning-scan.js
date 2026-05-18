@@ -388,6 +388,9 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   const failed = [];
   const notes = [];
 
+  // ── T6 FIP-gap kill flag (computed in T6 block below; declared here for scope)
+  let t6FipKill = false;
+
   // T2: Streak collision
   const collisionActive = away.streak !== home.streak;
   const collisionMax = collisionActive && (away.streakLen >= 5 || home.streakLen >= 5);
@@ -425,11 +428,19 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
 
   // ── HARD KILL: never back a losing-streak team (memory rule, no exceptions)
   const _bet = gateSide === 'home' ? home : away;
+  const _betBullpen = gateSide === 'home' ? homeBullpen : awayBullpen;
   let betTeamLossKill = false;
+  let betBullpenKill = false;
   if (_bet.streak === 'L' && _bet.streakLen >= 1) {
     betTeamLossKill = true;
     failed.push('STREAK_KILL');
     notes.push(`✗ HARD KILL — bet team ${_bet.abbr} on L${_bet.streakLen}; never back a losing-streak team`);
+  }
+  // T8 BET-SIDE KILL: never back a team whose own bullpen is depleted
+  if (_betBullpen && _betBullpen.depleted === true) {
+    betBullpenKill = true;
+    failed.push('T8_BET_KILL');
+    notes.push(`✗ HARD KILL — bet team ${_bet.abbr} bullpen depleted (${_betBullpen.note || 'BP gassed'})`);
   }
 
   // T3: Run differential
@@ -630,9 +641,11 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   // Collision max = gate alone sufficient
   const gateAlone = collisionMax && (away.streakLen >= 5 || home.streakLen >= 5);
 
-  // Kill if T14 fired or bet team on losing streak
+  // Kill if T14 fired, bet team on losing streak, bet-team bullpen depleted, or T6 FIP gap >= 2.0
   if (t14Kill) trigCount = 0;
   if (betTeamLossKill) trigCount = 0;
+  if (betBullpenKill) trigCount = 0;
+  if (t6FipKill) trigCount = 0;
 
   // ── UNIT TABLE (Apr 28 2026) ───────────────────────────
   // Fixed dollar units. Tiers: 1u ENTRY, 2u STRONG, 3u MAX, 5u SUPER MAX (reserved).
@@ -647,7 +660,7 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
 
   // Map (gate, trigCount) -> unit count
   let units = 0;
-  if (!t14Kill && !betTeamLossKill) {
+  if (!t14Kill && !betTeamLossKill && !betBullpenKill && !t6FipKill) {
     if (gateType === 'T1' || gateType === 'T1B') {
       // T1 alone is the gate, not a play. Need at least 1 stacking trigger.
       if (trigCount >= 4) units = 5;          // SUPER MAX
@@ -738,13 +751,16 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   } else if (t15Active) {
     color = 'orange'; strength = 'FADE';
     recommendation = `T15 FADE — ${game.away.name} (exotic/parlay only, $50-100)`;
-  } else if (trigCount >= 4 || collisionMax) {
+  } else if (units >= 5) {
+    color = 'purple'; strength = 'SUPER MAX';
+    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing}`;
+  } else if (units === 3) {
     color = 'blue'; strength = 'MAX';
     recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing}`;
-  } else if (trigCount === 3) {
+  } else if (units === 2) {
     color = 'green'; strength = 'STRONG';
     recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing}`;
-  } else if (trigCount === 2) {
+  } else if (units === 1) {
     color = 'teal'; strength = 'ENTRY';
     recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing}`;
   } else {
