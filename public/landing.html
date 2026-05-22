@@ -1859,7 +1859,10 @@
       // Meta: "5 of 7 last 7d"
       const wins = plays.filter(p => p.status === 'win').length;
       const losses = plays.filter(p => p.status === 'loss').length;
-      meta.textContent = `${wins}–${losses} · last night`;
+      const lastPlayDate = plays[0].play_date;
+      const daysSince = Math.floor((Date.now() - new Date(lastPlayDate + 'T12:00:00').getTime()) / 86400000);
+      const whenLabel = daysSince <= 0 ? 'today' : daysSince === 1 ? 'last night' : daysSince + 'd ago';
+      meta.textContent = `${wins}–${losses} · ${whenLabel}`;
     } catch(e) {
       console.warn('[Landing] recent results load failed:', e.message);
       list.innerHTML = '<div class="hero-results-empty">Results loading…</div>';
