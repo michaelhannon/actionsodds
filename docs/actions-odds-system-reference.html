@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Action's Odds — System Reference</title>
+<style>
+  :root{
+    --ink:#12151c; --ink2:#3a4250; --line:#e2e5ea; --paper:#f6f7f9; --card:#ffffff;
+    --proto:#5b6472; --gate:#b8860b; --core:#1f6feb; --overlay:#7c3aed;
+    --sit:#0d9488; --rl:#15803d; --team:#c2410c; --sport:#475569; --data:#64748b; --danger:#b91c1c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.45;padding:18px 12px 60px}
+  .wrap{max-width:560px;margin:0 auto}
+  .num{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+
+  header.top{border:2px solid var(--ink);border-radius:14px;background:var(--card);
+    padding:16px 18px;margin-bottom:14px}
+  header.top .kick{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:700}
+  header.top h1{font-size:23px;letter-spacing:-.01em;margin:3px 0 6px;font-weight:800}
+  header.top .meta{font-size:12px;color:var(--ink2);display:flex;gap:14px;flex-wrap:wrap}
+  header.top .meta b{color:var(--ink)}
+
+  .sect{margin:20px 0 8px;display:flex;align-items:center;gap:9px}
+  .sect .chip{width:11px;height:11px;border-radius:3px;background:var(--c)}
+  .sect h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--ink)}
+  .sect .ln{flex:1;height:1px;background:var(--line)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c);
+    border-radius:11px;padding:12px 14px;margin:9px 0}
+  .card h3{font-size:14px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:baseline;gap:8px;margin-bottom:5px}
+  .card h3 .tag{font-family:ui-monospace,monospace;font-size:11px;font-weight:700;color:#fff;
+    background:var(--c);padding:2px 7px;border-radius:5px;letter-spacing:.02em;flex:none}
+  .card p{font-size:13px;color:var(--ink2);margin:3px 0}
+  .card p b{color:var(--ink)}
+  .card .lede{color:var(--ink);font-size:13px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  @media(max-width:440px){.grid2{grid-template-columns:1fr}}
+
+  table.mini{width:100%;border-collapse:collapse;margin-top:6px;font-size:12px}
+  table.mini td{padding:3px 6px;border-bottom:1px solid var(--line)}
+  table.mini td:first-child{font-family:ui-monospace,monospace;font-weight:700;color:var(--ink);white-space:nowrap}
+  table.mini td:last-child{color:var(--ink2);text-align:right;font-family:ui-monospace,monospace}
+  table.mini tr:last-child td{border-bottom:none}
+
+  .steps{counter-reset:s}
+  .step{position:relative;padding-left:34px;margin:8px 0}
+  .step::before{counter-increment:s;content:"0" counter(s);position:absolute;left:0;top:0;
+    font-family:ui-monospace,monospace;font-weight:800;font-size:13px;color:#fff;background:var(--proto);
+    width:26px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:6px}
+  .step.z::before{content:"00";background:var(--danger)}
+  .step h4{font-size:13.5px;font-weight:800;margin-bottom:2px}
+  .step p{font-size:12.5px;color:var(--ink2)}
+
+  .pill{display:inline-block;font-family:ui-monospace,monospace;font-size:11px;font-weight:700;
+    padding:1px 6px;border-radius:5px;background:#eef1f5;color:var(--ink);margin:1px 2px 1px 0}
+  .flag{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d;border-radius:8px;padding:8px 11px;
+    font-size:12px;margin-top:8px}
+  .flag b{color:#7f1d1d}
+  footer{margin-top:26px;font-size:11px;color:var(--data);text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="kick">Action's Odds · Proprietary</div>
+    <h1>System Reference — V2.0</h1>
+    <div class="meta">
+      <span><b>Build:</b> Apr–Jul 2026</span>
+      <span><b>Sports:</b> MLB · NFL · NBA · NHL · Derby</span>
+      <span><b>Philosophy:</b> plus-money, cumulative scoring</span>
+    </div>
+  </header>
+
+  <!-- SESSION PROTOCOL -->
+  <div class="sect" style="--c:var(--proto)"><span class="chip"></span><h2>Session Protocol · run in order, every session</h2><span class="ln"></span></div>
+  <div class="card" style="--c:var(--proto)">
+    <div class="steps">
+      <div class="step z"><h4>Date &amp; time verification — MANDATORY</h4><p>Confirm today's date/time and <b>double/triple-check it against the live slate</b> before any game-state claim. Never reference plays, dates, or P&amp;L from a vague sense — only from a confirmed source. Zero tolerance for attribution errors.</p></div>
+      <div class="step"><h4>Pre-filter gate — hard gate</h4><p>Pull all 30: streaks, run diffs, splits. <b>PLAY</b> = +RD &amp; W1+. <b>FADE</b> = −RD &amp; L1+. Cross-ref slate; perfect collisions = top priority. <b>Fail the gate = dead on arrival</b> — no price, pitching edge, narrative, or Dog Days lean overrides it.</p></div>
+      <div class="step"><h4>Full trigger grid — walked in order, visible</h4><p>Grade every survivor against the whole checklist as a marked grid (fires / no-fire / direction) <b>before</b> totaling. Never just the top-of-mind triggers.</p></div>
+      <div class="step"><h4>Score → size → price LAST</h4><p>Cumulative score decides play / pass / size. Pricing &amp; structure (straight / parlay / RR) come last, scraped live, best number locked.</p></div>
+    </div>
+    <div class="flag"><b>Root cause of every past failure:</b> grading from memory instead of running the steps in order. Date → gate → grid → price. No skipping to the interesting part.</div>
+  </div>
+  <div class="grid2">
+    <div class="card" style="--c:var(--proto)">
+      <h3>Step-0 Sourcing</h3>
+      <p>Double-confirm each point; conflict → 3rd source, 2-of-3.</p>
+      <table class="mini">
+        <tr><td>Streaks</td><td>ESPN + Yahoo</td></tr>
+        <tr><td>SP</td><td>MLB.com + CBS</td></tr>
+        <tr><td>Lines</td><td>FanDuel + DK</td></tr>
+        <tr><td>Records</td><td>ESPN + Yahoo</td></tr>
+      </table>
+      <p style="margin-top:5px">Unresolved after 3 = flagged unconfirmed, never carded.</p>
+    </div>
+    <div class="card" style="--c:var(--proto)">
+      <h3>Odds &amp; CLV</h3>
+      <p>Sweep <b>5–6 books</b> every time: FD, DK, Caesars, BetMGM, Hard Rock, Fanatics.</p>
+      <p>Lock pre-filter <b>7–9 AM ET</b>. Track CLV vs close per play.</p>
+      <p><b>Skip</b> if line moved &gt;15¢ against pre-filter direction.</p>
+      <p>Source-sweep before ever asking for a price; unfound = flagged <b>unverified</b>, never fabricated.</p>
+    </div>
+  </div>
+
+  <!-- SIZING -->
+  <div class="sect" style="--c:var(--danger)"><span class="chip"></span><h2>Universal Sizing · all sports</h2><span class="ln"></span></div>
+  <div class="grid2">
+    <div class="card" style="--c:var(--danger)">
+      <h3>Unit Ladder</h3>
+      <table class="mini">
+        <tr><td>1u</td><td>$250</td></tr>
+        <tr><td>2u</td><td>$500</td></tr>
+        <tr><td>3u</td><td>$750</td></tr>
+        <tr><td>Super Max 5u</td><td>$1,000 (reserved)</td></tr>
+      </table>
+      <p style="margin-top:5px">Daily soft cap 10% bankroll. Never scale down a qualifier to stay under.</p>
+    </div>
+    <div class="card" style="--c:var(--danger)">
+      <h3>Streak Bell Curve</h3>
+      <table class="mini">
+        <tr><td>W1/L1</td><td>1u</td></tr>
+        <tr><td>W2/L2</td><td>1.5u</td></tr>
+        <tr><td>W3/L3</td><td>2u</td></tr>
+        <tr><td>W4/L4</td><td>2.5u</td></tr>
+        <tr><td>W5/L5 · peak</td><td>3u</td></tr>
+        <tr><td>W6–W10 ↓</td><td>2.5 → 0.5u</td></tr>
+        <tr><td>W11+</td><td>EXIT</td></tr>
+      </table>
+      <p style="margin-top:5px">Perfect collision +0.5u (3u cap).</p>
+    </div>
+  </div>
+
+  <!-- GATES -->
+  <div class="sect" style="--c:var(--gate)"><span class="chip"></span><h2>Entry Gates · price bands (locked Apr 28)</h2><span class="ln"></span></div>
+  <div class="grid2">
+    <div class="card" style="--c:var(--gate)"><h3><span class="tag">T1</span>Home dog</h3><p><b>+140 to +199.</b> Min 1 trigger. Ladder 1u–5u cap.</p></div>
+    <div class="card" style="--c:var(--gate)"><h3><span class="tag">T11</span>Home fav</h3><p><b>−115 to −135.</b> Min 2 triggers. Ladder 1u–3u cap.</p></div>
+    <div class="card" style="--c:var(--gate)"><h3><span class="tag">T12</span>Home dog</h3><p><b>+110 to +139.</b> Min 2 triggers. Ladder 1u–5u cap.</p></div>
+    <div class="card" style="--c:var(--gate)"><h3><span class="tag">T13</span>Road dog</h3><p><b>+125+.</b> Min 3 of 6 signals (C1 streak · C2 RD · C3 FIP · C4 bullpen · C5 48hr load · C6 power). Ladder 1u–5u.</p></div>
+  </div>
+  <div class="card" style="--c:var(--gate)"><h3><span class="tag">T14</span>Power ratings · bidirectional</h3><p>Graded on every qualifying game. <b>15+ pt gap kills the bet</b> unless all 6 signals fire (then downgrade to 1u). Road dog (T13) can't fire if home power rating 15+ higher; home dog (T1) gap &gt;20 needs 4+ triggers. <b>T15 eliminated</b> — merged into T13.</p></div>
+
+  <!-- CORE MLB -->
+  <div class="sect" style="--c:var(--core)"><span class="chip"></span><h2>Core MLB Triggers</h2><span class="ln"></span></div>
+  <div class="grid2">
+    <div class="card" style="--c:var(--core)"><h3><span class="tag">T2</span>Streak</h3><p>Feeds pre-filter + bell-curve sizing.</p></div>
+    <div class="card" style="--c:var(--core)"><h3><span class="tag">T3</span>Run diff</h3><p>Sign is the gate; pace vs 5-yr norm on every card.</p></div>
+    <div class="card" style="--c:var(--core)"><h3><span class="tag">T6</span>SP FIP</h3><p>Weighted scoring input — <b>never a dog-killer.</b></p></div>
+    <div class="card" style="--c:var(--core)"><h3><span class="tag">T6-Δ</span>FIP–ERA gap</h3><p>FIP .50+ <b>below</b> ERA = BET; above = FADE. +0.5 stack.</p></div>
+    <div class="card" style="--c:var(--core)"><h3><span class="tag">T8</span>Bullpen 48hr</h3><p>Pitches thrown / depletion. Closer IL boosts it.</p></div>
+    <div class="card" style="--c:var(--core)"><h3><span class="tag">T9</span>Fatigue</h3><p>See T-FAT overlay for the full ladder.</p></div>
+    <div class="card" style="--c:var(--core)"><h3><span class="tag">T10</span>Divisional</h3><p><b>1× only</b>, never 2×. T14 overrides.</p></div>
+    <div class="card" style="--c:var(--core)"><h3><span class="tag">T16</span>BvP</h3><p>Min 10 AB. <b>Mandatory pull on every collision.</b></p></div>
+  </div>
+  <div class="card" style="--c:var(--core)"><h3><span class="tag">Dog Days</span>replaces T-ACE (retired Jun 18)</h3><p class="lede">Back live summer dogs in the <b>+105 to +145</b> band vs <b>any</b> arm incl. aces, as a matter of course — no ace-vulnerability gate. Pitching still factors via T6 weighting only. <b>Confirmed +ROI band is +105–145;</b> +200+ home dogs historically lost money. The fat-dog ledger is separate and unproven until it has a real sample.</p></div>
+
+  <!-- OVERLAYS -->
+  <div class="sect" style="--c:var(--overlay)"><span class="chip"></span><h2>Weighted Overlays · +0.5 stacks</h2><span class="ln"></span></div>
+  <div class="card" style="--c:var(--overlay)"><h3><span class="tag">T-REG</span>Home/road regression</h3><p>Means ~.530 home / ~.470 road, <b>15-game min.</b> Premium (~+140 band): home &gt;.620 fade fav / &lt;.440 back dog; road &gt;.560 fade / &lt;.380 back. Strong: home &gt;.680 or &lt;.380. <b>Direction check mandatory</b> — extreme-LOW home split is a BUY, not a penalty. Discount when a bad team's split is simply deserved. Source: CBS Sports splits.</p></div>
+  <div class="grid2">
+    <div class="card" style="--c:var(--overlay)"><h3><span class="tag">T-INJ</span>Injury</h3><p>Weighted, not a last check. <b>MVP bat out</b> = meaningful fade; <b>ace scratch</b> = biggest lever; closer IL boosts T8. Hits hardest first 24–48hr (market lag).</p></div>
+    <div class="card" style="--c:var(--overlay)"><h3><span class="tag">T-CF</span>Framing +ABS</h3><p>+0.5 only. Elite Savant +12 &amp; poor −5 &amp; gap ≥10 fires. Pull Savant every 2 weeks.</p></div>
+  </div>
+  <div class="card" style="--c:var(--overlay)"><h3><span class="tag">T-FAT</span>Fatigue ladder</h3><p>Resets only on a scheduled day off. <b>Home:</b> G6 watch · G7+ +0.5. <b>Road:</b> G6 +0.5 · G7 +1.0 · G8 +1.5 · G9+ +2.0 max. Bullpen-game opponent = <b>variance flag</b>, not weakness — never a green light to lay juice.</p></div>
+
+  <!-- SITUATIONAL -->
+  <div class="sect" style="--c:var(--sit)"><span class="chip"></span><h2>Situational &amp; Reversion</h2><span class="ln"></span></div>
+  <div class="card" style="--c:var(--sit)"><h3><span class="tag">S7 / S7a</span>W-L + RD reversion</h3><p>Both confirm = lock. <b>W-L over + RD lags = STRONG fade.</b> W-L under + RD better = STRONG bet. 3rd dimension: 1-run W% &gt;60% + neg RD = EXTREME fade; 1-run W% &lt;45% + pos RD = STRONG bet. Games 30–70 get +0.5 confidence.</p></div>
+  <div class="grid2">
+    <div class="card" style="--c:var(--sit)"><h3><span class="tag">S1/S2/S6</span>Spots</h3><p>S1a blowout same opp = bet. S1b diff opp = fade. S2 shutout bounce (3-gm). S6 first start back from IL = fade.</p></div>
+    <div class="card" style="--c:var(--sit)"><h3><span class="tag">T-FLIP</span>Fade flip</h3><p>Fade team −2.5 cume → opp +100–160 = 1u fixed (30-play validation). Fade-flip <b>OBS</b> = side note only, never sized or tracked.</p></div>
+  </div>
+
+  <!-- RUN LINE / PARLAY / EXOTIC -->
+  <div class="sect" style="--c:var(--rl)"><span class="chip"></span><h2>Run Line · Parlay · Exotic</h2><span class="ln"></span></div>
+  <div class="card" style="--c:var(--rl)"><h3><span class="tag">RL</span>Run line universal</h3><p>Plus-money dog <b>always +1.5</b>, never −1.5. Fav −1.5 add-on v2.5: ML clears gates + −1.5 pays +140+ + RD gap clears the calendar (Apr +10 · May +15 · Jun +20 · Jul +25 · Aug–Sep +30) → auto-play both at 50% of ML risk. <b>G9+ fade zone = skip RL.</b></p></div>
+  <div class="grid2">
+    <div class="card" style="--c:var(--rl)"><h3><span class="tag">P/RR</span>Streak parlay</h3><p>Play list: W2+ · +RD · strong SP · priced fav. Fade list: L2+ · <b>−RD only</b>. 2-team ≤$200, 3 plays = RR $200. Exotic bucket only, never straight, never mixed with T1/T11.</p></div>
+    <div class="card" style="--c:var(--rl)"><h3><span class="tag">HOT</span>Fav parlay priority</h3><p>Route dominant hot teams to <b>legs only</b>, never straight. Strongest vs weak/cold opp with a good arm.</p></div>
+  </div>
+  <div class="card" style="--c:var(--rl)"><h3><span class="tag">PARK</span>Exotic bucket · separate ledger</h3><p><b>Coors Over</b> at total ≤10.5 (STRONG ≤9.5 or amplifiers; pass ≥12). <b>Pitcher-Park Under</b> at Oracle/T-Mobile/Petco/Tropicana/Busch when total ≥8.5, STRONG night + elite SP. RL parlay 2-team max $50–100.</p></div>
+
+  <!-- STANDING TEAM RULES -->
+  <div class="sect" style="--c:var(--team)"><span class="chip"></span><h2>Standing Team Rules · re-confirm each game</h2><span class="ln"></span></div>
+  <div class="grid2">
+    <div class="card" style="--c:var(--team)"><h3>NYY</h3><p><b>Parlay leg only, never straight.</b> Judge out (rib) → fade/downgrade as fav while sidelined; market slow to reprice.</p></div>
+    <div class="card" style="--c:var(--team)"><h3>NYM</h3><p><b>Standing fade</b> — last place, Lindor out, Soto day-to-day. Fade strongest when Soto sits &amp; NYM on W2–3. Guardrail: route through grid, don't reflexively lay heavy chalk.</p></div>
+    <div class="card" style="--c:var(--team)"><h3>Hot group</h3><p>MIL + LAD (elite), MIA (hot) → legs only. Refresh as form turns.</p></div>
+    <div class="card" style="--c:var(--team)"><h3>BOS + exposure</h3><p>BOS cold-fade. <b>Single-team cap</b>: total $ on any one team across ALL tickets is capped (ATL-in-3 = −$1,000 lesson).</p></div>
+  </div>
+
+  <!-- OTHER SPORTS -->
+  <div class="sect" style="--c:var(--sport)"><span class="chip"></span><h2>Other Sports</h2><span class="ln"></span></div>
+  <div class="grid2">
+    <div class="card" style="--c:var(--sport)"><h3><span class="tag">NFL</span>v1.6</h3><p>Dog-hunter, 60% totals / 40% sides. Sizing 1 / 1.7 / 2.5 / 4 / 5u. Core T1–T17 incl. T-RQB, T-HOT, T-PRE. RR 3-team. Primary vehicle for the fat-dog thesis.</p></div>
+    <div class="card" style="--c:var(--sport)"><h3><span class="tag">NBA</span>v3</h3><p>T1 = Net Rating diff 3+ (hard gate). Gates: T1 + home + ML +140+ + spread ±7 + Conf Finals/Finals. Eliminated: overs, road straight, 0-3 teams.</p></div>
+    <div class="card" style="--c:var(--sport)"><h3><span class="tag">NHL</span>system</h3><p>Primary = conditioned fav parlay (2 legs −120/−145, need 3/4 conditions). Secondary = −1.5 blowout teams. Value zone −120/−145 favs + +100/+130 dogs.</p></div>
+    <div class="card" style="--c:var(--sport)"><h3><span class="tag">DERBY</span>rules</h3><p>Horse on notes card = on ticket. Post position is a factor, not a sentence. Fades → exotic legs. Never all-in wins — preserve exotic budget.</p></div>
+  </div>
+
+  <!-- DATA SOURCES -->
+  <div class="sect" style="--c:var(--data)"><span class="chip"></span><h2>Data Sources · what actually works</h2><span class="ln"></span></div>
+  <div class="card" style="--c:var(--data)">
+    <p><span class="pill">DeepMetric</span> current RD &amp; standings <span class="pill">CBS</span> home/road splits <span class="pill">DK Network</span> nightly probables ~11:47 PM <span class="pill">MLB Stats API</span> schedule/probables/RD JSON <span class="pill">Statmuse</span> location RD queries <span class="pill">Beat writers</span> text-rendered, work when boards fail</p>
+    <div class="flag">
+      <b>Confirmed-dead to fetch tools</b> (JavaScript-rendered shells): ESPN odds board, sportsbook line pages, live odds grids. Re-hitting these is not a real sweep. <b>Statmuse RD leaderboard caches ~3 weeks stale</b> — never use as primary RD.
+      <br><br><b>Permanent fix:</b> allowlist <span class="num">api.the-odds-api.com</span> → clean JSON lines + confirmed probables in one pull. Same feed that unblocks the autonomous app.
+    </div>
+  </div>
+
+  <footer>
+    Action's Odds · System Reference V2.0 · compiled from locked rules Apr–Jul 2026<br>
+    Reference only — not a card. Every play still runs Step 0 → gate → grid → price live.
+  </footer>
+
+</div>
+</body>
+</html>
