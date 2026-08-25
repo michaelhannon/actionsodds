@@ -368,7 +368,7 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   }
   // T15: Home fade — road dog backing
   let t15Active = false;
-  if (awayML != null && awayML >= 125) {
+  if (awayML != null && awayML >= 120) {
     const f1 = home.streakLen >= 2 && home.streak === 'L'; // home L2+
     const f2 = home.runDiff < 0;                            // home neg diff
     const f3 = away.runDiff > 0;                            // road pos diff
@@ -383,64 +383,63 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
     return { gateType: null, plays: [], t15: false, collision: buildCollisionData(away, home), odds: { homeML, awayML } };
   }
 
+  // ── FUNDAMENTAL DIRECTION CHECK — NON-NEGOTIABLE ────────
+  // The team we are backing MUST be on a winning streak W2-W10
+  // A gate price on a losing streak team = automatic pass
+  // A winning streak beyond W10 = fade zone, stop backing
+  if (gradeTeam.streak === 'L') {
+    return {
+      gateType, gateML, gateSide,
+      triggered: [], failed: ['DIRECTION'],
+      notes: [`HARD KILL — ${gradeTeam.abbr} is on L${gradeTeam.streakLen} streak. We NEVER back losing streak teams. Gate fails regardless of price.`],
+      trigCount: 0, sizing: 0, color: 'red', strength: 'PASS',
+      recommendation: `PASS — ${gradeTeam.abbr} on losing streak L${gradeTeam.streakLen}. Fundamental direction rule.`,
+      rlAddon: null, t14Kill: false, t15Active: false, t3Kill: false,
+      directionKill: true,
+      collision: buildCollisionData(away, home),
+      odds: { homeML, awayML }
+    };
+  }
+  if (gradeTeam.streak === 'W' && gradeTeam.streakLen >= 10) {
+    return {
+      gateType, gateML, gateSide,
+      triggered: [], failed: ['FADE_ZONE'],
+      notes: [`FADE ZONE — ${gradeTeam.abbr} on W${gradeTeam.streakLen}. Regression due. Stop backing at W10+.`],
+      trigCount: 0, sizing: 0, color: 'amber', strength: 'PASS',
+      recommendation: `PASS — ${gradeTeam.abbr} W${gradeTeam.streakLen} fade zone. Regression to mean expected.`,
+      rlAddon: null, t14Kill: false, t15Active: false, t3Kill: false,
+      fadeZoneKill: true,
+      collision: buildCollisionData(away, home),
+      odds: { homeML, awayML }
+    };
+  }
+
   // ── TRIGGER COUNTING ─────────────────────────────────────
   const triggered = [];
   const failed = [];
   const notes = [];
 
-  // ── T6 FIP-gap kill flag (computed in T6 block below; declared here for scope)
-  let t6FipKill = false;
-
   // T2: Streak collision
-  const collisionActive = away.streak !== home.streak;
+  // T2 collision working range: W2-W10 vs L2-L10
+  const collisionActive = away.streak !== home.streak &&
+    away.streakLen >= 2 && away.streakLen <= 10 &&
+    home.streakLen >= 2 && home.streakLen <= 10;
   const collisionMax = collisionActive && (away.streakLen >= 5 || home.streakLen >= 5);
   const fadeZone = away.streakLen >= 9 || home.streakLen >= 9;
   if (collisionActive) {
-    // Apr 29 2026: T2 collision rule — bet side must be W2+, fade side must be L2+
-    // Rule: never back a losing-streak team; never fade a non-losing-streak team
-    const betSide = gateSide;
-    const betTeam = betSide === 'home' ? home : away;
-    const fadeTeam = betSide === 'home' ? away : home;
-    const betOnWinStreak = betTeam.streak === 'W' && betTeam.streakLen >= 2;
-    const fadeOnLossStreak = fadeTeam.streak === 'L' && fadeTeam.streakLen >= 2;
-    // W10/L10 cap: streak length 10+ = fade zone, T2 fails
-    const betCapped = betTeam.streakLen >= 10;
-    const fadeCapped = fadeTeam.streakLen >= 10;
-    if (betOnWinStreak && fadeOnLossStreak && !betCapped && !fadeCapped) {
+    const favSide = gateSide === 'home' ?
+      (home.streak === 'W' ? 'T2 ✓ Home W' + home.streakLen + ' vs Away L' + away.streakLen : 'T2 ✓ Away L' + away.streakLen + ' vs Home W' + home.streakLen) :
+      (away.streak === 'W' ? 'T2 ✓ Away W' + away.streakLen + ' vs Home L' + home.streakLen : null);
+    if (favSide) {
       triggered.push('T2');
-      const sideLbl = betSide === 'home'
-        ? `Home ${betTeam.abbr} W${betTeam.streakLen} vs Away ${fadeTeam.abbr} L${fadeTeam.streakLen}`
-        : `Away ${betTeam.abbr} W${betTeam.streakLen} vs Home ${fadeTeam.abbr} L${fadeTeam.streakLen}`;
-      notes.push(`T2 ✓ ${sideLbl}` + (collisionMax ? ' — MAX COLLISION' : ''));
+      notes.push(favSide + (collisionMax ? ' — MAX COLLISION' : ''));
     } else {
       failed.push('T2');
-      let why;
-      if (betCapped) why = `bet team ${betTeam.abbr} W${betTeam.streakLen} CAPPED (W10+ fade zone)`;
-      else if (fadeCapped) why = `fade team ${fadeTeam.abbr} L${fadeTeam.streakLen} CAPPED (L10+ fade zone)`;
-      else if (!betOnWinStreak) why = `bet team ${betTeam.abbr} not on W2+ (${betTeam.streak}${betTeam.streakLen})`;
-      else why = `fade team ${fadeTeam.abbr} not on L2+ (${fadeTeam.streak}${fadeTeam.streakLen})`;
-      notes.push(`T2 ✗ Collision fails — ${why}`);
+      notes.push('T2 ✗ Collision favors wrong side');
     }
   } else {
     failed.push('T2');
-    notes.push('T2 ✗ No streak data available');
-  }
-
-  // ── HARD KILL: never back a losing-streak team (memory rule, no exceptions)
-  const _bet = gateSide === 'home' ? home : away;
-  const _betBullpen = gateSide === 'home' ? homeBullpen : awayBullpen;
-  let betTeamLossKill = false;
-  let betBullpenKill = false;
-  if (_bet.streak === 'L' && _bet.streakLen >= 1) {
-    betTeamLossKill = true;
-    failed.push('STREAK_KILL');
-    notes.push(`✗ HARD KILL — bet team ${_bet.abbr} on L${_bet.streakLen}; never back a losing-streak team`);
-  }
-  // T8 BET-SIDE KILL: never back a team whose own bullpen is depleted
-  if (_betBullpen && _betBullpen.depleted === true) {
-    betBullpenKill = true;
-    failed.push('T8_BET_KILL');
-    notes.push(`✗ HARD KILL — bet team ${_bet.abbr} bullpen depleted (${_betBullpen.note || 'BP gassed'})`);
+    notes.push('T2 ✗ No streak mismatch');
   }
 
   // T3: Run differential
@@ -449,10 +448,10 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   if (gradeTeam.runDiff > 0) {
     triggered.push('T3');
     notes.push(`T3 ✓ ${gradeTeam.abbr} run diff ${gradeTeam.runDiff > 0 ? '+' : ''}${gradeTeam.runDiff}`);
-  } else if (gradeTeam.runDiff < -10) {
+  } else if (gradeTeam.runDiff < 0) {
     failed.push('T3');
-    notes.push(`T3 ✗ ${gradeTeam.abbr} run diff ${gradeTeam.runDiff} — KILLS PLAY (T3 hard kill)`);
-    // T3 hard kill flag — will zero sizing below
+    notes.push(`T3 ✗ ${gradeTeam.abbr} run diff ${gradeTeam.runDiff} — HARD KILL. Never back negative run diff team.`);
+    // T3 hard kill — ANY negative run diff kills the play
   } else {
     notes.push(`T3 ~ ${gradeTeam.abbr} run diff ${gradeTeam.runDiff} — neutral`);
   }
@@ -487,15 +486,17 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   }
 
   // T4-HL: Home loss streak on OPPONENT amplifies fade / boosts our team
+  // T4-HL: L3=entry noted, L5=fires full trigger, L7=MAX +1 trigger
   if (oppHomeLossSig) {
-    if (oppHomeLossSig.level === 'max_fade') {
+    const hl = oppHomeLossSig.len || 0;
+    if (hl >= 7) {
       triggered.push('T4-HL');
-      notes.push(`T4-HL ✓ MAX home loss fade — opp ${oppTeam.abbr} L${oppHomeLossSig.len} at home, structural failure, +1 trigger`);
-    } else if (oppHomeLossSig.level === 'strong_fade') {
+      notes.push(`T4-HL ✓ MAX — opp ${oppTeam.abbr} L${hl} at home, structural failure, +1 trigger added`);
+    } else if (hl >= 5) {
       triggered.push('T4-HL');
-      notes.push(`T4-HL ✓ Strong home fade — opp ${oppTeam.abbr} L${oppHomeLossSig.len} at home, systemic issue`);
-    } else if (oppHomeLossSig.level === 'fade') {
-      notes.push(`T4-HL ~ Opp ${oppTeam.abbr} L${oppHomeLossSig.len} at home — fade signal noted`);
+      notes.push(`T4-HL ✓ Strong — opp ${oppTeam.abbr} L${hl} at home, systemic issue fires`);
+    } else if (hl >= 3) {
+      notes.push(`T4-HL ~ Entry — opp ${oppTeam.abbr} L${hl} at home, noted on card`);
     }
   }
 
@@ -562,16 +563,11 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
     notes.push('T4-RS MAX bonus: +1 trigger added to sizing');
   }
 
-  // T10: Divisional familiarity (one confirming trigger; does not apply if opponent on hot streak)
-  const isDivisional = away.division === home.division;
+  // T10: Divisional familiarity
+  const isDivisional = away.division === home.division; // approximate
   if (isDivisional) {
-    const oppHotStreak = oppTeam.streak === 'W' && oppTeam.streakLen >= 3;
-    if (oppHotStreak) {
-      notes.push(`T10 ~ Divisional matchup but opp ${oppTeam.abbr} on W${oppTeam.streakLen} hot streak — T10 does not apply`);
-    } else {
-      triggered.push('T10');
-      notes.push('T10 ✓ Divisional matchup — confirming trigger');
-    }
+    triggered.push('T10');
+    notes.push('T10 ✓ Divisional matchup — counts as 2 triggers if T1 active');
   }
 
   // T14: Power ratings — mandatory kill check
@@ -635,168 +631,111 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   // ── SIZING ───────────────────────────────────────────────
   let trigCount = triggered.length;
 
-  // Apr 29 2026: T10 is ONE confirming trigger only (corrected — old "counts as 2" rule was wrong)
-  // No double-counting; T10 is already in triggered[] from above.
+  // T10 divisional doubles if T1
+  if (triggered.includes('T10') && gateType === 'T1') trigCount++;
 
   // Collision max = gate alone sufficient
   const gateAlone = collisionMax && (away.streakLen >= 5 || home.streakLen >= 5);
 
-  // Kill if T14 fired, bet team on losing streak, bet-team bullpen depleted, or T6 FIP gap >= 2.0
+  // Kill if T14 fired
   if (t14Kill) trigCount = 0;
-  if (betTeamLossKill) trigCount = 0;
-  if (betBullpenKill) trigCount = 0;
-  if (t6FipKill) trigCount = 0;
 
-  // ── UNIT TABLE (Apr 28 2026) ───────────────────────────
-  // Fixed dollar units. Tiers: 1u ENTRY, 2u STRONG, 3u MAX, 5u SUPER MAX (reserved).
-  const UNIT_TABLE_MLB = {1:250, 2:500, 3:750, 5:1000};
-  const TIER_LABEL_MLB = {1:'ENTRY', 2:'STRONG', 3:'MAX', 5:'SUPER MAX'};
-
-  // Gate caps (dollar ceilings — units mapping respects these)
+  // T11/T12/T13 max size caps
   let maxSize = 1000;
-  if (gateType === 'T11') maxSize = 750;
-  if (gateType === 'T12') maxSize = 1000;
-  if (gateType === 'T13') maxSize = 1000;
+  if (gateType === 'T11') maxSize = 800;
+  if (gateType === 'T12') maxSize = 600;
+  if (gateType === 'T13') maxSize = 400;
+  if (t15Active) maxSize = 100; // exotic only
 
-  // Map (gate, trigCount) -> unit count
-  let units = 0;
-  if (!t14Kill && !betTeamLossKill && !betBullpenKill && !t6FipKill) {
-    if (gateType === 'T1' || gateType === 'T1B') {
-      // T1 alone is the gate, not a play. Need at least 1 stacking trigger.
-      if (trigCount >= 4) units = 5;          // SUPER MAX
-      else if (trigCount === 3) units = 3;    // MAX
-      else if (trigCount === 2) units = 2;    // STRONG
-      else if (trigCount === 1) units = 1;    // ENTRY
-      else units = 0;
-    } else if (gateType === 'T11') {
-      if (trigCount >= 4) units = 3;          // MAX
-      else if (trigCount === 3) units = 2;    // STRONG
-      else if (trigCount === 2) units = 1;    // ENTRY
-      else units = 0;
-    } else if (gateType === 'T12') {
-      if (trigCount >= 5) units = 5;          // SUPER MAX
-      else if (trigCount === 4) units = 3;    // MAX
-      else if (trigCount === 3) units = 2;    // STRONG
-      else if (trigCount === 2) units = 1;    // ENTRY
-      else units = 0;
-    } else if (gateType === 'T13') {
-      units = 0; // computed below from C1-C6 signals
-    } else if (t15Active) {
-      units = 1; // restricted, parlay-only at $100
-    } else {
-      // Fallback ladder
-      if (trigCount >= 4) units = 5;
-      else if (trigCount === 3) units = 3;
-      else if (trigCount === 2) units = 2;
-      else if (trigCount === 1) units = 1;
-      else units = 0;
-    }
+  // Unit-based sizing: Gate alone=0 · Gate+1=ENTRY(1u) · Gate+2=STRONG(2u) · Gate+3=MAX(3u) · Gate+4+=SUPER MAX(5u reserved)
+  let unitCount = 0;
+  if (!t3Kill && !t14Kill) {
+    if (trigCount >= 4) unitCount = 3;      // Super MAX reserved — cap at 3 for now
+    else if (trigCount === 3) unitCount = 3; // MAX — 3 units
+    else if (trigCount === 2) unitCount = 2; // STRONG — 2 units
+    else if (trigCount === 1) unitCount = 1; // ENTRY — 1 unit
+    else unitCount = 0;                      // Gate alone = no play without supporting triggers
   }
+  // Path caps
+  if (gateType === 'T12') unitCount = Math.min(unitCount, 2);
+  if (gateType === 'T13') unitCount = Math.min(unitCount, 1);
+  if (t15Active) unitCount = 1;
+  const sizing = unitCount;
 
-  // T3 hard kill — negative run diff below -10 kills any play
-  const t3Kill = gradeTeam.runDiff < -10;
-  if (t3Kill) { units = 0; }
-
-  // T11 needs 3+ triggers minimum
-  if (gateType === 'T11' && trigCount < 2) units = 0;
+    // T11 needs 3+ triggers minimum
+  if (gateType === 'T11' && trigCount < 3) sizing = 0;
   // T12 needs 5+ triggers minimum
-  if (gateType === 'T12' && trigCount < 2) units = 0;
-  // T13: unified road dog +125+ with 6 confirming signals (C1-C6)
-  // C1=T2, C2=T3, C3=T6, C4=T8, C5=F5 (home BP explicit), C6=F6 (road T14 superior)
+  if (gateType === 'T12' && trigCount < 5) sizing = 0;
+  // T13 needs ALL 5 of: T2+T3+T6+T8+1 more
   if (gateType === 'T13') {
-    // Unified road dog gate at +125+ with 6 confirming signals (C1-C6)
-    // C1=T2, C2=T3, C3=T6, C4=T8, C5=F5 (home BP deeper depletion), C6=F6 (road T14 superior)
-    const c1 = triggered.includes('T2') ? 1 : 0;
-    const c2 = triggered.includes('T3') ? 1 : 0;
-    const c3 = triggered.includes('T6') ? 1 : 0;
-    const c4 = triggered.includes('T8') ? 1 : 0;
-    // C5 (F5): home BP "depleted" beyond T8 — both flags fire when usage is heavy
-    const c5 = (homeBullpen && homeBullpen.depleted === true) ? 1 : 0;
-    // C6 (F6): road team power rating clearly superior (5+ pts in road's favor)
-    const c6 = (favoredPower === 'away' && powerGap >= 5) ? 1 : 0;
-    const signalCount = c1 + c2 + c3 + c4 + c5 + c6;
-
-    if (signalCount < 3) {
-      units = 0;
-    } else {
-      // T14 bidirectional: 15+ pt gap toward EITHER side
-      // Toward home (against road dog) = kill, unless all 6 fire (downgrade to 1u)
-      // Toward road (favoring road dog) = no penalty, scale normally
-      if (favoredPower === 'home' && powerGap >= 15) {
-        units = (signalCount === 6) ? 1 : 0;
-      } else {
-        if (signalCount >= 6) units = 5;       // SUPER MAX
-        else if (signalCount === 5) units = 3; // MAX
-        else if (signalCount === 4) units = 2; // STRONG
-        else units = 1;                         // ENTRY (signalCount === 3)
-      }
-    }
-
-    // Audit note
-    notes.push(`T13 signals: C1${c1?'✓':'✗'} C2${c2?'✓':'✗'} C3${c3?'✓':'✗'} C4${c4?'✓':'✗'} C5${c5?'✓':'✗'} C6${c6?'✓':'✗'} = ${signalCount}/6 → ${units}u`);
+    const req = ['T2','T3','T6','T8'];
+    const hasAll = req.every(t => triggered.includes(t));
+    if (!hasAll || trigCount < 5) sizing = 0;
   }
-
-  // Resolve dollar amount from unit table (MLB default; sport hooks can override later)
-  let sizing = UNIT_TABLE_MLB[units] || 0;
-  // Enforce cap (defensive — table already respects it)
-  if (sizing > maxSize) sizing = maxSize;
-
-  const tier = TIER_LABEL_MLB[units] || '';
 
   // ── COLOR + STRENGTH ─────────────────────────────────────
   let color, strength, recommendation;
+  const team = gateSide === 'home' ? game.home.name : game.away.name;
+  const mlStr = `${gateML > 0 ? '+' : ''}${gateML}`;
   if (t14Kill || sizing === 0) {
     color = 'red'; strength = 'PASS';
-    recommendation = 'PASS — ' + (t14Kill ? 'T14 power ratings kill this play' : (betTeamLossKill ? `${_bet.abbr} on L${_bet.streakLen} — never back a losing-streak team` : 'Insufficient triggers'));
+    recommendation = 'PASS — ' + (t14Kill ? 'T14 power ratings kill this play' : 'Insufficient triggers');
   } else if (t15Active) {
     color = 'orange'; strength = 'FADE';
-    recommendation = `T15 FADE — ${game.away.name} (exotic/parlay only, $50-100)`;
-  } else if (units >= 5) {
-    color = 'purple'; strength = 'SUPER MAX';
-    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing}`;
-  } else if (units === 3) {
-    color = 'blue'; strength = 'MAX';
-    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing}`;
-  } else if (units === 2) {
+    recommendation = `T15 FADE — ${game.away.name} (1 unit exotic only)`;
+  } else if (unitCount >= 3) {
+    color = unitCount >= 5 ? 'blue' : 'blue'; strength = unitCount >= 5 ? 'SUPER MAX' : 'MAX';
+    recommendation = `${team} ML ${mlStr} — ${unitCount} units`;
+  } else if (unitCount === 2) {
     color = 'green'; strength = 'STRONG';
-    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing}`;
-  } else if (units === 1) {
+    recommendation = `${team} ML ${mlStr} — 2 units`;
+  } else if (unitCount === 1) {
     color = 'teal'; strength = 'ENTRY';
-    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing}`;
+    recommendation = `${team} ML ${mlStr} — 1 unit`;
   } else {
     color = 'amber'; strength = 'WATCH';
-    recommendation = `${gateSide === 'home' ? game.home.name : game.away.name} ML ${gateML > 0 ? '+' : ''}${gateML} — $${sizing} (borderline)`;
+    recommendation = `${team} ML ${mlStr} — monitor, triggers insufficient`;
   }
 
-  // Run line — always display both sides, flag qualifying add-on separately
-  // Rule: fav -1.5 must pay +115+. Dog +1.5 must pay +100+. Add-on only when 4+ triggers.
+  // Run line rules:
+  // FAV -1.5: only appears when team is a favorite (negative ML). Must pay +140 or better.
+  // DOG +1.5: only qualifies if the dog ML breaks through +140 barrier.
+  // PARLAY LEG QUALIFIER: if fav -1.5 pays +140+, team qualifies as parlay leg
+  //   even without a straight bet gate or W2+ streak requirement.
   const rlDisplay = {
     homeLine: homeRL ? { point: homeRL.point, price: homeRL.price } : null,
     awayLine: awayRL ? { point: awayRL.point, price: awayRL.price } : null
   };
 
   let rlAddon = null;
-  if (!t14Kill && !t15Active && trigCount >= 3) {
-    // Fav -1.5 at plus money (best value)
-    if (gateSide === 'home' && awayRL?.point <= -1 && awayRL?.price >= 115) {
-      rlAddon = { desc: `${game.away.name} -1.5 ${awayRL.price > 0 ? '+' : ''}${awayRL.price}`, amt: Math.round((sizing||200) * 0.5), qualifying: true };
-    } else if (gateSide === 'away' && homeRL?.point <= -1 && homeRL?.price >= 115) {
-      rlAddon = { desc: `${game.home.name} -1.5 ${homeRL.price > 0 ? '+' : ''}${homeRL.price}`, amt: Math.round((sizing||200) * 0.5), qualifying: true };
+  if (!t14Kill && !t15Active && unitCount >= 2) {
+    // FAV -1.5: fires when paying +140 or better
+    if (gateSide === 'home' && homeML < 0 && awayRL?.point <= -1 && awayRL?.price >= 140) {
+      rlAddon = { desc: `${game.home.name} -1.5 +${awayRL.price}`, units: 1, qualifying: true, note: 'Fav -1.5 add-on · also parlay leg qualifier' };
+    } else if (gateSide === 'away' && awayML < 0 && homeRL?.point <= -1 && homeRL?.price >= 140) {
+      rlAddon = { desc: `${game.away.name} -1.5 +${homeRL.price}`, units: 1, qualifying: true, note: 'Fav -1.5 add-on · also parlay leg qualifier' };
     }
-    // Dog +1.5 at +100 or better
-    else if (gateSide === 'home' && homeRL?.point >= 1 && homeRL?.price >= 100) {
-      rlAddon = { desc: `${game.home.name} +1.5 ${homeRL.price > 0 ? '+' : ''}${homeRL.price}`, amt: Math.round((sizing||200) * 0.5), qualifying: trigCount >= 4 };
-    } else if (gateSide === 'away' && awayRL?.point >= 1 && awayRL?.price >= 100) {
-      rlAddon = { desc: `${game.away.name} +1.5 ${awayRL.price > 0 ? '+' : ''}${awayRL.price}`, amt: Math.round((sizing||200) * 0.5), qualifying: trigCount >= 4 };
+    // PARLAY LEG QUALIFIER — even without gate, flag if fav -1.5 pays +140+
+    // This allows teams like LAD -285 or NYY to qualify as parlay legs via run line
+    const homeFavRL = homeML < 0 && awayRL?.price >= 140;
+    const awayFavRL = awayML < 0 && homeRL?.price >= 140;
+    if ((homeFavRL || awayFavRL) && !rlAddon) {
+      const rlTeam = homeFavRL ? game.home.name : game.away.name;
+      const rlPrice = homeFavRL ? awayRL.price : homeRL.price;
+      notes.push(`RL PARLAY ✓ ${rlTeam} -1.5 +${rlPrice} — qualifies as parlay leg (run line clears +140)`);
+    }
+    // DOG +1.5: only if dog ML is +140 or better (breaks the barrier)
+    else if (gateSide === 'home' && homeML >= 140 && homeRL?.point >= 1 && homeRL?.price >= 100) {
+      rlAddon = { desc: `${game.home.name} +1.5 ${homeRL.price > 0 ? '+' : ''}${homeRL.price}`, units: 1, qualifying: true, note: 'Dog +1.5 — ML cleared +140' };
+    } else if (gateSide === 'away' && awayML >= 140 && awayRL?.point >= 1 && awayRL?.price >= 100) {
+      rlAddon = { desc: `${game.away.name} +1.5 ${awayRL.price > 0 ? '+' : ''}${awayRL.price}`, units: 1, qualifying: true, note: 'Dog +1.5 — ML cleared +140' };
     }
   }
 
   return {
     gateType, gateML, gateSide,
     triggered, failed, notes,
-    trigCount, sizing,
-    units,
-    tier, color, strength,
+    trigCount, sizing, color, strength,
     recommendation, rlAddon, rlDisplay,
     t14Kill, t15Active, t3Kill,
     collision: buildCollisionData(away, home),
