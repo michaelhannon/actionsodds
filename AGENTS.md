@@ -36,10 +36,19 @@ This project's biggest recurring failure mode — documented repeatedly in its o
 3. Mark confidence explicitly: **verified today** vs. **per some other doc, not re-checked** vs. **discrepancy** — this repo has been burned before by treating unverified claims as current fact.
 4. Commit with a message describing what was verified or changed, and push to `kavimade/actionsodds-docs`.
 
+## Secrets — Railway is the source of truth, chat/files are never a store
+
+This project has already leaked one API key by hardcoding it in `server.js` as a fallback value (see the docs repo audit). The rules below exist specifically to stop that from happening again.
+
+- **Never display a real secret value** — API key, password, token, webhook secret, DB connection string, anything — in chat output, a code comment, a commit message, a markdown doc, or any file other than a developer's own local `.env` (gitignored, never committed). If a command would print one to stdout, redirect it to a file or otherwise suppress the output instead of letting it appear in a terminal/tool response. When confirming a secret is set, report the variable **name** and that it's present (optionally its length) — never the value.
+- **Railway → Variables is the single source of truth for every production secret.** Whenever you add, change, or rotate a secret as part of a task, push it to Railway — don't leave it sitting only in a local `.env` while production drifts out of sync. If you don't have Railway access to do this yourself, say so explicitly and hand off the exact variable name (never the value) for whoever does.
+- **`.env.example` is the checked-in template** — variable names and placeholder values only, kept up to date whenever a var is added, renamed, or removed. Real values never go here.
+- **Never hardcode a fallback secret value in source**, even "just for local dev" — that's exactly how the odds-API key leak happened. Missing env vars should fail the app closed at boot (see `server/auth.js` and the `ODDS_API_KEY` check in `server.js` for the existing pattern), not silently fall back to a baked-in value.
+- Note the one real env-var-naming gotcha in this codebase: the Supabase service key env var is `SUPABASE_SERVICE_KEY`, not `SUPABASE_SERVICE_ROLE_KEY`.
+
 ## House rules specific to this codebase
 
 - **Nothing that decides a bet, computes a score, or settles a wager should ever go through an LLM call.** The target architecture (`developer/production-architecture.md` in the docs repo) is explicit: the trigger grid is deterministic code with tests. If you're adding betting logic, it belongs in a pure function, not a prompt.
-- **No secrets in source.** `server.js` currently has a hardcoded odds-API key fallback — known issue, not a pattern to repeat. All keys come from env vars, matching `.env.example`. Note the one real gotcha: the Supabase service key env var is `SUPABASE_SERVICE_KEY`, not `SUPABASE_SERVICE_ROLE_KEY`.
 - **Migrations must be checked in.** The anti-sharing schema (`user_sessions`, `login_events`, `trusted_devices`, `device_verification_tokens`, `sharing_flags`) was applied directly to Supabase without ever being committed as a migration — don't repeat that. Any new table or column change gets a numbered file in `migrations/`, not an ad hoc script in `db/` and not a change made only in the Supabase dashboard.
 - **No staging environment exists yet.** Every push to `main` deploys straight to production on Railway. Be correspondingly careful — this is how the homepage got wiped once before.
 - **Deploy access is currently single-person** (Mike, via GitHub `michaelhannon/actionsodds`). Don't assume CI/CD guardrails that don't exist.
