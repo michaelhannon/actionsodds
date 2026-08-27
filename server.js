@@ -28,6 +28,11 @@ const https = require('https');
 const path = require('path');
 const fs = require('fs');
 
+if (!process.env.ODDS_API_KEY) {
+  console.error('FATAL: ODDS_API_KEY missing from env. Set it in .env (local) or Railway → Variables (production).');
+  process.exit(1);
+}
+
 const morningScan = require('./morning-scan');
 
 // Auto-publish qualifying plays to actions_plays after every scan,
@@ -73,7 +78,7 @@ if (publishScanPlays) {
 }
 
 morningScan.scheduleScan(
-  process.env.ODDS_API_KEY || '4e4c9bc2ffc7311be69697d28952cf1a',
+  process.env.ODDS_API_KEY,
   { t1Min: 140, t1Max: 199, t11Min: 115, t11Max: 135, t12Min: 110 }
 );
 
@@ -515,7 +520,7 @@ app.get('/morning-scan', (req, res) => {
 app.post('/morning-scan/run', (req, res) => {
   res.json({ status: 'started' });
   morningScan.runMorningScan(
-    process.env.ODDS_API_KEY || '4e4c9bc2ffc7311be69697d28952cf1a',
+    process.env.ODDS_API_KEY,
     { t1Min: 140, t1Max: 199, t11Min: 115, t11Max: 135, t12Min: 110 }
   );
 });

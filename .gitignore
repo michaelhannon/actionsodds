@@ -1,5 +1,6 @@
 node_modules/
 .env
+supabase/.temp/
 
 # Local tooling / AI agent state
 .agents/
