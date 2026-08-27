@@ -99,7 +99,7 @@ const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
 
 // ─── Auth & Stripe modules (Phase 1 SaaS) ──────────────────────────────────
 const { stripeWebhookHandler } = require('./server/stripe-webhook');
-const { requireAuth, supabaseAdmin } = require('./server/auth');
+const { requireAuth, requireAdmin, supabaseAdmin } = require('./server/auth');
 const { createCheckoutSession } = require('./server/stripe-checkout');
 const { createBillingPortalSession } = require('./server/stripe-billing-portal');
 const apiRoutes = require('./server/api-routes');
@@ -517,7 +517,7 @@ app.get('/morning-scan', (req, res) => {
   const scan = morningScan.getLastScan();
   res.json(scan || { error: 'No scan data yet' });
 });
-app.post('/morning-scan/run', (req, res) => {
+app.post('/morning-scan/run', requireAuth, requireAdmin, (req, res) => {
   res.json({ status: 'started' });
   morningScan.runMorningScan(
     process.env.ODDS_API_KEY,

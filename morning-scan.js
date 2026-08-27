@@ -383,6 +383,10 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
     return { gateType: null, plays: [], t15: false, collision: buildCollisionData(away, home), odds: { homeML, awayML } };
   }
 
+  // Moved up from below (was referenced at line ~390 before its declaration —
+  // threw "Cannot access 'gradeTeam' before initialization" on every scan).
+  const gradeTeam = gateSide === 'home' ? home : away;
+
   // ── FUNDAMENTAL DIRECTION CHECK — NON-NEGOTIABLE ────────
   // The team we are backing MUST be on a winning streak W2-W10
   // A gate price on a losing streak team = automatic pass
@@ -443,7 +447,6 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   }
 
   // T3: Run differential
-  const gradeTeam = gateSide === 'home' ? home : away;
   const oppTeam = gateSide === 'home' ? away : home;
   if (gradeTeam.runDiff > 0) {
     triggered.push('T3');
