@@ -652,6 +652,7 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
 
   // Unit-based sizing: Gate alone=0 · Gate+1=ENTRY(1u) · Gate+2=STRONG(2u) · Gate+3=MAX(3u) · Gate+4+=SUPER MAX(5u reserved)
   let unitCount = 0;
+  const t3Kill = gradeTeam.runDiff < -10;
   if (!t3Kill && !t14Kill) {
     if (trigCount >= 4) unitCount = 3;      // Super MAX reserved — cap at 3 for now
     else if (trigCount === 3) unitCount = 3; // MAX — 3 units
@@ -663,7 +664,7 @@ function runTriggerEngine(game, teams, odds, awayPitcherStats, homePitcherStats,
   if (gateType === 'T12') unitCount = Math.min(unitCount, 2);
   if (gateType === 'T13') unitCount = Math.min(unitCount, 1);
   if (t15Active) unitCount = 1;
-  const sizing = unitCount;
+  let sizing = unitCount;
 
     // T11 needs 3+ triggers minimum
   if (gateType === 'T11' && trigCount < 3) sizing = 0;
